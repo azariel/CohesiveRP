@@ -5,7 +5,11 @@
 
 version: 2
 updates:
-  - package-ecosystem: "dotnet-sdk,docker" # See documentation for possible values
+  - package-ecosystem: "dotnet-sdk" # See documentation for possible values
     directory: "/" # Location of package manifests
+    schedule:
+      interval: "monthly"
+  - package-ecosystem: "docker"
+    directory: "/"
     schedule:
       interval: "monthly"
