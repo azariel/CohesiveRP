@@ -1,0 +1,40 @@
+﻿using CohesiveRP.Storage.Sqlite;
+using CohesiveRP.Storage.Users;
+using Microsoft.EntityFrameworkCore;
+
+namespace CohesiveRP.Storage.Common
+{
+    /// <summary>
+    /// Main structure of the CohesiveRP database.
+    /// </summary>
+    public class StorageDbContext : CohesiveRPSqliteDbContext
+    {
+        // ********************************************************************
+        //                            Constructors
+        // ********************************************************************
+        public StorageDbContext()
+        {
+            this.ChangeTracker.AutoDetectChangesEnabled = true;
+
+            // We're having too much performance issue with lazy loading... we'll deal with load/include what we need manually instead..
+            // this.ChangeTracker.LazyLoadingEnabled = true;
+        }
+
+        // ********************************************************************
+        //                            Protected
+        // ********************************************************************
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+
+            //optionsBuilder.UseLazyLoadingProxies();
+        }
+
+        public override string GetDataBaseFileName() => "CohesiveRP-Storage.db";
+
+        // ********************************************************************
+        //                            Properties
+        // ********************************************************************
+        public DbSet<UserDbModel> Users { get; set; }
+    }
+}

@@ -1,0 +1,6 @@
+@CohesiveRP.Storage.WebApi_HostAddress = http://localhost:5115
+
+GET {{CohesiveRP.Storage.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="CohesiveRP.Core.WebApi/CohesiveRP.Core.WebApi.csproj" Id="d114b021-f3af-4c32-b5e1-af9ce4276e30" />
+    <Project Path="CohesiveRP.Core/CohesiveRP.Core.csproj" />
+  </Folder>
+  <Folder Name="/Storage/">
+    <Project Path="CohesiveRP.Storage.WebApi/CohesiveRP.Storage.WebApi.csproj" Id="f0bebd60-c06b-49bf-9420-d7bfae0742a7" />
+    <Project Path="CohesiveRP.Storage/CohesiveRP.Storage.csproj" Id="ce913b76-2c45-463f-800c-068f129de771" />
+  </Folder>
+  <Project Path="CohesiveRP.Common/CohesiveRP.Common.csproj" Id="1bc0db1f-cee8-4633-b6b8-61976c47be1b" />
+</Solution>

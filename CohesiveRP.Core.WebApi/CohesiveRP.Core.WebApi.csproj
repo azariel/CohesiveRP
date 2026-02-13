@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+        <Version>1.0.0.0</Version>
+        <Authors>Azariel</Authors>
+        <Product>CohesiveRP</Product>
+        <RootNamespace>CohesiveRP.Core.WebApi</RootNamespace>
+        <RootNamespace>CohesiveRP.Core.WebApi</RootNamespace>
+        <AssemblyName>CohesiveRP.Core.WebApi</AssemblyName>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CohesiveRP.Core\CohesiveRP.Core.csproj" />
+    </ItemGroup>
+
+</Project>
