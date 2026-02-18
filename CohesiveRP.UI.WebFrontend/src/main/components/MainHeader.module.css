@@ -1,0 +1,81 @@
+.header {
+  position: relative;
+  width: 100%;
+  background: #101010;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconRow {
+  width: 50%;
+  display: flex;
+  padding-top: 0.15rem;
+  gap: clamp(0.2rem, 4%, 2rem);
+}
+
+.iconRowLeft {
+  width: 50%;
+  margin-left: clamp(0.2rem, 1%, 0.5rem);
+  display: flex;
+  gap: clamp(0.2rem, 4%, 2rem);
+  justify-content: left;
+}
+
+.iconRowRight {
+  width: 50%;
+  margin-right: clamp(0.2rem, 1%, 0.5rem);
+  display: flex;
+  gap: clamp(0.2rem, 4%, 2rem);
+  justify-content: right;
+}
+
+.icon {
+  color: #484848;
+  font-size: clamp(0.5rem, 5vw, 1.4rem);
+  background: transparent;
+  align-items: center;
+}
+
+.separator {
+  width: 100%;
+  height: 1px;
+  background: #606060;
+  position: relative;
+  margin-top: 0.2rem;
+}
+
+.separator::after {
+  content: '';
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 0.5vh;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.8),
+    rgba(0, 0, 0, 0)
+  );
+}
+
+/* Mobile breakpoint: mobile display or smaller screens */
+@media (max-width: 876px) {
+  .iconRow {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding-inline: clamp(0.5rem, 4vw, 2rem);
+    box-sizing: border-box;
+  }
+  .icon {
+    font-size: clamp(0.5rem, 5vw, 3rem);
+  }
+  .iconRowLeft,
+  .iconRowRight {
+    width: auto;
+    display: flex;
+    gap: clamp(0.1rem, 4vw, 2rem);
+    justify-content: center;
+  }
+}

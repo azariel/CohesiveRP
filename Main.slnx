@@ -7,5 +7,11 @@
     <Project Path="CohesiveRP.Storage.WebApi/CohesiveRP.Storage.WebApi.csproj" Id="f0bebd60-c06b-49bf-9420-d7bfae0742a7" />
     <Project Path="CohesiveRP.Storage/CohesiveRP.Storage.csproj" Id="ce913b76-2c45-463f-800c-068f129de771" />
   </Folder>
+  <Folder Name="/UI/">
+    <Project Path="CohesiveRP.UI.WebFrontEnd/CohesiveRP.UI.WebFrontend.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+  </Folder>
   <Project Path="CohesiveRP.Common/CohesiveRP.Common.csproj" Id="1bc0db1f-cee8-4633-b6b8-61976c47be1b" />
 </Solution>
