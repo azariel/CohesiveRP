@@ -1,6 +1,6 @@
-import styles from "./MainLeftBody.module.css";
+import styles from "./MainLeftComponent.module.css";
 
-export default function MainLeftBody() {
+export default function MainLeftComponent() {
   return (
     <main className={styles.body}>
       <div className={styles.centerModule}>

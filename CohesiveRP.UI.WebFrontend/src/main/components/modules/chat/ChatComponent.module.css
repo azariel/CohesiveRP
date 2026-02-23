@@ -1,0 +1,55 @@
+.chatComponent {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  overflow-y: auto;
+
+    /* Firefox */
+    scrollbar-width: none;
+
+    /* Safari */
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-gutter: stable overlay;
+    padding-right: 8px;
+    margin-right: -8px;
+}
+
+.userInputContainer {
+  flex: 0 0 auto;
+  padding: 0.5em;
+}
+
+.messagesContainer > * + * {
+  margin-top: 0.7em;
+}
+
+.messagesContainer {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Chrome / Edge / Safari */
+.messagesContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messagesContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.messagesContainer.scrolling {
+  scrollbar-width: thin; /* Firefox */
+}
+
+.messagesContainer.scrolling::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.4);
+}

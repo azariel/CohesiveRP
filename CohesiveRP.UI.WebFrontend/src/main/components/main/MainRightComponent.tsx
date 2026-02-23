@@ -1,6 +1,6 @@
-import styles from "./MainRightBody.module.css";
+import styles from "./MainRightComponent.module.css";
 
-export default function MainRightBody() {
+export default function MainRightComponent() {
   return (
     <main className={styles.body}>
       <div className={styles.centerModule}>
