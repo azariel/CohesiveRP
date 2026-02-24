@@ -1,4 +1,79 @@
 .inputContainer{
-    padding-top: 1em;
-    padding-bottom: 2em;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: 1px solid #636363;
+    border-radius: 8px;
+    height: 100%;
+    width: 100%;
+    min-height: 2.4em;
+    margin-bottom: 1em;
+}
+
+.autoCorrectIcon {
+    color: rgb(172, 172, 172);
+    width: 1.2em;
+    height: 1.2em;
+    padding: 0.2em;
+    padding-left: 0.5em;
+}
+
+.inputAutoCorrectSeparator {
+    width: 1px;
+    margin: 0.1em 0.2em 0.1em 0.2em;
+}
+
+.inputSendSeparator {
+    width: 1px;
+    margin: 0.1em 0.2em 0.1em 0.2em;
+}
+
+.inputControlContainer {
+    flex: 1 0 auto;
+}
+
+.inputControl {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    height: auto;
+    
+    margin: 0;
+    padding: 0.4em 0em 0.1em 0.6em;
+    resize: none;
+    border: none;
+    outline: none;
+    
+    color:rgb(168, 167, 167);
+    
+    font-size: 1em;
+    line-height: 1.4em;
+    background-color: transparent;
+
+    overflow-y: auto;
+
+    /* Firefox */
+    scrollbar-width: none;
+
+    /* Safari */
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-gutter: stable overlay;
+    max-height: 40dvh;
+}
+
+.sendInputIcon {
+    color: rgb(58, 138, 230);
+    width: 1.2em;
+    height: 1.2em;
+    padding: 0.2em;
+    padding-right: 0.6em;
+    margin-top: 0.4em;
+}
+
+.sendInputIcon:hover {
+    cursor: pointer;
+    color:rgb(109, 177, 255);
+    transition: color 0.3s ease;
 }

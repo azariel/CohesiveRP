@@ -25,6 +25,13 @@
   flex: 0 0 50%;/* This must match MainHeader.module.css '.iconRow' 'width' value ! */
 }
 
+/* On mobile, the center body takes 100% */
+@media (max-width: 876px) {
+  .bodyControlCenter {
+    flex: 0 0 100%;
+  }
+}
+
 .bodyControlRight {
   flex: 0 0 25%;
 }

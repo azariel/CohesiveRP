@@ -1,7 +1,11 @@
 import styles from "./ChatMessageComponent.module.css";
-import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification } from "react-icons/hi2";
+import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification, HiMiniChevronRight } from "react-icons/hi2";
 
-export default function ChatMessageComponent() {
+interface Props {
+  enableSwipeBtn?: boolean;
+}
+
+export default function ChatMessageComponent({ enableSwipeBtn = false }: Props) {
   return (
     <main className={styles.chatMessageComponent}>
       <div className={styles.container}>
@@ -32,13 +36,23 @@ export default function ChatMessageComponent() {
             hello 
           </div>
           <div className={styles.messageContentFooter}>
-            <HiChatBubbleLeftEllipsis />
-            <HiMiniUsers />
-            <HiIdentification />
-            <HiBeaker />
-            <HiCircleStack />
-            <HiAdjustmentsHorizontal />
-            <HiCog6Tooth />
+            <div className={styles.messageContentFooterLeftSideIcons}>
+              <HiChatBubbleLeftEllipsis />
+              <HiMiniUsers />
+              <HiIdentification />
+              <HiBeaker />
+              <HiCircleStack />
+              <HiAdjustmentsHorizontal />
+              <HiCog6Tooth />
+            </div>
+            {enableSwipeBtn ? (
+              <div className={styles.messageContentFooterRightSideSwipeIcons}>
+                <label className={styles.messageContentFooterRightSideSwipeIconsLabel}>1/1</label>
+                <HiMiniChevronRight className={styles.messageContentFooterRightSideSwipeIconsBtn} />
+              </div>
+            ) : (
+              <div></div>// empty
+            )}
           </div>
         </div>
       </div>

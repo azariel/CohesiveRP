@@ -1,6 +1,6 @@
 .container {
     width: 100%;
-    min-height: 5vh;
+    min-height: 5dvh;
     background-color: rgb(27, 27, 27);
     border: 1px solid #2e2e2e;
     border-radius: 14px;
@@ -8,7 +8,7 @@
 }
 
 .messageAvatarContainer {
-    width: clamp(5rem, 10vw, 9rem);
+    width: clamp(5rem, 10dvw, 9rem);
     height: auto;
     display: flex;
     justify-items: center;
@@ -34,7 +34,7 @@
 }
 
 .messageAvatarContainer img {
-    width: clamp(5rem, 10vw, 9rem);
+    width: clamp(5rem, 10dvw, 9rem);
     height: auto;
     border-top-left-radius: 14px;
     object-fit: scale-down;
@@ -55,7 +55,7 @@
 }
 
 .messageHeaderContentName {
-    font-size: 0.7em;
+    font-size: 0.9em;
     font-weight: bolder;
     color: #3484e0;
     margin-top: 0.5em;
@@ -65,7 +65,7 @@
     font-size: 0.4em;
     font-weight: bolder;
     color: #696969;
-    margin-left: clamp(0.1rem, 0.5vw, 3rem);
+    margin-left: clamp(0.1rem, 0.5dvw, 3rem);
     margin-top: 2em;
 }
 
@@ -90,7 +90,7 @@
     padding-left: 0;
     padding-right: 1em;
     font-size: 0.8em;
-    color: #dbdbd1;
+    color: #d3d3ca;
     text-align: left;
 }
 
@@ -116,10 +116,51 @@
 
 .messageContentFooter {
     display: flex;
+    justify-content: space-between;
     margin-top: auto;
-    gap: 0.5em;
     padding: 0.5em;
+    padding-bottom: 0.2em;
     padding-left: 0;
     font-size: 1em;
     color: #696969;
+}
+
+.messageContentFooterLeftSideIcons {
+    display: flex;
+    gap: 0.5em;
+}
+
+.messageContentFooterRightSideSwipeIcons {
+    display: flex;
+    gap: 1em;
+}
+
+.messageContentFooterRightSideSwipeIconsLabel {
+    all: unset;
+    font-size: 0.7em;
+}
+
+.messageContentFooterRightSideSwipeIconsBtn:hover {
+    cursor: pointer;
+    color:#3484e0;
+    transition: color 0.3s ease;
+}
+
+/* Mobile breakpoint: mobile display or smaller screens */
+@media (max-width: 876px) {
+    .messageAvatarContainer {
+        width: clamp(5rem, 25dvw, 9rem);
+    }
+
+    .messageAvatarContainer img {
+        width: clamp(5rem, 25dvw, 9rem);
+    }
+
+    .messageHeaderContentName {
+        font-size: 1em;
+    }
+
+    .messageContentValue {
+        font-size: 1em;
+    }
 }

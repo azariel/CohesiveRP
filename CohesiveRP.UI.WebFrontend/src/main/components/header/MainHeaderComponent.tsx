@@ -17,7 +17,7 @@ export default function Header() {
     <header className={styles.header}>
       <div className={styles.iconRow}>
         <div className={styles.iconRowLeft}>
-          <button className={styles.iconBtn} onClick={() => handleIconClick("chat")} aria-label="Chat Module" title="Chat">
+          <button className={styles.iconBtn} onClick={() => handleIconClick("chatSelection")} aria-label="Chat Selection Module" title="Chat">
             <HiChatBubbleLeftEllipsis />
           </button>
           <button className={styles.iconBtn} onClick={() => handleIconClick("characters")} aria-label="Characters Module"  title="Characters">

@@ -2,6 +2,8 @@ import styles from "./MainCenterComponent.module.css";
 
 /* modules components */
 import ChatComponent from '../modules/chat/ChatComponent';
+import ChatSelectionComponent from "../modules/chatSelection/ChatSelectionComponent";
+import CharactersComponent from "../modules/characters/CharactersComponent";
 
 /* Store */
 import { sharedContext } from '../../../store/AppSharedStoreContext';
@@ -11,8 +13,12 @@ export default function MainCenterComponent() {
   const renderModule = () => {
     console.log(`Rendering module [${activeModule}].`);
     switch (activeModule) {
+      case "chatSelection":
+        return <ChatSelectionComponent />;
       case "chat":
         return <ChatComponent />;
+      case "characters":
+        return <CharactersComponent />;
       default:
         return null;
     }
