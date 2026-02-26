@@ -69,7 +69,7 @@ export default function CharactersComponent() {
               key={index}
               className={styles.characterAvatarContainer}
             >
-              <img src="./public/dev/Seyrdis.png" alt="Avatar" />
+              <img src="./dev/Seyrdis.png" alt="Avatar" />
             </div>
             <div className={styles.characterInfoPanel}>
               <label className={styles.characterCharNameLabel}>char name {index}</label>

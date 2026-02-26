@@ -1,5 +1,5 @@
 using CohesiveRP.Common.Serialization;
-using CohesiveRP.Storage.WebApi.ResponseDtos;
+using CohesiveRP.Storage.WebApi.RequestDtos;
 using CohesiveRP.Storage.WebApi.Workflows;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +22,6 @@ namespace CohesiveRP.Storage.WebApi.Controllers
 
         [HttpGet]
         [Route("create")]
-        public async Task<IActionResult> CreateNewUser(UserCreationRequestDto userRequestDto) => new JsonResult(JsonCommonSerializer.SerializeToString(usersWorkflow.CreateNewUser(userRequestDto)));
+        public async Task<IActionResult> CreateNewUser(CreateUserRequestDto userRequestDto) => new JsonResult(JsonCommonSerializer.SerializeToString(usersWorkflow.CreateNewUser(userRequestDto)));
     }
 }

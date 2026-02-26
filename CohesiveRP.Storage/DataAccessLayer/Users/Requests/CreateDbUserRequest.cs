@@ -1,16 +1,11 @@
-﻿namespace CohesiveRP.Storage.RequestDtos
+﻿namespace CohesiveRP.Storage.DataAccessLayer.Users.Requests
 {
-    public class CreateUserRequestDto // : IRequestDto
+    public class CreateDbUserRequest
     {
-
         // ********************************************************************
         //                            Properties
         // ********************************************************************
         public string UserName { get; set; }
-        
-        /// <summary>
-        /// Optional
-        /// </summary>
         public string Password { get; set; }
     }
 }

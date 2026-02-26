@@ -63,17 +63,40 @@
     max-height: 40dvh;
 }
 
+.rightInputControlContainer {
+    padding: 0.2em;
+    padding-right: 0.6em;
+    padding-top: 0.4em;
+}
+
 .sendInputIcon {
     color: rgb(58, 138, 230);
     width: 1.2em;
     height: 1.2em;
-    padding: 0.2em;
-    padding-right: 0.6em;
-    margin-top: 0.4em;
 }
 
 .sendInputIcon:hover {
     cursor: pointer;
     color:rgb(109, 177, 255);
     transition: color 0.3s ease;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sendInputSpinnerWaitingServerAck {
+    color: rgb(255, 191, 0);
+    width: 1.2em;
+    height: 1.2em;
+    animation: spin 1s linear infinite;
+}
+
+.sendInputSpinnerWaitingMessageProcess {
+    color: rgb(0, 115, 255);
+    width: 1.2em;
+    height: 1.2em;
+    animation: spin 1s linear infinite;
 }

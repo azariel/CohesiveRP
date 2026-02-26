@@ -26,7 +26,7 @@ export default function ChatSelectionComponent() {
               className={styles.chatAvatarContainer}
               onClick={() => handleSpecificChatClick("chat")}
             >
-              <img src="./public/dev/Seyrdis.png" alt="Avatar" />
+              <img src="./dev/Seyrdis.png" alt="Avatar" />
             </div>
             <label className={styles.chatFootLabel}>2026-02-24 14h22m24s</label>
           </div>

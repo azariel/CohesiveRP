@@ -1,8 +1,8 @@
 ﻿using CohesiveRP.Common.WebApi;
 
-namespace CohesiveRP.Storage.WebApi.ResponseDtos
+namespace CohesiveRP.Storage.WebApi.RequestDtos
 {
-    public class UserCreationRequestDto : IWebApiRequestDto
+    public class CreateUserRequestDto : IWebApiRequestDto
     {
         // ********************************************************************
         //                            Properties

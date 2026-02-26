@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using CohesiveRP.Storage.Common;
-using CohesiveRP.Storage.RequestDtos;
+using CohesiveRP.Storage.DataAccessLayer.Users.Requests;
 using CohesiveRP.Storage.Users;
 using Microsoft.EntityFrameworkCore;
 
-namespace CohesiveRP.Storage.WebApi.DataAccessLayer
+namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
     /// <summary>
     /// DataAccessLayer around Users.
@@ -28,7 +28,7 @@ namespace CohesiveRP.Storage.WebApi.DataAccessLayer
             GC.SuppressFinalize(this);
         }
 
-        public async Task<UserDbModel> CreateNewUserAsync(CreateUserRequestDto userToCreate)
+        public async Task<UserDbModel> CreateNewUserAsync(CreateDbUserRequest userToCreate)
         {
             // Create the User
             var newUser = new UserDbModel()

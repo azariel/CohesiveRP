@@ -1,19 +1,18 @@
 ﻿using System.Text.Json;
-using CohesiveRP.Storage.DataAccessLayer.Users;
-using CohesiveRP.Storage.WebApi.Workflows.Chats;
+using CohesiveRP.Core.WebApi.Services;
+using CohesiveRP.Core.WebApi.Workflows.Chat;
 
-namespace CohesiveRP.Storage.WebApi
+namespace CohesiveRP.Core.WebApi
 {
     internal static class CustomServices
     {
         internal static void AddCustomServices(this IServiceCollection services)
         {
             // Workflows
-            services.AddSingleton<IGetChatWorkflow, GetChatWorkflow>();
+            services.AddSingleton<IChatAddNewMessageWorkflow, ChatAddNewMessageWorkflow>();
 
-            // DataAccessLayers
-            services.AddSingleton<IUsersDal, UsersDal>();
-            services.AddSingleton<IChatsDal, ChatsDal>();
+            // Services
+            services.AddSingleton<IStorageService, StorageService>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

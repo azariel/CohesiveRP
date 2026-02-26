@@ -11,7 +11,7 @@ export default function ChatMessageComponent({ enableSwipeBtn = false }: Props) 
       <div className={styles.container}>
         <div className={styles.leftMessageContainer}>
           <div className={styles.messageAvatarContainer}>
-            <img src="./public/dev/Seyrdis.png" alt="Avatar" />
+            <img src="./dev/Placeholder.png" alt="Avatar" />
           </div>
           <div className={styles.messageInfoContainer}>
             <div title="messageId">#32</div>

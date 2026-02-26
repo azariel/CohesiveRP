@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace CohesiveRP.Storage.WebApi.DataAccessLayer
+namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
     // TODO: Cache
     public class StorageDal : IStorageDal
