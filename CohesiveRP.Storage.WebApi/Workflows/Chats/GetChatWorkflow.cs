@@ -1,6 +1,8 @@
-﻿using CohesiveRP.Common.WebApi;
+﻿using CohesiveRP.Common.Exceptions;
+using CohesiveRP.Common.WebApi;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.WebApi.RequestDtos.Chat;
+using CohesiveRP.Storage.WebApi.ResponseDtos;
 
 namespace CohesiveRP.Storage.WebApi.Workflows.Chats
 {
@@ -13,28 +15,27 @@ namespace CohesiveRP.Storage.WebApi.Workflows.Chats
             this.chatsDal = chatsDal;
         }
 
-        public string GetById(string chatId)
+        public async Task<IWebApiReponseDto> GetChatByIdAsync(GetChatByIdRequestDto getChatByIdRequestDto)
         {
-            throw new NotImplementedException();
+            var chat = await chatsDal.GetChatByIdAsync(getChatByIdRequestDto.ChatId);
+
+            if (chat == null)
+            {
+                return new WebApiException
+                {
+                    HttpResultCode = System.Net.HttpStatusCode.NotFound,
+                    Message = $"Chat with id {getChatByIdRequestDto.ChatId} was not found."
+                };
+            }
+
+            // Create the model that will be returned to the client based on the data access layer model
+            var responseModel = new GetChatResponseDto
+            {
+                ChatId = chat.ChatId,
+            };
+
+            return responseModel;
         }
-
-        public Task<IWebApiReponseDto> GetChatByIdAsync(GetChatByIdRequestDto getChatByIdRequestDto)
-        {
-            return null;
-        }
-
-        //public async Task<IWebApiReponseDto> CreateNewUser(UserCreationRequestDto userCreationRequestDto)
-        //{
-        //    var existingUser = await usersDal.GetUserByUsernameAsync(userCreationRequestDto.Username);
-
-        //    if (existingUser == null)
-        //    {
-        //        throw new StorageException("f7033238-d192-4d1c-95eb-1b13c387f8e2", $"Couldn't create user with Username [{userCreationRequestDto.Username}] as it already exists.");
-        //    }
-
-        //    // TODO: remove this temp code
-        //    return new UserCreationResponseDto();
-        //}
     }
 }
 

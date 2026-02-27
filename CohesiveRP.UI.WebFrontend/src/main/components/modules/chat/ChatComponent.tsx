@@ -17,14 +17,6 @@ export default function ChatComponent() {
     <main className={styles.chatComponent}>
       <div className={styles.messagesContainer} ref={messagesRef}>
         <ChatMessageComponent />
-        <ChatMessageComponent />
-        <ChatMessageComponent />
-        <ChatMessageComponent />
-        <ChatMessageComponent />
-        <ChatMessageComponent />
-        <ChatMessageComponent />
-        <ChatMessageComponent />
-        <ChatMessageComponent />
         <ChatMessageComponent enableSwipeBtn={true} />
         <div className={styles.userInputContainer}>
           <UserInputComponent messagesRef={messagesRef} />

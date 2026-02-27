@@ -2,6 +2,8 @@
 using System.Net;
 using System.Text;
 using CohesiveRP.Common.Exceptions;
+using CohesiveRP.Common.Serialization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Core.WebApi.Middlewares
 {
@@ -31,7 +33,6 @@ namespace CohesiveRP.Core.WebApi.Middlewares
             {
                 await this.next.Invoke(context).ConfigureAwait(false);
             }
-
             //catch (InvalidIdFormatException exception)
             //{
             //    this.logger.LogWarning(exception, $"{exception.Message}");
@@ -42,7 +43,7 @@ namespace CohesiveRP.Core.WebApi.Middlewares
                 context.Response.ContentType = "text/plain";
                 context.Response.StatusCode = (int)exception.Code;
 
-                var data = Encoding.UTF8.GetBytes(exception.Message);
+                var data = Encoding.UTF8.GetBytes(JsonCommonSerializer.SerializeToString(WebApiExceptionDtoConverter.ConvertToWebApiExceptionDto(exception)));
                 await context.Response.Body.WriteAsync(data, 0, data.Length);
             }
             // Unhandled exception
@@ -51,7 +52,7 @@ namespace CohesiveRP.Core.WebApi.Middlewares
                 context.Response.ContentType = "text/plain";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-                var data = Encoding.UTF8.GetBytes(exception.Message);
+                var data = Encoding.UTF8.GetBytes(JsonCommonSerializer.SerializeToString(WebApiExceptionDtoConverter.ConvertToWebApiExceptionDto(exception)));
                 await context.Response.Body.WriteAsync(data, 0, data.Length);
             }
 #pragma warning restore CA1303 // Do not pass literals as localized parameters

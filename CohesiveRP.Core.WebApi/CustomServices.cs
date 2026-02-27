@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using CohesiveRP.Core.WebApi.Services;
+using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 
 namespace CohesiveRP.Core.WebApi

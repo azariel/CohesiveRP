@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using CohesiveRP.Storage.Sqlite;
 
-namespace CohesiveRP.Storage.Users
+namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
     /// <summary>
     /// Represents the structure of a user within the storage.
@@ -31,7 +31,7 @@ namespace CohesiveRP.Storage.Users
 
         [Required]
         [Key]
-        public long UserId { get; set; }
+        public string UserId { get; set; }
 
         [Required]
         [MaxLength(256)]

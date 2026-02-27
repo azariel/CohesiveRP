@@ -22,6 +22,9 @@ namespace CohesiveRP.Common.HttpClient
             {
                 Timeout = new TimeSpan(0, 0, 0, 15)
             };
+
+            // Add default headers
+            httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         // ********************************************************************
@@ -44,13 +47,17 @@ namespace CohesiveRP.Common.HttpClient
                 response = await httpClient.GetAsync(url);
 
                 if (response.IsSuccessStatusCode)
-                    return await response.Content.ReadAsStringAsync();
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    return responseContent;
+                }
             }
             catch (AggregateException aggregateException) when (aggregateException.InnerExceptions.Any(a => a.GetType() == typeof(HttpRequestException)))
             {
                 LoggingManager.LogToFile("270b1291-8da6-4f20-8f73-30464927fe6e", $"[{nameof(HttpRestClient)}.{nameof(GetAsync)}] failed.", aggregateException);
                 throw;
             }
+            //catch(TaskCanceledException)
             catch (Exception ex)
             {
                 LoggingManager.LogToFile("16f4baea-ecba-4631-a4a0-65a2653cf63d", $"Unhandled exception. [{nameof(HttpRestClient)}.{nameof(GetAsync)}] failed.", ex);

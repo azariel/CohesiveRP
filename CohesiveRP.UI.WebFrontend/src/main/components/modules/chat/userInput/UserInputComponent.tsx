@@ -4,14 +4,19 @@ import { HiChip } from "react-icons/hi";
 import { BiSolidPaperPlane, BiPaperPlane  } from "react-icons/bi";
 import { ImSpinner2 } from "react-icons/im";
 
+// Response handlers
+import { postToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
+import type { ServerApiResponseDto } from "../../../../../ResponsesDto/ServerApiResponseDto";
+import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-
 export default function UserInputComponent({ messagesRef }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hoveringSendBtn, setHoveringSendBtn] = useState(false);
+  const [playerMessage, setPlayerMessage] = useState("");
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
   const [isSendingMessageToServer, setIsSendingMessageToServer] = useState(false);
   const [isWaitingOnPlayerMessageServerProcess, setIsWaitingOnPlayerMessageServerProcess] = useState(false);
@@ -53,37 +58,33 @@ export default function UserInputComponent({ messagesRef }: Props) {
   };
 
   const handleSendPlayerMessage = async () => {
-    if (isSendingMessageToServer)
+    if (isSendingMessageToServer || !playerMessage || !playerMessage.trim()){
       return;
+    }
     
     console.log(`Sending new message from player to server.`);
     setIsInputBlockedDueToServer(true)
     setIsSendingMessageToServer(true);
     
-    try {
-      const response = await fetch("https://127.0.0.1:7080/api/chat/0/addNewMessage", {
-        method: "POST",
-        body: "TODO: use json serialized obj here",
-      });
+    // Fetch from server api
+    const payload = JSON.stringify({
+      content: playerMessage,
+      timestampUtc: new Date().toUTCString(),
+    });
 
-      if (!response.ok) {
-        // TODO: wrap Error with console logging + notification to user
-        console.log(`Failed to send Player message to backend. [${JSON.stringify(response)}]`);
-        throw new Error("Failed to send Player message to backend.");
-      }
-      
-      const data = await response.json();
-      console.log("PlayerMessage sent to server. Response:", data);
-      setIsWaitingOnPlayerMessageServerProcess(true);
-    } catch (err) {
-      console.error(err);
+    let response:ServerApiResponseDto | null = await postToServerApiAsync("api/chat/0/addNewMessage", payload);
+    console.log(`RESPONSE IS [${response}]`);
+
+    if(!response || response.code != 200 || response as ServerApiExceptionResponseDto != null){
       // TODO: show err to user
       setIsWaitingOnPlayerMessageServerProcess(false);
       setIsSendingMessageToServer(false);
       setIsInputBlockedDueToServer(false);
-    } finally {
-      setIsSendingMessageToServer(false);
+      return;
     }
+
+    setIsWaitingOnPlayerMessageServerProcess(true);
+    setPlayerMessage(""); // clear input on success
   };
 
   const handleCancelLatestPlayerMessage = () => {
@@ -101,7 +102,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
         <HiChip className={styles.autoCorrectIcon} />
         <div className={styles.inputAutoCorrectSeparator} />
         <div className={styles.inputControlContainer}>
-          <textarea className={styles.inputControl} rows={1} ref={textareaRef} onInput={handleInput} placeholder="Type a message..."/>
+          <textarea className={styles.inputControl} rows={1} ref={textareaRef} onInput={handleInput} onChange={(e) => setPlayerMessage(e.target.value)} value={playerMessage} placeholder="Type a message..."/>
         </div>
         <div className={styles.inputSendSeparator} />
           <div

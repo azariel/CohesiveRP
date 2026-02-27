@@ -24,7 +24,8 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         [Route("{chatId}")]
         public async Task<IActionResult> GetChat(GetChatByIdRequestDto requestDto)
         {
-            return new JsonResult(JsonCommonSerializer.SerializeToString(await getChatWorkflow.GetChatByIdAsync(requestDto)));
+            var result = await getChatWorkflow.GetChatByIdAsync(requestDto);
+            return new JsonResult(result);
         }
     }
 }

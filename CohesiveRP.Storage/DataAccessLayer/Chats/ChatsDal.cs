@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
+using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Storage.Common;
+using CohesiveRP.Storage.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
@@ -26,25 +28,17 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             GC.SuppressFinalize(this);
         }
 
-        //public async Task<UserDbModel> CreateNewUserAsync(CreateDbUserRequest userToCreate)
-        //{
-        //    // Create the User
-        //    var newUser = new UserDbModel()
-        //    {
-        //        UserName = userToCreate.UserName,
-        //        Password = userToCreate.Password,
-        //        Type = UserDbModel.UserType.User
-        //    };
-
-        //    var addedUser = await storageDbContext.Users.AddAsync(newUser);
-        //    await storageDbContext.SaveChangesAsync();
-        //    return addedUser.Entity;
-        //}
-
-        //public async Task<UserDbModel> GetUserByUsernameAsync(string userName)
-        //{
-        //    string lowerInvariantUsername = userName.ToLowerInvariant();
-        //    return await storageDbContext.Users.Where(w => w.UserName.ToLowerInvariant().Equals(lowerInvariantUsername)).FirstOrDefaultAsync();
-        //}
+        public async Task<ChatDbModel> GetChatByIdAsync(string id)
+        {
+            try
+            {
+                storageDbContext.Chats.Load();
+                return storageDbContext.Chats.FirstOrDefault(w => w.ChatId == id);
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("ed1b481f-463b-4854-acac-222965ef3601", $"Error when querying Db on table Chat.", ex);
+                return null;
+            }
+        }
     }
 }

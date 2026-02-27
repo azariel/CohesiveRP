@@ -1,33 +1,31 @@
-﻿using CohesiveRP.Core.WebApi.RequestDtos.Chat;
-using CohesiveRP.Core.WebApi.ResponseDtos.Storage;
-using CohesiveRP.Core.WebApi.Services;
+﻿using CohesiveRP.Common.WebApi;
+using CohesiveRP.Core.Services;
+using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 
-namespace CohesiveRP.Core.WebApi.Workflows.Chat
+namespace CohesiveRP.Core.WebApi.Workflows.Chat;
+
+public class ChatAddNewMessageWorkflow : IChatAddNewMessageWorkflow
 {
-    public class ChatAddNewMessageWorkflow : IChatAddNewMessageWorkflow
+    private IStorageService storageService;
+
+    public ChatAddNewMessageWorkflow(IStorageService storageService)
     {
-        private IStorageService storageService;
+        this.storageService = storageService;
+    }
 
-        public ChatAddNewMessageWorkflow(IStorageService storageService)
-        {
-            this.storageService = storageService;
-        }
+    public async Task<IWebApiReponseDto> AddNewMessageAsync(GetChatByIdRequestDto requestDto)
+    {
+        requestDto = requestDto ?? throw new ArgumentNullException(nameof(requestDto));
+        ArgumentException.ThrowIfNullOrWhiteSpace(requestDto.ChatId);
 
-        public async Task<string> AddNewMessageAsync(GetChatByIdRequestDto requestDto)
-        {
-            requestDto = requestDto ?? throw new ArgumentNullException(nameof(requestDto));
-            ArgumentException.ThrowIfNullOrWhiteSpace(requestDto.ChatId);
+        // Validate that the chat exists in storage
+        var chat = await storageService.GetChatAsync(requestDto.ChatId);
+        return chat;
+        //if (chat is not ChatResponseDto _chatResponseDto)
+        //{
+        //    return chat;
+        //}
 
-            // Validate that the chat exists in storage
-            ChatResponseDto chat = await storageService.GetChatAsync(requestDto.ChatId);
-
-            if (chat == null)
-            {
-                return "Chat does not exists.";
-            }
-
-            // TODO: replace this placeholder
-            return $"Message added to chat with ID: {requestDto.ChatId}";
-        }
+        //return chat;
     }
 }

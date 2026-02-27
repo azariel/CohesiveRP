@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.Users.Requests;
-using CohesiveRP.Storage.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users

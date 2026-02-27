@@ -88,7 +88,7 @@
 }
 
 .sendInputSpinnerWaitingServerAck {
-    color: rgb(255, 191, 0);
+    color: rgb(255, 255, 255);
     width: 1.2em;
     height: 1.2em;
     animation: spin 1s linear infinite;

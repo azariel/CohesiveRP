@@ -1,8 +1,11 @@
-﻿using CohesiveRP.Common.WebApi;
+﻿using System.Text.Json.Serialization;
+using CohesiveRP.Common.WebApi;
 
 namespace CohesiveRP.Storage.WebApi.ResponseDtos
 {
-    public class UserCreationResponseDto : IWebApiReponseDto
+    public class GetChatResponseDto : IWebApiReponseDto
     {
+        [JsonPropertyName("chatId")]
+        public string ChatId { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Storage.Sqlite;
+﻿using CohesiveRP.Storage.DataAccessLayer.Users;
+using CohesiveRP.Storage.Sqlite;
 using CohesiveRP.Storage.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,5 +37,6 @@ namespace CohesiveRP.Storage.Common
         //                            Properties
         // ********************************************************************
         public DbSet<UserDbModel> Users { get; set; }
+        public DbSet<ChatDbModel> Chats { get; set; }
     }
 }

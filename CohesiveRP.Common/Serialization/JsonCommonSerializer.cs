@@ -24,7 +24,7 @@ namespace CohesiveRP.Common.Serialization
         {
             try
             {
-                return JsonSerializer.Serialize(aObjectToSerialize, Settings);
+                return JsonSerializer.Serialize(aObjectToSerialize, aObjectToSerialize?.GetType() ?? typeof(object), Settings);
             } catch (Exception _Ex)
             {
                 LoggingManager.LogToFile("00967675-8EA2-48C8-9AEF-066156DD9D23", $"Couldn't serialize object [{typeof(T)}]", _Ex);
