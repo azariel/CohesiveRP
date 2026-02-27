@@ -1,6 +1,3 @@
-import type { ServerApiExceptionResponseDto } from "../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
-import type { ServerApiResponseDto } from "../../../ResponsesDto/ServerApiResponseDto";
-
 export async function extractRawStringBodyFromHttpResponseAsync(bodyStream: ReadableStream<Uint8Array> | null): Promise<string | null> {
     if (!bodyStream) {
         return null;
@@ -28,22 +25,19 @@ export async function extractRawStringBodyFromHttpResponseAsync(bodyStream: Read
     }
 }
 
-export async function extractErrorFromHttpResponseAsync(bodyStream: ReadableStream<Uint8Array> | null): Promise<ServerApiExceptionResponseDto | null> {
-    let bodyAsString : string | null = await extractRawStringBodyFromHttpResponseAsync(bodyStream);
+export async function extractFromBody<T>(bodyStream: ReadableStream<Uint8Array> | null): Promise<T | null> {
+    let bodyAsString : string | null = null;
+    try {
+        bodyAsString = await extractRawStringBodyFromHttpResponseAsync(bodyStream);
 
-    if (!bodyAsString) {
+        if (!bodyAsString) {
+            return null;
+        }
+
+        let bodyJsonResponse = JSON.parse(bodyAsString);
+        return JSON.parse(bodyJsonResponse) as T | null;
+    } catch(err) {
+        console.error(`Couldn't convert the HttpResponse body to valid Json: [${err}]. Initial stringified body to convert: [${bodyAsString}].`);
         return null;
     }
-
-    return JSON.parse(bodyAsString) as ServerApiExceptionResponseDto;
-}
-
-export async function extractServerApiResponseFromBody(bodyStream: ReadableStream<Uint8Array> | null): Promise<ServerApiResponseDto | null> {
-    let bodyAsString : string | null = await extractRawStringBodyFromHttpResponseAsync(bodyStream);
-
-    if (!bodyAsString) {
-        return null;
-    }
-
-    return JSON.parse(bodyAsString) as ServerApiResponseDto;
 }

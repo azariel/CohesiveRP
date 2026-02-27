@@ -4,10 +4,14 @@ import { HiChip } from "react-icons/hi";
 import { BiSolidPaperPlane, BiPaperPlane  } from "react-icons/bi";
 import { ImSpinner2 } from "react-icons/im";
 
-// Response handlers
+// Backend webapi
 import { postToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
 import type { ServerApiResponseDto } from "../../../../../ResponsesDto/ServerApiResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+
+// Store
+import { sharedContext } from '../../../../../store/AppSharedStoreContext';
+import type { SharedContextChatType } from "../../../../../store/SharedContextChat";
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
@@ -20,6 +24,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
   const [isSendingMessageToServer, setIsSendingMessageToServer] = useState(false);
   const [isWaitingOnPlayerMessageServerProcess, setIsWaitingOnPlayerMessageServerProcess] = useState(false);
+  const { activeModule } = sharedContext();
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -67,15 +72,18 @@ export default function UserInputComponent({ messagesRef }: Props) {
     setIsSendingMessageToServer(true);
     
     // Fetch from server api
-    const payload = JSON.stringify({
+    const payload = {
       content: playerMessage,
-      timestampUtc: new Date().toUTCString(),
-    });
+      timestampUtc: new Date().toUTCString()
+    };
+    
+    let chatModule = activeModule as SharedContextChatType;
+    let response:ServerApiResponseDto | null = await postToServerApiAsync<ServerApiResponseDto>(`api/chat/${chatModule.chatId}/messages`, payload);
 
-    let response:ServerApiResponseDto | null = await postToServerApiAsync("api/chat/0/addNewMessage", payload);
-    console.log(`RESPONSE IS [${response}]`);
+    let serverApiException = response as ServerApiExceptionResponseDto | null;
+    if(!response || response.code != 200 || serverApiException?.message){
+      console.error(`Sending player message to backend failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}].`);
 
-    if(!response || response.code != 200 || response as ServerApiExceptionResponseDto != null){
       // TODO: show err to user
       setIsWaitingOnPlayerMessageServerProcess(false);
       setIsSendingMessageToServer(false);
@@ -83,6 +91,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
       return;
     }
 
+    console.log(`Sending player message to backend succeeded.`);
     setIsWaitingOnPlayerMessageServerProcess(true);
     setPlayerMessage(""); // clear input on success
   };

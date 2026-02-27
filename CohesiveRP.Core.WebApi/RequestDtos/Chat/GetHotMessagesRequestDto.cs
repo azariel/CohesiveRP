@@ -1,10 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 using CohesiveRP.Common.WebApi;
+using Microsoft.AspNetCore.Mvc;
 
-namespace CohesiveRP.Core.WebApi.ResponseDtos.Storage
+namespace CohesiveRP.Core.WebApi.RequestDtos.Chat
 {
-    public class ChatResponseDto : IWebApiReponseDto
+    public class GetHotMessagesRequestDto : IWebApiRequestDto
     {
+        [FromRoute]
         [JsonPropertyName("chatId")]
         public string ChatId { get; set; }
     }

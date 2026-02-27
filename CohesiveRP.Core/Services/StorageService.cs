@@ -1,53 +1,45 @@
-﻿using CohesiveRP.Common.Diagnostics;
-using CohesiveRP.Common.Exceptions;
-using CohesiveRP.Common.HttpClient;
-using CohesiveRP.Common.Serialization;
-using CohesiveRP.Common.WebApi;
+﻿using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Users;
+using CohesiveRP.Storage.QueryModels.Chat;
+using CohesiveRP.Storage.Users;
 
 namespace CohesiveRP.Core.Services
 {
     /// <summary>
     /// Expose and handle operations to the Storage service.
     /// </summary>
-    public class StorageService : IStorageService, IDisposable
+    public class StorageService : IStorageService
     {
-        private const string STORAGE_BASE_URL = "https://127.0.0.1:7298";// TODO: make configurable
-        private const string CHAT_CONTROLLER_BASE_URL = "api/chats";// TODO: make configurable
-        HttpRestClient httpRestClient = new();
+        private IChatsDal chatsDal;
+        private IMessagesDal messagesDal;
 
-        public void Dispose()
+        public StorageService(IChatsDal chatsDal, IMessagesDal messagesDal)
         {
-            httpRestClient?.Dispose();
+            this.chatsDal = chatsDal;
+            this.messagesDal = messagesDal;
         }
 
-        public async Task<IWebApiReponseDto> GetChatAsync(string chatId)
+        // Chats
+        public async Task<ChatDbModel> CreateChatAsync(CreateChatQueryModel queryModel)
         {
-            string url = $"{STORAGE_BASE_URL}/{CHAT_CONTROLLER_BASE_URL}/{chatId}";
-            string response = null;
-            try
-            {
-                response = await httpRestClient.GetAsync(url);
-            } catch (Exception ex)
-            {
-                string message = $"Couldn't get Chat with id [{chatId}] from Storage WebApi.";
-                LoggingManager.LogToFile("6141bd7a-5060-4ada-82c8-8eb181159051", message, ex);
-                throw new ApiException(System.Net.HttpStatusCode.InternalServerError, message, ex);
-            }
+            return await chatsDal.CreateChatAsync(queryModel);
+        }
 
-            try
-            {
-                return JsonCommonSerializer.DeserializeFromString<ChatResponseDto>(response);
-            } catch (Exception)
-            {
-                try
-                {
-                    return JsonCommonSerializer.DeserializeFromString<WebApiException>(response);
-                } catch (Exception)
-                {
-                    LoggingManager.LogToFile("e47ad25b-dffc-4315-bca6-d129796dbe5f", $"Couldn't deserialize value returned from StorageWebApi in [{nameof(GetChatAsync)}]. Response was [{response}].");
-                    throw;
-                }
-            }
+        public async Task<ChatDbModel[]> GetAllChatsAsync()
+        {
+            return await chatsDal.GetChatsAsync();
+        }
+
+        public async Task<ChatDbModel> GetChatAsync(string chatId)
+        {
+            return await chatsDal.GetChatByIdAsync(chatId);
+        }
+
+        // Messages
+
+        public async Task<IMessageDbModel[]> GetAllHotMessages(string chatId)
+        {
+            return await messagesDal.GetHotMessagesAsync(chatId);
         }
     }
 }

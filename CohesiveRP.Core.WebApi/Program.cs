@@ -19,34 +19,55 @@ if (builder.Environment.IsDevelopment())
 
 // Add CORS services
 // Build the ipv4 local addresses so we can map them to default CORS
-var host = Dns.GetHostEntry(Dns.GetHostName());
-List<string> localIps = new()
-{
-    // TODO: map the accepted origins to configuration + the PORT
-    "http://127.0.0.1:61109",
-    "https://127.0.0.1:61109",
-    "http://localhost:61109",
-    "https://localhost:61109",
-};
+//var host = Dns.GetHostEntry(Dns.GetHostName());
+//List<string> localIps = new()
+//{
+//    // TODO: map the accepted origins to configuration + the PORT
+//    "http://127.0.0.1:61109",
+//    "https://127.0.0.1:61109",
+//    "http://localhost:61109",
+//    "https://localhost:61109",
+//    "http://192.168.0.64:61109",
+//    "https://192.168.0.64:61109",
+//};
 
-foreach (var ip in host.AddressList)
-{
-    if (ip.AddressFamily == AddressFamily.InterNetwork)
-    {
-        localIps.Add($"http://{ip}:61109");
-        localIps.Add($"https://{ip}:61109");
-    }
-}
+//foreach (var ip in host.AddressList)
+//{
+//    if (ip.AddressFamily == AddressFamily.InterNetwork)
+//    {
+//        localIps.Add($"http://{ip}:61109");
+//        localIps.Add($"https://{ip}:61109");
+//    }
+//}
 
+//options.AddPolicy(CORS_WEB_CLIENT_POLICY_NAME, policy =>
+//{
+//    policy.WithOrigins(localIps.ToArray())
+//          .AllowAnyHeader()
+//          .AllowAnyMethod()
+//          .AllowCredentials();
+//});
+
+//options.AddPolicy("DevCors", policy =>
+//{
+//    // Accept mismatch between localhost and 127.0.0.1 since they're equivalent and should be considered the SAME
+//    policy.WithOrigins(
+//        "http://localhost:61109",
+//        "http://127.0.0.1:61109",
+//        "http://192.168.0.64:61109"
+//    )
+//    .AllowAnyHeader()
+//    .AllowAnyMethod();
+//});
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(CORS_WEB_CLIENT_POLICY_NAME, policy =>
-    {
-        policy.WithOrigins(localIps.ToArray())
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder.AllowAnyOrigin();
+            builder.AllowAnyHeader();
+            builder.AllowAnyMethod();
+        });
 });
 
 // Dependency injection of custom services
@@ -60,16 +81,16 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+//app.UseRouting();
+
 // Start with CORS policies handling
-app.UseCors(CORS_WEB_CLIENT_POLICY_NAME);
+app.UseCors();
 
 // Allow unsecure HTTP in Debug to avoid dealing with certificates handling overhead when irrelevant
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

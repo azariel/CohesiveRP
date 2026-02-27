@@ -1,6 +1,6 @@
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
-using CohesiveRP.Core.WebApi.Workflows.Chat;
+using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Storage.WebApi.Controllers
@@ -9,11 +9,15 @@ namespace CohesiveRP.Storage.WebApi.Controllers
     [Route("api/[controller]/{chatId}")]
     public class ChatController : ControllerBase
     {
+        private IGetAllHotMessagesWorkflow getAllHotMessagesWorkflow;
         private IChatAddNewMessageWorkflow addNewMessageWorkflow;
 
-        public ChatController(IChatAddNewMessageWorkflow chatAddNewMessageWorkflow)
+        public ChatController(
+            IGetAllHotMessagesWorkflow getAllHotMessagesWorkflow,
+            IChatAddNewMessageWorkflow chatAddNewMessageWorkflow)
         {
-            addNewMessageWorkflow = chatAddNewMessageWorkflow;
+            this.getAllHotMessagesWorkflow = getAllHotMessagesWorkflow;
+            this.addNewMessageWorkflow = chatAddNewMessageWorkflow;
         }
 
         [HttpGet]
@@ -21,10 +25,17 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> GetImateapot() => new JsonResult("You're a teapot.");
 
         [HttpPost]
-        [Route("addNewMessage")]
-        public async Task<IActionResult> AddNewNessage(GetChatByIdRequestDto requestDto)
+        [Route("messages")]
+        public async Task<IActionResult> AddNewNessage(AddNewMessageRequestDto requestDto)
         {
             return new JsonResult(JsonCommonSerializer.SerializeToString(await addNewMessageWorkflow.AddNewMessageAsync(requestDto)));
+        }
+
+        [HttpGet]
+        [Route("messages/hot")]
+        public async Task<IActionResult> GetAllHotMessages(GetHotMessagesRequestDto requestDto)
+        {
+            return new JsonResult(JsonCommonSerializer.SerializeToString(await getAllHotMessagesWorkflow.GetAllMessages(requestDto)));
         }
     }
 }

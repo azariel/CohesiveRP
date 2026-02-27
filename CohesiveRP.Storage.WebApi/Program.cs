@@ -1,5 +1,4 @@
 using CohesiveRP.Storage.WebApi;
-using CohesiveRP.Storage.WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +15,7 @@ if (builder.Environment.IsDevelopment())
 CustomServices.AddCustomServices(builder.Services);
 
 var app = builder.Build();
-app.UseMiddleware<StorageWebApiExceptionMiddleware>();
+//app.UseMiddleware<StorageWebApiExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

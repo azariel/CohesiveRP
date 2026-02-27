@@ -11,8 +11,8 @@ import { sharedContext } from '../../../store/AppSharedStoreContext';
 export default function MainCenterComponent() {
   const { activeModule } = sharedContext();
   const renderModule = () => {
-    console.log(`Rendering module [${activeModule}].`);
-    switch (activeModule) {
+    console.log(`Rendering module [${activeModule?.moduleName}].`);
+    switch (activeModule.moduleName) {
       case "chatSelection":
         return <ChatSelectionComponent />;
       case "chat":

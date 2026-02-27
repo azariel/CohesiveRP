@@ -4,12 +4,18 @@ import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsi
 
 /* Store */
 import { sharedContext } from '../../../store/AppSharedStoreContext';
+import type { SharedContextType } from "../../../store/SharedContextType";
 
 export default function Header() {
   const { setActiveModule } = sharedContext();
 
   const handleIconClick = (moduleName: string) => {
-    setActiveModule(moduleName);
+
+    let module = {
+      moduleName: moduleName
+    } as SharedContextType;
+
+    setActiveModule(module);
     console.log(`Module [${moduleName}] selected.`);
   };
 

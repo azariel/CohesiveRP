@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using CohesiveRP.Storage.DataAccessLayer.Users;
-using CohesiveRP.Storage.WebApi.Workflows.Chats;
 
 namespace CohesiveRP.Storage.WebApi
 {
@@ -9,18 +8,18 @@ namespace CohesiveRP.Storage.WebApi
         internal static void AddCustomServices(this IServiceCollection services)
         {
             // Workflows
-            services.AddSingleton<IGetChatWorkflow, GetChatWorkflow>();
+            //services.AddSingleton<IGetChatWorkflow, GetChatWorkflow>();
 
             // DataAccessLayers
-            services.AddSingleton<IUsersDal, UsersDal>();
-            services.AddSingleton<IChatsDal, ChatsDal>();
+            //services.AddSingleton<IUsersDal, UsersDal>();
+            //services.AddSingleton<IChatsDal, ChatsDal>();
 
-            // Default Json options
-            services.AddSingleton(new JsonSerializerOptions()
-            {
-                AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true,
-            });
+            //// Default Json options
+            //services.AddSingleton(new JsonSerializerOptions()
+            //{
+            //    AllowTrailingCommas = true,
+            //    PropertyNameCaseInsensitive = true,
+            //});
         }
     }
 }

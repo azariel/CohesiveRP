@@ -1,17 +1,22 @@
 import styles from "./CharactersComponent.module.css";
+import { useRef } from "react";
 import { FaFilter  } from "react-icons/fa";
 import { MdAddBox } from "react-icons/md";
 
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
-import { useRef } from "react";
+import type { SharedContextType } from "../../../../store/SharedContextType";
 
 export default function CharactersComponent() {
   const { setActiveModule } = sharedContext();
   const newCharacterFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSpecificCharacterClick = (moduleName: string) => {
-    setActiveModule(moduleName);
+
+    let module = {
+      moduleName: moduleName
+    } as SharedContextType;
+    setActiveModule(module);
     console.log(`Character selected -> Module [${moduleName}] selected.`);
   };
 

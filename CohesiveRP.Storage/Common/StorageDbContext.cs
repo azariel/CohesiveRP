@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Storage.DataAccessLayer.Users;
+﻿using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.Sqlite;
 using CohesiveRP.Storage.Users;
 using Microsoft.EntityFrameworkCore;
@@ -38,5 +39,11 @@ namespace CohesiveRP.Storage.Common
         // ********************************************************************
         public DbSet<UserDbModel> Users { get; set; }
         public DbSet<ChatDbModel> Chats { get; set; }
+
+        // Recent message in a specific chat
+        public DbSet<HotMessagesDbModel> HotMessages { get; set; }
+
+        // Old messages in a specific chat (strictly for performance, we're sunsetting old messages in this table to keep things lean and efficient)
+        public DbSet<ColdMessagesDbModel> ColdMessages { get; set; }
     }
 }

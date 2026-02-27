@@ -7,7 +7,7 @@ namespace CohesiveRP.Common.Exceptions
     /// <summary>
     /// Model mapped to what the client is expecting from a server-side exception Http response.
     /// </summary>
-    public class WebApiException : IWebApiReponseDto
+    public class WebApiException : IWebApiResponseDto
     {
         // ********************************************************************
         //                            Properties

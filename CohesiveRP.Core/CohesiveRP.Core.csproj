@@ -16,6 +16,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\CohesiveRP.Common\CohesiveRP.Common.csproj" />
+      <ProjectReference Include="..\CohesiveRP.Storage\CohesiveRP.Storage.csproj" />
     </ItemGroup>
 
 </Project>

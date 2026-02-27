@@ -1,11 +1,13 @@
+import type { ChatMessageResponseDto } from "../../../../../ResponsesDto/chat/BusinessObjects/ChatMessageResponseDto";
 import styles from "./ChatMessageComponent.module.css";
 import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification, HiMiniChevronRight } from "react-icons/hi2";
 
 interface Props {
+  messageContent?: ChatMessageResponseDto;
   enableSwipeBtn?: boolean;
 }
 
-export default function ChatMessageComponent({ enableSwipeBtn = false }: Props) {
+export default function ChatMessageComponent({ messageContent, enableSwipeBtn = false }: Props) {
   return (
     <main className={styles.chatMessageComponent}>
       <div className={styles.container}>
@@ -33,7 +35,7 @@ export default function ChatMessageComponent({ enableSwipeBtn = false }: Props) 
           </div>
           <div className={styles.messageContentSeparator} />
           <div className={styles.messageContentValue}>
-            hello 
+            {messageContent?.content} 
           </div>
           <div className={styles.messageContentFooter}>
             <div className={styles.messageContentFooterLeftSideIcons}>

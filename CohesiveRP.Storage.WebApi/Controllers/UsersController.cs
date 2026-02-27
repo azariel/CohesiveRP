@@ -1,27 +1,27 @@
-using CohesiveRP.Common.Serialization;
-using CohesiveRP.Storage.WebApi.RequestDtos;
-using CohesiveRP.Storage.WebApi.Workflows;
-using Microsoft.AspNetCore.Mvc;
+//using CohesiveRP.Common.Serialization;
+//using CohesiveRP.Storage.WebApi.RequestDtos;
+//using CohesiveRP.Storage.WebApi.Workflows;
+//using Microsoft.AspNetCore.Mvc;
 
-namespace CohesiveRP.Storage.WebApi.Controllers
-{
-    [ApiController]
-    [Route("[controller]")]
-    public class UsersController : ControllerBase
-    {
-        private IUsersWorkflow usersWorkflow;
+//namespace CohesiveRP.Storage.WebApi.Controllers
+//{
+//    [ApiController]
+//    [Route("[controller]")]
+//    public class UsersController : ControllerBase
+//    {
+//        private IUsersWorkflow usersWorkflow;
 
-        public UsersController(IUsersWorkflow workflow)
-        {
-            usersWorkflow = workflow;
-        }
+//        public UsersController(IUsersWorkflow workflow)
+//        {
+//            usersWorkflow = workflow;
+//        }
 
-        [HttpGet]
-        [Route("imateapot")]
-        public async Task<IActionResult> GetImateapot() => new JsonResult("You're a teapot.");
+//        [HttpGet]
+//        [Route("imateapot")]
+//        public async Task<IActionResult> GetImateapot() => new JsonResult("You're a teapot.");
 
-        [HttpGet]
-        [Route("create")]
-        public async Task<IActionResult> CreateNewUser(CreateUserRequestDto userRequestDto) => new JsonResult(JsonCommonSerializer.SerializeToString(usersWorkflow.CreateNewUser(userRequestDto)));
-    }
-}
+//        [HttpGet]
+//        [Route("create")]
+//        public async Task<IActionResult> CreateNewUser(CreateUserRequestDto userRequestDto) => new JsonResult(JsonCommonSerializer.SerializeToString(usersWorkflow.CreateNewUser(userRequestDto)));
+//    }
+//}
