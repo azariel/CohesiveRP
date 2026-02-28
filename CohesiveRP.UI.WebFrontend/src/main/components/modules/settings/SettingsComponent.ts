@@ -42,7 +42,8 @@ export default function SettingsComponent() {
 
   return (
     <main className={styles.settingsComponent}>
-      
+      <p>LLM Providers</p>
+      <label>{settings.LLMProviders}</label>
     </main>
   );
 }
