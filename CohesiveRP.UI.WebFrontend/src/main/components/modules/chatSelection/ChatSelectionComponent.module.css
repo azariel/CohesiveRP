@@ -23,6 +23,11 @@
     scrollbar-gutter: stable;
 }
 
+/* Optional: Ensure the second item doesn't shrink below its content if needed */
+.chatsEmptyContainer > *:last-child {
+    min-width: 0; 
+}
+
 .chatAddNewChatContainer {
     width: 100%;
     aspect-ratio: 1 / 1.5;
@@ -32,6 +37,16 @@
     border: 1px solid #686868;
     border-radius: 8px;
     cursor: pointer;
+}
+
+.chatAddNewChatContainerDisconnected {
+    width: 100%;
+    aspect-ratio: 1 / 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #686868;
+    border-radius: 8px;
 }
 
 .chatAddNewChatBtn {
@@ -98,6 +113,30 @@
 
 .filterRow {
     padding-top: 1em;
+}
+
+.addChatTutorial {
+    grid-column: span 2;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    font-size: 0.8em;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.isLoadingSpinner {
+    color: rgb(255, 255, 255);
+    width: 1.2em;
+    height: 1.2em;
+    animation: spin 1s linear infinite;
 }
 
 /* Mobile breakpoint: mobile display or smaller screens */

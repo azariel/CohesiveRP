@@ -54,9 +54,13 @@ export default function ChatComponent() {
   return (
     <main className={styles.chatComponent}>
       <div className={styles.messagesContainer} ref={messagesRef}>
-        {activeModule?.messages?.map((message, index) => (
-          <ChatMessageComponent key={index} messageContent={message} enableSwipeBtn={index === (activeModule.messages?.length ?? 0) - 1} />
-        ))}
+        {activeModule?.messages && activeModule.messages.length > 0 ? (
+          activeModule.messages.map((message, index) => (
+            <ChatMessageComponent key={index} messageContent={message} enableSwipeBtn={index === (activeModule.messages?.length ?? 0) - 1} />
+          ))
+        ) : (
+          <p />
+        )}
         <div className={styles.userInputContainer}>
           <UserInputComponent messagesRef={messagesRef} />
         </div>

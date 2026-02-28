@@ -351,3 +351,4 @@ MigrationBackup/
 /WebScraper/RadiantWebScraperWebApi/DOMScraperOps.txt
 
 *.db
+*.db-wal

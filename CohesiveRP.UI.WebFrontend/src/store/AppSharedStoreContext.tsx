@@ -2,12 +2,6 @@ import { createContext, useContext, useState, useEffect  } from "react";
 import type { ReactNode } from "react";
 import type { SharedContextType } from "./SharedContextType";
 
-// type SharedContextWrapperType = {
-  
-//   activeModule: SharedContextType;
-//   setActiveModule: (module: SharedContextType) => void;
-// };
-
 type SharedContextWrapperType<T = SharedContextType> = {
   /* Set the active module in the center component, which will trigger auto-rendering */
   activeModule: T;
@@ -51,14 +45,3 @@ export function sharedContext<T = SharedContextType>() {
   }
   return context as SharedContextWrapperType<T>;
 }
-
-// export const sharedContext = () => {
-  
-//   const context = useContext(SharedContext);
-//   if (!context) {
-//     console.error('Store shared context was null within AppSharedStoreProvider.');
-//     throw new Error("sharedContext must be used within AppSharedStoreProvider");
-//   }
-
-//   return context;
-// };
