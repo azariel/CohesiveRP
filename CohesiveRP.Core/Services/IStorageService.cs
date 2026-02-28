@@ -1,5 +1,6 @@
 ﻿using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.QueryModels.Chat;
+using CohesiveRP.Storage.QueryModels.Message;
 using CohesiveRP.Storage.Users;
 
 namespace CohesiveRP.Core.Services
@@ -10,5 +11,6 @@ namespace CohesiveRP.Core.Services
         Task<ChatDbModel[]> GetAllChatsAsync();
         Task<ChatDbModel> GetChatAsync(string chatId);
         Task<IMessageDbModel[]> GetAllHotMessages(string chatId);
+        Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message);
     }
 }

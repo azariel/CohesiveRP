@@ -3,7 +3,10 @@ using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
+using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Storage.QueryModels.Chat;
+using CohesiveRP.Storage.QueryModels.Message;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -33,14 +36,33 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             };
         }
 
+        if (!DateTime.TryParse(requestDto.Message.timestampUtc, out DateTime messageDate))
+        {
+            messageDate = DateTime.UtcNow;
+        }
+
         // Add the message
-        await storageService.CreateMessageAsync(requestDto.ChatId, requestDto.Message);
+        CreateMessageQueryModel queryModel = new()
+        {
+            ChatId = requestDto.ChatId,
+            MessageContent = requestDto.Message.Content,
+            TimestampUtc = messageDate,
+        };
+
+        var message = await storageService.CreateMessageAsync(queryModel);
+
+        // Get all messages
+        //var messages = await storageService.GetAllHotMessages(requestDto.ChatId);
 
         // Convert DbModel to an acceptable web model (without sensitive information)
-        var responseDto = new ChatResponseDto
+        var responseDto = new MessageResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
-            ChatId = chat.ChatId,
+            Message =  new MessageDefinition
+            {
+                MessageId = message.MessageId,
+                Content = message.Content,
+            },
         };
 
         return responseDto;

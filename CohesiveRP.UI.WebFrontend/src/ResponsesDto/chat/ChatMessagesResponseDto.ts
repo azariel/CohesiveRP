@@ -1,8 +1,8 @@
 import type { ServerApiResponseDto } from "../ServerApiResponseDto";
-import type { ChatMessageResponseDto } from "./BusinessObjects/ChatMessageResponseDto"
+import type { ChatMessage } from "./BusinessObjects/ChatMessage"
 
 interface ChatMessagesResponseDto extends ServerApiResponseDto  {
-    messages: ChatMessageResponseDto[] | null
+    messages: ChatMessage[] | null
 }
 
 export type {

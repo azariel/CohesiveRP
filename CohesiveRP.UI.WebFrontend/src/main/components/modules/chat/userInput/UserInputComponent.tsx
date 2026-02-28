@@ -6,25 +6,25 @@ import { ImSpinner2 } from "react-icons/im";
 
 // Backend webapi
 import { postToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
-import type { ServerApiResponseDto } from "../../../../../ResponsesDto/ServerApiResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 
 // Store
 import { sharedContext } from '../../../../../store/AppSharedStoreContext';
-import type { SharedContextChatType } from "../../../../../store/SharedContextChat";
+import type { SharedContextChatType } from "../../../../../store/SharedContextChatType";
+import type { ChatMessageResponseDto } from "../../../../../ResponsesDto/chat/BusinessObjects/ChatMessageResponseDto";
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function UserInputComponent({ messagesRef }: Props) {
+  const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hoveringSendBtn, setHoveringSendBtn] = useState(false);
   const [playerMessage, setPlayerMessage] = useState("");
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
   const [isSendingMessageToServer, setIsSendingMessageToServer] = useState(false);
   const [isWaitingOnPlayerMessageServerProcess, setIsWaitingOnPlayerMessageServerProcess] = useState(false);
-  const { activeModule } = sharedContext();
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -77,12 +77,11 @@ export default function UserInputComponent({ messagesRef }: Props) {
       timestampUtc: new Date().toUTCString()
     };
     
-    let chatModule = activeModule as SharedContextChatType;
-    let response:ServerApiResponseDto | null = await postToServerApiAsync<ServerApiResponseDto>(`api/chat/${chatModule.chatId}/messages`, payload);
+    let response:ChatMessageResponseDto | null = await postToServerApiAsync<ChatMessageResponseDto>(`api/chat/${activeModule?.chatId}/messages`, payload);
 
     let serverApiException = response as ServerApiExceptionResponseDto | null;
     if(!response || response.code != 200 || serverApiException?.message){
-      console.error(`Sending player message to backend failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}].`);
+      console.error(`Sending player message to backend failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
 
       // TODO: show err to user
       setIsWaitingOnPlayerMessageServerProcess(false);
@@ -94,6 +93,9 @@ export default function UserInputComponent({ messagesRef }: Props) {
     console.log(`Sending player message to backend succeeded.`);
     setIsWaitingOnPlayerMessageServerProcess(true);
     setPlayerMessage(""); // clear input on success
+    
+    // reflect those messages in the UI!
+    setActiveModule({...activeModule, messages: [...(activeModule.messages || []), response.messageObj]});
   };
 
   const handleCancelLatestPlayerMessage = () => {

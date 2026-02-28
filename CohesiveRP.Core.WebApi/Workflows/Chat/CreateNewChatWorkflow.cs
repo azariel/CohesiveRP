@@ -19,9 +19,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chat
 
         public async Task<IWebApiResponseDto> AddNewChatAsync(AddNewChatRequestDto requestDto)
         {
-            CreateChatQueryModel queryModel = new()
-            {
-            };
+            CreateChatQueryModel queryModel = new(){};
 
             ChatDbModel newlyCreatedChat = await storageService.CreateChatAsync(queryModel);
 

@@ -1,5 +1,5 @@
 import styles from "./ChatComponent.module.css";
-import { useEffect, useRef, useState  } from "react";
+import { useEffect, useRef  } from "react";
 import ChatMessageComponent from "./message/ChatMessageComponent";
 import UserInputComponent from "./userInput/UserInputComponent";
 
@@ -9,13 +9,12 @@ import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exc
 
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
-import type { SharedContextChatType } from "../../../../store/SharedContextChat";
+import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
-  const { activeModule } = sharedContext();
+  const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
   const didComponentMountAlready = useRef(false);
-  const [messagesWrapper, setMessagesWrapper] = useState<ChatMessagesResponseDto>();
 
   useEffect(() => {
     if (didComponentMountAlready.current)
@@ -35,7 +34,7 @@ export default function ChatComponent() {
           return;
         }
 
-        setMessagesWrapper(response ?? []);
+        setActiveModule({...activeModule, messages: response.messages ?? []});
         console.log(`Specific chat fetched successfully.`);
       } catch (error) {
         console.error("Fetch error:", error);
@@ -55,11 +54,9 @@ export default function ChatComponent() {
   return (
     <main className={styles.chatComponent}>
       <div className={styles.messagesContainer} ref={messagesRef}>
-        {messagesWrapper?.messages?.map((message, index) => (
-          <ChatMessageComponent messageContent={message} />
+        {activeModule?.messages?.map((message, index) => (
+          <ChatMessageComponent key={index} messageContent={message} enableSwipeBtn={index === (activeModule.messages?.length ?? 0) - 1} />
         ))}
-        {/* <ChatMessageComponent />
-        <ChatMessageComponent enableSwipeBtn={true} /> */}
         <div className={styles.userInputContainer}>
           <UserInputComponent messagesRef={messagesRef} />
         </div>

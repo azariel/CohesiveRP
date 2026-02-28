@@ -85,18 +85,18 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 MessageDbModel messageDbModel = new MessageDbModel
                 {
                     MessageId = Guid.NewGuid().ToString(),
-                    Content = queryModel.messageContent,
+                    Content = queryModel.MessageContent,
                 };
 
                 // Check if HotMessages for this chat already exist
-                var chat = storageDbContext.HotMessages.FirstOrDefault(f => f.ChatId == queryModel.chatId);
+                var chat = storageDbContext.HotMessages.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
 
                 if (chat == null)
                 {
                     // Create the HotMessages row tied to this chat first
                     var newHotMessagesObj = new HotMessagesDbModel
                     {
-                        ChatId = queryModel.chatId,
+                        ChatId = queryModel.ChatId,
                         InsertDateTimeUtc = DateTime.UtcNow,
                         SerializedMessages = JsonCommonSerializer.SerializeToString(new[] { messageDbModel }),
                     };
@@ -113,7 +113,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 }
 
                 // Otherwise, Update the existing row with the new message
-                var currentMessages = JsonCommonSerializer.DeserializeFromString<IMessageDbModel[]>(chat.SerializedMessages)?.ToList();
+                var currentMessages = JsonCommonSerializer.DeserializeFromString<MessageDbModel[]>(chat.SerializedMessages)?.ToList();
                 currentMessages.Add(messageDbModel);
                 chat.SerializedMessages = JsonCommonSerializer.SerializeToString(currentMessages);
                 var resultUpdate = storageDbContext.HotMessages.Update(chat);

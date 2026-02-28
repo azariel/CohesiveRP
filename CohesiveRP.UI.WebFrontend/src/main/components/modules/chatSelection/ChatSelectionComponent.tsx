@@ -11,7 +11,7 @@ import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSel
 
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
-import type { SharedContextChatType } from "../../../../store/SharedContextChat";
+import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 
 export default function ChatSelectionComponent() {
   const { setActiveModule } = sharedContext();

@@ -1,9 +1,9 @@
-import type { ChatMessageResponseDto } from "../../../../../ResponsesDto/chat/BusinessObjects/ChatMessageResponseDto";
+import type { ChatMessage } from "../../../../../ResponsesDto/chat/BusinessObjects/ChatMessage";
 import styles from "./ChatMessageComponent.module.css";
 import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification, HiMiniChevronRight } from "react-icons/hi2";
 
 interface Props {
-  messageContent?: ChatMessageResponseDto;
+  messageContent?: ChatMessage;
   enableSwipeBtn?: boolean;
 }
 
@@ -13,7 +13,7 @@ export default function ChatMessageComponent({ messageContent, enableSwipeBtn = 
       <div className={styles.container}>
         <div className={styles.leftMessageContainer}>
           <div className={styles.messageAvatarContainer}>
-            <img src="./dev/Placeholder.png" alt="Avatar" />
+            <img src="./dev/Seyrdis.png" alt="Avatar" />
           </div>
           <div className={styles.messageInfoContainer}>
             <div title="messageId">#32</div>
