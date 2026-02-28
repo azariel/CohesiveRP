@@ -12,7 +12,7 @@ import type { SettingsResponseDto } from "../../../../ResponsesDto/settings/Sett
 export default function SettingsComponent() {
   //sharedContext<SharedContextSettings>();
   const didComponentMountAlready = useRef(false);
-  const [setSettings] = useState<SettingsResponseDto>();
+  const [settings, setSettings] = useState<SettingsResponseDto | undefined>(undefined);
 
   useEffect(() => {
     if (didComponentMountAlready.current)
@@ -38,7 +38,7 @@ export default function SettingsComponent() {
     };
 
     fetchData();
-  }, []);
+  }, [setSettings]);
 
   return (
     <main className={styles.settingsComponent}>
