@@ -4,7 +4,7 @@ import { useEffect, useState, useRef  } from "react";
 // Backend webapi
 import { getFromServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
-import type { SettingsResponseDto } from "../../../../ResponsesDto/settings/SettingsResponseDto"
+import type { SettingsResponseDto } from "../../../../ResponsesDto/settings/SettingsResponseDto";
 
 /* Store */
 //import type { SharedContextSettings } from "../../../../store/SharedContextSettings";
@@ -12,7 +12,7 @@ import type { SettingsResponseDto } from "../../../../ResponsesDto/settings/Sett
 export default function SettingsComponent() {
   //sharedContext<SharedContextSettings>();
   const didComponentMountAlready = useRef(false);
-  const [settings, setSettings] = useState<SettingsResponseDto | undefined>(undefined);
+  const [settings, setSettings] = useState<SettingsResponseDto | null>(null);
 
   useEffect(() => {
     if (didComponentMountAlready.current)
