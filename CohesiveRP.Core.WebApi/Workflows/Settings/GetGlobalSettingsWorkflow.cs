@@ -2,7 +2,7 @@
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.ResponseDtos.Settings;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
-using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 

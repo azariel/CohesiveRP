@@ -1,9 +1,10 @@
 ﻿using CohesiveRP.Storage.DataAccessLayer.Messages;
-using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
 using CohesiveRP.Storage.Users;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 
 namespace CohesiveRP.Core.Services
 {
@@ -15,12 +16,14 @@ namespace CohesiveRP.Core.Services
         private IChatsDal chatsDal;
         private IMessagesDal messagesDal;
         private IGlobalSettingsDal globalSettingsDal;
+        private IBackgroundQueriesDal backgroundQueriesDal;
 
-        public StorageService(IChatsDal chatsDal, IMessagesDal messagesDal, IGlobalSettingsDal globalSettingsDal)
+        public StorageService(IChatsDal chatsDal, IMessagesDal messagesDal, IGlobalSettingsDal globalSettingsDal, IBackgroundQueriesDal backgroundQueriesDal)
         {
             this.chatsDal = chatsDal;
             this.messagesDal = messagesDal;
             this.globalSettingsDal = globalSettingsDal;
+            this.backgroundQueriesDal = backgroundQueriesDal;
         }
 
         // Chats
@@ -55,6 +58,12 @@ namespace CohesiveRP.Core.Services
         public async Task<GlobalSettingsDbModel> GetGlobalSettingsAsync()
         {
             return await globalSettingsDal.GetGlobalSettingsAsync();
+        }
+
+        // BackgroundQueries
+        public async Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel)
+        {
+            return await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
         }
     }
 }

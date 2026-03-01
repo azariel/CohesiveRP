@@ -1,5 +1,5 @@
 ﻿using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
-using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.Sqlite;
 using CohesiveRP.Storage.Users;
@@ -49,5 +49,8 @@ namespace CohesiveRP.Storage.Common
         public DbSet<ColdMessagesDbModel> ColdMessages { get; set; }
 
         public DbSet<GlobalSettingsDbModel> GlobalSettings { get; set; }
+
+        // Queries that are queued to be processed, processing or recently processed against a background worker
+        public DbSet<BackgroundQueryDbModel> BackgroundQueries { get; set; }
     }
 }

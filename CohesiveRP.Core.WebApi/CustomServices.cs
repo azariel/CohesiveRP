@@ -4,7 +4,7 @@ using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
-using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 
 namespace CohesiveRP.Core.WebApi
@@ -24,6 +24,8 @@ namespace CohesiveRP.Core.WebApi
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();
 
+            // Workflows.BackgroundQueries
+
             // Services
             services.AddSingleton<IStorageService, StorageService>();
 
@@ -32,6 +34,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IChatsDal, ChatsDal>();
             services.AddSingleton<IMessagesDal, MessagesDal>();
             services.AddSingleton<IGlobalSettingsDal, GlobalSettingsDal>();
+            services.AddSingleton<IBackgroundQueriesDal, BackgroundQueriesDal>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

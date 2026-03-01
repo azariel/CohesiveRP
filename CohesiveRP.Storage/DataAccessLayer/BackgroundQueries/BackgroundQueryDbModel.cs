@@ -5,20 +5,20 @@ using CohesiveRP.Storage.Sqlite;
 namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
 {
     /// <summary>
-    /// Represents the structure of global settings within the storage.
+    /// Represents the structure of queries made to background backend within the storage.
     /// </summary>
-    [Table("GlobalSettings")]
-    public class GlobalSettingsDbModel : CohesiveRPSqliteBaseTable
+    [Table("BackgroundQueries")]
+    public class BackgroundQueryDbModel : CohesiveRPSqliteBaseTable
     {
         // ********************************************************************
         //                            Properties
         // ********************************************************************
         [Required]
         [Key]
-        public string GlobalSettingsId { get; set; }
+        public string BackgroundQueryId { get; set; }
 
         //[MaxLength(1024)]
-        public string LLMProviders { get; set; }
+        //public string LLMProviders { get; set; }
 
         //[Required]
         //[MaxLength(1024)]

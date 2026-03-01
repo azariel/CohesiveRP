@@ -1,6 +1,6 @@
 ﻿using CohesiveRP.Storage.Users;
 
-namespace CohesiveRP.Storage.DataAccessLayer.Settings
+namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
 {
     public interface IGlobalSettingsDal
     {

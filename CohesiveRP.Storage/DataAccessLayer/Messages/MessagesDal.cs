@@ -6,6 +6,7 @@ using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.Message;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Messages
 {
@@ -101,7 +102,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                         SerializedMessages = JsonCommonSerializer.SerializeToString(new[] { messageDbModel }),
                     };
 
-                    var resultAdd = storageDbContext.HotMessages.Add(newHotMessagesObj);
+                    EntityEntry<HotMessagesDbModel> resultAdd = storageDbContext.HotMessages.Add(newHotMessagesObj);
                     if (resultAdd.State != EntityState.Added)
                     {
                         LoggingManager.LogToFile("b22ec4b0-0707-4521-a932-9af95430a2ae", $"Error when querying Db on table HOT messages. State was [{resultAdd.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultAdd)}].");

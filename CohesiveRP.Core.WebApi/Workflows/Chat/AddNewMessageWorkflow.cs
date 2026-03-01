@@ -5,7 +5,7 @@ using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
-using CohesiveRP.Storage.QueryModels.Chat;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Message;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
@@ -42,23 +42,26 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         }
 
         // Add the message
-        CreateMessageQueryModel queryModel = new()
+        CreateMessageQueryModel messageQueryModel = new()
         {
             ChatId = requestDto.ChatId,
             MessageContent = requestDto.Message.Content,
             TimestampUtc = messageDate,
         };
 
-        var message = await storageService.CreateMessageAsync(queryModel);
+        var message = await storageService.CreateMessageAsync(messageQueryModel);
 
-        // Get all messages
-        //var messages = await storageService.GetAllHotMessages(requestDto.ChatId);
+        // The message was added to storage, we'll query a request for the backend to process a new AI reply
+        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+        {
+        };
+        await storageService.CreateBackgroundQueryAsync(backgroundQueryModel);// Note that we're still not querying the LLM at this point, we're adding a query to be process async against the backend and that process will eventually query the LLMs
 
         // Convert DbModel to an acceptable web model (without sensitive information)
         var responseDto = new MessageResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
-            Message =  new MessageDefinition
+            Message = new MessageDefinition
             {
                 MessageId = message.MessageId,
                 Content = message.Content,

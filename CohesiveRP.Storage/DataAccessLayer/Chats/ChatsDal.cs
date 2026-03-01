@@ -5,6 +5,7 @@ using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.Users;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
@@ -69,7 +70,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     InsertDateTimeUtc = DateTime.UtcNow,
                 };
 
-                var result = await storageDbContext.Chats.AddAsync(chatDbModel);
+                EntityEntry<ChatDbModel> result = await storageDbContext.Chats.AddAsync(chatDbModel);
 
                 if (result.State != EntityState.Added)
                 {
@@ -78,7 +79,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 }
 
                 await storageDbContext.SaveChangesAsync();
-                return chatDbModel;
+                return result.Entity;
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("0a39887a-ea58-4e78-b44b-afad7e5fc340", $"Error when querying Db on table Chat.", ex);
