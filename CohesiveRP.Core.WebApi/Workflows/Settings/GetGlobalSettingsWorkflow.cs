@@ -1,4 +1,6 @@
-﻿using CohesiveRP.Common.WebApi;
+﻿using CohesiveRP.Common.Serialization;
+using CohesiveRP.Common.WebApi;
+using CohesiveRP.Core.BusinessObjects.LLMProviders;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.ResponseDtos.Settings;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
@@ -22,7 +24,7 @@ public class GetGlobalSettingsWorkflow : IGetGlobalSettingsWorkflow
 
         var responseDto = new GlobalSettingsResponseDto
         {
-            LLMProviders = globalSettings.LLMProviders,
+            LLMProviders = globalSettings.LLMProviders == null ? [] : JsonCommonSerializer.DeserializeFromString<List<LLMProviderConfig>>(globalSettings.LLMProviders),
         };
 
         responseDto.HttpResultCode = System.Net.HttpStatusCode.OK;

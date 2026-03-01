@@ -17,6 +17,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         [Key]
         public string BackgroundQueryId { get; set; }
 
+        public string Tags { get; set; }
+
         //[MaxLength(1024)]
         //public string LLMProviders { get; set; }
 

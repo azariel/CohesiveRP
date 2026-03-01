@@ -54,6 +54,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         // The message was added to storage, we'll query a request for the backend to process a new AI reply
         var backgroundQueryModel = new CreateBackgroundQueryQueryModel
         {
+            Tags = ["main"],// This is a message from the player and thus is tagged as 'main'
         };
         await storageService.CreateBackgroundQueryAsync(backgroundQueryModel);// Note that we're still not querying the LLM at this point, we're adding a query to be process async against the backend and that process will eventually query the LLMs
 

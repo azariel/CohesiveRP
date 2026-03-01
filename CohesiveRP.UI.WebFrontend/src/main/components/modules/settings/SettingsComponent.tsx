@@ -44,7 +44,7 @@ export default function SettingsComponent() {
   return (
     <main className={styles.settingsComponent}>
       <p>LLM Providers</p>
-      <label>{settings?.llmProviders}</label>
+      <label>{JSON.stringify(settings?.llmProviders)}</label>
     </main>
   );
 }

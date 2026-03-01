@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json.Serialization;
 using CohesiveRP.Common.WebApi;
+using CohesiveRP.Core.BusinessObjects.LLMProviders;
 
 namespace CohesiveRP.Core.WebApi.ResponseDtos.Settings
 {
@@ -10,6 +11,6 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Settings
         public HttpStatusCode HttpResultCode { get; set; }
 
         [JsonPropertyName("llmProviders")]
-        public string LLMProviders { get; set; }
+        public List<LLMProviderConfig> LLMProviders { get; set; } = new();
     }
 }

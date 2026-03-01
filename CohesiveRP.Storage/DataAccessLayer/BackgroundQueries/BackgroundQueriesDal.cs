@@ -42,6 +42,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 {
                     BackgroundQueryId = Guid.NewGuid().ToString(),
                     InsertDateTimeUtc = DateTime.UtcNow,
+                    Tags = JsonCommonSerializer.SerializeToString(queryModel.Tags),
                 };
 
                 EntityEntry<BackgroundQueryDbModel> result = await storageDbContext.BackgroundQueries.AddAsync(dbModel);
