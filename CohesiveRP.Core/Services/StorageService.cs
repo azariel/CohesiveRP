@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
@@ -13,11 +14,13 @@ namespace CohesiveRP.Core.Services
     {
         private IChatsDal chatsDal;
         private IMessagesDal messagesDal;
+        private IGlobalSettingsDal globalSettingsDal;
 
-        public StorageService(IChatsDal chatsDal, IMessagesDal messagesDal)
+        public StorageService(IChatsDal chatsDal, IMessagesDal messagesDal, IGlobalSettingsDal globalSettingsDal)
         {
             this.chatsDal = chatsDal;
             this.messagesDal = messagesDal;
+            this.globalSettingsDal = globalSettingsDal;
         }
 
         // Chats
@@ -46,6 +49,12 @@ namespace CohesiveRP.Core.Services
         public async Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message)
         {
             return await messagesDal.CreateMessageAsync(message);
+        }
+
+        // Settings
+        public async Task<GlobalSettingsDbModel> GetGlobalSettingsAsync()
+        {
+            return await globalSettingsDal.GetGlobalSettingsAsync();
         }
     }
 }

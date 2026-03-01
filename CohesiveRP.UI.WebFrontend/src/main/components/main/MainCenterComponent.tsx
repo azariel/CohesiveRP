@@ -4,6 +4,7 @@ import styles from "./MainCenterComponent.module.css";
 import ChatComponent from '../modules/chat/ChatComponent';
 import ChatSelectionComponent from "../modules/chatSelection/ChatSelectionComponent";
 import CharactersComponent from "../modules/characters/CharactersComponent";
+import SettingsComponent from "../modules/settings/SettingsComponent";
 
 /* Store */
 import { sharedContext } from '../../../store/AppSharedStoreContext';
@@ -19,6 +20,8 @@ export default function MainCenterComponent() {
         return <ChatComponent />;
       case "characters":
         return <CharactersComponent />;
+        case "settings":
+        return <SettingsComponent />;
       default:
         return null;
     }

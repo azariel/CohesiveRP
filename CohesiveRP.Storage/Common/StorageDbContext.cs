@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.Sqlite;
 using CohesiveRP.Storage.Users;
@@ -38,6 +39,7 @@ namespace CohesiveRP.Storage.Common
         //                            Properties
         // ********************************************************************
         public DbSet<UserDbModel> Users { get; set; }
+
         public DbSet<ChatDbModel> Chats { get; set; }
 
         // Recent message in a specific chat
@@ -45,5 +47,7 @@ namespace CohesiveRP.Storage.Common
 
         // Old messages in a specific chat (strictly for performance, we're sunsetting old messages in this table to keep things lean and efficient)
         public DbSet<ColdMessagesDbModel> ColdMessages { get; set; }
+
+        public DbSet<GlobalSettingsDbModel> GlobalSettings { get; set; }
     }
 }

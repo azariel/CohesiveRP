@@ -4,7 +4,6 @@
     <Project Path="CohesiveRP.Core/CohesiveRP.Core.csproj" />
   </Folder>
   <Folder Name="/Storage/">
-    <Project Path="CohesiveRP.Storage.WebApi/CohesiveRP.Storage.WebApi.csproj" Id="f0bebd60-c06b-49bf-9420-d7bfae0742a7" />
     <Project Path="CohesiveRP.Storage/CohesiveRP.Storage.csproj" Id="ce913b76-2c45-463f-800c-068f129de771" />
   </Folder>
   <Folder Name="/UI/">

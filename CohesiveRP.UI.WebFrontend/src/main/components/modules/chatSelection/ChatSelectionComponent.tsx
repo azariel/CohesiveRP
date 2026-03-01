@@ -139,8 +139,8 @@ export default function ChatSelectionComponent() {
           ):(
             // Show information about adding a new chat for the first time
             <div className={styles.addChatTutorial}>
-              <label>To add a new chat,</label>
-              <label>simply click on the '+' card to add a new chat.</label>
+              <label>Click on the '+' card </label>
+              <label>to add a new chat</label>
             </div>
           )
         )}

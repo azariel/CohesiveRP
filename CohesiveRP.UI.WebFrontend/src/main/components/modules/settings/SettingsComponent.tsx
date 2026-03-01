@@ -1,3 +1,4 @@
+
 import styles from "./SettingsComponent.module.css";
 import { useEffect, useState, useRef  } from "react";
 
@@ -43,7 +44,7 @@ export default function SettingsComponent() {
   return (
     <main className={styles.settingsComponent}>
       <p>LLM Providers</p>
-      <label>{settings.LLMProviders}</label>
+      <label>{settings?.llmProviders}</label>
     </main>
   );
 }
