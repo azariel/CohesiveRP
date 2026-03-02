@@ -14,6 +14,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         //                            Properties
         // ********************************************************************
         [Required]
+        [MaxLength(32)]
         [Key]
         public string GlobalSettingsId { get; set; }
 

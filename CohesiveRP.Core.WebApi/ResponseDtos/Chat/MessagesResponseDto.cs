@@ -7,6 +7,7 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat
 {
     public class MessagesResponseDto : IWebApiResponseDto
     {
+        [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
         [JsonPropertyName("code")]
         public HttpStatusCode HttpResultCode { get; set; }
 

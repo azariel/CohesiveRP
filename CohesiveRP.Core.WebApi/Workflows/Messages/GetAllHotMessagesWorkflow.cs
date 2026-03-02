@@ -19,7 +19,7 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
 
     public async Task<IWebApiResponseDto> GetAllMessages(GetHotMessagesRequestDto requestDto)
     {
-        var messages = await storageService.GetAllHotMessages(requestDto.ChatId);
+        IMessageDbModel[] messages = await storageService.GetAllHotMessages(requestDto.ChatId);
 
         messages ??= Array.Empty<MessageDbModel>();
         var responseDto = new MessagesResponseDto
@@ -29,6 +29,8 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
             {
                 MessageId = s.MessageId,
                 Content = s.Content,
+                SourceType = s.SourceType,
+                CreatedAtUtc = s.CreatedAtUtc,
             }).ToArray(),
         };
 

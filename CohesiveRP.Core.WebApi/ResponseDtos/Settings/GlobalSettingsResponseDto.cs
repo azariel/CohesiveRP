@@ -7,6 +7,7 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Settings
 {
     public class GlobalSettingsResponseDto : IWebApiResponseDto
     {
+        [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
         [JsonPropertyName("code")]
         public HttpStatusCode HttpResultCode { get; set; }
 

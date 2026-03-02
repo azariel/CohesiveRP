@@ -13,31 +13,25 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
     /// <summary>
     /// DataAccessLayer around Chats.
     /// </summary>
-    public class MessagesDal : StorageDal, IMessagesDal, IDisposable
+    public class MessagesDal : StorageDal, IMessagesDal
     {
-        private StorageDbContext storageDbContext;
+        private readonly IDbContextFactory<StorageDbContext> contextFactory;
 
-        public MessagesDal(JsonSerializerOptions jsonSerializerOptions) : base(jsonSerializerOptions)
+        public MessagesDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
         {
-            storageDbContext = new StorageDbContext();
-            storageDbContext.HotMessages.Load();
+            this.contextFactory = contextFactory;
         }
 
         // ********************************************************************
         //                            Public
         // ********************************************************************
-        public void Dispose()
-        {
-            storageDbContext?.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
         public async Task<IMessageDbModel[]> GetHotMessagesAsync(string chatId)
         {
             try
             {
-                await storageDbContext.HotMessages.LoadAsync();
-                var hotMessages = storageDbContext.HotMessages.FirstOrDefault(w => w.ChatId == chatId);
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                //await dbContext.HotMessages.LoadAsync();
+                var hotMessages = dbContext.HotMessages.FirstOrDefault(w => w.ChatId == chatId);
 
                 if (hotMessages == null)
                 {
@@ -80,17 +74,20 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         {
             try
             {
-                storageDbContext.HotMessages.Load();
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                //dbContext.HotMessages.Load();
 
                 // Convert model
                 MessageDbModel messageDbModel = new MessageDbModel
                 {
                     MessageId = Guid.NewGuid().ToString(),
                     Content = queryModel.MessageContent,
+                    SourceType = queryModel.SourceType,
+                    CreatedAtUtc = queryModel.CreatedAtUtc,
                 };
 
                 // Check if HotMessages for this chat already exist
-                var chat = storageDbContext.HotMessages.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
+                var chat = dbContext.HotMessages.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
 
                 if (chat == null)
                 {
@@ -102,14 +99,14 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                         SerializedMessages = JsonCommonSerializer.SerializeToString(new[] { messageDbModel }),
                     };
 
-                    EntityEntry<HotMessagesDbModel> resultAdd = storageDbContext.HotMessages.Add(newHotMessagesObj);
+                    EntityEntry<HotMessagesDbModel> resultAdd = dbContext.HotMessages.Add(newHotMessagesObj);
                     if (resultAdd.State != EntityState.Added)
                     {
                         LoggingManager.LogToFile("b22ec4b0-0707-4521-a932-9af95430a2ae", $"Error when querying Db on table HOT messages. State was [{resultAdd.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultAdd)}].");
                         return null;
                     }
 
-                    await storageDbContext.SaveChangesAsync();
+                    await dbContext.SaveChangesAsync();
                     return messageDbModel;
                 }
 
@@ -117,14 +114,14 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 var currentMessages = JsonCommonSerializer.DeserializeFromString<MessageDbModel[]>(chat.SerializedMessages)?.ToList();
                 currentMessages.Add(messageDbModel);
                 chat.SerializedMessages = JsonCommonSerializer.SerializeToString(currentMessages);
-                var resultUpdate = storageDbContext.HotMessages.Update(chat);
+                var resultUpdate = dbContext.HotMessages.Update(chat);
                 if (resultUpdate.State != EntityState.Modified)
                 {
                     LoggingManager.LogToFile("77cb56c7-238d-46e3-a110-d68dc4427a6e", $"Error when querying Db on table HOT messages. State was [{resultUpdate.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultUpdate)}].");
                     return null;
                 }
 
-                await storageDbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
                 return messageDbModel;
             } catch (Exception ex)
             {

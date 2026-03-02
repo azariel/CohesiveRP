@@ -5,6 +5,7 @@ using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Message;
 
@@ -45,8 +46,9 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         CreateMessageQueryModel messageQueryModel = new()
         {
             ChatId = requestDto.ChatId,
+            SourceType = Common.BusinessObjects.MessageSourceType.User,
             MessageContent = requestDto.Message.Content,
-            TimestampUtc = messageDate,
+            CreatedAtUtc = messageDate,
         };
 
         var message = await storageService.CreateMessageAsync(messageQueryModel);
@@ -54,9 +56,12 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         // The message was added to storage, we'll query a request for the backend to process a new AI reply
         var backgroundQueryModel = new CreateBackgroundQueryQueryModel
         {
-            Tags = ["main"],// This is a message from the player and thus is tagged as 'main'
+            ChatId = requestDto.ChatId,
+            Priority = BackgroundQueryPriority.Highest,// User is waiting!
+            DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString()],
+            Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'
         };
-        await storageService.CreateBackgroundQueryAsync(backgroundQueryModel);// Note that we're still not querying the LLM at this point, we're adding a query to be process async against the backend and that process will eventually query the LLMs
+        var backgroundQuery = await storageService.CreateBackgroundQueryAsync(backgroundQueryModel);// Note that we're still not querying the LLM at this point, we're adding a query to be process async against the backend and that process will eventually query the LLMs
 
         // Convert DbModel to an acceptable web model (without sensitive information)
         var responseDto = new MessageResponseDto
@@ -67,6 +72,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 MessageId = message.MessageId,
                 Content = message.Content,
             },
+            MainQueryId = backgroundQuery.BackgroundQueryId,
         };
 
         return responseDto;

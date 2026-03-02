@@ -16,5 +16,6 @@ namespace CohesiveRP.Core.Services
         Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message);
         Task<GlobalSettingsDbModel> GetGlobalSettingsAsync();
         Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
+        Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId);
     }
 }

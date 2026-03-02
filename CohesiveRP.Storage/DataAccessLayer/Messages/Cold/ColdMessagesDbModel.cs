@@ -14,6 +14,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages.Hot
         //                            Properties
         // ********************************************************************
         [Required]
+        [MaxLength(32)]
         [Key]// Partition key AND FK
         public string ChatId { get; set; }
 

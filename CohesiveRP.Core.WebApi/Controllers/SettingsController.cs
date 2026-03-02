@@ -23,7 +23,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetGlobalSettings()
         {
-            return new JsonResult(JsonCommonSerializer.SerializeToString(await getGlobalSettingsWorkflow.GetGlobalSettings()));
+            return new JsonResult(await getGlobalSettingsWorkflow.GetGlobalSettings());
         }
     }
 }

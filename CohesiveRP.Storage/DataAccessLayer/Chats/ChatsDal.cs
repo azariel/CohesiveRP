@@ -12,31 +12,25 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
     /// <summary>
     /// DataAccessLayer around Chats.
     /// </summary>
-    public class ChatsDal : StorageDal, IChatsDal, IDisposable
+    public class ChatsDal : StorageDal, IChatsDal
     {
-        private StorageDbContext storageDbContext;
+        private readonly IDbContextFactory<StorageDbContext> contextFactory;
 
-        public ChatsDal(JsonSerializerOptions jsonSerializerOptions) : base(jsonSerializerOptions)
+        public ChatsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
         {
-            storageDbContext = new StorageDbContext();
-            storageDbContext.Chats.Load();
+            this.contextFactory = contextFactory;
         }
 
         // ********************************************************************
         //                            Public
         // ********************************************************************
-        public void Dispose()
-        {
-            storageDbContext?.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
         public async Task<ChatDbModel[]> GetChatsAsync()
         {
             try
             {
-                await storageDbContext.Chats.LoadAsync();
-                return storageDbContext.Chats.ToArray();
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                //await dbContext.Chats.LoadAsync();
+                return dbContext.Chats.ToArray();
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("0a39887a-ea58-4e78-b44b-afad7e5fc340", $"Error when querying Db on table Chat.", ex);
@@ -48,8 +42,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         {
             try
             {
-                await storageDbContext.Chats.LoadAsync();
-                return storageDbContext.Chats.FirstOrDefault(w => w.ChatId == id);
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                //await dbContext.Chats.LoadAsync();
+                return dbContext.Chats.FirstOrDefault(w => w.ChatId == id);
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("ed1b481f-463b-4854-acac-222965ef3601", $"Error when querying Db on table Chat.", ex);
@@ -61,7 +56,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         {
             try
             {
-                storageDbContext.Chats.Load();
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                //dbContext.Chats.Load();
 
                 // Convert models
                 ChatDbModel chatDbModel = new ChatDbModel
@@ -70,7 +66,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     InsertDateTimeUtc = DateTime.UtcNow,
                 };
 
-                EntityEntry<ChatDbModel> result = await storageDbContext.Chats.AddAsync(chatDbModel);
+                EntityEntry<ChatDbModel> result = await dbContext.Chats.AddAsync(chatDbModel);
 
                 if (result.State != EntityState.Added)
                 {
@@ -78,7 +74,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return null;
                 }
 
-                await storageDbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
                 return result.Entity;
             } catch (Exception ex)
             {

@@ -27,13 +27,13 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllSelectableChats()
         {
-            return new JsonResult(JsonCommonSerializer.SerializeToString(await getAllChatsWorkflow.GetAllSelectableChats()));
+            return new JsonResult(await getAllChatsWorkflow.GetAllSelectableChats());
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateNewChat(AddNewChatRequestDto requestDto)
         {
-            return new JsonResult(JsonCommonSerializer.SerializeToString(await createNewChatWorkflow.AddNewChatAsync(requestDto)));
+            return new JsonResult(await createNewChatWorkflow.AddNewChatAsync(requestDto));
         }
     }
 }

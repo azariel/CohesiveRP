@@ -33,9 +33,10 @@ export async function extractFromBody<T>(bodyStream: ReadableStream<Uint8Array> 
         if (!bodyAsString) {
             return null;
         }
-
+        
         let bodyJsonResponse = JSON.parse(bodyAsString);
-        return JSON.parse(bodyJsonResponse) as T | null;
+        const result = Array.isArray(bodyJsonResponse) ? bodyJsonResponse[0] : bodyJsonResponse;
+        return result as T | null;
     } catch(err) {
         console.error(`Couldn't convert the HttpResponse body to valid Json: [${err}]. Initial stringified body to convert: [${bodyAsString}].`);
         return null;

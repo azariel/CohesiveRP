@@ -65,5 +65,10 @@ namespace CohesiveRP.Core.Services
         {
             return await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
         }
+
+        public async Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId)
+        {
+            return await backgroundQueriesDal.GetBackgroundQueryAsync(queryId);
+        }
     }
 }

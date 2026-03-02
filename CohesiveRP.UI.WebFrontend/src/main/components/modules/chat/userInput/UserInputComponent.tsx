@@ -5,13 +5,14 @@ import { BiSolidPaperPlane, BiPaperPlane  } from "react-icons/bi";
 import { ImSpinner2 } from "react-icons/im";
 
 // Backend webapi
-import { postToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
+import { getFromServerApiAsync, postToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
 import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 
 // Store
 import { sharedContext } from '../../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../../store/SharedContextChatType";
-import type { ChatMessageResponseDto } from "../../../../../ResponsesDto/chat/BusinessObjects/ChatMessageResponseDto";
+import type { ChatMessageResponseDto } from "../../../../../ResponsesDto/chat/ChatMessageResponseDto";
+import type { BackgroundQueryResponseDto } from "../../../../../ResponsesDto/chat/BackgroundQueryResponseDto";
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
@@ -25,6 +26,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
   const [isSendingMessageToServer, setIsSendingMessageToServer] = useState(false);
   const [isWaitingOnPlayerMessageServerProcess, setIsWaitingOnPlayerMessageServerProcess] = useState(false);
+  const pollingTimerRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -95,12 +97,51 @@ export default function UserInputComponent({ messagesRef }: Props) {
     setPlayerMessage(""); // clear input on success
     
     // reflect those messages in the UI!
-    setActiveModule({...activeModule, messages: [...(activeModule.messages || []), response.messageObj]});
+    setActiveModule({
+      ...activeModule,
+      messages: [...(activeModule.messages || []), response.messageObj],
+      mainQueryId: response.mainQueryId// Track the main query id to know the status of the AI reply
+    });
+
+    pollingTimerRef.current = window.setInterval(async () => {
+      await refreshMainBackgroundQueryStateAsync(response.mainQueryId);
+    }, 1000)
+  };
+
+  const refreshMainBackgroundQueryStateAsync = async (mainQueryId: string) => {
+      console.log("Tracking remote BackgroundQuery to generate AI reply.");
+
+      if(mainQueryId == null)
+      {
+        console.log("No background query to track.");
+        return;
+      }
+      
+      let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${mainQueryId}`);
+
+      let serverApiException = response as ServerApiExceptionResponseDto | null;
+      if(!response || response.code != 200 || serverApiException?.message){
+        console.error(`Fetching Main background query failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
+      }
+
+      if(response?.status != "InProgress") {
+        clearInterval(pollingTimerRef.current);
+        pollingTimerRef.current = undefined;
+        setIsSendingMessageToServer(false);
+        setIsWaitingOnPlayerMessageServerProcess(false);
+        setIsInputBlockedDueToServer(false);
+
+        // clear mainQueryId
+        setActiveModule((prev) => ({
+            ...prev,
+            mainQueryId: null
+        }));
+      }
   };
 
   const handleCancelLatestPlayerMessage = () => {
     // optional: cancel request / noop / show tooltip
-    console.log("Cancelling...");
+    console.log("Cancelling... TODO (not implemented)");
     setIsSendingMessageToServer(false);
     setIsWaitingOnPlayerMessageServerProcess(false);
 

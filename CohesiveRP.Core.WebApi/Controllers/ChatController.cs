@@ -28,14 +28,14 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         [Route("messages")]
         public async Task<IActionResult> AddNewNessage(AddNewMessageRequestDto requestDto)
         {
-            return new JsonResult(JsonCommonSerializer.SerializeToString(await addNewMessageWorkflow.AddNewMessageAsync(requestDto)));
+            return new JsonResult(await addNewMessageWorkflow.AddNewMessageAsync(requestDto));
         }
 
         [HttpGet]
         [Route("messages/hot")]
         public async Task<IActionResult> GetAllHotMessages(GetHotMessagesRequestDto requestDto)
         {
-            return new JsonResult(JsonCommonSerializer.SerializeToString(await getAllHotMessagesWorkflow.GetAllMessages(requestDto)));
+            return new JsonResult(await getAllHotMessagesWorkflow.GetAllMessages(requestDto));
         }
     }
 }

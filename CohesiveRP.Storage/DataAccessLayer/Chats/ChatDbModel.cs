@@ -14,6 +14,7 @@ namespace CohesiveRP.Storage.Users
         //                            Properties
         // ********************************************************************
         [Required]
+        [MaxLength(32)]
         [Key]
         public string ChatId { get; set; }
 

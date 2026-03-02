@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, useEffect  } from "react";
-import type { ReactNode } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import type { SharedContextType } from "./SharedContextType";
 
 type SharedContextWrapperType<T = SharedContextType> = {
   /* Set the active module in the center component, which will trigger auto-rendering */
   activeModule: T;
-  setActiveModule: (module: T) => void;
+  setActiveModule: Dispatch<SetStateAction<T>>;//(module: T) => void;
 };
 
 const SharedContext = createContext<SharedContextWrapperType<any> | null>(null);

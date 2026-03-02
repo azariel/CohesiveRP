@@ -14,24 +14,25 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         //                            Properties
         // ********************************************************************
         [Required]
+        [MaxLength(32)]
         [Key]
         public string BackgroundQueryId { get; set; }
 
+        [MaxLength(512)]
         public string Tags { get; set; }
 
-        //[MaxLength(1024)]
-        //public string LLMProviders { get; set; }
+        [MaxLength(512)]
+        public string DependenciesTags { get; set; }
 
-        //[Required]
-        //[MaxLength(1024)]
-        //public string Password { get; set; }// TODO: encrypt
+        [MaxLength(50)]
+        public string Status { get; set; }
 
-        //[Required]
-        //public UserType Type { get; set; } = UserType.User;
+        public int Priority { get; set; }
 
+        [MaxLength(16384)]
+        public string Content { get; set; }
 
-        //[Required]
-        //[MaxLength(256)]
-        //public string UserName { get; set; }
+        [MaxLength(32)]
+        public string ChatId { get; set; }
     }
 }

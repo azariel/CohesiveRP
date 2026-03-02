@@ -25,7 +25,6 @@ export default function ChatComponent() {
     const fetchData = async () => {
       try {
         let chatModule = activeModule as SharedContextChatType;
-        //const response:ChatResponseDto | null = await getFromServerApiAsync<ChatResponseDto>(`api/chat/${chatModule.chatId}`);
         const response:ChatMessagesResponseDto | null = await getFromServerApiAsync<ChatMessagesResponseDto>(`api/chat/${chatModule.chatId}/messages/hot`);
 
         let serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -56,7 +55,7 @@ export default function ChatComponent() {
       <div className={styles.messagesContainer} ref={messagesRef}>
         {activeModule?.messages && activeModule.messages.length > 0 ? (
           activeModule.messages.map((message, index) => (
-            <ChatMessageComponent key={index} messageContent={message} enableSwipeBtn={index === (activeModule.messages?.length ?? 0) - 1} />
+            <ChatMessageComponent key={index} message={message} enableSwipeBtn={index === (activeModule.messages?.length ?? 0) - 1} />
           ))
         ) : (
           <p />

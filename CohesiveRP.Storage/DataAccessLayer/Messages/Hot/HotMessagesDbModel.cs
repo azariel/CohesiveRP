@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Storage.Sqlite;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Messages.Hot
@@ -14,6 +15,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages.Hot
         //                            Properties
         // ********************************************************************
         [Required]
+        [MaxLength(32)]
         [Key]// Partition key AND FK
         public string ChatId { get; set; }
 

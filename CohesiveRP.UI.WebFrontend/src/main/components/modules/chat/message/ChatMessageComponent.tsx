@@ -1,19 +1,24 @@
 import type { ChatMessage } from "../../../../../ResponsesDto/chat/BusinessObjects/ChatMessage";
 import styles from "./ChatMessageComponent.module.css";
 import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification, HiMiniChevronRight } from "react-icons/hi2";
+import { FormatUtcDate } from "../../../../../utils/DateUtils";
 
 interface Props {
-  messageContent?: ChatMessage;
+  message?: ChatMessage;
   enableSwipeBtn?: boolean;
 }
 
-export default function ChatMessageComponent({ messageContent, enableSwipeBtn = false }: Props) {
+export default function ChatMessageComponent({ message, enableSwipeBtn = false }: Props) {
   return (
     <main className={styles.chatMessageComponent}>
       <div className={styles.container}>
         <div className={styles.leftMessageContainer}>
           <div className={styles.messageAvatarContainer}>
-            <img src="./dev/Seyrdis.png" alt="Avatar" />
+            {message?.sourceType == 0 ? (
+              <img src="./dev/Seyrdis.png" alt="Avatar" />
+            ) : (
+              <img src="./dev/Venelas.png" alt="Avatar" />
+            )}
           </div>
           <div className={styles.messageInfoContainer}>
             <div title="messageId">#32</div>
@@ -24,18 +29,22 @@ export default function ChatMessageComponent({ messageContent, enableSwipeBtn = 
         <div className={styles.messageContent}>
           <div className={styles.messageHeaderContent}>
             <div className={styles.messageHeaderContentName}>
-              Azariel
+              {message?.sourceType == 0 ? (
+                <label>User</label>
+              ) : (
+                <label>AI</label>
+              )}
             </div>
             <div className={styles.messageHeaderContentModel}>
               glm-reasoner (1m29s)
             </div>
             <div className={styles.messageHeaderContentCreatedAt}>
-              February 22, 2026 7:45 PM
+              {message?.createdAtUtc ? FormatUtcDate(message.createdAtUtc) : ''}
             </div>
           </div>
           <div className={styles.messageContentSeparator} />
           <div className={styles.messageContentValue}>
-            {messageContent?.content} 
+            {message?.content} 
           </div>
           <div className={styles.messageContentFooter}>
             <div className={styles.messageContentFooterLeftSideIcons}>

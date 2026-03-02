@@ -1,10 +1,14 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using CohesiveRP.Core.BackgroundServices.BackgroundQueries;
+using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
-using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 
 namespace CohesiveRP.Core.WebApi
@@ -25,11 +29,16 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();
 
             // Workflows.BackgroundQueries
+            services.AddSingleton<IGetBackgroundQueryWorkflow, GetBackgroundQueryWorkflow>();
 
             // Services
             services.AddSingleton<IStorageService, StorageService>();
 
+            // Processors
+            services.AddSingleton<ILLMQueryProcessor, LLMQueryProcessor>();
+
             // DataAccessLayers
+            services.AddDbContextFactory<StorageDbContext>();
             services.AddSingleton<IUsersDal, UsersDal>();
             services.AddSingleton<IChatsDal, ChatsDal>();
             services.AddSingleton<IMessagesDal, MessagesDal>();
@@ -41,6 +50,15 @@ namespace CohesiveRP.Core.WebApi
             {
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true,
+            });
+
+            // Add background services
+            services.AddHostedService<BackgroundQueriesWorker>();
+
+            services.AddControllers().AddJsonOptions(option =>
+            {
+                option.JsonSerializerOptions.AllowTrailingCommas = true;
+                option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); // Convert enum value to string instead of integer
             });
         }
     }
