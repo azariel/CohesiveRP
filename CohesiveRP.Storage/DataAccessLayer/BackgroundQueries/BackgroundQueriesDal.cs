@@ -55,7 +55,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                //await dbContext.BackgroundQueries.LoadAsync();
 
                 // Add the query to storage
                 var dbModel = new BackgroundQueryDbModel()
@@ -91,7 +90,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                //await dbContext.BackgroundQueries.LoadAsync();
                 return dbContext.BackgroundQueries.Where(w => w.Status == BackgroundQueryStatus.Pending.ToString()).ToArray();
             } catch (Exception ex)
             {
@@ -105,7 +103,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                //await dbContext.BackgroundQueries.LoadAsync();
 
                 EntityEntry<BackgroundQueryDbModel> result = dbContext.BackgroundQueries.Update(dbModel);
                 if (result.State != EntityState.Modified)

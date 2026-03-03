@@ -2,6 +2,9 @@
 using System.Text.Json.Serialization;
 using CohesiveRP.Core.BackgroundServices.BackgroundQueries;
 using CohesiveRP.Core.LLMProviderManager;
+using CohesiveRP.Core.PromptContext;
+using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
@@ -35,8 +38,10 @@ namespace CohesiveRP.Core.WebApi
             // Services
             services.AddSingleton<IStorageService, StorageService>();
 
-            // Processors
-            services.AddSingleton<ILLMQueryProcessor, LLMQueryProcessor>();
+            // Factories
+            services.AddSingleton<ILLMProviderQueryerFactory, LLMProviderQueryerFactory>();
+            services.AddSingleton<IPromptContextBuilderFactory, PromptContextBuilderFactory>();
+            services.AddSingleton<IPromptContextElementBuilderFactory, PromptContextElementBuilderFactory>();
 
             // DataAccessLayers
             services.AddDbContextFactory<StorageDbContext>();
