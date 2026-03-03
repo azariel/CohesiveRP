@@ -57,7 +57,9 @@ namespace CohesiveRP.Core.LLMProviderManager
                 CreatedAtUtc = DateTime.UtcNow,
             };
 
-            await messagesDal.CreateMessageAsync(messageQueryModel);
+
+            var message = await messagesDal.CreateMessageAsync(messageQueryModel);
+            selectedQuery.LinkedMessageId = message.MessageId;
         }
     }
 }

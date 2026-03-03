@@ -13,6 +13,7 @@ namespace CohesiveRP.Core.Services
         Task<ChatDbModel[]> GetAllChatsAsync();
         Task<ChatDbModel> GetChatAsync(string chatId);
         Task<IMessageDbModel[]> GetAllHotMessages(string chatId);
+        Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId);
         Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message);
         Task<GlobalSettingsDbModel> GetGlobalSettingsAsync();
         Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);

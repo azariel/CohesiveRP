@@ -33,6 +33,8 @@ export default function ChatComponent() {
           return;
         }
 
+        // TODO: also check the state of a 'main' backgroundQuery to know if we should add a tempAIReply message
+
         setActiveModule({...activeModule, messages: response.messages ?? []});
         console.log(`Specific chat fetched successfully.`);
       } catch (error) {

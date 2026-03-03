@@ -8,6 +8,8 @@ import { ImSpinner2 } from "react-icons/im";
 import { getFromServerApiAsync, postToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
 import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 
+import { TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY } from "../../../../Constants";
+
 // Store
 import { sharedContext } from '../../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../../store/SharedContextChatType";
@@ -26,7 +28,6 @@ export default function UserInputComponent({ messagesRef }: Props) {
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
   const [isSendingMessageToServer, setIsSendingMessageToServer] = useState(false);
   const [isWaitingOnPlayerMessageServerProcess, setIsWaitingOnPlayerMessageServerProcess] = useState(false);
-  const pollingTimerRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -64,6 +65,91 @@ export default function UserInputComponent({ messagesRef }: Props) {
     }
   };
 
+  useEffect(() => {
+  // Only run if we have a query to track
+  if (!activeModule?.mainQueryId)
+    return;
+
+  const pollInterval = setInterval(async () => {
+    try {
+      let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${activeModule?.mainQueryId}`);
+
+      let serverApiException = response as ServerApiExceptionResponseDto | null;
+      if(!response || response.code != 200 || serverApiException?.message) {
+        console.error(`Fetching Main background query failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
+      }
+
+      // If the query is not inProgress, we'll fetch the generated message
+      let realMessageFromStorage:ChatMessageResponseDto | null = null;
+      if (response?.status !== "InProgress") {
+        realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedMessageId}`);
+
+        let serverApiException = response as ServerApiExceptionResponseDto | null;
+        if(!response || response.code != 200 || serverApiException?.message) {
+          console.error(`Fetching real message from main background query result failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
+        }
+      }
+
+      setActiveModule((prev) => {
+        if (!prev)
+          return prev;
+
+        const updatedMessages = [...(prev.messages || [])];
+        const tempAIReplyMessageIndex = updatedMessages.findIndex(f => f.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
+
+        // Update the fake AI message to show generation progress
+        if (tempAIReplyMessageIndex !== -1) {
+          updatedMessages[tempAIReplyMessageIndex] = {
+            ...updatedMessages[tempAIReplyMessageIndex],
+            content: response?.content ?? "...",
+          };
+        }
+
+        // If the AI reply generation is done, update states
+        if(response != null && response?.status !== "InProgress") {
+          if (tempAIReplyMessageIndex !== -1) {
+
+            if(realMessageFromStorage && realMessageFromStorage.messageObj) {
+              updatedMessages[tempAIReplyMessageIndex].messageId = realMessageFromStorage.messageObj.messageId;
+              updatedMessages[tempAIReplyMessageIndex].createdAtUtc = realMessageFromStorage.messageObj.createdAtUtc;
+              updatedMessages[tempAIReplyMessageIndex].content = realMessageFromStorage.messageObj.content;
+              updatedMessages[tempAIReplyMessageIndex].sourceType = realMessageFromStorage.messageObj.sourceType;
+            } else {
+              updatedMessages[tempAIReplyMessageIndex].messageId = response.linkedMessageId;
+              console.error(`Background main query was done, but the underlying message couldn't be retrieved from backend! Impersonating the message with the right id [${response.linkedMessageId}] now, but state is finicky.`);
+            }
+            
+          }
+
+          // Query is done
+          return { ...prev, messages: updatedMessages, mainQueryId: null };
+        }
+
+        // Still inProgress
+        return { ...prev, messages: updatedMessages };
+      });
+
+      if (response?.status !== "InProgress") {
+        console.log("Generation complete, clearing polling.");
+        clearInterval(pollInterval);
+        
+        // These local state updates are now safe because they aren't 
+        // nested inside another component's state update logic
+        setIsSendingMessageToServer(false);
+        setIsWaitingOnPlayerMessageServerProcess(false);
+        setIsInputBlockedDueToServer(false);
+      }
+
+    } catch (err) {
+      console.error("Polling main background query error:", err);
+      clearInterval(pollInterval);
+    }
+  }, 1000);
+
+  // CLEANUP: This is vital. It stops the timer if the user leaves the page.
+  return () => clearInterval(pollInterval);
+}, [activeModule?.mainQueryId, setActiveModule]); // Only re-run if the ID changes
+
   const handleSendPlayerMessage = async () => {
     if (isSendingMessageToServer || !playerMessage || !playerMessage.trim()){
       return;
@@ -97,47 +183,73 @@ export default function UserInputComponent({ messagesRef }: Props) {
     setPlayerMessage(""); // clear input on success
     
     // reflect those messages in the UI!
-    setActiveModule({
-      ...activeModule,
-      messages: [...(activeModule.messages || []), response.messageObj],
-      mainQueryId: response.mainQueryId// Track the main query id to know the status of the AI reply
-    });
-
-    pollingTimerRef.current = window.setInterval(async () => {
-      await refreshMainBackgroundQueryStateAsync(response.mainQueryId);
-    }, 1000)
-  };
-
-  const refreshMainBackgroundQueryStateAsync = async (mainQueryId: string) => {
-      console.log("Tracking remote BackgroundQuery to generate AI reply.");
-
-      if(mainQueryId == null)
+    setActiveModule((prev) => ({
+      ...prev,
+      messages: [...(prev.messages || []),// Keep messages history
+      response.messageObj,// Add new player message at the bottom
       {
-        console.log("No background query to track.");
-        return;
-      }
-      
-      let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${mainQueryId}`);
-
-      let serverApiException = response as ServerApiExceptionResponseDto | null;
-      if(!response || response.code != 200 || serverApiException?.message){
-        console.error(`Fetching Main background query failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
-      }
-
-      if(response?.status != "InProgress") {
-        clearInterval(pollingTimerRef.current);
-        pollingTimerRef.current = undefined;
-        setIsSendingMessageToServer(false);
-        setIsWaitingOnPlayerMessageServerProcess(false);
-        setIsInputBlockedDueToServer(false);
-
-        // clear mainQueryId
-        setActiveModule((prev) => ({
-            ...prev,
-            mainQueryId: null
-        }));
-      }
+        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1 }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
+      mainQueryId: response.mainQueryId// Track the main query id to know the status of the AI reply
+    }));
   };
+
+  // const refreshMainBackgroundQueryStateAsync = async (mainQueryId: string) => {
+  //     if(mainQueryId == null)
+  //     {
+  //       console.log("No background query to track.");
+  //       return;
+  //     }
+      
+  //     let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${mainQueryId}`);
+
+  //     let serverApiException = response as ServerApiExceptionResponseDto | null;
+  //     if(!response || response.code != 200 || serverApiException?.message){
+  //       console.error(`Fetching Main background query failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
+  //     }
+
+  //     // Update the fake AI message to show generation progress
+  //     // let tempAIMessage = activeModule.messages.find(f=> f.messageId == TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
+
+  //     // if(tempAIMessage) {
+  //     //   console.log(`Updating to [${response?.content ?? null}].`);
+  //     //   tempAIMessage.content = response?.content ?? null;
+  //     // }
+
+  //     setActiveModule((prev) => {
+  //       if (!prev)
+  //         return prev;
+
+  //       const updatedMessages = [...(prev.messages || [])];
+  //       const tempAIReplyMessageIndex = updatedMessages.findIndex(f => f.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
+
+  //       // Update the fake AI message to show generation progress
+  //       if (tempAIReplyMessageIndex !== -1) {
+  //         updatedMessages[tempAIReplyMessageIndex] = {
+  //           ...updatedMessages[tempAIReplyMessageIndex],
+  //           content: response?.content ?? "...",
+  //         };
+  //       }
+
+  //       // If the AI reply generation is done, update states
+  //       if(response?.status !== "InProgress") {
+  //         clearInterval(pollingTimerRef.current);
+  //         pollingTimerRef.current = undefined;
+  //         setIsSendingMessageToServer(false);
+  //         setIsWaitingOnPlayerMessageServerProcess(false);
+  //         setIsInputBlockedDueToServer(false);
+
+  //         if (tempAIReplyMessageIndex !== -1) {
+  //           updatedMessages.splice(tempAIReplyMessageIndex, 1);
+  //         }
+
+  //         // Query is done
+  //         return { ...prev, messages: updatedMessages, mainQueryId: null };
+  //       }
+
+  //       // Still inProgress
+  //       return { ...prev, messages: updatedMessages };
+  //     });
+  // };
 
   const handleCancelLatestPlayerMessage = () => {
     // optional: cancel request / noop / show tooltip

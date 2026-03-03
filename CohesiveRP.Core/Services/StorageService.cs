@@ -49,6 +49,11 @@ namespace CohesiveRP.Core.Services
             return await messagesDal.GetHotMessagesAsync(chatId);
         }
 
+        public async Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId)
+        {
+            return await messagesDal.GetMessageByIdAsync(chatId, messageId);
+        }
+
         public async Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message)
         {
             return await messagesDal.CreateMessageAsync(message);

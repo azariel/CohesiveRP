@@ -24,6 +24,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IChatAddNewMessageWorkflow, AddNewMessageWorkflow>();
             services.AddSingleton<ICreateNewChatWorkflow, CreateNewChatWorkflow>();
             services.AddSingleton<IGetAllHotMessagesWorkflow, GetAllHotMessagesWorkflow>();
+            services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
 
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();

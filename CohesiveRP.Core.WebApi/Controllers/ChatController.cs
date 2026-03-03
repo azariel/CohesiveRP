@@ -10,13 +10,16 @@ namespace CohesiveRP.Storage.WebApi.Controllers
     public class ChatController : ControllerBase
     {
         private IGetAllHotMessagesWorkflow getAllHotMessagesWorkflow;
+        private IGetSpecificMessageByIdWorkflow getSpecificMessageByIdWorkflow;
         private IChatAddNewMessageWorkflow addNewMessageWorkflow;
 
         public ChatController(
             IGetAllHotMessagesWorkflow getAllHotMessagesWorkflow,
+            IGetSpecificMessageByIdWorkflow getSpecificMessageByIdWorkflow,
             IChatAddNewMessageWorkflow chatAddNewMessageWorkflow)
         {
             this.getAllHotMessagesWorkflow = getAllHotMessagesWorkflow;
+            this.getSpecificMessageByIdWorkflow = getSpecificMessageByIdWorkflow;
             this.addNewMessageWorkflow = chatAddNewMessageWorkflow;
         }
 
@@ -36,6 +39,13 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> GetAllHotMessages(GetHotMessagesRequestDto requestDto)
         {
             return new JsonResult(await getAllHotMessagesWorkflow.GetAllMessages(requestDto));
+        }
+
+        [HttpGet]
+        [Route("messages/{messageId}")]
+        public async Task<IActionResult> GetSpecificMessageById(GetSpecificMessageRequestDto requestDto)
+        {
+            return new JsonResult(await getSpecificMessageByIdWorkflow.GetSpecificMessage(requestDto));
         }
     }
 }

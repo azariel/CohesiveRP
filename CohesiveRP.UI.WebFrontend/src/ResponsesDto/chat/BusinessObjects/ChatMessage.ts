@@ -1,8 +1,8 @@
 interface ChatMessage {
     messageId: string;
-    content: string;
+    content: string | null;
     sourceType: number;
-    createdAtUtc: string;
+    createdAtUtc: string | null;
 }
 
 export type {

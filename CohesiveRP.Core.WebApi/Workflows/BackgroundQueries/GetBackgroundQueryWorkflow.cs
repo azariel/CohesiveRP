@@ -24,6 +24,7 @@ public class GetBackgroundQueryWorkflow : IGetBackgroundQueryWorkflow
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
             ChatId = backgroundQuery.ChatId,
+            LinkedMessageId = backgroundQuery.LinkedMessageId,
             BackgroundQueryId = backgroundQuery.BackgroundQueryId,
             Tags = backgroundQuery.Tags,
             DependenciesTags = backgroundQuery.DependenciesTags,

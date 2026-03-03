@@ -20,7 +20,7 @@ namespace CohesiveRP.Core.LLMProviderManager
             // Query the LLM provider here and update Db
             for (var i = 0; i < 100; ++i)
             {
-                await Task.Delay(250);
+                await Task.Delay(100);
                 query.Content += Guid.NewGuid().ToString()[0];
             }
             query.Content += "-COMPLETED";

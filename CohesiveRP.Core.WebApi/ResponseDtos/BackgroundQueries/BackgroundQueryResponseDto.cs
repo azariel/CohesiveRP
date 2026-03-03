@@ -11,24 +11,27 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.BackgroundQueries
         public HttpStatusCode HttpResultCode { get; set; }
 
         [JsonPropertyName("chatId")]
-        public string ChatId { get; internal set; }
+        public string ChatId { get; set; }
+
+        [JsonPropertyName("linkedMessageId")]
+        public string LinkedMessageId { get; set; }
 
         [JsonPropertyName("backgroundQueryId")]
-        public string BackgroundQueryId { get; internal set; }
+        public string BackgroundQueryId { get; set; }
 
         [JsonPropertyName("dependenciesTags")]
-        public string DependenciesTags { get; internal set; }
+        public string DependenciesTags { get; set; }
 
         [JsonPropertyName("status")]
-        public string Status { get; internal set; }
+        public string Status { get; set; }
 
         [JsonPropertyName("priority")]
-        public int Priority { get; internal set; }
+        public int Priority { get; set; }
 
         [JsonPropertyName("content")]
-        public string Content { get; internal set; }
+        public string Content { get; set; }
 
         [JsonPropertyName("tags")]
-        public string Tags { get; internal set; }
+        public string Tags { get; set; }
     }
 }
