@@ -22,6 +22,7 @@ export async function getFromServerApiAsync<T extends ServerApiResponseDto>(url:
       }
       
       console.log(`GET [${url}] HttpRequest to CohesiveRP backend Webapi was successful.`);
+      console.log(`${JSON.stringify(result)}`);
       return result;
     } catch (err) {
       console.error(`Unhandled error on getFromServerApiAsync function in HttpRequestHelper. err=[${err}].`);
@@ -47,6 +48,7 @@ export async function postToServerApiAsync<T extends ServerApiResponseDto>(url:s
       }
       
       console.log(`POST [${url}] HttpRequest to CohesiveRP backend Webapi was successful.`);
+      console.log(`${JSON.stringify(result)}`);
       return result;
     } catch (err) {
       console.error(`Unhandled error on postToServerApiAsync function in HttpRequestHelper. err=[${err}].`);

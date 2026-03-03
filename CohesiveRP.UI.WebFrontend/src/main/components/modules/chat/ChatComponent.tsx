@@ -37,6 +37,12 @@ export default function ChatComponent() {
 
         setActiveModule({...activeModule, messages: response.messages ?? []});
         console.log(`Specific chat fetched successfully.`);
+
+        setTimeout(() => {
+        if(messagesRef?.current) {
+          messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+          }
+        }, 200);
       } catch (error) {
         console.error("Fetch error:", error);
       }
@@ -47,9 +53,9 @@ export default function ChatComponent() {
 
   // Scroll to bottom when component mounts
   useEffect(() => {
-    if (messagesRef.current) {
+    if(messagesRef?.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    }
+      }
   }, []);
 
   return (

@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Common.BusinessObjects;
+﻿using System.Text.Json.Serialization;
+using CohesiveRP.Common.BusinessObjects;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Messages
 {

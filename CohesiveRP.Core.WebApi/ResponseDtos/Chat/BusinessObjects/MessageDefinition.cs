@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Net;
+using System.Text.Json.Serialization;
 using CohesiveRP.Common.BusinessObjects;
 
 namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
@@ -10,6 +11,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
 
         [JsonPropertyName("content")]
         public string Content { get; set; }
+
+        [JsonConverter(typeof(JsonNumberEnumConverter<MessageSourceType>))]
 
         [JsonPropertyName("sourceType")]
         public MessageSourceType SourceType { get; set; }

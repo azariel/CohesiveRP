@@ -146,7 +146,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
     }
   }, 1000);
 
-  // CLEANUP: This is vital. It stops the timer if the user leaves the page.
+  // cleanup
   return () => clearInterval(pollInterval);
 }, [activeModule?.mainQueryId, setActiveModule]); // Only re-run if the ID changes
 
@@ -189,67 +189,15 @@ export default function UserInputComponent({ messagesRef }: Props) {
       response.messageObj,// Add new player message at the bottom
       {
         messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1 }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
-      mainQueryId: response.mainQueryId// Track the main query id to know the status of the AI reply
+        mainQueryId: response.mainQueryId// Track the main query id to know the status of the AI reply
     }));
+
+    setTimeout(() => {
+      if(messagesRef?.current) {
+        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      }
+    }, 200);
   };
-
-  // const refreshMainBackgroundQueryStateAsync = async (mainQueryId: string) => {
-  //     if(mainQueryId == null)
-  //     {
-  //       console.log("No background query to track.");
-  //       return;
-  //     }
-      
-  //     let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${mainQueryId}`);
-
-  //     let serverApiException = response as ServerApiExceptionResponseDto | null;
-  //     if(!response || response.code != 200 || serverApiException?.message){
-  //       console.error(`Fetching Main background query failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
-  //     }
-
-  //     // Update the fake AI message to show generation progress
-  //     // let tempAIMessage = activeModule.messages.find(f=> f.messageId == TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
-
-  //     // if(tempAIMessage) {
-  //     //   console.log(`Updating to [${response?.content ?? null}].`);
-  //     //   tempAIMessage.content = response?.content ?? null;
-  //     // }
-
-  //     setActiveModule((prev) => {
-  //       if (!prev)
-  //         return prev;
-
-  //       const updatedMessages = [...(prev.messages || [])];
-  //       const tempAIReplyMessageIndex = updatedMessages.findIndex(f => f.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
-
-  //       // Update the fake AI message to show generation progress
-  //       if (tempAIReplyMessageIndex !== -1) {
-  //         updatedMessages[tempAIReplyMessageIndex] = {
-  //           ...updatedMessages[tempAIReplyMessageIndex],
-  //           content: response?.content ?? "...",
-  //         };
-  //       }
-
-  //       // If the AI reply generation is done, update states
-  //       if(response?.status !== "InProgress") {
-  //         clearInterval(pollingTimerRef.current);
-  //         pollingTimerRef.current = undefined;
-  //         setIsSendingMessageToServer(false);
-  //         setIsWaitingOnPlayerMessageServerProcess(false);
-  //         setIsInputBlockedDueToServer(false);
-
-  //         if (tempAIReplyMessageIndex !== -1) {
-  //           updatedMessages.splice(tempAIReplyMessageIndex, 1);
-  //         }
-
-  //         // Query is done
-  //         return { ...prev, messages: updatedMessages, mainQueryId: null };
-  //       }
-
-  //       // Still inProgress
-  //       return { ...prev, messages: updatedMessages };
-  //     });
-  // };
 
   const handleCancelLatestPlayerMessage = () => {
     // optional: cancel request / noop / show tooltip
