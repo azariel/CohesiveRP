@@ -1,0 +1,10 @@
+.body {
+}
+
+.centerModule {
+  width: 99.5%;
+  min-height: 5dvh;
+  border-radius: 14px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}

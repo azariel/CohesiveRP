@@ -1,0 +1,12 @@
+.body {
+  background: #111111;
+}
+
+.centerModule {
+  width: 98%;
+  min-height: 5dvh;
+  background: #1B1B1B;
+  border-radius: 14px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}

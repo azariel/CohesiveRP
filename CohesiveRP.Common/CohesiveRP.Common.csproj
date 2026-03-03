@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+        <Version>1.0.0.0</Version>
+        <Authors>Azariel</Authors>
+        <Product>CohesiveRP</Product>
+        <RootNamespace>CohesiveRP.Common</RootNamespace>
+        <RootNamespace>CohesiveRP.Common</RootNamespace>
+        <AssemblyName>CohesiveRP.Common</AssemblyName>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    </PropertyGroup>
+
+</Project>

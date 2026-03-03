@@ -1,0 +1,5 @@
+.settingsComponent {
+  height: 100dvh;
+  display: flex;
+  overflow: hidden;
+}

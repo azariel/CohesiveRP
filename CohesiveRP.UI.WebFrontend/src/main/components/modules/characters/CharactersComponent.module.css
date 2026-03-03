@@ -1,0 +1,142 @@
+.charactersComponent {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.charactersHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+    padding: 0;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+.filterRow {
+    padding-top: 1em;
+    color:#dfdfdf;
+    font-size: 1em;
+}
+
+.filterRow:hover {
+    cursor: pointer;
+    color:rgb(255, 255, 255);
+    transition: color 0.3s ease;
+}
+
+.charactersToolsComponent {
+    margin-left: auto;
+    padding-top: 1em;
+}
+
+.addNewCharacterIcon {
+    font-size: 1.7em;
+    color:#dfdfdf;
+}
+
+.addNewCharacterIcon:hover {
+    cursor: pointer;
+    color:rgb(255, 255, 255);
+    transition: color 0.3s ease;
+}
+
+.charactersGridContainer {
+    display: flex;
+    flex-direction: column;
+    align-content: flex-start;
+    gap: 1em;
+    padding-bottom: 2em;
+    height: 100dvh;
+
+    overflow-y: auto;
+
+    /* Firefox */
+    scrollbar-width: none;
+
+    /* Safari */
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-gutter: stable;
+}
+
+.characterAvatarContainer {
+    width: 20%;
+    aspect-ratio: 1 / 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%), /* horizontal */
+    linear-gradient(to bottom, transparent 0%, black 3%, black 97%, transparent 100%); /* vertical */
+
+    -webkit-mask-composite: destination-in;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+
+    mask-image:
+    linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 3%, black 97%, transparent 100%);
+
+    mask-composite: intersect;
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+}
+
+.characterContainer {
+    cursor: pointer;
+    border: 1px solid #888;
+    border-radius: 9px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.5em;
+}
+
+.characterContainer > * {
+    pointer-events: none; /* disables interaction for all direct children */
+}
+
+.characterContainer:hover {
+    border-color: #187d8f;
+    transition: border-color 0.3s ease;
+}
+
+.characterAvatarContainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.characterCharNameLabel {
+    text-align: left;
+    color:#dfdfdf;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.characterTagsLabel {
+    text-align: left;
+    color:#5c5c5c;
+    font-size: 0.6em;
+    margin-top: -0.7em;
+    font-weight: bold;
+}
+
+.characterDescriptionLabel {
+    text-align: left;
+    padding-top: 1em;
+    color:#c0c0c0;
+    font-size: 0.8em;
+}
+
+.characterInfoPanel {
+    height: auto;
+    flex:1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5em;
+}

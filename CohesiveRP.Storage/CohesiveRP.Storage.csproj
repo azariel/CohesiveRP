@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+        <Version>1.0.0.0</Version>
+        <Authors>Azariel</Authors>
+        <Product>CohesiveRP</Product>
+        <RootNamespace>CohesiveRP.Storage</RootNamespace>
+        <RootNamespace>CohesiveRP.Storage</RootNamespace>
+        <AssemblyName>CohesiveRP.Storage</AssemblyName>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CohesiveRP.Common\CohesiveRP.Common.csproj" />
+    </ItemGroup>
+
+</Project>
