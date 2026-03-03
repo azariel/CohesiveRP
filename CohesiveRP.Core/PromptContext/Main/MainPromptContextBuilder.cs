@@ -4,6 +4,7 @@ using CohesiveRP.Common.Serialization;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Format;
+using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 
 namespace CohesiveRP.Core.PromptContext.Main
 {
@@ -21,33 +22,35 @@ namespace CohesiveRP.Core.PromptContext.Main
             // build the prompt context from the Db config, associate characters, dynamic memory, yada yada
             // TODO: get the GlobalPromptContextFormat model from Db. ChatCompletionPreset.PromptContextFormat
 
-            // For Debug
-            GlobalPromptContextFormat globalPromptContextFormat = new GlobalPromptContextFormat
-            {
-                OrderedElementsWithinTheGlobalPromptContext =
-                [
-                    new(){ Tag = PromptContextFormatTag.Directive, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.World, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.LoreByKeywords, Options = new() { Format = $"## {{{{item_header}}}}{Environment.NewLine}{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.SummaryExtraTerm, Options = new() { Format = $"- {{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.SummaryLongTerm, Options = new() { Format = $"- {{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.SummaryMediumTerm, Options = new() { Format = $"- {{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.SummaryShortTerm, Options = new() { Format = $"- {{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.LoreByQuery, Options = new() { Format = $"## {{{{item_header}}}}{Environment.NewLine}{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.RelevantCharacters, Options = new() { Format = $"## {{{{item_header}}}}{Environment.NewLine}{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.LastXMessages, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.SceneTracker, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.CurrentObjective, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.LastUserMessage, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                    new(){ Tag = PromptContextFormatTag.BehavioralInstructions, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
-                ]
-            };
+            GlobalPromptContextFormat promptContextFormat = await servideDal.GetChatCompletionPresetByChatId(chatId);
 
-            string a = JsonCommonSerializer.SerializeToString(globalPromptContextFormat);
+            // For Debug
+            //GlobalPromptContextFormat globalPromptContextFormat = new GlobalPromptContextFormat
+            //{
+            //    OrderedElementsWithinTheGlobalPromptContext =
+            //    [
+            //        new(){ Tag = PromptContextFormatTag.Directive, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.World, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.LoreByKeywords, Options = new() { Format = $"## {{{{item_header}}}}{Environment.NewLine}{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.SummaryExtraTerm, Options = new() { Format = $"- {{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.SummaryLongTerm, Options = new() { Format = $"- {{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.SummaryMediumTerm, Options = new() { Format = $"- {{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.SummaryShortTerm, Options = new() { Format = $"- {{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.LoreByQuery, Options = new() { Format = $"## {{{{item_header}}}}{Environment.NewLine}{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.RelevantCharacters, Options = new() { Format = $"## {{{{item_header}}}}{Environment.NewLine}{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.LastXMessages, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.SceneTracker, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.CurrentObjective, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.LastUserMessage, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //        new(){ Tag = PromptContextFormatTag.BehavioralInstructions, Options = new() { Format = $"{{{{item_description}}}}{Environment.NewLine}{Environment.NewLine}" } },
+            //    ]
+            //};
+
+            //string a = JsonCommonSerializer.SerializeToString(globalPromptContextFormat);
 
             // for each elements in our format, we need to build them accordingly
             StringBuilder str = new();
-            foreach (var contextElement in globalPromptContextFormat.OrderedElementsWithinTheGlobalPromptContext)
+            foreach (var contextElement in promptContextFormat.OrderedElementsWithinTheGlobalPromptContext)
             {
                 var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement);
 

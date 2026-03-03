@@ -2,8 +2,9 @@
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.Sqlite;
-using CohesiveRP.Storage.Users;
 using Microsoft.EntityFrameworkCore;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Storage.Common
 {
@@ -49,6 +50,8 @@ namespace CohesiveRP.Storage.Common
         public DbSet<ColdMessagesDbModel> ColdMessages { get; set; }
 
         public DbSet<GlobalSettingsDbModel> GlobalSettings { get; set; }
+
+        public DbSet<ChatCompletionPresetsDbModel> ChatCompletionPresets { get; set; }
 
         // Queries that are queued to be processed, processing or recently processed against a background worker
         public DbSet<BackgroundQueryDbModel> BackgroundQueries { get; set; }

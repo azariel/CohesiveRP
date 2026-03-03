@@ -1,10 +1,11 @@
 ﻿using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.BusinessObjects.LLMProviders;
+using CohesiveRP.Core.ChatCompletionPresets;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.ResponseDtos.Settings;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
-using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -25,6 +26,7 @@ public class GetGlobalSettingsWorkflow : IGetGlobalSettingsWorkflow
         var responseDto = new GlobalSettingsResponseDto
         {
             LLMProviders = globalSettings.LLMProviders == null ? [] : JsonCommonSerializer.DeserializeFromString<List<LLMProviderConfig>>(globalSettings.LLMProviders),
+            ChatCompletionPresetsMap = globalSettings.ChatCompletionPresetsMap == null ? null : JsonCommonSerializer.DeserializeFromString<ChatCompletionPresetsMap>(globalSettings.ChatCompletionPresetsMap),
         };
 
         responseDto.HttpResultCode = System.Net.HttpStatusCode.OK;

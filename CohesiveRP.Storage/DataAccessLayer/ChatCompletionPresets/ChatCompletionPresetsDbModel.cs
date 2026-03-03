@@ -2,13 +2,13 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using CohesiveRP.Storage.Sqlite;
 
-namespace CohesiveRP.Storage.DataAccessLayer.Chats
+namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
 {
     /// <summary>
-    /// Represents the structure of a chat within the storage.
+    /// Represents the structure of global settings within the storage.
     /// </summary>
-    [Table("Chats")]
-    public class ChatDbModel : CohesiveRPSqliteBaseTable
+    [Table("ChatCompletionPresets")]
+    public class ChatCompletionPresetsDbModel : CohesiveRPSqliteBaseTable
     {
         // ********************************************************************
         //                            Properties
@@ -16,10 +16,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         [Required]
         [MaxLength(32)]
         [Key]
-        public string ChatId { get; set; }
+        public string ChatCompletionPresetId { get; set; }
 
-        //[Required]
-        ////[MaxLength(32)]
-        //public string ChatCompletionPresets { get; set; }
+        //[MaxLength(1024)]
+        public string Content { get; set; }
     }
 }

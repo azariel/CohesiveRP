@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using CohesiveRP.Storage.Sqlite;
 
-namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
+namespace CohesiveRP.Storage.DataAccessLayer.Settings
 {
     /// <summary>
     /// Represents the structure of global settings within the storage.
@@ -21,16 +21,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         //[MaxLength(1024)]
         public string LLMProviders { get; set; }
 
-        //[Required]
-        //[MaxLength(1024)]
-        //public string Password { get; set; }// TODO: encrypt
-
-        //[Required]
-        //public UserType Type { get; set; } = UserType.User;
-
-
-        //[Required]
-        //[MaxLength(256)]
-        //public string UserName { get; set; }
+        public string ChatCompletionPresetsMap { get; set; }
     }
 }

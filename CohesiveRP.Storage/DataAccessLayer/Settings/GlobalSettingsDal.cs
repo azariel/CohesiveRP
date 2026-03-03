@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Storage.Common;
-using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using Microsoft.EntityFrameworkCore;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
@@ -33,7 +33,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     GlobalSettingsId = Guid.NewGuid().ToString(),
                     InsertDateTimeUtc = DateTime.UtcNow,
                     // TODO: replace this dev option
-                    LLMProviders = "[{\"providerConfigId\":\"ba92f3f0-923f-4a32-a52b-4767ee7f4a1c\",\"name\":\"IntenseRP-V2-GLM\",\"type\":\"OpenAICustom\",\"concurrencyLimit\":1,\"tags\":[\"main\"],\"timeoutStrategy\":{\"type\":\"RetryXtimesThenGiveUp\",\"retries\":3}},{\"providerConfigId\":\"191302fb-08bf-4f30-a192-d6f20c42a378\",\"name\":\"IntenseRP-V2-DS\",\"type\":\"OpenAICustom\",\"concurrencyLimit\":1,\"tags\":[\"sceneTracker\",\"summary\"],\"timeoutStrategy\":{\"type\":\"RetryXtimesThenGiveUp\",\"retries\":3}}]"
+                    LLMProviders = "[{\"providerConfigId\":\"ba92f3f0-923f-4a32-a52b-4767ee7f4a1c\",\"name\":\"IntenseRP-V2-GLM\",\"type\":\"OpenAICustom\",\"concurrencyLimit\":1,\"tags\":[\"main\"],\"timeoutStrategy\":{\"type\":\"RetryXtimesThenGiveUp\",\"retries\":3}},{\"providerConfigId\":\"191302fb-08bf-4f30-a192-d6f20c42a378\",\"name\":\"IntenseRP-V2-DS\",\"type\":\"OpenAICustom\",\"concurrencyLimit\":1,\"tags\":[\"sceneTracker\",\"summary\"],\"timeoutStrategy\":{\"type\":\"RetryXtimesThenGiveUp\",\"retries\":3}}]",
+                    ChatCompletionPresetsMap = $"{{\"map\":[{{\"tag\":\"main\",\"chatCompletionPresetId\":\"{StorageConstants.DEFAULT_CHAT_COMPLETION_PRESET}\"}}]}}",
                 });
 
                 dbContext.SaveChangesAsync();

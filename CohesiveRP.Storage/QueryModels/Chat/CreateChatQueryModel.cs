@@ -2,5 +2,6 @@
 {
     public class CreateChatQueryModel
     {
+        public int? ChatCompletionPresetId { get; set; }
     }
 }

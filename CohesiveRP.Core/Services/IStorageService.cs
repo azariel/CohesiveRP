@@ -2,8 +2,9 @@
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
-using CohesiveRP.Storage.Users;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.Services
 {

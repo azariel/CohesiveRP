@@ -3,8 +3,10 @@ using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
-using CohesiveRP.Storage.Users;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
+using Microsoft.VisualBasic;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.Services
 {
@@ -29,6 +31,12 @@ namespace CohesiveRP.Core.Services
         // Chats
         public async Task<ChatDbModel> CreateChatAsync(CreateChatQueryModel queryModel)
         {
+            // If the new chat to create isn't linked to a chat completion preset configuration
+            //if (queryModel == null)
+            //{
+            //    queryModel.ChatCompletionPresetsContainerId = await GetDefaultChatCompletionPresetAsync()?.ChatCompletionPresetId;
+            //}
+
             return await chatsDal.CreateChatAsync(queryModel);
         }
 
