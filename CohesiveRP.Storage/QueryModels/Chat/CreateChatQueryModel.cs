@@ -1,6 +1,10 @@
-﻿namespace CohesiveRP.Storage.QueryModels.Chat
+﻿using System.Text.Json.Serialization;
+
+namespace CohesiveRP.Storage.QueryModels.Chat
 {
     public class CreateChatQueryModel
     {
+        [JsonPropertyName("selectedChatCompletionPresets")]
+        public List<ChatCompletionPresetSelection> SelectedChatCompletionPresets { get; set; }
     }
 }

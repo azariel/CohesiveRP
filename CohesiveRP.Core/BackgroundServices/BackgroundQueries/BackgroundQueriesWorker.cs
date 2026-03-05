@@ -14,12 +14,13 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
         const int ERROR_DELAY_MS = 5000;
         const int STANDARD_DELAY_MS = 1000;
         private IBackgroundQueriesDal backgroundQueriesDal;
-        private ILLMQueryProcessor llmQueryProcessor;
+        private ILLMProviderQueryerFactory llmProviderQueryerFactory;
 
-        public BackgroundQueriesWorker(IBackgroundQueriesDal backgroundQueriesDal, ILLMQueryProcessor llmQueryProcessor)
+        public BackgroundQueriesWorker(IBackgroundQueriesDal backgroundQueriesDal, ILLMProviderQueryerFactory llmProviderQueryerFactory)
         {
             this.backgroundQueriesDal = backgroundQueriesDal;
-            this.llmQueryProcessor = llmQueryProcessor;
+            //this.llmQueryProcessor = llmQueryProcessor;
+            this.llmProviderQueryerFactory = llmProviderQueryerFactory;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -57,11 +58,15 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
 
             // Register the task in the main thread to avoid desyncs
             string queryId = Guid.NewGuid().ToString();
-            LLMProviderManager.LLMProviderManager.RegisterNewQuery(new LLMProviderQuery
+            var queryProcessor = llmProviderQueryerFactory.Generate(selectedQuery);
+
+            if(queryProcessor == null)
             {
-                Id = queryId,
-                Status = LLMProviderQueryStatus.InProgress,
-            });
+                LoggingManager.LogToFile("fbf44e69-5367-49fe-86ba-ae306420a961", $"LLMProviderQueryerFactory couldn't generate a valid QueryProcessor in [{nameof(BackgroundQueriesWorker)}].");
+                return;
+            }
+
+            await queryProcessor.QueueProcessAsync();
 
             // Start a new thread and execute the task asynchronously
             var cancellationToken = new CancellationTokenSource(new TimeSpan(0, 30, 0)).Token;// 30 minutes max
@@ -72,19 +77,10 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                 {
                     while (true)
                     {
-                        // Check the state of the LLMProviderQuery against the queryer
-                        LLMProviderQuery query = LLMProviderManager.LLMProviderManager.GetQuery(queryId);
-                        selectedQuery.Content = query.Content;// Save the text returned by the LLM
-
-                        if (query.Status == LLMProviderQueryStatus.Completed || query.Status == LLMProviderQueryStatus.Error)
+                        if (selectedQuery.Status == BackgroundQueryStatus.Completed || selectedQuery.Status == BackgroundQueryStatus.Error)
                         {
-                            // Query was processed against the queryer, update storage
-                            finalStatus = query.Status == LLMProviderQueryStatus.Completed ? BackgroundQueryStatus.Completed : BackgroundQueryStatus.Error;
-                            selectedQuery.Status = finalStatus.ToString();
-                            LLMProviderManager.LLMProviderManager.AcknowledgeQuery(query.Id);
-
                             // process the resulting completed query. If it was a 'main', it'll add a new AI message, if it was a sceneTracker, it'll attach the tracker, if it was a summary, it'll attach the summary to an existing message, etc.
-                            await llmQueryProcessor.ProcessCompletedQueryAsync(selectedQuery);
+                            await queryProcessor.ProcessCompletedQueryAsync(selectedQuery);
                             break;
                         }
 
@@ -94,8 +90,6 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                     }
                 } finally
                 {
-                    // change status
-                    selectedQuery.Status = finalStatus.ToString();
                     if (!await backgroundQueriesDal.UpdateBackgroundQueryAsync(selectedQuery))
                     {
                         LoggingManager.LogToFile("bde82901-e86d-4481-ae76-05c0de13bfb8", $"Failed to update background status of query [{selectedQuery.BackgroundQueryId}] to [{finalStatus}]. Ignoring this query.");
@@ -132,9 +126,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             {
                 if (query.DependenciesTags != null)
                 {
-                    string[] dependentTags = JsonCommonSerializer.DeserializeFromString<string[]>(query.DependenciesTags);
-
-                    if (allPendingQueries.Any(a => dependentTags.Any(an => a.Tags.Contains(an))))
+                    if (query.DependenciesTags != null && allPendingQueries.Any(a => query.DependenciesTags.Any(an => a.Tags.Contains(an))))
                     {
                         continue;
                     }
@@ -166,7 +158,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             }
 
             // change status
-            selectedQuery.Status = BackgroundQueryStatus.InProgress.ToString();
+            selectedQuery.Status = BackgroundQueryStatus.InProgress;
             if (!await backgroundQueriesDal.UpdateBackgroundQueryAsync(selectedQuery))
             {
                 LoggingManager.LogToFile("4be430da-d967-4277-b2c0-86d7ef2380b9", $"Failed to update background status of query [{selectedQuery.BackgroundQueryId}] to [{BackgroundQueryStatus.InProgress}]. Ignoring this query.");

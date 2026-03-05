@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.JsonConverters;
 using CohesiveRP.Storage.Sqlite;
 
 namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
@@ -19,15 +21,17 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         public string BackgroundQueryId { get; set; }
 
         [MaxLength(512)]
-        public string Tags { get; set; }
+        [JsonValueConverter]
+        public List<string> Tags { get; set; }
 
         [MaxLength(512)]
-        public string DependenciesTags { get; set; }
+        [JsonValueConverter]
+        public List<string> DependenciesTags { get; set; }
 
         [MaxLength(50)]
-        public string Status { get; set; }
+        public BackgroundQueryStatus Status { get; set; }
 
-        public int Priority { get; set; }
+        public BackgroundQueryPriority Priority { get; set; }
 
         [MaxLength(16384)]
         public string Content { get; set; }

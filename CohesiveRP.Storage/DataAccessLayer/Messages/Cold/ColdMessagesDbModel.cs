@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CohesiveRP.Storage.JsonConverters;
 using CohesiveRP.Storage.Sqlite;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Messages.Hot
@@ -19,6 +20,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages.Hot
         public string ChatId { get; set; }
 
         //[MaxLength(256)]
-        public string SerializedMessages { get; set; }
+        [JsonValueConverter]
+        public List<MessageDbModel> SerializedMessages { get; set; }
     }
 }

@@ -90,6 +90,8 @@ export default function UserInputComponent({ messagesRef }: Props) {
         }
       }
 
+      // TODO: if backend is closed whilst we're waiting here, we want to handle this cleanly!
+
       setActiveModule((prev) => {
         if (!prev)
           return prev;

@@ -7,6 +7,9 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
         [JsonPropertyName("chatId")]
         public string ChatId { get; set; }
 
+        //[JsonPropertyName("chatCompletionPresets")]
+        //public string ChatCompletionPresets { get; set; }
+
         // TODO: Name, desc, avatar
     }
 }

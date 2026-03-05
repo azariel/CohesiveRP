@@ -20,6 +20,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         public MessagesDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
+
+            using var dbContext = contextFactory.CreateDbContext();
+            dbContext.Database.EnsureCreated();
         }
 
         // ********************************************************************
@@ -40,9 +43,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 }
 
                 // Convert the wrapper into individual messages
-                List<IMessageDbModel> messages = [];
-                var models = JsonCommonSerializer.DeserializeFromString<MessageDbModel[]>(hotMessages.SerializedMessages);
-                return models;
+                return hotMessages.SerializedMessages?.ToArray();
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("54337d85-dc06-436d-88f2-c3d952154a16", $"Error when querying Db on table messages.", ex);
@@ -96,7 +97,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     {
                         ChatId = queryModel.ChatId,
                         InsertDateTimeUtc = DateTime.UtcNow,
-                        SerializedMessages = JsonCommonSerializer.SerializeToString(new[] { messageDbModel }),
+                        SerializedMessages = new List<MessageDbModel> { messageDbModel },
                     };
 
                     EntityEntry<HotMessagesDbModel> resultAdd = dbContext.HotMessages.Add(newHotMessagesObj);
@@ -111,9 +112,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 }
 
                 // Otherwise, Update the existing row with the new message
-                var currentMessages = JsonCommonSerializer.DeserializeFromString<MessageDbModel[]>(chat.SerializedMessages)?.ToList();
+                var currentMessages = chat.SerializedMessages;
                 currentMessages.Add(messageDbModel);
-                chat.SerializedMessages = JsonCommonSerializer.SerializeToString(currentMessages);
+                chat.SerializedMessages = currentMessages;
                 var resultUpdate = dbContext.HotMessages.Update(chat);
                 if (resultUpdate.State != EntityState.Modified)
                 {
