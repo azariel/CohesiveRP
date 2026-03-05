@@ -1,10 +1,10 @@
-﻿using CohesiveRP.Storage.DataAccessLayer.Messages;
-using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+﻿using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
-using CohesiveRP.Storage.QueryModels.BackgroundQuery;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
-using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.Services
 {
@@ -19,5 +19,6 @@ namespace CohesiveRP.Core.Services
         Task<GlobalSettingsDbModel> GetGlobalSettingsAsync();
         Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
         Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId);
+        Task<ChatCompletionPresetsDbModel> GetChatCompletionPreset(string mainChatCompletionPresetId);
     }
 }

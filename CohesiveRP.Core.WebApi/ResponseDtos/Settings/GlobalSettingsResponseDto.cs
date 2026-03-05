@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Text.Json.Serialization;
 using CohesiveRP.Common.WebApi;
-using CohesiveRP.Core.BusinessObjects.LLMProviders;
-using CohesiveRP.Core.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
 
 namespace CohesiveRP.Core.WebApi.ResponseDtos.Settings
 {

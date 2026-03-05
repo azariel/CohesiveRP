@@ -1,7 +1,11 @@
 ﻿using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Storage.Common;
+using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
+using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.TimeoutStrategies;
 using Microsoft.EntityFrameworkCore;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
@@ -23,6 +27,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         private void Cleanup()
         {
             using var dbContext = contextFactory.CreateDbContext();
+            dbContext.Database.EnsureCreated();
+
             int GlobalSettings = dbContext.GlobalSettings.Count();
 
             if (GlobalSettings <= 0)
@@ -33,8 +39,47 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     GlobalSettingsId = Guid.NewGuid().ToString(),
                     InsertDateTimeUtc = DateTime.UtcNow,
                     // TODO: replace this dev option
-                    LLMProviders = "[{\"providerConfigId\":\"ba92f3f0-923f-4a32-a52b-4767ee7f4a1c\",\"name\":\"IntenseRP-V2-GLM\",\"type\":\"OpenAICustom\",\"concurrencyLimit\":1,\"tags\":[\"main\"],\"timeoutStrategy\":{\"type\":\"RetryXtimesThenGiveUp\",\"retries\":3}},{\"providerConfigId\":\"191302fb-08bf-4f30-a192-d6f20c42a378\",\"name\":\"IntenseRP-V2-DS\",\"type\":\"OpenAICustom\",\"concurrencyLimit\":1,\"tags\":[\"sceneTracker\",\"summary\"],\"timeoutStrategy\":{\"type\":\"RetryXtimesThenGiveUp\",\"retries\":3}}]",
-                    ChatCompletionPresetsMap = $"{{\"map\":[{{\"tag\":\"main\",\"chatCompletionPresetId\":\"{StorageConstants.DEFAULT_CHAT_COMPLETION_PRESET}\"}}]}}",
+                    LLMProviders = new List<LLMProviderConfig>()
+                    {
+                        new LLMProviderConfig
+                        {
+                            ProviderConfigId = Guid.NewGuid().ToString(),
+                            Name = "IntenseRP-V2-GLM",
+                            Type = LLMProviderType.OpenAICustom,
+                            ConcurrencyLimit = 1,
+                            Tags = [BackgroundQuerySystemTags.main.ToString()],
+                            TimeoutStrategy = new TimeoutStrategy
+                            {
+                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                                Retries = 3,
+                            }
+                        },
+                        new LLMProviderConfig
+                        {
+                            ProviderConfigId = Guid.NewGuid().ToString(),
+                            Name = "IntenseRP-V2-DS",
+                            Type = LLMProviderType.OpenAICustom,
+                            ConcurrencyLimit = 1,
+                            Tags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.summary.ToString()],
+                            TimeoutStrategy = new TimeoutStrategy
+                            {
+                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                                Retries = 1,
+                            }
+                        }
+                    },
+                    ChatCompletionPresetsMap = new ChatCompletionPresetsMap()
+                    {
+                        Map = new List<ChatCompletionPresetsMapElement>()
+                        {
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = QueryModels.Chat.ChatCompletionPresetType.Main,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_CHAT_COMPLETION_PRESET,
+                                IsDefault = true,
+                            }
+                        }
+                    }
                 });
 
                 dbContext.SaveChangesAsync();
@@ -50,7 +95,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                //await dbContext.GlobalSettings.LoadAsync();
                 return dbContext.GlobalSettings.FirstOrDefault();// TODO get by UserId eventually
             } catch (Exception ex)
             {

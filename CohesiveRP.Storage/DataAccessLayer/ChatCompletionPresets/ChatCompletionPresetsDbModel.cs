@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
+using CohesiveRP.Storage.JsonConverters;
 using CohesiveRP.Storage.Sqlite;
 
 namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
@@ -19,6 +21,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         public string ChatCompletionPresetId { get; set; }
 
         //[MaxLength(1024)]
-        public string Content { get; set; }
+        [JsonValueConverter]
+        public GlobalPromptContextFormat Format { get; set; }
     }
 }

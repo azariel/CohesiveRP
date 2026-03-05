@@ -1,4 +1,4 @@
-﻿namespace CohesiveRP.Core.BusinessObjects.LLMProviders
+﻿namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders
 {
     public enum LLMProviderType
     {

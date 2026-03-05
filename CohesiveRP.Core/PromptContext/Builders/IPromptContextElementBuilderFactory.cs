@@ -1,4 +1,4 @@
-﻿using CohesiveRP.Core.PromptContext.Format;
+﻿using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 
 namespace CohesiveRP.Core.PromptContext.Builders
 {

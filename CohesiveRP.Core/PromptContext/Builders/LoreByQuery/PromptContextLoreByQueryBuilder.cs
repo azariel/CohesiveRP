@@ -1,6 +1,6 @@
 ﻿using System.Text;
-using CohesiveRP.Core.PromptContext.Format;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {

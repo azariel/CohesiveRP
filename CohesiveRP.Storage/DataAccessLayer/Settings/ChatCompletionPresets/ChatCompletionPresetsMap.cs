@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CohesiveRP.Core.ChatCompletionPresets
+namespace CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets
 {
     public class ChatCompletionPresetsMap
     {

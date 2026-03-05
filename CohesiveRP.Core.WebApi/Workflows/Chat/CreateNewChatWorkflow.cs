@@ -3,7 +3,6 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
-using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.QueryModels.Chat;
 
@@ -22,7 +21,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chat
         {
             CreateChatQueryModel queryModel = new()
             {
-                ChatCompletionPresetId = null,
+                SelectedChatCompletionPresets = null,
             };
 
             ChatDbModel newlyCreatedChat = await storageService.CreateChatAsync(queryModel);

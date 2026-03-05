@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CohesiveRP.Core.BusinessObjects.LLMProviders.TimeoutStrategies
+namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.TimeoutStrategies
 {
     public class TimeoutStrategy
     {

@@ -77,7 +77,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                 {
                     while (true)
                     {
-                        if (selectedQuery.Status == BackgroundQueryStatus.Completed.ToString() || selectedQuery.Status == BackgroundQueryStatus.Error.ToString())
+                        if (selectedQuery.Status == BackgroundQueryStatus.Completed || selectedQuery.Status == BackgroundQueryStatus.Error)
                         {
                             // process the resulting completed query. If it was a 'main', it'll add a new AI message, if it was a sceneTracker, it'll attach the tracker, if it was a summary, it'll attach the summary to an existing message, etc.
                             await queryProcessor.ProcessCompletedQueryAsync(selectedQuery);
@@ -126,9 +126,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             {
                 if (query.DependenciesTags != null)
                 {
-                    string[] dependentTags = JsonCommonSerializer.DeserializeFromString<string[]>(query.DependenciesTags);
-
-                    if (allPendingQueries.Any(a => dependentTags.Any(an => a.Tags.Contains(an))))
+                    if (query.DependenciesTags != null && allPendingQueries.Any(a => query.DependenciesTags.Any(an => a.Tags.Contains(an))))
                     {
                         continue;
                     }
@@ -160,7 +158,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             }
 
             // change status
-            selectedQuery.Status = BackgroundQueryStatus.InProgress.ToString();
+            selectedQuery.Status = BackgroundQueryStatus.InProgress;
             if (!await backgroundQueriesDal.UpdateBackgroundQueryAsync(selectedQuery))
             {
                 LoggingManager.LogToFile("4be430da-d967-4277-b2c0-86d7ef2380b9", $"Failed to update background status of query [{selectedQuery.BackgroundQueryId}] to [{BackgroundQueryStatus.InProgress}]. Ignoring this query.");

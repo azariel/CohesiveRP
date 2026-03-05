@@ -1,9 +1,9 @@
 ﻿using CohesiveRP.Core.LLMProviderManager.Main;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
+using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.Messages;
 
 namespace CohesiveRP.Core.LLMProviderManager
 {
@@ -11,16 +11,16 @@ namespace CohesiveRP.Core.LLMProviderManager
     {
         private IPromptContextBuilderFactory promptContextBuilderFactory;
         private IPromptContextElementBuilderFactory promptContextElementBuilderFactory;
-        private IMessagesDal messagesDal;
+        private IStorageService storageService;
 
-        public LLMProviderQueryerFactory(IPromptContextBuilderFactory promptContextBuilderFactory, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IMessagesDal messagesDal)
+        public LLMProviderQueryerFactory(IPromptContextBuilderFactory promptContextBuilderFactory, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService)
         {
            this.promptContextBuilderFactory = promptContextBuilderFactory;
            this.promptContextElementBuilderFactory = promptContextElementBuilderFactory;
-           this.messagesDal = messagesDal;
+           this.storageService = storageService;
         }
 
-        private BackgroundQuerySystemTags GetRunningTagFromTags(string tags)
+        private BackgroundQuerySystemTags GetRunningTagFromTags(List<string> tags)
         {
             if(tags.Contains(BackgroundQuerySystemTags.main.ToString()))
                 return BackgroundQuerySystemTags.main;
@@ -46,7 +46,7 @@ namespace CohesiveRP.Core.LLMProviderManager
             switch (runningTag)
             {
                 case BackgroundQuerySystemTags.main:
-                    return new MainLLMQueryProcessor(queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, messagesDal);
+                    return new MainLLMQueryProcessor(queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService);
                 case BackgroundQuerySystemTags.sceneTracker:
                     return null;
                 case BackgroundQuerySystemTags.summary:

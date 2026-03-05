@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CohesiveRP.Storage.JsonConverters;
+using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.Sqlite;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Chats
@@ -18,8 +20,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         [Key]
         public string ChatId { get; set; }
 
-        //[Required]
-        ////[MaxLength(32)]
-        //public string ChatCompletionPresets { get; set; }
+        [JsonValueConverter]
+        public List<ChatCompletionPresetSelection> SelectedChatCompletionPresets { get; set; }
     }
 }

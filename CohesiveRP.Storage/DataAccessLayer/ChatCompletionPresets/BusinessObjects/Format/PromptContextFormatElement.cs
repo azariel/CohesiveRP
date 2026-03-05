@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CohesiveRP.Core.PromptContext.Format
+namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format
 {
     public class PromptContextFormatElement
     {

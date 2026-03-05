@@ -27,6 +27,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         private void Cleanup()
         {
             using var dbContext = contextFactory.CreateDbContext();
+            dbContext.Database.EnsureCreated();
 
             int NbBackgroundQueries = dbContext.BackgroundQueries.Count();
 
@@ -36,10 +37,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             }
 
             // Reset status of all BG tasks to Pending if they were InProgress
-            var inProgressQueries = dbContext.BackgroundQueries.Where(w => w.Status == BackgroundQueryStatus.InProgress.ToString()).ToArray();
+            var inProgressQueries = dbContext.BackgroundQueries.Where(w => w.Status == BackgroundQueryStatus.InProgress).ToArray();
             foreach (var inProgressQuery in inProgressQueries)
             {
-                inProgressQuery.Status = BackgroundQueryStatus.Pending.ToString();
+                inProgressQuery.Status = BackgroundQueryStatus.Pending;
                 inProgressQuery.Content = string.Empty;
             }
 
@@ -62,10 +63,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     BackgroundQueryId = Guid.NewGuid().ToString(),
                     InsertDateTimeUtc = DateTime.UtcNow,
                     ChatId = queryModel.ChatId,
-                    Status = BackgroundQueryStatus.Pending.ToString(),
-                    Tags = JsonCommonSerializer.SerializeToString(queryModel.Tags),
-                    DependenciesTags = JsonCommonSerializer.SerializeToString(queryModel.DependenciesTags),
-                    Priority = (int)queryModel.Priority,
+                    Status = BackgroundQueryStatus.Pending,
+                    Tags = queryModel.Tags,
+                    DependenciesTags = queryModel.DependenciesTags,
+                    Priority = queryModel.Priority,
                 };
 
                 EntityEntry<BackgroundQueryDbModel> result = await dbContext.BackgroundQueries.AddAsync(dbModel);
@@ -90,7 +91,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                return dbContext.BackgroundQueries.Where(w => w.Status == BackgroundQueryStatus.Pending.ToString()).ToArray();
+                return dbContext.BackgroundQueries.Where(w => w.Status == BackgroundQueryStatus.Pending).ToArray();
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("13272c00-4ba1-4815-a461-3b6abc9516b3", $"Error when querying pending queries on table BackgroundQueries.", ex);

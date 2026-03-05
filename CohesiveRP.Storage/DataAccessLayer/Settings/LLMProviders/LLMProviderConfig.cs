@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using CohesiveRP.Core.BusinessObjects.LLMProviders.TimeoutStrategies;
+using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.TimeoutStrategies;
 
-namespace CohesiveRP.Core.BusinessObjects.LLMProviders
+namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders
 {
     public class LLMProviderConfig
     {

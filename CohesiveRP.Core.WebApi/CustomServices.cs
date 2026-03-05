@@ -11,6 +11,7 @@ using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Users;
@@ -46,10 +47,12 @@ namespace CohesiveRP.Core.WebApi
 
             // DataAccessLayers
             services.AddDbContextFactory<StorageDbContext>();
-            services.AddSingleton<IUsersDal, UsersDal>();
+            //services.AddSingleton<IUsersDal, UsersDal>();
+            // Those must be injected into StorageService ctor to make sure their CTOR is called upon service startup and thus default values are injected into storage at startup
             services.AddSingleton<IChatsDal, ChatsDal>();
             services.AddSingleton<IMessagesDal, MessagesDal>();
             services.AddSingleton<IGlobalSettingsDal, GlobalSettingsDal>();
+            services.AddSingleton<IChatCompletionPresetsDal, ChatCompletionPresetsDal>();
             services.AddSingleton<IBackgroundQueriesDal, BackgroundQueriesDal>();
 
             // Default Json options
