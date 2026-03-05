@@ -39,8 +39,6 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             //queryDbModel.Content += $"-COMPLETED{Environment.NewLine}{promptContext?.Value}";
             
             // Query the LLM provider here and use the promptContext
-
-
             queryDbModel.Status = BackgroundQueryStatus.Completed;
         }
 
