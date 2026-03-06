@@ -1,5 +1,5 @@
-﻿using CohesiveRP.Storage.QueryModels.Chat;
-using CohesiveRP.Storage.Users;
+﻿using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
 {

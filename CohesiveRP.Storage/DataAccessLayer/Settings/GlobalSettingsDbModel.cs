@@ -1,8 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
+using CohesiveRP.Storage.JsonConverters;
 using CohesiveRP.Storage.Sqlite;
 
-namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
+namespace CohesiveRP.Storage.DataAccessLayer.Settings
 {
     /// <summary>
     /// Represents the structure of global settings within the storage.
@@ -18,19 +21,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         [Key]
         public string GlobalSettingsId { get; set; }
 
-        //[MaxLength(1024)]
-        public string LLMProviders { get; set; }
+        [JsonValueConverter]
+        public List<LLMProviderConfig> LLMProviders { get; set; }
 
-        //[Required]
-        //[MaxLength(1024)]
-        //public string Password { get; set; }// TODO: encrypt
-
-        //[Required]
-        //public UserType Type { get; set; } = UserType.User;
-
-
-        //[Required]
-        //[MaxLength(256)]
-        //public string UserName { get; set; }
+        [JsonValueConverter]
+        public ChatCompletionPresetsMap ChatCompletionPresetsMap { get; set; }
     }
 }

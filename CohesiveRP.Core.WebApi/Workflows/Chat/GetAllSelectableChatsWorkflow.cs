@@ -3,7 +3,7 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
-using CohesiveRP.Storage.Users;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -28,6 +28,7 @@ public class GetAllSelectableChatsWorkflow : IGetAllSelectableChatsWorkflow
             responseDto.Chats.Add(new ChatDefinition
             {
                 ChatId = chat.ChatId,
+                //ChatCompletionPresets = chat.ChatCompletionPresets,
             });
         }
 

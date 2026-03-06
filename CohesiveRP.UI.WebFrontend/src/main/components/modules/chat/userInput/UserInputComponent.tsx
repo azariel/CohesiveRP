@@ -90,6 +90,8 @@ export default function UserInputComponent({ messagesRef }: Props) {
         }
       }
 
+      // TODO: if backend is closed whilst we're waiting here, we want to handle this cleanly!
+
       setActiveModule((prev) => {
         if (!prev)
           return prev;
@@ -106,7 +108,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
         }
 
         // If the AI reply generation is done, update states
-        if(response != null && response?.status !== "InProgress") {
+        if(response != null && response.status !== "InProgress") {
           if (tempAIReplyMessageIndex !== -1) {
 
             if(realMessageFromStorage && realMessageFromStorage.messageObj) {

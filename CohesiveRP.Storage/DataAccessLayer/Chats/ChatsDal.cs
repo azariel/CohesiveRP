@@ -2,8 +2,8 @@
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.QueryModels.Chat;
-using CohesiveRP.Storage.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -19,6 +19,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         public ChatsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
+
+            using var dbContext = contextFactory.CreateDbContext();
+            dbContext.Database.EnsureCreated();
         }
 
         // ********************************************************************
@@ -64,6 +67,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 {
                     ChatId = Guid.NewGuid().ToString(),
                     InsertDateTimeUtc = DateTime.UtcNow,
+                    SelectedChatCompletionPresets = queryModel.SelectedChatCompletionPresets,
                 };
 
                 EntityEntry<ChatDbModel> result = await dbContext.Chats.AddAsync(chatDbModel);

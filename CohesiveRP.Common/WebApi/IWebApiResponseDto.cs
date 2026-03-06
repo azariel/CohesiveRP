@@ -8,6 +8,7 @@ namespace CohesiveRP.Common.WebApi
     /// </summary>
     public interface IWebApiResponseDto
     {
+        [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
         [JsonPropertyName("code")]
         public HttpStatusCode HttpResultCode { get; set; }
     }

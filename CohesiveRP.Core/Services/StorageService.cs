@@ -1,10 +1,14 @@
-﻿using CohesiveRP.Storage.DataAccessLayer.Messages;
+﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Users;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
-using CohesiveRP.Storage.Users;
-using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 
 namespace CohesiveRP.Core.Services
 {
@@ -16,19 +20,64 @@ namespace CohesiveRP.Core.Services
         private IChatsDal chatsDal;
         private IMessagesDal messagesDal;
         private IGlobalSettingsDal globalSettingsDal;
+        private IChatCompletionPresetsDal chatCompletionPresetsDal;
         private IBackgroundQueriesDal backgroundQueriesDal;
+        private ILLMApiQueriesDal llmApiQueriesDal;
 
-        public StorageService(IChatsDal chatsDal, IMessagesDal messagesDal, IGlobalSettingsDal globalSettingsDal, IBackgroundQueriesDal backgroundQueriesDal)
+        public StorageService(
+            IChatsDal chatsDal, 
+            IMessagesDal messagesDal, 
+            IGlobalSettingsDal globalSettingsDal, 
+            IChatCompletionPresetsDal chatCompletionPresetsDal, 
+            IBackgroundQueriesDal backgroundQueriesDal,
+            ILLMApiQueriesDal llmApiQueriesDal)
         {
             this.chatsDal = chatsDal;
             this.messagesDal = messagesDal;
             this.globalSettingsDal = globalSettingsDal;
+            this.chatCompletionPresetsDal = chatCompletionPresetsDal;
             this.backgroundQueriesDal = backgroundQueriesDal;
+            this.llmApiQueriesDal = llmApiQueriesDal;
         }
 
         // Chats
         public async Task<ChatDbModel> CreateChatAsync(CreateChatQueryModel queryModel)
         {
+            // If the new chat to create isn't linked to a chat completion preset configuration
+            if (queryModel != null && (queryModel.SelectedChatCompletionPresets == null || queryModel.SelectedChatCompletionPresets.Count <= 0))
+            {
+                try
+                {
+                    // Fetch defaults from globalSettings
+                    var globalSettings = await GetGlobalSettingsAsync();
+                    var defaultChatCompletionPresets = globalSettings.ChatCompletionPresetsMap.Map.Where(w => w.IsDefault).ToArray();
+
+                    List<ChatCompletionPresetsMapElement> defaultChatCompletionPresetsFiltered = [];
+                    foreach (var defaultChatCompletionPreset in defaultChatCompletionPresets)
+                    {
+                        if (defaultChatCompletionPresetsFiltered.Any(a => a.Type == defaultChatCompletionPreset.Type))
+                        {
+                            continue;
+                        }
+
+                        defaultChatCompletionPresetsFiltered.Add(defaultChatCompletionPreset);
+                    }
+
+                    queryModel.SelectedChatCompletionPresets =
+                    [
+                        ..defaultChatCompletionPresetsFiltered.Select(s=> new ChatCompletionPresetSelection
+                    {
+                        ChatCompletionPresetId = s.ChatCompletionPresetId,
+                        Type = s.Type,
+                    }),
+                ];
+                } catch (Exception e)
+                {
+                    LoggingManager.LogToFile("73d8e0f2-2e34-4624-9c79-baedde5d3e40", $"Couldn't force default ChatCompletionPresets on the new Chat. Chat can't be created without ChatCompletionPresets. Either fix the default presets or specify them.", e);
+                    return null; ;
+                }
+            }
+
             return await chatsDal.CreateChatAsync(queryModel);
         }
 
@@ -74,6 +123,28 @@ namespace CohesiveRP.Core.Services
         public async Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId)
         {
             return await backgroundQueriesDal.GetBackgroundQueryAsync(queryId);
+        }
+
+        // ChatCompletionPresets
+        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPreset(string mainChatCompletionPresetId)
+        {
+            return await chatCompletionPresetsDal.GetChatCompletionPresetsAsync(mainChatCompletionPresetId);
+        }
+
+        // LLMQueries
+        public async Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag)
+        {
+            return await llmApiQueriesDal.GetQueriesOnLLMApisAsync(tag);
+        }
+
+        public async Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery)
+        {
+            return await llmApiQueriesDal.AddNewQueryAsync(newQuery);
+        }
+
+        public async Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId)
+        {
+            return await llmApiQueriesDal.DeleteQueryByIdAsync(lLMApiQueryId);
         }
     }
 }
