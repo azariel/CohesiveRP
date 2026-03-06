@@ -1,8 +1,5 @@
-﻿using System.Diagnostics;
-using CohesiveRP.Common.Diagnostics;
-using CohesiveRP.Common.Serialization;
+﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.LLMProviderManager;
-using CohesiveRP.Core.LLMProviderManager.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using Microsoft.Extensions.Hosting;
@@ -19,7 +16,6 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
         public BackgroundQueriesWorker(IBackgroundQueriesDal backgroundQueriesDal, ILLMProviderQueryerFactory llmProviderQueryerFactory)
         {
             this.backgroundQueriesDal = backgroundQueriesDal;
-            //this.llmQueryProcessor = llmQueryProcessor;
             this.llmProviderQueryerFactory = llmProviderQueryerFactory;
         }
 

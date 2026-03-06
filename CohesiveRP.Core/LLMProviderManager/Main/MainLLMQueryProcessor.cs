@@ -1,11 +1,12 @@
 ﻿using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Core.HttpLLMApiProvider;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
 
 namespace CohesiveRP.Core.LLMProviderManager.Main
@@ -16,30 +17,46 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
         private IPromptContextBuilderFactory contextBuilderFactory;
         private IPromptContextElementBuilderFactory promptContextElementBuilderFactory;
         private IStorageService storageService;
+        private IHttpLLMApiProviderService httpLLMApiProviderService;
 
-        public MainLLMQueryProcessor(BackgroundQueryDbModel queryDbModel, IPromptContextBuilderFactory contextBuilderFactory, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService)
+        public MainLLMQueryProcessor(
+            BackgroundQueryDbModel queryDbModel,
+            IPromptContextBuilderFactory contextBuilderFactory,
+            IPromptContextElementBuilderFactory promptContextElementBuilderFactory,
+            IStorageService storageService,
+            IHttpLLMApiProviderService httpLLMApiProviderService)
         {
             this.queryDbModel = queryDbModel;
             this.contextBuilderFactory = contextBuilderFactory;
             this.promptContextElementBuilderFactory = promptContextElementBuilderFactory;
             this.storageService = storageService;
+            this.httpLLMApiProviderService = httpLLMApiProviderService;
         }
 
         private async Task ProcessMainQueryAsync()
         {
             var promptContext = await BuildContextAsync();
 
-            //// for debug
-            //for (var i = 0; i < 100; ++i)
-            //{
-            //    await Task.Delay(100);
-            //    queryDbModel.Content += Guid.NewGuid().ToString()[0];
-            //}
+            try
+            {
+                var globalSettings = await storageService.GetGlobalSettingsAsync();
+                var availableLLMApiProviders = globalSettings.LLMProviders.Where(w => w.Tags.Contains(ChatCompletionPresetType.Main)).ToArray();
 
-            //queryDbModel.Content += $"-COMPLETED{Environment.NewLine}{promptContext?.Value}";
-            
-            // Query the LLM provider here and use the promptContext
-            queryDbModel.Status = BackgroundQueryStatus.Completed;
+                if (availableLLMApiProviders == null || availableLLMApiProviders.Length <= 0)
+                {
+                    LoggingManager.LogToFile("1e48b939-c19d-4097-98fa-bfe8fd857939", $"Couldn't query a LLM Api because no one was configured for [{ChatCompletionPresetType.Main}].");
+                    queryDbModel.Status = BackgroundQueryStatus.Error;
+                    return;
+                }
+
+                HttpLLMApiProviderQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(ChatCompletionPresetType.Main.ToString(), availableLLMApiProviders, promptContext);
+                queryDbModel.Status = BackgroundQueryStatus.Completed;
+            } catch (Exception e)
+            {
+                LoggingManager.LogToFile("52cac4f0-cbfd-4786-9530-c96b6d909515", $"The query to HttpLLMApiProviderService failed. Unhandled error.", e);
+                queryDbModel.Status = BackgroundQueryStatus.Error;
+                return;
+            }
         }
 
         private async Task<IPromptContext> BuildContextAsync()
@@ -51,7 +68,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
         public async Task<bool> QueueProcessAsync()
         {
-            if(queryDbModel == null)
+            if (queryDbModel == null)
             {
                 return false;
             }

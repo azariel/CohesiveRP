@@ -20,7 +20,7 @@ namespace CohesiveRP.Common.HttpClient
 
             httpClient = new System.Net.Http.HttpClient(clientHandler)
             {
-                Timeout = new TimeSpan(0, 0, 0, 15)
+                Timeout = new TimeSpan(0, 1, 0, 0)
             };
 
             // Add default headers

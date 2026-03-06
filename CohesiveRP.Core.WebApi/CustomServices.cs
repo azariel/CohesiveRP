@@ -6,6 +6,7 @@ using CohesiveRP.Core.PromptContext;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
@@ -39,11 +40,13 @@ namespace CohesiveRP.Core.WebApi
 
             // Services
             services.AddSingleton<IStorageService, StorageService>();
+            services.AddSingleton<IHttpLLMApiProviderService, HttpLLMApiProviderService>();
 
             // Factories
             services.AddSingleton<ILLMProviderQueryerFactory, LLMProviderQueryerFactory>();
             services.AddSingleton<IPromptContextBuilderFactory, PromptContextBuilderFactory>();
             services.AddSingleton<IPromptContextElementBuilderFactory, PromptContextElementBuilderFactory>();
+            services.AddSingleton<ILLMApiQueryPayloadBuilderFactory, LLMApiQueryPayloadBuilderFactory>();
 
             // DataAccessLayers
             services.AddDbContextFactory<StorageDbContext>();
@@ -54,6 +57,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGlobalSettingsDal, GlobalSettingsDal>();
             services.AddSingleton<IChatCompletionPresetsDal, ChatCompletionPresetsDal>();
             services.AddSingleton<IBackgroundQueriesDal, BackgroundQueriesDal>();
+            services.AddSingleton<ILLMApiQueriesDal, LLMApiQueriesDal>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

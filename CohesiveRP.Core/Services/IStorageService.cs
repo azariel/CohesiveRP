@@ -20,5 +20,8 @@ namespace CohesiveRP.Core.Services
         Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
         Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId);
         Task<ChatCompletionPresetsDbModel> GetChatCompletionPreset(string mainChatCompletionPresetId);
+        Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag);
+        Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery);
+        Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId);
     }
 }

@@ -3,8 +3,8 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 
 namespace CohesiveRP.Core.PromptContext.Main
 {
@@ -66,6 +66,14 @@ namespace CohesiveRP.Core.PromptContext.Main
             return new PromptContext
             {
                 Value = str.ToString(),
+                Messages =
+                [
+                    new OpenAIChatCompletionMessage
+                    {
+                        Role = OpenAIChatCompletionRole.system,
+                        Content = str.ToString(),
+                    }
+                ],
             };
         }
     }

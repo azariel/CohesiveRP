@@ -1,0 +1,28 @@
+﻿using System.Text.Json.Serialization;
+
+namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Response
+{
+    public class OpenAIChatCompletion
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("object")]
+        public string Object { get; set; } = "chat.compeltion";
+
+        [JsonPropertyName("created")]
+        public long CreatedAtUtcInSeconds { get; set; }
+
+        [JsonPropertyName("model")]
+        public string Model { get; set; }
+
+        [JsonPropertyName("choices")]
+        public OpenAIMessage[] Messages { get; set; }
+
+        [JsonPropertyName("usage")]
+        public OpenAIUsage Usage { get; set; }
+
+        [JsonPropertyName("service_tier")]
+        public string ServiceTier { get; set; }
+    }
+}
