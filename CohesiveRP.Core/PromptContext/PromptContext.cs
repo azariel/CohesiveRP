@@ -8,5 +8,7 @@ namespace CohesiveRP.Core.PromptContext
         /// The actual text to add to the LLM prompt as a context.
         /// </summary>
         public string Value { get; set; }
+
+        public IPromptMessage[] Messages { get; set; }
     }
 }

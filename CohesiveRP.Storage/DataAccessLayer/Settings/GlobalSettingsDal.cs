@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Storage.Common;
-using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.TimeoutStrategies;
+using CohesiveRP.Storage.QueryModels.Chat;
 using Microsoft.EntityFrameworkCore;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
@@ -45,9 +45,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         {
                             ProviderConfigId = Guid.NewGuid().ToString(),
                             Name = "IntenseRP-V2-GLM",
+                            Model = "glm-reasoner",
+                            ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [BackgroundQuerySystemTags.main.ToString()],
+                            Tags = [ChatCompletionPresetType.Main],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -58,9 +60,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         {
                             ProviderConfigId = Guid.NewGuid().ToString(),
                             Name = "IntenseRP-V2-DS",
+                            Model = "deepseek-chat",
+                            ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.summary.ToString()],
+                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -74,7 +78,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         {
                             new ChatCompletionPresetsMapElement
                             {
-                                Type = QueryModels.Chat.ChatCompletionPresetType.Main,
+                                Type = ChatCompletionPresetType.Main,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_CHAT_COMPLETION_PRESET,
                                 IsDefault = true,
                             }

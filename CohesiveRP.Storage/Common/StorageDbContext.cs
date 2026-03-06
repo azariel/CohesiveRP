@@ -91,5 +91,7 @@ namespace CohesiveRP.Storage.Common
 
         // Queries that are queued to be processed, processing or recently processed against a background worker
         public DbSet<BackgroundQueryDbModel> BackgroundQueries { get; set; }
+
+        public DbSet<LLMApiQueryDbModel> LLMApiQueries { get; set; }
     }
 }

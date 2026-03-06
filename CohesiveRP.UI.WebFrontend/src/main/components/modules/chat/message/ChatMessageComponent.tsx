@@ -44,7 +44,7 @@ export default function ChatMessageComponent({ message, enableSwipeBtn = false }
           </div>
           <div className={styles.messageContentSeparator} />
           <div className={styles.messageContentValue}>
-            {message?.content} 
+            {message?.content ?? "[empty]"} 
           </div>
           <div className={styles.messageContentFooter}>
             <div className={styles.messageContentFooterLeftSideIcons}>

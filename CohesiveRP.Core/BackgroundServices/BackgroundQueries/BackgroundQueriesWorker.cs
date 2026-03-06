@@ -1,8 +1,5 @@
-﻿using System.Diagnostics;
-using CohesiveRP.Common.Diagnostics;
-using CohesiveRP.Common.Serialization;
+﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.LLMProviderManager;
-using CohesiveRP.Core.LLMProviderManager.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using Microsoft.Extensions.Hosting;
@@ -19,7 +16,6 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
         public BackgroundQueriesWorker(IBackgroundQueriesDal backgroundQueriesDal, ILLMProviderQueryerFactory llmProviderQueryerFactory)
         {
             this.backgroundQueriesDal = backgroundQueriesDal;
-            //this.llmQueryProcessor = llmQueryProcessor;
             this.llmProviderQueryerFactory = llmProviderQueryerFactory;
         }
 
@@ -60,7 +56,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             string queryId = Guid.NewGuid().ToString();
             var queryProcessor = llmProviderQueryerFactory.Generate(selectedQuery);
 
-            if(queryProcessor == null)
+            if (queryProcessor == null)
             {
                 LoggingManager.LogToFile("fbf44e69-5367-49fe-86ba-ae306420a961", $"LLMProviderQueryerFactory couldn't generate a valid QueryProcessor in [{nameof(BackgroundQueriesWorker)}].");
                 return;
@@ -77,10 +73,10 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                 {
                     while (true)
                     {
-                        if (selectedQuery.Status == BackgroundQueryStatus.Completed || selectedQuery.Status == BackgroundQueryStatus.Error)
+                        if (selectedQuery.Status == BackgroundQueryStatus.Completed || selectedQuery.Status == BackgroundQueryStatus.Error || selectedQuery.Status == BackgroundQueryStatus.ProcessingFinalInstruction)
                         {
                             // process the resulting completed query. If it was a 'main', it'll add a new AI message, if it was a sceneTracker, it'll attach the tracker, if it was a summary, it'll attach the summary to an existing message, etc.
-                            await queryProcessor.ProcessCompletedQueryAsync(selectedQuery);
+                            await queryProcessor.ProcessCompletedQueryAsync();
                             break;
                         }
 
@@ -158,7 +154,16 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             }
 
             // change status
-            selectedQuery.Status = BackgroundQueryStatus.InProgress;
+            if (selectedQuery.Status == BackgroundQueryStatus.Pending)
+            {
+                selectedQuery.Status = BackgroundQueryStatus.InProgress;
+            }
+
+            if (selectedQuery.Status == BackgroundQueryStatus.ProcessedWaitingForFinalInstruction)
+            {
+                selectedQuery.Status = BackgroundQueryStatus.ProcessingFinalInstruction;
+            }
+
             if (!await backgroundQueriesDal.UpdateBackgroundQueryAsync(selectedQuery))
             {
                 LoggingManager.LogToFile("4be430da-d967-4277-b2c0-86d7ef2380b9", $"Failed to update background status of query [{selectedQuery.BackgroundQueryId}] to [{BackgroundQueryStatus.InProgress}]. Ignoring this query.");

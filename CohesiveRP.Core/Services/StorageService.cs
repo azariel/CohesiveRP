@@ -22,14 +22,22 @@ namespace CohesiveRP.Core.Services
         private IGlobalSettingsDal globalSettingsDal;
         private IChatCompletionPresetsDal chatCompletionPresetsDal;
         private IBackgroundQueriesDal backgroundQueriesDal;
+        private ILLMApiQueriesDal llmApiQueriesDal;
 
-        public StorageService(IChatsDal chatsDal, IMessagesDal messagesDal, IGlobalSettingsDal globalSettingsDal, IChatCompletionPresetsDal chatCompletionPresetsDal, IBackgroundQueriesDal backgroundQueriesDal)
+        public StorageService(
+            IChatsDal chatsDal, 
+            IMessagesDal messagesDal, 
+            IGlobalSettingsDal globalSettingsDal, 
+            IChatCompletionPresetsDal chatCompletionPresetsDal, 
+            IBackgroundQueriesDal backgroundQueriesDal,
+            ILLMApiQueriesDal llmApiQueriesDal)
         {
             this.chatsDal = chatsDal;
             this.messagesDal = messagesDal;
             this.globalSettingsDal = globalSettingsDal;
             this.chatCompletionPresetsDal = chatCompletionPresetsDal;
             this.backgroundQueriesDal = backgroundQueriesDal;
+            this.llmApiQueriesDal = llmApiQueriesDal;
         }
 
         // Chats
@@ -66,7 +74,7 @@ namespace CohesiveRP.Core.Services
                 } catch (Exception e)
                 {
                     LoggingManager.LogToFile("73d8e0f2-2e34-4624-9c79-baedde5d3e40", $"Couldn't force default ChatCompletionPresets on the new Chat. Chat can't be created without ChatCompletionPresets. Either fix the default presets or specify them.", e);
-                    return null;;
+                    return null; ;
                 }
             }
 
@@ -121,6 +129,22 @@ namespace CohesiveRP.Core.Services
         public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPreset(string mainChatCompletionPresetId)
         {
             return await chatCompletionPresetsDal.GetChatCompletionPresetsAsync(mainChatCompletionPresetId);
+        }
+
+        // LLMQueries
+        public async Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag)
+        {
+            return await llmApiQueriesDal.GetQueriesOnLLMApisAsync(tag);
+        }
+
+        public async Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery)
+        {
+            return await llmApiQueriesDal.AddNewQueryAsync(newQuery);
+        }
+
+        public async Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId)
+        {
+            return await llmApiQueriesDal.DeleteQueryByIdAsync(lLMApiQueryId);
         }
     }
 }

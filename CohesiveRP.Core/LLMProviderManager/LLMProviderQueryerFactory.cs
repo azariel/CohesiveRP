@@ -12,23 +12,29 @@ namespace CohesiveRP.Core.LLMProviderManager
         private IPromptContextBuilderFactory promptContextBuilderFactory;
         private IPromptContextElementBuilderFactory promptContextElementBuilderFactory;
         private IStorageService storageService;
+        private IHttpLLMApiProviderService httpLLMApiProviderService;
 
-        public LLMProviderQueryerFactory(IPromptContextBuilderFactory promptContextBuilderFactory, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService)
+        public LLMProviderQueryerFactory(
+            IPromptContextBuilderFactory promptContextBuilderFactory,
+            IPromptContextElementBuilderFactory promptContextElementBuilderFactory,
+            IStorageService storageService,
+            IHttpLLMApiProviderService httpLLMApiProviderService)
         {
-           this.promptContextBuilderFactory = promptContextBuilderFactory;
-           this.promptContextElementBuilderFactory = promptContextElementBuilderFactory;
-           this.storageService = storageService;
+            this.promptContextBuilderFactory = promptContextBuilderFactory;
+            this.promptContextElementBuilderFactory = promptContextElementBuilderFactory;
+            this.storageService = storageService;
+            this.httpLLMApiProviderService = httpLLMApiProviderService;
         }
 
         private BackgroundQuerySystemTags GetRunningTagFromTags(List<string> tags)
         {
-            if(tags.Contains(BackgroundQuerySystemTags.main.ToString()))
+            if (tags.Contains(BackgroundQuerySystemTags.main.ToString()))
                 return BackgroundQuerySystemTags.main;
 
-            if(tags.Contains(BackgroundQuerySystemTags.sceneTracker.ToString()))
+            if (tags.Contains(BackgroundQuerySystemTags.sceneTracker.ToString()))
                 return BackgroundQuerySystemTags.sceneTracker;
 
-            if(tags.Contains(BackgroundQuerySystemTags.summary.ToString()))
+            if (tags.Contains(BackgroundQuerySystemTags.summary.ToString()))
                 return BackgroundQuerySystemTags.summary;
 
             return BackgroundQuerySystemTags.custom;
@@ -36,7 +42,7 @@ namespace CohesiveRP.Core.LLMProviderManager
 
         public ILLMQueryProcessor Generate(BackgroundQueryDbModel queryModel)
         {
-            if(queryModel == null)
+            if (queryModel == null)
             {
                 return null;
             }
@@ -46,7 +52,7 @@ namespace CohesiveRP.Core.LLMProviderManager
             switch (runningTag)
             {
                 case BackgroundQuerySystemTags.main:
-                    return new MainLLMQueryProcessor(queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService);
+                    return new MainLLMQueryProcessor(queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService);
                 case BackgroundQuerySystemTags.sceneTracker:
                     return null;
                 case BackgroundQuerySystemTags.summary:

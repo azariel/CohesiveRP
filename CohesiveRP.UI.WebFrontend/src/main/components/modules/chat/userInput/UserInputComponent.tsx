@@ -108,7 +108,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
         }
 
         // If the AI reply generation is done, update states
-        if(response != null && response?.status !== "InProgress") {
+        if(response != null && response.status !== "InProgress") {
           if (tempAIReplyMessageIndex !== -1) {
 
             if(realMessageFromStorage && realMessageFromStorage.messageObj) {
