@@ -1,17 +1,24 @@
 ﻿using System.Text;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
     public class PromptContextRelevantCharactersBuilder : IPromptContextElementBuilder
     {
-        public PromptContextRelevantCharactersBuilder(IStorageService storageService)
+        private IStorageService storageService;
+        private PromptContextFormatElement promptContextFormatElement;
+        private ChatDbModel chatDbModel;
+
+        public PromptContextRelevantCharactersBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
         {
-            
+            this.storageService = storageService;
+            this.promptContextFormatElement = promptContextFormatElement;
+            this.chatDbModel = chatDbModel;
         }
 
-        public async Task<string> BuildAsync(PromptContextFormatElement promptContextFormatElement)
+        public async Task<string> BuildAsync()
         {
             Dictionary<string, string> loreByQueryContent = [];
             string userPersonaName = "userName";// TODO: fetch from Db

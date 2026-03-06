@@ -2,6 +2,7 @@ import type { ChatMessage } from "../../../../../ResponsesDto/chat/BusinessObjec
 import styles from "./ChatMessageComponent.module.css";
 import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification, HiMiniChevronRight } from "react-icons/hi2";
 import { FormatUtcDate } from "../../../../../utils/DateUtils";
+import { HighlightedText } from "../../../../../utils/HighlightText";
 
 interface Props {
   message?: ChatMessage;
@@ -21,9 +22,9 @@ export default function ChatMessageComponent({ message, enableSwipeBtn = false }
             )}
           </div>
           <div className={styles.messageInfoContainer}>
-            <div title="messageId">#32</div>
-            <div title="message generation time">75s</div>
-            <div title="tokens in message">1305t</div>
+            <div title="messageId">{!message?.messageIndex ? "-": "#" + message.messageIndex}</div>
+            <div title="message generation time">??s</div>
+            <div title="tokens in message">????t</div>
           </div>
         </div>
         <div className={styles.messageContent}>
@@ -36,7 +37,7 @@ export default function ChatMessageComponent({ message, enableSwipeBtn = false }
               )}
             </div>
             <div className={styles.messageHeaderContentModel}>
-              glm-reasoner (1m29s)
+              glm-reasoner (?m??s)
             </div>
             <div className={styles.messageHeaderContentCreatedAt}>
               {message?.createdAtUtc ? FormatUtcDate(message.createdAtUtc) : ''}
@@ -44,7 +45,7 @@ export default function ChatMessageComponent({ message, enableSwipeBtn = false }
           </div>
           <div className={styles.messageContentSeparator} />
           <div className={styles.messageContentValue}>
-            {message?.content ?? "[empty]"} 
+            <HighlightedText text={message?.content ?? "[empty]"} />
           </div>
           <div className={styles.messageContentFooter}>
             <div className={styles.messageContentFooterLeftSideIcons}>

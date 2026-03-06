@@ -49,6 +49,7 @@ export default function ChatComponent() {
     };
 
     fetchData();
+    // TODO: fetch MAIN background task and reflect spinner state in inputModule accordingly
   }, []);
 
   // Scroll to bottom when component mounts

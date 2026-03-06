@@ -37,10 +37,10 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             };
         }
 
-        if (!DateTime.TryParse(requestDto.Message.timestampUtc, out DateTime messageDate))
-        {
-            messageDate = DateTime.UtcNow;
-        }
+        //if (!DateTime.TryParse(requestDto.Message.timestampUtc, out DateTime messageDate))
+        //{
+        //    messageDate = DateTime.UtcNow;
+        //}
 
         // Add the message
         CreateMessageQueryModel messageQueryModel = new()
@@ -48,7 +48,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             ChatId = requestDto.ChatId,
             SourceType = Common.BusinessObjects.MessageSourceType.User,
             MessageContent = requestDto.Message.Content,
-            CreatedAtUtc = messageDate,
+            CreatedAtUtc = DateTime.UtcNow,
         };
 
         var message = await storageService.CreateMessageAsync(messageQueryModel);

@@ -80,6 +80,13 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                             break;
                         }
 
+                        if (selectedQuery.Status == BackgroundQueryStatus.Pending)
+                        {
+                            // BackgroundQuery task was re-queued. Drop current after a timeout.
+                            await Task.Delay(ERROR_DELAY_MS);
+                            break;
+                        }
+
                         await backgroundQueriesDal.UpdateBackgroundQueryAsync(selectedQuery);
                         await Task.Delay(500);
                         cancellationToken.ThrowIfCancellationRequested();

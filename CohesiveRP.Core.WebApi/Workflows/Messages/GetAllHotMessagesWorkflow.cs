@@ -25,9 +25,10 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
         var responseDto = new MessagesResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
-            Messages = messages.Select(s => new MessageDefinition
+            Messages = messages.Select((s, index) => new MessageDefinition
             {
                 MessageId = s.MessageId,
+                MessageIndex = index + 1,
                 Content = s.Content,
                 SourceType = s.SourceType,
                 CreatedAtUtc = s.CreatedAtUtc,

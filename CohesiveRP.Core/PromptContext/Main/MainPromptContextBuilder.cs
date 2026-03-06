@@ -51,7 +51,7 @@ namespace CohesiveRP.Core.PromptContext.Main
             StringBuilder str = new();
             foreach (var contextElement in mainChatCompletionPreset.Format.OrderedElementsWithinTheGlobalPromptContext)
             {
-                var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement);
+                var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement, chat);
 
                 if (builder == null)
                 {
@@ -59,7 +59,7 @@ namespace CohesiveRP.Core.PromptContext.Main
                     continue;
                 }
 
-                var result = await builder.BuildAsync(contextElement);
+                var result = await builder.BuildAsync();
                 str.Append(result);
             }
 

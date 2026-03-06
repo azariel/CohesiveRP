@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CohesiveRP.Common.Utils.Parsers
+﻿namespace CohesiveRP.Common.Utils.Parsers
 {
     public static class ChatMessageParserUtils
     {
@@ -10,7 +6,7 @@ namespace CohesiveRP.Common.Utils.Parsers
         {
             string message = rawMessage;
 
-            
+            // TODO: add regexes as needed, could also most likely allow custom regexes (from globalSettings, passed in params)
 
             return message;
         }

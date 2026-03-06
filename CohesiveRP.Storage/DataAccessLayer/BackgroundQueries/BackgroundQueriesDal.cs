@@ -44,6 +44,13 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 inProgressQuery.Content = string.Empty;
             }
 
+            var processingQueries = dbContext.BackgroundQueries.Where(w => w.Status == BackgroundQueryStatus.ProcessingFinalInstruction).ToArray();
+            foreach (var processingQuery in processingQueries)
+            {
+                // Note: Keep content as-is since it was correctly generated, but reset the query to a status to process that content before setting it to completed
+                processingQuery.Status = BackgroundQueryStatus.ProcessedWaitingForFinalInstruction;
+            }
+
             dbContext.SaveChanges();
         }
 

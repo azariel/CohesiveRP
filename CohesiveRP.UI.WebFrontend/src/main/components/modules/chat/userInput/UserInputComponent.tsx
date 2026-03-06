@@ -28,6 +28,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
   const [isSendingMessageToServer, setIsSendingMessageToServer] = useState(false);
   const [isWaitingOnPlayerMessageServerProcess, setIsWaitingOnPlayerMessageServerProcess] = useState(false);
+  const isStreamingQueryResult:boolean = false;
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -140,13 +141,21 @@ export default function UserInputComponent({ messagesRef }: Props) {
         setIsSendingMessageToServer(false);
         setIsWaitingOnPlayerMessageServerProcess(false);
         setIsInputBlockedDueToServer(false);
+
+        if (messagesRef?.current) {
+          setTimeout(() => {
+            if(messagesRef?.current) {
+              messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+            }
+          }, 200);
+        }
       }
 
     } catch (err) {
       console.error("Polling main background query error:", err);
       clearInterval(pollInterval);
     }
-  }, 1000);
+  }, isStreamingQueryResult ? 1000 : 3000);
 
   // cleanup
   return () => clearInterval(pollInterval);
@@ -190,8 +199,8 @@ export default function UserInputComponent({ messagesRef }: Props) {
       messages: [...(prev.messages || []),// Keep messages history
       response.messageObj,// Add new player message at the bottom
       {
-        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1 }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
-        mainQueryId: response.mainQueryId// Track the main query id to know the status of the AI reply
+        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1, messageIndex: null }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
+        mainQueryId: response.mainQueryId,// Track the main query id to know the status of the AI reply
     }));
 
     setTimeout(() => {

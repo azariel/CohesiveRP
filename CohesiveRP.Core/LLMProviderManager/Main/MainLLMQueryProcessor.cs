@@ -59,6 +59,11 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 }
 
                 IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(ChatCompletionPresetType.Main.ToString(), availableLLMApiProviders, promptContext);
+                if (response == null)
+                {
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                    return;
+                }
 
                 // TODO: update background query here
                 var responseMessages = response.Messages;
@@ -120,13 +125,6 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
                 foreach (var message in messages)
                 {
-                    //string deserializedMessage = message.Content;
-
-                    //try
-                    //{
-                    //    deserializedMessage = JsonCommonSerializer.DeserializeFromString<string>(message.Content);
-                    //} catch (Exception) { }
-
                     // Add the AI reply message to the end of the chat
                     CreateMessageQueryModel messageQueryModel = new()
                     {
