@@ -4,7 +4,7 @@ namespace CohesiveRP.Core.LLMProviderManager
 {
     public interface ILLMQueryProcessor
     {
-        Task ProcessCompletedQueryAsync(BackgroundQueryDbModel selectedQuery);
+        Task ProcessCompletedQueryAsync();
         Task<bool> QueueProcessAsync();
         Task<BackgroundQueryDbModel> GetBackgroundQueryDbModelAsync();
     }

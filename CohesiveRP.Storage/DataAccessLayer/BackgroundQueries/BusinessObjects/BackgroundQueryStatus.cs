@@ -4,7 +4,12 @@
     {
         Pending = 0,
         InProgress = 1,
-        Completed = 2,
-        Error = 3,
+
+        ProcessedWaitingForFinalInstruction = 10,
+        ProcessingFinalInstruction = 11,
+
+        Completed = 99,
+
+        Error = 100,
     }
 }

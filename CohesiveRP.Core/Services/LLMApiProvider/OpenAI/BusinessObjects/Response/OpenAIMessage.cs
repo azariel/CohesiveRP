@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request;
 
 namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Response
 {
@@ -8,7 +9,7 @@ namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Respons
         public int Index { get; set; }
 
         [JsonPropertyName("message")]
-        public string Message { get; set; }
+        public OpenAIChatCompletionMessage Message { get; set; }
 
         [JsonPropertyName("logProbs")]
         public string LogProbs { get; set; }

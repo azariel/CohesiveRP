@@ -3,6 +3,7 @@ using CohesiveRP.Common.HttpClient;
 using CohesiveRP.Core.HttpLLMApiProvider;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services.LLMApiProvider;
+using CohesiveRP.Core.Services.LLMApiProvider.Utils;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
 
@@ -19,7 +20,7 @@ namespace CohesiveRP.Core.Services
             this.llmApiQueryPayloadBuilderFactory = llmApiQueryPayloadBuilderFactory;
         }
 
-        public async Task<HttpLLMApiProviderQueryResponseDto> QueryApiAsync(string tag, LLMProviderConfig[] availableLLMApiProviders, IPromptContext promptContext)
+        public async Task<IHttpLLMApiQueryResponseDto> QueryApiAsync(string tag, LLMProviderConfig[] availableLLMApiProviders, IPromptContext promptContext)
         {
             if (availableLLMApiProviders == null || availableLLMApiProviders.Length <= 0)
             {
@@ -71,11 +72,11 @@ namespace CohesiveRP.Core.Services
                 return null;
             }
 
-            HttpLLMApiProviderQueryResponseDto response = null;
             try
             {
                 // Now once we have a state in Db for our query, we can poke the actual inference server api
                 var LLMApiResult = await PostLLMApiAsync(selectedLLMApiQueryDbModel, promptContext);
+                return LLMApiResult;
 
                 // TODO: Manage the state of the ongoing query to the inference server api
                 // TODO: if streaming, then use a delegate to update the content as we receive it
@@ -94,16 +95,14 @@ namespace CohesiveRP.Core.Services
                     LoggingManager.LogToFile("5d617262-d527-4cef-88cd-4fa7da8891ad", $"Couldn't add a new LLM Api Query to Storage for tag [{tag}]. Unhandled error.");
                 }
             }
-
-            return response;
         }
 
-        private async Task<bool> PostLLMApiAsync(LLMProviderConfig selectedLLMApiQueryDbModel, IPromptContext promptContext)
+        private async Task<IHttpLLMApiQueryResponseDto> PostLLMApiAsync(LLMProviderConfig selectedLLMApiQueryDbModel, IPromptContext promptContext)
         {
             if (selectedLLMApiQueryDbModel == null || string.IsNullOrWhiteSpace(selectedLLMApiQueryDbModel.Model) || string.IsNullOrWhiteSpace(selectedLLMApiQueryDbModel.ApiUrl))
             {
                 LoggingManager.LogToFile("26968ad4-8437-4819-8cbb-35e6da04020f", $"The configured LLMProviderConfig [{selectedLLMApiQueryDbModel.ProviderConfigId}] is incorrectly configured.");
-                return false;
+                return null;
             }
 
             using HttpRestClient httpClient = new HttpRestClient();
@@ -111,12 +110,12 @@ namespace CohesiveRP.Core.Services
             ILLMApiQueryPayloadBuilder llmApiQueryPayloadBuilder = llmApiQueryPayloadBuilderFactory.Create(selectedLLMApiQueryDbModel.Type);
             string payload = llmApiQueryPayloadBuilder.BuildPayload(promptContext, selectedLLMApiQueryDbModel.Model);
 
-            string result = null;
-
             try
             {
-                result = await httpClient.PostAsync(selectedLLMApiQueryDbModel.ApiUrl, payload);
-                var
+                string rawResponse = await httpClient.PostAsync(selectedLLMApiQueryDbModel.ApiUrl, payload);
+                IHttpLLMApiQueryResponseDto httpLLMApiQueryResponseDto = LLMApiQueryResponseDtoConverter.Convert(selectedLLMApiQueryDbModel.Type, rawResponse);
+                return httpLLMApiQueryResponseDto;
+
             } catch (Exception e)
             {
                 if (e.Message.ToLowerInvariant().Contains("input should be a valid string"))
@@ -124,10 +123,8 @@ namespace CohesiveRP.Core.Services
                     LoggingManager.LogToFile("611e883a-f3c6-4e9a-9f35-458690125ede", $"The configured LLMProviderConfig [{selectedLLMApiQueryDbModel.ProviderConfigId}] is incorrectly configured. The OpenAI compliant inference server has refused to serve the request due to an incorrect configuration.");
                 }
                 
-                return false;
+                return null;
             }
-
-            return true;
         }
     }
 }

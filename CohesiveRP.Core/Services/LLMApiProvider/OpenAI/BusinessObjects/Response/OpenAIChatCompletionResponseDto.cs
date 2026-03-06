@@ -1,8 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Net;
+using System.Text.Json.Serialization;
+using CohesiveRP.Core.HttpLLMApiProvider;
+using CohesiveRP.Core.PromptContext.Abstractions;
 
 namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Response
 {
-    public class OpenAIChatCompletion
+    public class OpenAIChatCompletionResponseDto : IHttpLLMApiQueryResponseDto
     {
         [JsonPropertyName("id")]
         public string Id { get; set; }
@@ -24,5 +27,10 @@ namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Respons
 
         [JsonPropertyName("service_tier")]
         public string ServiceTier { get; set; }
+
+        [JsonPropertyName("code")]
+        public HttpStatusCode HttpResultCode { get; set; }
+
+        IPromptMessage[] IHttpLLMApiQueryResponseDto.Messages => Messages?.Select(s => s.Message).ToArray();
     }
 }

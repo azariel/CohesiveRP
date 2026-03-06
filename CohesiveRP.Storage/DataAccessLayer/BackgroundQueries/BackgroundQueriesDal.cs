@@ -91,7 +91,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                return dbContext.BackgroundQueries.Where(w => w.Status == BackgroundQueryStatus.Pending).ToArray();
+                return dbContext.BackgroundQueries.Where(w => w.Status == BackgroundQueryStatus.Pending || w.Status == BackgroundQueryStatus.ProcessedWaitingForFinalInstruction).ToArray();
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("13272c00-4ba1-4815-a461-3b6abc9516b3", $"Error when querying pending queries on table BackgroundQueries.", ex);
