@@ -2,7 +2,7 @@ import type { ServerApiResponseDto } from "../ServerApiResponseDto";
 
 interface BackgroundQueryResponseDto extends ServerApiResponseDto {
     chatId : string,
-    linkedMessageId : string,
+    linkedId : string,
     backgroundQueryId : string,
     dependenciesTags : string[],
     tags : string[],

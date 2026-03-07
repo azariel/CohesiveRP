@@ -15,9 +15,9 @@ using CohesiveRP.Storage.QueryModels.Message;
 
 namespace CohesiveRP.Core.LLMProviderManager.Main
 {
-    public class MainLLMQueryProcessor : LLMQueryProcessor
+    public class ShortSummaryLLMQueryProcessor : LLMQueryProcessor
     {
-        public MainLLMQueryProcessor(
+        public ShortSummaryLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
             BackgroundQueryDbModel backgroundQueryDbModel,
@@ -33,7 +33,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 promptContextElementBuilderFactory,
                 storageService,
                 httpLLMApiProviderService,
-                summaryService){}
+                summaryService)
+        { }
 
         /// <summary>
         /// Process the resulting completed query. If it was a 'main', it'll add a new AI message, if it was a sceneTracker, it'll attach the tracker, if it was a summary, it'll attach the summary to an existing message, etc.
@@ -42,13 +43,13 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
         {
             if (backgroundQueryDbModel == null || backgroundQueryDbModel.Status != BackgroundQueryStatus.ProcessingFinalInstruction)
             {
-                LoggingManager.LogToFile("12498826-8f44-4f5f-ac9f-51f7de6e08fa", $"Ignoring background query [{backgroundQueryDbModel?.BackgroundQueryId}]. Status was [{backgroundQueryDbModel?.Status}].");
+                LoggingManager.LogToFile("1d7442145-1b29-499c-963a-64264155fb3f", $"Ignoring background query [{backgroundQueryDbModel?.BackgroundQueryId}]. Status was [{backgroundQueryDbModel?.Status}].");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(backgroundQueryDbModel.Content))
             {
-                LoggingManager.LogToFile("a44dbd75-61fb-46fc-98df-dcea7eaa83c6", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content was null or empty. Task will be set to Pending status for re-generation.");
+                LoggingManager.LogToFile("fc9174e2-55ca-40e9-b8fc-6870e111a069", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content was null or empty. Task will be set to Pending status for re-generation.");
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
                 return;
@@ -59,33 +60,27 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             {
                 LLMApiResponseMessage[] messages = JsonCommonSerializer.DeserializeFromString<LLMApiResponseMessage[]>(backgroundQueryDbModel.Content);
 
-                foreach (var message in messages)
+                if (messages.Length != 1)
                 {
-                    // Add the AI reply message to the end of the chat
-                    CreateMessageQueryModel messageQueryModel = new()
-                    {
-                        ChatId = backgroundQueryDbModel.ChatId,
-                        SourceType = MessageSourceType.AI,
-                        MessageContent = ChatMessageParserUtils.ParseMessage(message.Content),
-                        CreatedAtUtc = DateTime.UtcNow,
-                    };
-
-                    IMessageDbModel newMessageInStorage = await storageService.CreateMessageAsync(messageQueryModel);
-                    backgroundQueryDbModel.LinkedId = newMessageInStorage.MessageId;
+                    LoggingManager.LogToFile("8f7def6e-a58b-4db3-9db0-9ea3ac25d6fa", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content embedding [{messages.Length}] messages generated from the inference server. One message was expected (no more, no less). Task will be set to Pending status for re-generation.");
+                    backgroundQueryDbModel.Content = null;
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
                 }
 
-                // Right before setting the query processor to completed state, we'll launch the background workers
-                if(contextBuilder == null)
+                // Add the AI reply message to the end of the chat
+                CreateSummaryQueryModel messageQueryModel = new()
                 {
-                    await BuildContextAsync();
-                }
+                    ChatId = backgroundQueryDbModel.ChatId,
+                    Content = ChatMessageParserUtils.ParseMessage(messages[0].Content),
+                    CreatedAtUtc = DateTime.UtcNow,
+                };
 
-                _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, contextBuilder.GetChatCompletionPreset()?.Format?.Settings);
-
+                ISummaryDbModel newMessageInStorage = await storageService.CreateShortTermSummaryAsync(messageQueryModel);
+                //backgroundQueryDbModel.LinkedId = newMessageInStorage.SummaryId;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
             } catch (Exception e)
             {
-                LoggingManager.LogToFile("3323ca32-a0b4-414f-a0a7-eedea88c4099", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
+                LoggingManager.LogToFile("27b69224-425c-4df2-8ea9-9c121b689a13", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
             }

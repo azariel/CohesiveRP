@@ -5,6 +5,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.Summary.Short;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
@@ -23,6 +24,7 @@ namespace CohesiveRP.Core.Services
         private IChatCompletionPresetsDal chatCompletionPresetsDal;
         private IBackgroundQueriesDal backgroundQueriesDal;
         private ILLMApiQueriesDal llmApiQueriesDal;
+        private IShortTermSummaryDal shortTermSummaryDal;
 
         public StorageService(
             IChatsDal chatsDal, 
@@ -30,7 +32,8 @@ namespace CohesiveRP.Core.Services
             IGlobalSettingsDal globalSettingsDal, 
             IChatCompletionPresetsDal chatCompletionPresetsDal, 
             IBackgroundQueriesDal backgroundQueriesDal,
-            ILLMApiQueriesDal llmApiQueriesDal)
+            ILLMApiQueriesDal llmApiQueriesDal,
+            IShortTermSummaryDal shortTermSummaryDal)
         {
             this.chatsDal = chatsDal;
             this.messagesDal = messagesDal;
@@ -38,6 +41,7 @@ namespace CohesiveRP.Core.Services
             this.chatCompletionPresetsDal = chatCompletionPresetsDal;
             this.backgroundQueriesDal = backgroundQueriesDal;
             this.llmApiQueriesDal = llmApiQueriesDal;
+            this.shortTermSummaryDal = shortTermSummaryDal;
         }
 
         // Chats
@@ -145,6 +149,13 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId)
         {
             return await llmApiQueriesDal.DeleteQueryByIdAsync(lLMApiQueryId);
+        }
+
+        // Summary
+        // --- Short-Term
+        public async Task<ISummaryDbModel> CreateShortTermSummaryAsync(CreateSummaryQueryModel queryModel)
+        {
+            return await shortTermSummaryDal.AddShortTermSummaryAsync(queryModel);
         }
     }
 }

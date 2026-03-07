@@ -83,7 +83,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
       // If the query is not inProgress, we'll fetch the generated message
       let realMessageFromStorage:ChatMessageResponseDto | null = null;
       if (response?.status !== "InProgress") {
-        realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedMessageId}`);
+        realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedId}`);
 
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if(!response || response.code != 200 || serverApiException?.message) {
@@ -118,8 +118,8 @@ export default function UserInputComponent({ messagesRef }: Props) {
               updatedMessages[tempAIReplyMessageIndex].content = realMessageFromStorage.messageObj.content;
               updatedMessages[tempAIReplyMessageIndex].sourceType = realMessageFromStorage.messageObj.sourceType;
             } else {
-              updatedMessages[tempAIReplyMessageIndex].messageId = response.linkedMessageId;
-              console.error(`Background main query was done, but the underlying message couldn't be retrieved from backend! Impersonating the message with the right id [${response.linkedMessageId}] now, but state is finicky.`);
+              updatedMessages[tempAIReplyMessageIndex].messageId = response.linkedId;
+              console.error(`Background main query was done, but the underlying message couldn't be retrieved from backend! Impersonating the message with the right id [${response.linkedId}] now, but state is finicky.`);
             }
             
           }
@@ -194,12 +194,13 @@ export default function UserInputComponent({ messagesRef }: Props) {
     setPlayerMessage(""); // clear input on success
     
     // reflect those messages in the UI!
+    response.messageObj.messageIndex = activeModule.messages.length + 1;
     setActiveModule((prev) => ({
       ...prev,
       messages: [...(prev.messages || []),// Keep messages history
       response.messageObj,// Add new player message at the bottom
       {
-        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1, messageIndex: null }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
+        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1, messageIndex: prev.messages.length + 2 }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
         mainQueryId: response.mainQueryId,// Track the main query id to know the status of the AI reply
     }));
 

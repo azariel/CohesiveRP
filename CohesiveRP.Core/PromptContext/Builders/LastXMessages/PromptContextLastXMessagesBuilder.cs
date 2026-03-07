@@ -1,6 +1,7 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
+using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 
@@ -10,12 +11,14 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
     {
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
+        private PromptContextSettings settings;
         private ChatDbModel chatDbModel;
 
-        public PromptContextLastXMessagesBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
+        public PromptContextLastXMessagesBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, PromptContextSettings settings, ChatDbModel chatDbModel)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
+            this.settings = settings;
             this.chatDbModel = chatDbModel;
         }
 
@@ -28,10 +31,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             // TODO: Get the amount of messages to keep as-is from settings
-            const int nbMessages = 5;// For Debug
-
             IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatDbModel.ChatId);
-
             if(hotMessages.Length <= 0)
             {
                 return null;
@@ -48,7 +48,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 skipNb = 1;
             }
 
-            List<IMessageDbModel> selectedMessages = orderedMessagesByMostRecent.Skip(skipNb).Take(nbMessages).Reverse().ToList();
+            List<IMessageDbModel> selectedMessages = orderedMessagesByMostRecent.Skip(skipNb).Take(settings.LastXMessages).Reverse().ToList();
 
             if (selectedMessages.Count <= 0)
             {

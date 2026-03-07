@@ -19,8 +19,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         public async Task<string> BuildAsync()
         {
+            string worldTitle = $"Terra";//TODO: fetch from Db
             string worldContent = $"Infer the world from the roleplay context.";//TODO: fetch from Db
-            string userPersonaName = "userName";// TODO: fetch from Db
+            string userPersonaName = "Azariel";// TODO: fetch from Db
 
             if (string.IsNullOrWhiteSpace(worldContent))
             {
@@ -29,6 +30,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             return $"# World{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{item_description}}", worldContent)
+                .Replace("{{item_header}}", worldTitle)
                 .Replace("{{user}}", userPersonaName)}";
         }
     }

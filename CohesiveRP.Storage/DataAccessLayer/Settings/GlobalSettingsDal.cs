@@ -81,6 +81,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Type = ChatCompletionPresetType.Main,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_CHAT_COMPLETION_PRESET,
                                 IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.Summarize,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_SUMMARIZE_COMPLETION_PRESET,
+                                IsDefault = true,
                             }
                         }
                     }

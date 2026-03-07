@@ -16,5 +16,6 @@
         CurrentObjective = 11,
         LastUserMessage = 12,
         BehavioralInstructions = 13,
+        LastXMessagesToSummarize = 14,
     }
 }

@@ -3,5 +3,6 @@
     internal static class StorageConstants
     {
         internal const string DEFAULT_CHAT_COMPLETION_PRESET = "d6ef2aea-8089-4d9c-b87e-891c8df3c326";
+        internal const string DEFAULT_SUMMARIZE_COMPLETION_PRESET = "9cd03a74-367b-486a-b048-df9aaca9a931";
     }
 }

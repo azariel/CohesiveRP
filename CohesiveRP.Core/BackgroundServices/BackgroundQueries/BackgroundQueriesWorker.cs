@@ -77,6 +77,9 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                         {
                             // process the resulting completed query. If it was a 'main', it'll add a new AI message, if it was a sceneTracker, it'll attach the tracker, if it was a summary, it'll attach the summary to an existing message, etc.
                             await queryProcessor.ProcessCompletedQueryAsync();
+
+                            // TODO: if query was set to completed status, set a TTL for auto-delete
+
                             break;
                         }
 

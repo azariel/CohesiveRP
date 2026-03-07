@@ -23,5 +23,6 @@ namespace CohesiveRP.Core.Services
         Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag);
         Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery);
         Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId);
+        Task<ISummaryDbModel> CreateShortTermSummaryAsync(CreateSummaryQueryModel queryModel);
     }
 }

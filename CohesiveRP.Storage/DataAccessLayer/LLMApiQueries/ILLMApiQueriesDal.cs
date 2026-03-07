@@ -1,4 +1,7 @@
-﻿namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
+﻿using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.QueryModels.Message;
+
+namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
 {
     public interface ILLMApiQueriesDal
     {

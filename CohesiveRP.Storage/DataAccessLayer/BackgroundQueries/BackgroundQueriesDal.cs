@@ -133,7 +133,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                return dbContext.BackgroundQueries.FirstOrDefault(f=>f.BackgroundQueryId == queryId);
+                return dbContext.BackgroundQueries.FirstOrDefault(f => f.BackgroundQueryId == queryId);
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("16533a30-0c2c-429c-9287-17db226fd947", $"Error when querying query by id [{queryId}] on table BackgroundQueries.", ex);

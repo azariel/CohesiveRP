@@ -1,8 +1,9 @@
 ﻿using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
-using CohesiveRP.Core.PromptContext.Main;
+using CohesiveRP.Core.PromptContext.Summary;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.PromptContext
 {
@@ -13,10 +14,16 @@ namespace CohesiveRP.Core.PromptContext
             switch (generationTag)
             {
                 case BackgroundQuerySystemTags.main:
-                    return new MainPromptContextBuilder(promptContextElementBuilderFactory, storageService);
+                    return new PromptContextBuilder(ChatCompletionPresetType.Main, promptContextElementBuilderFactory, storageService);
                 case BackgroundQuerySystemTags.sceneTracker:
                     return null;
-                case BackgroundQuerySystemTags.summary:
+                case BackgroundQuerySystemTags.shortSummary:
+                    return new PromptContextBuilder(ChatCompletionPresetType.Summarize, promptContextElementBuilderFactory, storageService);
+                case BackgroundQuerySystemTags.mediumSummary:
+                    return null;
+                case BackgroundQuerySystemTags.longSummary:
+                    return null;
+                case BackgroundQuerySystemTags.extraSummary:
                     return null;
                 case BackgroundQuerySystemTags.custom:
                     return null;

@@ -40,6 +40,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         public string ChatId { get; set; }
 
         [MaxLength(32)]
-        public string LinkedMessageId { get; set; }
+        public string LinkedId { get; set; }
     }
 }

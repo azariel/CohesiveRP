@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Users;
@@ -93,5 +94,7 @@ namespace CohesiveRP.Storage.Common
         public DbSet<BackgroundQueryDbModel> BackgroundQueries { get; set; }
 
         public DbSet<LLMApiQueryDbModel> LLMApiQueries { get; set; }
+
+        public DbSet<ShortTermSummaryDbModel> ShortTermSummaries { get; set; }
     }
 }
