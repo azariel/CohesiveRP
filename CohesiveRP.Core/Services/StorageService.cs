@@ -3,6 +3,7 @@ using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Summary.Short;
@@ -27,10 +28,10 @@ namespace CohesiveRP.Core.Services
         private IShortTermSummaryDal shortTermSummaryDal;
 
         public StorageService(
-            IChatsDal chatsDal, 
-            IMessagesDal messagesDal, 
-            IGlobalSettingsDal globalSettingsDal, 
-            IChatCompletionPresetsDal chatCompletionPresetsDal, 
+            IChatsDal chatsDal,
+            IMessagesDal messagesDal,
+            IGlobalSettingsDal globalSettingsDal,
+            IChatCompletionPresetsDal chatCompletionPresetsDal,
             IBackgroundQueriesDal backgroundQueriesDal,
             ILLMApiQueriesDal llmApiQueriesDal,
             IShortTermSummaryDal shortTermSummaryDal)
@@ -112,6 +113,11 @@ namespace CohesiveRP.Core.Services
             return await messagesDal.CreateMessageAsync(message);
         }
 
+        public async Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages)
+        {
+            return await messagesDal.UpdateHotMessagesAsync(messages);
+        }
+
         // Settings
         public async Task<GlobalSettingsDbModel> GetGlobalSettingsAsync()
         {
@@ -127,6 +133,11 @@ namespace CohesiveRP.Core.Services
         public async Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId)
         {
             return await backgroundQueriesDal.GetBackgroundQueryAsync(queryId);
+        }
+
+        public async Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync()
+        {
+            return await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
         }
 
         // ChatCompletionPresets
@@ -156,6 +167,11 @@ namespace CohesiveRP.Core.Services
         public async Task<ISummaryDbModel> CreateShortTermSummaryAsync(CreateSummaryQueryModel queryModel)
         {
             return await shortTermSummaryDal.AddShortTermSummaryAsync(queryModel);
+        }
+
+        public async Task<ShortTermSummaryDbModel> GetShortTermSummary(string chatId)
+        {
+            return await shortTermSummaryDal.GetShortTermSummaryAsync(chatId);
         }
     }
 }

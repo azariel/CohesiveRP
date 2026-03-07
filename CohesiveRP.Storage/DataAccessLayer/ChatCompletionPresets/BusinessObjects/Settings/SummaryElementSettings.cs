@@ -5,6 +5,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjec
     public class SummaryElementSettings
     {
         [JsonPropertyName("nbMessageInChunk")]
-        public int NbMessageInChunk { get; set; } = 5;
+        public int NbMessageInChunk { get; set; } = 3;
     }
 }

@@ -49,6 +49,25 @@ export default function UserInputComponent({ messagesRef }: Props) {
     };
   }, [messagesRef]);
 
+  const adjustTextareaHeight = () => {
+    const element = textareaRef.current;
+    if (!element)
+      return;
+
+    element.style.height = "auto";
+    const targetHeight = element.scrollHeight;
+    element.style.height = `${Math.min(targetHeight, 140)}px`;
+    element.style.overflowY = targetHeight > 140 ? "auto" : "hidden";
+
+    if (messagesRef?.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [playerMessage]);
+
   const handleInput = () => {
     const el = textareaRef.current;
     if (!el) {
@@ -200,7 +219,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
       messages: [...(prev.messages || []),// Keep messages history
       response.messageObj,// Add new player message at the bottom
       {
-        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1, messageIndex: prev.messages.length + 2 }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
+        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1, messageIndex: prev.messages.length + 2, summarized: false }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
         mainQueryId: response.mainQueryId,// Track the main query id to know the status of the AI reply
     }));
 

@@ -1,7 +1,9 @@
-﻿using CohesiveRP.Core.Services;
+﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
@@ -22,18 +24,30 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         public async Task<string> BuildAsync()
         {
+            if (promptContextFormatElement == null || chatDbModel == null)
+            {
+                LoggingManager.LogToFile("b73fa32a-6110-4e23-b1d5-603719ce0943", $"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
+                return null;
+            }
 
+            ShortTermSummaryDbModel shortTermSummary = await storageService.GetShortTermSummary(chatDbModel.ChatId);
+            if (shortTermSummary == null)
+            {
+                return null;
+            }
 
+            // Inject that short term summary
 
-            //string ShortTermMemoryContent = "";//TODO: fetch from Db
+            string output = $"# Previous facts, events, speech and actions (Short-Term){Environment.NewLine}";
 
-            //if (string.IsNullOrWhiteSpace(ShortTermMemoryContent))
-            //{
-            //    return string.Empty;
-            //}
+            foreach (ISummaryDbModel summaryElement in shortTermSummary.Summaries)
+            {
+                // TODO: add a notion of time?
+                string value = $"{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{summaryElement.Content}")}";
+                output += value;
+            }
 
-            //return $"# Short-term memory{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", ShortTermMemoryContent)}";
-            return null;
+            return output;
         }
     }
 }

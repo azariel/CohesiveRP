@@ -1,5 +1,4 @@
-﻿using CohesiveRP.Common.BusinessObjects;
-using CohesiveRP.Common.Diagnostics;
+﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.PromptContext.Abstractions;
@@ -10,6 +9,7 @@ using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
 
@@ -67,16 +67,21 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
                 }
 
-                // Add the AI reply message to the end of the chat
+                // Add the new summary entry
                 CreateSummaryQueryModel messageQueryModel = new()
                 {
                     ChatId = backgroundQueryDbModel.ChatId,
+                    MessageIdTracker = backgroundQueryDbModel.LinkedId,
                     Content = ChatMessageParserUtils.ParseMessage(messages[0].Content),
                     CreatedAtUtc = DateTime.UtcNow,
                 };
 
-                ISummaryDbModel newMessageInStorage = await storageService.CreateShortTermSummaryAsync(messageQueryModel);
-                //backgroundQueryDbModel.LinkedId = newMessageInStorage.SummaryId;
+                ISummaryDbModel newSummaryEntryInStorage = await storageService.CreateShortTermSummaryAsync(messageQueryModel);
+
+                // Update the summarized messages
+                await UpdateSummarizedMessagesAsync(messageQueryModel.ChatId, messageQueryModel.MessageIdTracker, contextBuilder.GetChatCompletionPreset().Format.Settings.LastXMessages);
+
+                //backgroundQueryDbModel.LinkedId = newSummaryEntryInStorage.MessageIdTracker;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
             } catch (Exception e)
             {
@@ -84,6 +89,40 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
             }
+        }
+
+        private async Task UpdateSummarizedMessagesAsync(string chatId, string mostRecentSummarizedMessageId, int nbMessagesSummarized)
+        {
+            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatId);
+
+            hotMessages = hotMessages.OrderByDescending(o => o.CreatedAtUtc).ToArray();
+            int indexOfTargetLastMessage = hotMessages.IndexOf(hotMessages.FirstOrDefault(f => f.MessageId == mostRecentSummarizedMessageId));
+            if (indexOfTargetLastMessage < 0)
+            {
+                throw new Exception($"Invalid contextLinkedId [{mostRecentSummarizedMessageId}]. ChatId: [{chatId}] hot messages did not contain this messageId.");
+            }
+
+            IMessageDbModel[] messagesToProcess = hotMessages.Skip(indexOfTargetLastMessage).Take(nbMessagesSummarized).ToArray();
+
+            if (messagesToProcess.Length < nbMessagesSummarized)
+            {
+                throw new Exception($"Not enough messages to summarize to short summary module. MostRecentSummarizedMessageId: [{mostRecentSummarizedMessageId}]. ChatId: [{chatId}].");
+            }
+
+            // Process the messages
+            hotMessages = hotMessages.OrderBy(o => o.CreatedAtUtc).ToArray();
+
+            foreach (var message in messagesToProcess)
+            {
+                hotMessages.FirstOrDefault(w => w.MessageId == message.MessageId)?.Summarized = true;
+            }
+
+            HotMessagesDbModel request = new HotMessagesDbModel
+            {
+                ChatId = chatId,
+                SerializedMessages = hotMessages.Cast<MessageDbModel>().ToList(),
+            };
+            await storageService.UpdateHotMessagesAsync(request);
         }
     }
 }

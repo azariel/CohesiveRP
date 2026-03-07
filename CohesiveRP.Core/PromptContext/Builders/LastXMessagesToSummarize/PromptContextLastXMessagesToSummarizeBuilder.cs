@@ -13,40 +13,48 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private PromptContextFormatElement promptContextFormatElement;
         private PromptContextSettings settings;
         private ChatDbModel chatDbModel;
+        private string contextLinkedId;
 
-        public PromptContextLastXMessagesToSummarizeBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, PromptContextSettings settings, ChatDbModel chatDbModel)
+        public PromptContextLastXMessagesToSummarizeBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, PromptContextSettings settings, ChatDbModel chatDbModel, string contextLinkedId)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.settings = settings;
             this.chatDbModel = chatDbModel;
+            this.contextLinkedId = contextLinkedId;
         }
 
         public async Task<string> BuildAsync()
         {
-            if (promptContextFormatElement == null || chatDbModel == null)
+            if (promptContextFormatElement == null || chatDbModel == null || contextLinkedId == null)
             {
-                LoggingManager.LogToFile("5f5a5855-14e4-48c5-ae4f-34e78defe5c5", $"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
-                return null;
+                throw new Exception($"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
             }
 
             // TODO: Get the amount of messages to keep as-is from settings
             IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatDbModel.ChatId);
-            hotMessages = hotMessages.OrderByDescending(o => o.CreatedAtUtc).Skip(settings.LastXMessages + 1).ToArray();
+            hotMessages = hotMessages.OrderByDescending(o => o.CreatedAtUtc).ToArray();
 
-            if (hotMessages.Length < settings.Summary.Short.NbMessageInChunk)
+            int indexOfTargetLastMessage = hotMessages.IndexOf(hotMessages.FirstOrDefault(f => f.MessageId == contextLinkedId));
+            if (indexOfTargetLastMessage < 0)
             {
-                // Not enough messages to summarize to short summary module
-                return null;
+                throw new Exception($"Invalid contextLinkedId [{contextLinkedId}]. ChatId: [{chatDbModel?.ChatId}] hot messages did not contain this messageId.");
+            }
+
+            IMessageDbModel[] messagesToProcess = hotMessages.Skip(indexOfTargetLastMessage).Take(settings.Summary.Short.NbMessageInChunk).ToArray();
+
+            if (messagesToProcess.Length < settings.Summary.Short.NbMessageInChunk)
+            {
+                throw new Exception($"Not enough messages to summarize to short summary module. ContextLinkedId: [{contextLinkedId}]. ChatId: [{chatDbModel?.ChatId}].");
             }
 
             // Filter for a chunk ordered by createdAt
-            hotMessages = hotMessages.Reverse().Take(settings.Summary.Short.NbMessageInChunk).ToArray();
+            messagesToProcess = messagesToProcess.Reverse().ToArray();
 
             string output = $"# Messages to summarize{Environment.NewLine}{promptContextFormatElement.Options?.Format}";
 
             string value = string.Empty;
-            foreach (IMessageDbModel message in hotMessages)
+            foreach (IMessageDbModel message in messagesToProcess)
             {
                 value += $"{message.SourceType}:{Environment.NewLine}<message>{message.Content}</message>{Environment.NewLine}{Environment.NewLine}";
             }

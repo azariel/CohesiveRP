@@ -15,7 +15,7 @@ namespace CohesiveRP.Core.PromptContext.Builders
             this.storageService = storageService;
         }
 
-        public async Task<IPromptContextElementBuilder> GenerateBuilderAsync(PromptContextFormatElement contextElement, PromptContextSettings settings, ChatDbModel chatDbModel)
+        public async Task<IPromptContextElementBuilder> GenerateBuilderAsync(PromptContextFormatElement contextElement, PromptContextSettings settings, ChatDbModel chatDbModel, string contextLinkedId)
         {
             if (contextElement?.Tag == null)
             {
@@ -53,7 +53,9 @@ namespace CohesiveRP.Core.PromptContext.Builders
                 case PromptContextFormatTag.BehavioralInstructions:
                     return new PromptContextBehavioralInstructionsBuilder(storageService, contextElement, chatDbModel);
                 case PromptContextFormatTag.LastXMessagesToSummarize:
-                    return new PromptContextLastXMessagesToSummarizeBuilder(storageService, contextElement, settings, chatDbModel);
+                    return new PromptContextLastXMessagesToSummarizeBuilder(storageService, contextElement, settings, chatDbModel, contextLinkedId);
+                    case PromptContextFormatTag.LastUnsummarizedMessages:
+                    return new PromptContextLastUnsummarizedMessagesBuilder(storageService, contextElement, settings, chatDbModel);
                 default:
                     throw new Exception($"Unhandled [{contextElement.Tag}].");
             }

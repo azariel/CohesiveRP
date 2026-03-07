@@ -17,5 +17,6 @@
         LastUserMessage = 12,
         BehavioralInstructions = 13,
         LastXMessagesToSummarize = 14,
+        LastUnsummarizedMessages = 15,
     }
 }

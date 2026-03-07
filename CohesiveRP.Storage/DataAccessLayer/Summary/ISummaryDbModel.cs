@@ -4,5 +4,6 @@
     {
         string Content { get; set; }
         DateTime CreatedAtUtc { get; set; }
+        string MessageIdTracker { get; set; }
     }
 }

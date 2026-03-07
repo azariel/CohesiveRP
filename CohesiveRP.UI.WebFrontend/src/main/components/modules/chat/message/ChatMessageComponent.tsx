@@ -40,6 +40,7 @@ export default function ChatMessageComponent({ message, enableSwipeBtn = false }
               glm-reasoner (?m??s)
             </div>
             <div className={styles.messageHeaderContentCreatedAt}>
+              {message?.summarized ? (<HiBeaker className={styles.messageHeaderSummarizeIcon} />) : ''}
               {message?.createdAtUtc ? FormatUtcDate(message.createdAtUtc) : ''}
             </div>
           </div>

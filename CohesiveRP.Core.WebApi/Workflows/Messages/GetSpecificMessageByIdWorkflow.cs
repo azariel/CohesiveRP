@@ -34,6 +34,7 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
                 MessageId = message.MessageId,
                 Content = message.Content,
                 SourceType = message.SourceType,
+                Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,
             },
             MainQueryId = null

@@ -8,5 +8,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         string Content { get; set; }
         MessageSourceType SourceType { get; set; }
         DateTime CreatedAtUtc { get; set; }
+        bool Summarized { get; set; }
     }
 }

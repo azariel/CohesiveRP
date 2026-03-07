@@ -14,15 +14,17 @@ namespace CohesiveRP.Core.PromptContext.Summary
         private IPromptContextElementBuilderFactory promptContextElementBuilderFactory;
         private IStorageService storageService;
         private ChatCompletionPresetType presetType;
+        private string contextLinkedId;
         private ChatCompletionPresetsDbModel presetTypeChatCompletionPreset;
 
         public ChatCompletionPresetsDbModel GetChatCompletionPreset() => presetTypeChatCompletionPreset;
 
-        public PromptContextBuilder(ChatCompletionPresetType presetType, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService)
+        public PromptContextBuilder(ChatCompletionPresetType presetType, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService, string contextLinkedId)
         {
             this.promptContextElementBuilderFactory = promptContextElementBuilderFactory;
             this.storageService = storageService;
             this.presetType = presetType;
+            this.contextLinkedId = contextLinkedId;
         }
 
         public async Task<IPromptContext> BuildAsync(string chatId)
@@ -59,7 +61,7 @@ namespace CohesiveRP.Core.PromptContext.Summary
                 StringBuilder str = new();
                 foreach (var contextElement in presetTypeChatCompletionPreset.Format.OrderedElementsWithinTheGlobalPromptContext)
                 {
-                    var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement, presetTypeChatCompletionPreset.Format.Settings, chat);
+                    var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement, presetTypeChatCompletionPreset.Format.Settings, chat, contextLinkedId);
 
                     if (builder == null)
                     {

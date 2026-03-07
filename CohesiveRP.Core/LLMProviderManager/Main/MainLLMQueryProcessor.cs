@@ -66,6 +66,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     {
                         ChatId = backgroundQueryDbModel.ChatId,
                         SourceType = MessageSourceType.AI,
+                        Summarized = false,// New message, so it's not summarized yet
                         MessageContent = ChatMessageParserUtils.ParseMessage(message.Content),
                         CreatedAtUtc = DateTime.UtcNow,
                     };
@@ -77,7 +78,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 // Right before setting the query processor to completed state, we'll launch the background workers
                 if(contextBuilder == null)
                 {
-                    await BuildContextAsync();
+                    await BuildContextAsync(backgroundQueryDbModel.LinkedId);
                 }
 
                 _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, contextBuilder.GetChatCompletionPreset()?.Format?.Settings);

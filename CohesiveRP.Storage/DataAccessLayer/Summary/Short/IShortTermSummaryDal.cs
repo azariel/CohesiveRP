@@ -6,5 +6,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Summary.Short
     public interface IShortTermSummaryDal
     {
         Task<ISummaryDbModel> AddShortTermSummaryAsync(CreateSummaryQueryModel queryModel);
+        Task<ShortTermSummaryDbModel> GetShortTermSummaryAsync(string chatId);
     }
 }

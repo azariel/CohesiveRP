@@ -9,16 +9,16 @@ namespace CohesiveRP.Core.PromptContext
 {
     public class PromptContextBuilderFactory : IPromptContextBuilderFactory
     {
-        public async Task<IPromptContextBuilder> GenerateAsync(BackgroundQuerySystemTags generationTag, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService)
+        public async Task<IPromptContextBuilder> GenerateAsync(BackgroundQuerySystemTags generationTag, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService, string contextLinkedId)
         {
             switch (generationTag)
             {
                 case BackgroundQuerySystemTags.main:
-                    return new PromptContextBuilder(ChatCompletionPresetType.Main, promptContextElementBuilderFactory, storageService);
+                    return new PromptContextBuilder(ChatCompletionPresetType.Main, promptContextElementBuilderFactory, storageService, contextLinkedId);
                 case BackgroundQuerySystemTags.sceneTracker:
                     return null;
                 case BackgroundQuerySystemTags.shortSummary:
-                    return new PromptContextBuilder(ChatCompletionPresetType.Summarize, promptContextElementBuilderFactory, storageService);
+                    return new PromptContextBuilder(ChatCompletionPresetType.Summarize, promptContextElementBuilderFactory, storageService, contextLinkedId);
                 case BackgroundQuerySystemTags.mediumSummary:
                     return null;
                 case BackgroundQuerySystemTags.longSummary:

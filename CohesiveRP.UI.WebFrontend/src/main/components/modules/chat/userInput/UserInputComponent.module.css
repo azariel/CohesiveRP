@@ -33,14 +33,14 @@
 }
 
 .inputControl {
-    flex: 1;
+    display: block;
     min-width: 0;
     min-height: 0;
     width: 100%;
     height: auto;
     
     margin: 0;
-    padding: 0.4em 0em 0.1em 0.6em;
+    padding: 0.5em 0.6em;
     resize: none;
     border: none;
     outline: none;

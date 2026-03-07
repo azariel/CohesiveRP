@@ -68,6 +68,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 var dbModel = new BackgroundQueryDbModel()
                 {
                     BackgroundQueryId = Guid.NewGuid().ToString(),
+                    LinkedId = queryModel.LinkedId,
                     InsertDateTimeUtc = DateTime.UtcNow,
                     ChatId = queryModel.ChatId,
                     Status = BackgroundQueryStatus.Pending,
@@ -137,6 +138,24 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("16533a30-0c2c-429c-9287-17db226fd947", $"Error when querying query by id [{queryId}] on table BackgroundQueries.", ex);
+                return null;
+            }
+        }
+
+        public async Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync()
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                return dbContext.BackgroundQueries.Where(w => 
+                    w.Status == BackgroundQueryStatus.Pending ||
+                    w.Status == BackgroundQueryStatus.InProgress ||
+                    w.Status == BackgroundQueryStatus.ProcessingFinalInstruction ||
+                    w.Status == BackgroundQueryStatus.ProcessedWaitingForFinalInstruction
+                ).ToArray();
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("6a5dfca3-31a0-4dd4-b8f4-8126524d6c48", $"Error when querying pending or unprocessed queries on table BackgroundQueries.", ex);
                 return null;
             }
         }

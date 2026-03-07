@@ -54,7 +54,7 @@ namespace CohesiveRP.Core.LLMProviderManager
                 return;
             }
 
-            IPromptContext promptContext = await BuildContextAsync();
+            IPromptContext promptContext = await BuildContextAsync(backgroundQueryDbModel.LinkedId);
 
             try
             {
@@ -87,10 +87,10 @@ namespace CohesiveRP.Core.LLMProviderManager
             }
         }
 
-        protected virtual async Task<IPromptContext> BuildContextAsync()
+        protected virtual async Task<IPromptContext> BuildContextAsync(string backgroundQueryLinkedId)
         {
             // Generate a context builder appropriate for our MainQuery
-            this.contextBuilder = await contextBuilderFactory.GenerateAsync(tag, promptContextElementBuilderFactory, storageService);
+            this.contextBuilder = await contextBuilderFactory.GenerateAsync(tag, promptContextElementBuilderFactory, storageService, backgroundQueryLinkedId);
             return await contextBuilder.BuildAsync(backgroundQueryDbModel.ChatId);
         }
 

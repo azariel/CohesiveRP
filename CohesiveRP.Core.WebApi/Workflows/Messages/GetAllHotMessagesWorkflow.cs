@@ -31,6 +31,7 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
                 MessageIndex = index + 1,
                 Content = s.Content,
                 SourceType = s.SourceType,
+                Summarized = s.Summarized,
                 CreatedAtUtc = s.CreatedAtUtc,
             }).ToArray(),
         };

@@ -82,6 +82,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 MessageDbModel messageDbModel = new MessageDbModel
                 {
                     MessageId = Guid.NewGuid().ToString(),
+                    Summarized = queryModel.Summarized,
                     Content = queryModel.MessageContent,
                     SourceType = queryModel.SourceType,
                     CreatedAtUtc = queryModel.CreatedAtUtc,
@@ -128,6 +129,39 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
             {
                 LoggingManager.LogToFile("49529c3a-aa3e-41a9-ad12-209faa0d4047", $"Error when querying Db on table HOT messages.", ex);
                 return null;
+            }
+        }
+
+        public async Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel dbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+
+                // Constant fields not to update
+                var insertDateTimeUtc = dbContext.HotMessages.AsNoTracking().FirstOrDefault(f=>f.ChatId == dbModel.ChatId)?.InsertDateTimeUtc;
+
+                if(insertDateTimeUtc == null)
+                {
+                    LoggingManager.LogToFile("fe04e764-2cb2-4f74-9d1e-7d20b801526a", $"Can't update hot messages associated with chatId [{dbModel.ChatId}]. HotMessages related to this chat are not in storage.");
+                    return false;
+                }
+
+                dbModel.InsertDateTimeUtc = insertDateTimeUtc;
+
+                EntityEntry<HotMessagesDbModel> result = dbContext.HotMessages.Update(dbModel);
+                if (result.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("b5bf0a01-1371-4373-be47-b06882018280", $"Error when updating Dbmodel on table messages. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("ba7aac69-13d6-402f-8777-b575a455a175", $"Error when querying pending queries on table messages.", ex);
+                return false;
             }
         }
     }

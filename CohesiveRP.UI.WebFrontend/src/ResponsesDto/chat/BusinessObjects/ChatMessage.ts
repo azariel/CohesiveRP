@@ -4,6 +4,7 @@ interface ChatMessage {
     content: string | null;
     sourceType: number;
     createdAtUtc: string | null;
+    summarized: boolean | null;
 }
 
 export type {

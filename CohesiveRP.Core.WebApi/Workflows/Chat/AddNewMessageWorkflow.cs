@@ -46,6 +46,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         CreateMessageQueryModel messageQueryModel = new()
         {
             ChatId = requestDto.ChatId,
+            Summarized = false,// adding a brand new message, so ofc it's not summarized yet
             SourceType = Common.BusinessObjects.MessageSourceType.User,
             MessageContent = requestDto.Message.Content,
             CreatedAtUtc = DateTime.UtcNow,
@@ -61,6 +62,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString()],
             Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'
         };
+
         var backgroundQuery = await storageService.CreateBackgroundQueryAsync(backgroundQueryModel);// Note that we're still not querying the LLM at this point, we're adding a query to be process async against the backend and that process will eventually query the LLMs
 
         // Convert DbModel to an acceptable web model (without sensitive information)
@@ -70,6 +72,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             Message = new MessageDefinition
             {
                 MessageId = message.MessageId,
+                Summarized = message.Summarized,
                 Content = message.Content,
             },
             MainQueryId = backgroundQuery.BackgroundQueryId,

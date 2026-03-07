@@ -3,7 +3,6 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
-using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.Message;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +34,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Summary.Short
                 // Convert model
                 SummaryDbModel summaryDbModel = new SummaryDbModel
                 {
+                    MessageIdTracker = queryModel.MessageIdTracker,
                     Content = queryModel.Content,
                     CreatedAtUtc = queryModel.CreatedAtUtc,
                 };
@@ -81,6 +81,19 @@ namespace CohesiveRP.Storage.DataAccessLayer.Summary.Short
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("a5b8aa90-68de-45a0-bf12-49e3c95b5f94", $"Error when querying Db on table ShortTermSummaries.", ex);
+                return null;
+            }
+        }
+
+        public async Task<ShortTermSummaryDbModel> GetShortTermSummaryAsync(string chatId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                return dbContext.ShortTermSummaries.FirstOrDefault(w => w.ChatId == chatId);
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("4136e601-ec63-42b4-bee7-ec39b742bbf7", $"Error when querying Db on table ShortTermSummaries.", ex);
                 return null;
             }
         }

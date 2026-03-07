@@ -6,6 +6,6 @@ namespace CohesiveRP.Core.PromptContext.Builders
 {
     public interface IPromptContextElementBuilderFactory
     {
-        Task<IPromptContextElementBuilder> GenerateBuilderAsync(PromptContextFormatElement contextElement, PromptContextSettings settings, ChatDbModel chatDbModel);
+        Task<IPromptContextElementBuilder> GenerateBuilderAsync(PromptContextFormatElement contextElement, PromptContextSettings settings, ChatDbModel chatDbModel, string contextLinkedId);
     }
 }

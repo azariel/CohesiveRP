@@ -6,6 +6,8 @@ namespace CohesiveRP.Storage.QueryModels.BackgroundQuery
     {
         public string ChatId { get; set; }
 
+        public string LinkedId { get; set; }
+
         /// <summary>
         /// Tags tied to the background query. This serves the purpose of knowing on which LLM provider to run the actual query for synchronisation purpose.
         /// </summary>

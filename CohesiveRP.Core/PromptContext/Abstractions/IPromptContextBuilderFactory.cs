@@ -6,6 +6,6 @@ namespace CohesiveRP.Core.PromptContext.Abstractions
 {
     public interface IPromptContextBuilderFactory
     {
-        Task<IPromptContextBuilder> GenerateAsync(BackgroundQuerySystemTags generationTag, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService);
+        Task<IPromptContextBuilder> GenerateAsync(BackgroundQuerySystemTags generationTag, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService, string contextLinkedId);
     }
 }
