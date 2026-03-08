@@ -37,7 +37,6 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             // Inject that short term summary
-
             string output = $"# Previous facts, events, speech and actions (Short-Term){Environment.NewLine}";
 
             foreach (ISummaryDbModel summaryElement in shortTermSummary.Summaries)
@@ -47,6 +46,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 output += value;
             }
 
+            output += Environment.NewLine;
             return output;
         }
     }

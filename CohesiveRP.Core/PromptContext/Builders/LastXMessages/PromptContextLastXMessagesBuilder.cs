@@ -48,7 +48,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 skipNb = 1;
             }
 
-            List<IMessageDbModel> selectedMessages = orderedMessagesByMostRecent.Skip(skipNb).Take(settings.LastXMessages).Reverse().ToList();
+            List<IMessageDbModel> selectedMessages = orderedMessagesByMostRecent.Skip(skipNb).Take(settings.LastXMessages).Reverse().ToList();// TODO: check LastXMessages - 1?
 
             if (selectedMessages.Count <= 0)
             {

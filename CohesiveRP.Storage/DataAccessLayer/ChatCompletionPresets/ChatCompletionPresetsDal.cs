@@ -40,7 +40,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     {
                         Settings = new PromptContextSettings
                         {
-                            LastXMessages = 2,// That amount of messages + 1 (due to player message) are protected. So you will always have this amount + 1 in raw messages sent to the AI. The rest may be summarized.
+                            LastXMessages = 3,// That amount of messages are protected. So you will always have this amount in raw messages sent to the AI. The rest may be summarized.
                         },
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
@@ -168,7 +168,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     {
                         Settings = new PromptContextSettings
                         {
-                            LastXMessages = 2,// should match with others logically
+                            LastXMessages = 3,// should match with others logically
                         },
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {

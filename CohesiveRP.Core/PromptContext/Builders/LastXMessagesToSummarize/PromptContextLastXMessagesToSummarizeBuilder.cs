@@ -1,5 +1,4 @@
-﻿using CohesiveRP.Common.Diagnostics;
-using CohesiveRP.Core.Services;
+﻿using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Chats;

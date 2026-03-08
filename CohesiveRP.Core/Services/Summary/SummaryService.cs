@@ -50,14 +50,14 @@ namespace CohesiveRP.Core.Services.Summary
 
             hotMessagesCopy = hotMessagesCopy?.Where(w => !w.Summarized).ToList();
 
-            if (hotMessagesCopy.Count < settings.LastXMessages + 1 + settings.Summary.Short.NbMessageInChunk)
+            if (hotMessagesCopy.Count < settings.LastXMessages + settings.Summary.Short.NbMessageInChunk)
             {
                 return;
             }
 
             // We know that the 'main' context builder is generating the last user message + {settings.LastXMessages} amount of raw messages
             // Skip the 'reserved' messages
-            hotMessagesCopy = hotMessagesCopy.OrderByDescending(o => o.CreatedAtUtc).Skip(settings.LastXMessages + 1).ToList();
+            hotMessagesCopy = hotMessagesCopy.OrderByDescending(o => o.CreatedAtUtc).Skip(settings.LastXMessages).ToList();
 
             if (hotMessagesCopy.Count < settings.Summary.Short.NbMessageInChunk)
             {
