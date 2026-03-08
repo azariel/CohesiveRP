@@ -1,6 +1,6 @@
 ﻿namespace CohesiveRP.Storage.DataAccessLayer.Messages
 {
-    public interface ISummaryDbModel
+    public interface ISummaryEntryDbModel
     {
         string Content { get; set; }
         DateTime CreatedAtUtc { get; set; }

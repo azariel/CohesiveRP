@@ -1,6 +1,4 @@
-﻿using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Settings;
-
-namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format
+﻿namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format
 {
     public class GlobalPromptContextFormat
     {
@@ -20,6 +18,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjec
             # behavioral instruction (300 tokens) / think step by step
          * */
         public List<PromptContextFormatElement> OrderedElementsWithinTheGlobalPromptContext { get; set; } = new();
-        public PromptContextSettings Settings { get; set; } = new();
+        //public PromptContextSettings Settings { get; set; } = new();
     }
 }

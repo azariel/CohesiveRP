@@ -23,4 +23,8 @@
       <ProjectReference Include="..\CohesiveRP.Common\CohesiveRP.Common.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="DataAccessLayer\Summary\Short\" />
+    </ItemGroup>
+
 </Project>

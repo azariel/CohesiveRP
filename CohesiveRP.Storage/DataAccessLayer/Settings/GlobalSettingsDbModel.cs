@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
+using CohesiveRP.Storage.DataAccessLayer.Settings.Summary;
 using CohesiveRP.Storage.JsonConverters;
 using CohesiveRP.Storage.Sqlite;
 
@@ -20,6 +21,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings
         [MaxLength(32)]
         [Key]
         public string GlobalSettingsId { get; set; }
+
+        [JsonValueConverter]
+        public SummarySettings Summary { get; set; }
 
         [JsonValueConverter]
         public List<LLMProviderConfig> LLMProviders { get; set; }

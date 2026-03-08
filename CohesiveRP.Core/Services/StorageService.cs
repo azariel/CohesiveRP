@@ -25,7 +25,7 @@ namespace CohesiveRP.Core.Services
         private IChatCompletionPresetsDal chatCompletionPresetsDal;
         private IBackgroundQueriesDal backgroundQueriesDal;
         private ILLMApiQueriesDal llmApiQueriesDal;
-        private IShortTermSummaryDal shortTermSummaryDal;
+        private ISummaryDal summaryDal;
 
         public StorageService(
             IChatsDal chatsDal,
@@ -34,7 +34,7 @@ namespace CohesiveRP.Core.Services
             IChatCompletionPresetsDal chatCompletionPresetsDal,
             IBackgroundQueriesDal backgroundQueriesDal,
             ILLMApiQueriesDal llmApiQueriesDal,
-            IShortTermSummaryDal shortTermSummaryDal)
+            ISummaryDal summaryDal)
         {
             this.chatsDal = chatsDal;
             this.messagesDal = messagesDal;
@@ -42,7 +42,7 @@ namespace CohesiveRP.Core.Services
             this.chatCompletionPresetsDal = chatCompletionPresetsDal;
             this.backgroundQueriesDal = backgroundQueriesDal;
             this.llmApiQueriesDal = llmApiQueriesDal;
-            this.shortTermSummaryDal = shortTermSummaryDal;
+            this.summaryDal = summaryDal;
         }
 
         // Chats
@@ -71,11 +71,11 @@ namespace CohesiveRP.Core.Services
                     queryModel.SelectedChatCompletionPresets =
                     [
                         ..defaultChatCompletionPresetsFiltered.Select(s=> new ChatCompletionPresetSelection
-                    {
-                        ChatCompletionPresetId = s.ChatCompletionPresetId,
-                        Type = s.Type,
-                    }),
-                ];
+                        {
+                            ChatCompletionPresetId = s.ChatCompletionPresetId,
+                            Type = s.Type,
+                        }),
+                    ];
                 } catch (Exception e)
                 {
                     LoggingManager.LogToFile("73d8e0f2-2e34-4624-9c79-baedde5d3e40", $"Couldn't force default ChatCompletionPresets on the new Chat. Chat can't be created without ChatCompletionPresets. Either fix the default presets or specify them.", e);
@@ -86,92 +86,42 @@ namespace CohesiveRP.Core.Services
             return await chatsDal.CreateChatAsync(queryModel);
         }
 
-        public async Task<ChatDbModel[]> GetAllChatsAsync()
-        {
-            return await chatsDal.GetChatsAsync();
-        }
-
-        public async Task<ChatDbModel> GetChatAsync(string chatId)
-        {
-            return await chatsDal.GetChatByIdAsync(chatId);
-        }
+        public async Task<ChatDbModel[]> GetAllChatsAsync() => await chatsDal.GetChatsAsync();
+        public async Task<ChatDbModel> GetChatAsync(string chatId) => await chatsDal.GetChatByIdAsync(chatId);
 
         // Messages
-
-        public async Task<IMessageDbModel[]> GetAllHotMessages(string chatId)
-        {
-            return await messagesDal.GetHotMessagesAsync(chatId);
-        }
-
-        public async Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId)
-        {
-            return await messagesDal.GetMessageByIdAsync(chatId, messageId);
-        }
-
-        public async Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message)
-        {
-            return await messagesDal.CreateMessageAsync(message);
-        }
-
-        public async Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages)
-        {
-            return await messagesDal.UpdateHotMessagesAsync(messages);
-        }
+        public async Task<IMessageDbModel[]> GetAllHotMessages(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);
+        public async Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId) => await messagesDal.GetMessageByIdAsync(chatId, messageId);
+        public async Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message) => await messagesDal.CreateMessageAsync(message);
+        public async Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages) => await messagesDal.UpdateHotMessagesAsync(messages);
 
         // Settings
-        public async Task<GlobalSettingsDbModel> GetGlobalSettingsAsync()
-        {
-            return await globalSettingsDal.GetGlobalSettingsAsync();
-        }
+        public async Task<GlobalSettingsDbModel> GetGlobalSettingsAsync() => await globalSettingsDal.GetGlobalSettingsAsync();
 
         // BackgroundQueries
-        public async Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel)
-        {
-            return await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
-        }
-
-        public async Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId)
-        {
-            return await backgroundQueriesDal.GetBackgroundQueryAsync(queryId);
-        }
-
-        public async Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync()
-        {
-            return await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
-        }
+        public async Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel) => await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
+        public async Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId) => await backgroundQueriesDal.GetBackgroundQueryAsync(queryId);
+        public async Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync() => await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
 
         // ChatCompletionPresets
-        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPreset(string mainChatCompletionPresetId)
-        {
-            return await chatCompletionPresetsDal.GetChatCompletionPresetsAsync(mainChatCompletionPresetId);
-        }
+        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPreset(string mainChatCompletionPresetId) => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync(mainChatCompletionPresetId);
 
         // LLMQueries
-        public async Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag)
-        {
-            return await llmApiQueriesDal.GetQueriesOnLLMApisAsync(tag);
-        }
-
-        public async Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery)
-        {
-            return await llmApiQueriesDal.AddNewQueryAsync(newQuery);
-        }
-
-        public async Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId)
-        {
-            return await llmApiQueriesDal.DeleteQueryByIdAsync(lLMApiQueryId);
-        }
+        public async Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag) => await llmApiQueriesDal.GetQueriesOnLLMApisAsync(tag);
+        public async Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery) => await llmApiQueriesDal.AddNewQueryAsync(newQuery);
+        public async Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId) => await llmApiQueriesDal.DeleteQueryByIdAsync(lLMApiQueryId);
 
         // Summary
-        // --- Short-Term
-        public async Task<ISummaryDbModel> CreateShortTermSummaryAsync(CreateSummaryQueryModel queryModel)
-        {
-            return await shortTermSummaryDal.AddShortTermSummaryAsync(queryModel);
-        }
-
-        public async Task<ShortTermSummaryDbModel> GetShortTermSummary(string chatId)
-        {
-            return await shortTermSummaryDal.GetShortTermSummaryAsync(chatId);
-        }
+        public async Task<ISummaryEntryDbModel> AddShortTermSummaryAsync(CreateSummaryQueryModel queryModel) => await summaryDal.AddShortTermSummaryAsync(queryModel);
+        public async Task<ISummaryEntryDbModel> AddMediumTermSummaryAsync(CreateSummaryQueryModel queryModel) => await summaryDal.AddMediumTermSummaryAsync(queryModel);
+        public async Task<ISummaryEntryDbModel> AddLongTermSummaryAsync(CreateSummaryQueryModel queryModel) => await summaryDal.AddLongTermSummaryAsync(queryModel);
+        public async Task<ISummaryEntryDbModel> AddExtraTermSummaryAsync(CreateSummaryQueryModel queryModel) => await summaryDal.AddExtraTermSummaryAsync(queryModel);
+        public async Task<ISummaryEntryDbModel> AddOverflowTermSummaryAsync(CreateSummaryQueryModel queryModel) => await summaryDal.AddOverflowTermSummaryAsync(queryModel);
+        public async Task<SummaryDbModel> GetSummaryAsync(string chatId) => await summaryDal.GetSummaryAsync(chatId);
+        public async Task<bool> DeleteShortTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteShortTermSummariesEntriesAsync(chatId, summariesIds);
+        public async Task<bool> DeleteMediumTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteMediumTermSummariesEntriesAsync(chatId, summariesIds);
+        public async Task<bool> DeleteLongTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteLongTermSummariesEntriesAsync(chatId, summariesIds);
+        public async Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteExtraTermSummariesEntriesAsync(chatId, summariesIds);
+        public async Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteOverflowTermSummariesEntriesAsync(chatId, summariesIds);
     }
 }

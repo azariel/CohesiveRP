@@ -1,9 +1,9 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
-using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
@@ -12,9 +12,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
-        private PromptContextSettings settings;
+        private GlobalSettingsDbModel settings;
 
-        public PromptContextSummaryShortTermBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, PromptContextSettings settings, ChatDbModel chatDbModel)
+        public PromptContextSummaryShortTermBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
@@ -30,16 +30,17 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return null;
             }
 
-            ShortTermSummaryDbModel shortTermSummary = await storageService.GetShortTermSummary(chatDbModel.ChatId);
+            SummaryDbModel shortTermSummary = await storageService.GetSummaryAsync(chatDbModel.ChatId);
             if (shortTermSummary == null)
             {
+                // We still don't have any summary yet, so we have nothing to add to the prompt atm
                 return null;
             }
 
             // Inject that short term summary
             string output = $"# Previous facts, events, speech and actions (Short-Term){Environment.NewLine}";
 
-            foreach (ISummaryDbModel summaryElement in shortTermSummary.Summaries)
+            foreach (ISummaryEntryDbModel summaryElement in shortTermSummary.ShortTermSummaries)
             {
                 // TODO: add a notion of time?
                 string value = $"{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{summaryElement.Content}")}";

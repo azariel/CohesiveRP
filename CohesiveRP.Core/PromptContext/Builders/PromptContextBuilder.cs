@@ -1,10 +1,13 @@
-﻿using System.Text;
+﻿using System.Formats.Asn1;
+using System.Text;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.PromptContext.Summary
@@ -14,17 +17,21 @@ namespace CohesiveRP.Core.PromptContext.Summary
         private IPromptContextElementBuilderFactory promptContextElementBuilderFactory;
         private IStorageService storageService;
         private ChatCompletionPresetType presetType;
+        private GlobalSettingsDbModel settings;
         private string contextLinkedId;
+        public BackgroundQuerySystemTags tag;
         private ChatCompletionPresetsDbModel presetTypeChatCompletionPreset;
 
         public ChatCompletionPresetsDbModel GetChatCompletionPreset() => presetTypeChatCompletionPreset;
 
-        public PromptContextBuilder(ChatCompletionPresetType presetType, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService, string contextLinkedId)
+        public PromptContextBuilder(ChatCompletionPresetType presetType, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService, GlobalSettingsDbModel settings, string contextLinkedId, BackgroundQuerySystemTags tag)
         {
             this.promptContextElementBuilderFactory = promptContextElementBuilderFactory;
             this.storageService = storageService;
             this.presetType = presetType;
+            this.settings = settings;
             this.contextLinkedId = contextLinkedId;
+            this.tag = tag;
         }
 
         public async Task<IPromptContext> BuildAsync(string chatId)
@@ -61,7 +68,7 @@ namespace CohesiveRP.Core.PromptContext.Summary
                 StringBuilder str = new();
                 foreach (var contextElement in presetTypeChatCompletionPreset.Format.OrderedElementsWithinTheGlobalPromptContext)
                 {
-                    var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement, presetTypeChatCompletionPreset.Format.Settings, chat, contextLinkedId);
+                    var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement, settings, chat, contextLinkedId, tag);
 
                     if (builder == null)
                     {

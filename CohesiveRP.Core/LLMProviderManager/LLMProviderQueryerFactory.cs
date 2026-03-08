@@ -72,11 +72,13 @@ namespace CohesiveRP.Core.LLMProviderManager
                 case BackgroundQuerySystemTags.shortSummary:
                     return new ShortSummaryLLMQueryProcessor(ChatCompletionPresetType.Summarize, BackgroundQuerySystemTags.shortSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.mediumSummary:
-                    return null;
+                    return new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.mediumSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.longSummary:
-                    return null;
+                    return new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.longSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.extraSummary:
-                    return null;
+                    return new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.extraSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
+                case BackgroundQuerySystemTags.overflowSummary:
+                    break;
                 case BackgroundQuerySystemTags.custom:
                     break;
                 default:

@@ -1,9 +1,9 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
-using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
@@ -11,10 +11,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
     {
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
-        private PromptContextSettings settings;
+        private GlobalSettingsDbModel settings;
         private ChatDbModel chatDbModel;
 
-        public PromptContextLastXMessagesBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, PromptContextSettings settings, ChatDbModel chatDbModel)
+        public PromptContextLastXMessagesBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
@@ -48,7 +48,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 skipNb = 1;
             }
 
-            List<IMessageDbModel> selectedMessages = orderedMessagesByMostRecent.Skip(skipNb).Take(settings.LastXMessages).Reverse().ToList();// TODO: check LastXMessages - 1?
+            List<IMessageDbModel> selectedMessages = orderedMessagesByMostRecent.Skip(skipNb).Take(settings.Summary.Short.NbMessageInChunk).Reverse().ToList();// TODO: check LastXMessages - 1?
 
             if (selectedMessages.Count <= 0)
             {

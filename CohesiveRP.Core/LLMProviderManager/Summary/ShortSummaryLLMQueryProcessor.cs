@@ -10,6 +10,7 @@ using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
 
@@ -65,6 +66,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     LoggingManager.LogToFile("8f7def6e-a58b-4db3-9db0-9ea3ac25d6fa", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content embedding [{messages.Length}] messages generated from the inference server. One message was expected (no more, no less). Task will be set to Pending status for re-generation.");
                     backgroundQueryDbModel.Content = null;
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                    return;
                 }
 
                 // Add the new summary entry
@@ -76,10 +78,11 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     CreatedAtUtc = DateTime.UtcNow,
                 };
 
-                ISummaryDbModel newSummaryEntryInStorage = await storageService.CreateShortTermSummaryAsync(messageQueryModel);
+                ISummaryEntryDbModel newSummaryEntryInStorage = await storageService.AddShortTermSummaryAsync(messageQueryModel);
+                GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
 
-                // Update the summarized messages
-                await UpdateSummarizedMessagesAsync(messageQueryModel.ChatId, messageQueryModel.MessageIdTracker, contextBuilder.GetChatCompletionPreset().Format.Settings.LastXMessages);
+                // Update the summarized messages in db
+                await UpdateSummarizedMessagesAsync(messageQueryModel.ChatId, messageQueryModel.MessageIdTracker, globalSettings.Summary.Short.NbMessageInChunk);
 
                 //backgroundQueryDbModel.LinkedId = newSummaryEntryInStorage.MessageIdTracker;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
@@ -122,6 +125,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 ChatId = chatId,
                 SerializedMessages = hotMessages.Cast<MessageDbModel>().ToList(),
             };
+
             await storageService.UpdateHotMessagesAsync(request);
         }
     }

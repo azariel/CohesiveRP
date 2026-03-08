@@ -1,8 +1,8 @@
 ﻿using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
-using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
@@ -10,11 +10,11 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
     {
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
-        private PromptContextSettings settings;
+        private GlobalSettingsDbModel settings;
         private ChatDbModel chatDbModel;
         private string contextLinkedId;
 
-        public PromptContextLastXMessagesToSummarizeBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, PromptContextSettings settings, ChatDbModel chatDbModel, string contextLinkedId)
+        public PromptContextLastXMessagesToSummarizeBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, string contextLinkedId)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;

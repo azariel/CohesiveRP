@@ -119,26 +119,28 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
         /// </summary>
         private async Task<BackgroundQueryDbModel> LockNextPendingQueryIfAnyAsync(string[] tagsAllowedByIdleProviders)
         {
-            var allPendingQueries = await backgroundQueriesDal.GetAllPendingQueriesAsync();
+            //var allPendingQueries = await backgroundQueriesDal.GetAllPendingQueriesAsync();
+            var allProcessingQueries = await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
 
-            if (allPendingQueries.Length <= 0)
+            if (allProcessingQueries.Length <= 0)
             {
                 return null;
             }
 
             // Filter only those that have no dependencies currently queued up
             List<BackgroundQueryDbModel> validQueries = new();
-            foreach (var query in allPendingQueries)
+            foreach (var query in allProcessingQueries)
             {
                 if (query.DependenciesTags != null)
                 {
-                    if (query.DependenciesTags != null && allPendingQueries.Any(a => query.DependenciesTags.Any(an => a.Tags.Contains(an))))
+                    if (query.DependenciesTags != null && allProcessingQueries.Any(a => query.DependenciesTags.Any(an => a.Tags.Contains(an))))
                     {
                         continue;
                     }
                 }
 
-                validQueries.Add(query);
+                if (query.Status == BackgroundQueryStatus.Pending || query.Status == BackgroundQueryStatus.ProcessedWaitingForFinalInstruction)
+                    validQueries.Add(query);
             }
 
             // All queued queries depend on each other (possible, if we're waiting on a background process to add a query to unblock them)
@@ -161,6 +163,11 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                 {
                     return null;
                 }
+            }
+
+            if (validQueries.Count <= 0)
+            {
+                return null;
             }
 
             // change status

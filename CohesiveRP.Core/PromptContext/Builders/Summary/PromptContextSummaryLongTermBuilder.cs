@@ -1,7 +1,7 @@
 ﻿using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
-using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
@@ -10,9 +10,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
-        private PromptContextSettings settings;
+        private GlobalSettingsDbModel settings;
 
-        public PromptContextSummaryLongTermBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, PromptContextSettings settings, ChatDbModel chatDbModel)
+        public PromptContextSummaryLongTermBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;

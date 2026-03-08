@@ -1,8 +1,9 @@
 ﻿using CohesiveRP.Core.PromptContext.Builders.Directive;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
-using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.PromptContext.Builders
 {
@@ -15,7 +16,7 @@ namespace CohesiveRP.Core.PromptContext.Builders
             this.storageService = storageService;
         }
 
-        public async Task<IPromptContextElementBuilder> GenerateBuilderAsync(PromptContextFormatElement contextElement, PromptContextSettings settings, ChatDbModel chatDbModel, string contextLinkedId)
+        public async Task<IPromptContextElementBuilder> GenerateBuilderAsync(PromptContextFormatElement contextElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, string contextLinkedId, BackgroundQuerySystemTags tag)
         {
             if (contextElement?.Tag == null)
             {
@@ -54,8 +55,10 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new PromptContextBehavioralInstructionsBuilder(storageService, contextElement, chatDbModel);
                 case PromptContextFormatTag.LastXMessagesToSummarize:
                     return new PromptContextLastXMessagesToSummarizeBuilder(storageService, contextElement, settings, chatDbModel, contextLinkedId);
-                    case PromptContextFormatTag.LastUnsummarizedMessages:
+                case PromptContextFormatTag.LastUnsummarizedMessages:
                     return new PromptContextLastUnsummarizedMessagesBuilder(storageService, contextElement, settings, chatDbModel);
+                case PromptContextFormatTag.OverflowingSummariesToSummarize:
+                    return new PromptContextSummarizeSummariesBuilder(storageService, contextElement, settings, chatDbModel, tag);
                 default:
                     throw new Exception($"Unhandled [{contextElement.Tag}].");
             }

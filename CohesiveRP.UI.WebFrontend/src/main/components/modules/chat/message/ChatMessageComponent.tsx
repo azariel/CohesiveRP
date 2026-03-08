@@ -1,6 +1,7 @@
 import type { ChatMessage } from "../../../../../ResponsesDto/chat/BusinessObjects/ChatMessage";
 import styles from "./ChatMessageComponent.module.css";
 import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification, HiMiniChevronRight } from "react-icons/hi2";
+import { MdOutlineSummarize } from "react-icons/md";
 import { FormatUtcDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
 
@@ -40,7 +41,7 @@ export default function ChatMessageComponent({ message, enableSwipeBtn = false }
               glm-reasoner (?m??s)
             </div>
             <div className={styles.messageHeaderContentCreatedAt}>
-              {message?.summarized ? (<HiBeaker className={styles.messageHeaderSummarizeIcon} />) : ''}
+              {message?.summarized ? (<MdOutlineSummarize className={styles.messageHeaderSummarizeIcon} title="Summarized" />) : ''}
               {message?.createdAtUtc ? FormatUtcDate(message.createdAtUtc) : ''}
             </div>
           </div>

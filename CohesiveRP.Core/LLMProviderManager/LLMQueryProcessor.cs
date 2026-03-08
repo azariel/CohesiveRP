@@ -55,6 +55,12 @@ namespace CohesiveRP.Core.LLMProviderManager
             }
 
             IPromptContext promptContext = await BuildContextAsync(backgroundQueryDbModel.LinkedId);
+            if(promptContext == null)
+            {
+                LoggingManager.LogToFile("1a5f7d13-c2ef-46ad-a2dc-726510342f4c", $"Couldn't build promptContext because not one was configured for [{completionPresetType}].");
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                return;
+            }
 
             try
             {

@@ -10,6 +10,7 @@ using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
 
@@ -81,7 +82,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     await BuildContextAsync(backgroundQueryDbModel.LinkedId);
                 }
 
-                _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, contextBuilder.GetChatCompletionPreset()?.Format?.Settings);
+                GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
+                _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, globalSettings);
 
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
             } catch (Exception e)

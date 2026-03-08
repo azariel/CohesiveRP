@@ -18,5 +18,6 @@
         BehavioralInstructions = 13,
         LastXMessagesToSummarize = 14,
         LastUnsummarizedMessages = 15,
+        OverflowingSummariesToSummarize = 16,
     }
 }

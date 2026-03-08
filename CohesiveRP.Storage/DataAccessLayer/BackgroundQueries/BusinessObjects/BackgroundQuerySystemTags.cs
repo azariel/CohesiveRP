@@ -9,5 +9,6 @@
         mediumSummary = 4,
         longSummary = 5,
         extraSummary = 6,
+        overflowSummary = 7,
     }
 }

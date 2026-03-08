@@ -4,7 +4,6 @@ using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
-using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Settings;
 using Microsoft.EntityFrameworkCore;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
@@ -38,10 +37,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     InsertDateTimeUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
-                        Settings = new PromptContextSettings
-                        {
-                            LastXMessages = 3,// That amount of messages are protected. So you will always have this amount in raw messages sent to the AI. The rest may be summarized.
-                        },
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -166,10 +161,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     InsertDateTimeUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
-                        Settings = new PromptContextSettings
-                        {
-                            LastXMessages = 3,// should match with others logically
-                        },
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -212,14 +203,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                     Format = "## {{item_header}}\r\n{{item_description}}\r\n\r\n",
                                 }
                             },
-                            //new PromptContextFormatElement
-                            //{
-                            //    Tag = PromptContextFormatTag.LastXMessages,
-                            //    Options = new PromptContextFormatElementOptions
-                            //    {
-                            //        Format = "<messages_to_summarize>{{item_description}}</messages_to_summarize>\r\n\r\n",
-                            //    }
-                            //},
                             new PromptContextFormatElement
                             {
                                 Tag = PromptContextFormatTag.LastXMessagesToSummarize,
@@ -234,6 +217,58 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Options = new PromptContextFormatElementOptions
                                 {
                                     Format = "To help you in your summarization task, here is some information about the current roleplay scene. You may use this information to help you, but you still should only summarize the messages_to_summarize.\r\n<scene_information>{{item_description}}</scene_information>\r\n\r\n",
+                                }
+                            },
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.BehavioralInstructions,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "How do you respond?\r\nThink about it first. Recall the available lore, characters, objective, scene and messages. Consider the current point in the narrative and how the characters got there.\r\nWrite in past tense third-person omniscient narration.\r\nFocus your summary on what happened in the messages_to_summarize instead of lore, world or characters.\r\n\r\nNow, continue directly with your summarization of the messages_to_summarize content only.\r\n\r\n",
+                                }
+                            }
+                        }
+                    }
+                });
+
+                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
+                {
+                    ChatCompletionPresetId = StorageConstants.DEFAULT_SUMMARIZES_MERGER_COMPLETION_PRESET,
+                    InsertDateTimeUtc = DateTime.UtcNow,
+                    Format = new GlobalPromptContextFormat()
+                    {
+                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                        {
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.Directive,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "Role:Summarizer | Goal:summarize the provided text into a cohesive summary | MaxLen:512\r\n\r\n## Task\r\nStop your roleplay. You are now an helpful assistant. Your task is to summarize a roleplay session. You will be given a fictional narrative which you need to summarize into a single, very short and concise statement of facts, events, speech and actions. You must ignore the roleplay, your role isn't to continue the roleplay, but to summarize the text.\r\n\r\nNote that {{user}} will always use first-person pronouns.\r\n\r\nResponses should be no more than 100 words an a single paragraph long.\r\nInclude names when possible.\r\nResponse must be in the past tense.\r\nYour response must ONLY contain the summary.\r\n\r\n",
+                                }
+                            },
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.World,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "## {{item_header}}\r\n{{item_description}}\r\n\r\n",
+                                }
+                            },
+                            //new PromptContextFormatElement
+                            //{
+                            //    Tag = PromptContextFormatTag.RelevantCharacters,
+                            //    Options = new PromptContextFormatElementOptions
+                            //    {
+                            //        Format = "## {{item_header}}\r\n{{item_description}}\r\n\r\n",
+                            //    }
+                            //},
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.OverflowingSummariesToSummarize,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "<summary_to_summarize>\r\n{{item_description}}</summary_to_summarize>\r\n\r\n",
                                 }
                             },
                             new PromptContextFormatElement

@@ -61,7 +61,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IChatCompletionPresetsDal, ChatCompletionPresetsDal>();
             services.AddSingleton<IBackgroundQueriesDal, BackgroundQueriesDal>();
             services.AddSingleton<ILLMApiQueriesDal, LLMApiQueriesDal>();
-            services.AddSingleton<IShortTermSummaryDal, ShortTermSummaryDal>();
+            services.AddSingleton<ISummaryDal, SummaryDal>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

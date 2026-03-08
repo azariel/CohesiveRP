@@ -95,6 +95,6 @@ namespace CohesiveRP.Storage.Common
 
         public DbSet<LLMApiQueryDbModel> LLMApiQueries { get; set; }
 
-        public DbSet<ShortTermSummaryDbModel> ShortTermSummaries { get; set; }
+        public DbSet<SummaryDbModel> Summaries { get; set; }
     }
 }
