@@ -65,6 +65,7 @@ namespace CohesiveRP.Core.PromptContext.Summary
                 }
 
                 // for each elements in our format, we need to build them accordingly
+                List<IShareableContextLink> shareableLinks = new();
                 StringBuilder str = new();
                 foreach (var contextElement in presetTypeChatCompletionPreset.Format.OrderedElementsWithinTheGlobalPromptContext)
                 {
@@ -76,8 +77,9 @@ namespace CohesiveRP.Core.PromptContext.Summary
                         continue;
                     }
 
-                    var result = await builder.BuildAsync();
+                    (string result, IShareableContextLink link) = await builder.BuildAsync();
                     str.Append(result);
+                    shareableLinks.Add(link);
                 }
 
                 return new PromptContext
@@ -91,6 +93,7 @@ namespace CohesiveRP.Core.PromptContext.Summary
                         Content = str.ToString(),
                     }
                     ],
+                    ShareableContextLinks = shareableLinks,
                 };
             } catch (Exception e)
             {

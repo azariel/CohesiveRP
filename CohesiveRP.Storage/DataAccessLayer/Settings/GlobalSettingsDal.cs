@@ -102,27 +102,27 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         Short = new ShortSummaryConfig
                         {
                             NbMessageInChunk = 3,
-                            MaxShortTermSummaryTokens = 128,// Standard would probably be 4096
+                            MaxShortTermSummaryTokens = 1024,// Standard would probably be 4096
                         },
                         Medium = new ExtensibleSummaryConfig
                         {
-                            SummarizeLastXTokens = 64,// Standard would probably be 1024 (about 25% of Short.MaxShortTermSummaryTokens)
-                            MaxTotalSummariesTokens = 128,// Standard would probably be 2048
+                            SummarizeLastXTokens = 256,// Standard would probably be 1024 (about 25% of Short.MaxShortTermSummaryTokens)
+                            MaxTotalSummariesTokens = 512,// Standard would probably be 2048
                         },
                         Long = new ExtensibleSummaryConfig
                         {
-                            SummarizeLastXTokens = 32,// Standard would probably be 512 (about 25% of Medium.MaxShortTermSummaryTokens)
-                            MaxTotalSummariesTokens = 128,// Standard would probably be 2048
+                            SummarizeLastXTokens = 128,// Standard would probably be 512 (about 25% of Medium.MaxShortTermSummaryTokens)
+                            MaxTotalSummariesTokens = 512,// Standard would probably be 2048
                         },
                         Extra = new ExtensibleSummaryConfig
                         {
-                            SummarizeLastXTokens = 32,// Standard would probably be 512 (about 25% of Long.MaxShortTermSummaryTokens)
-                            MaxTotalSummariesTokens = 128,// Standard would probably be 2048
+                            SummarizeLastXTokens = 128,// Standard would probably be 512 (about 25% of Long.MaxShortTermSummaryTokens)
+                            MaxTotalSummariesTokens = 512,// Standard would probably be 2048
                         },
                         Overflow = new OverflowSummaryConfig
                         {
-                            SummarizeLastXTokens = 32,// Standard would probably be 512 (about 25% of Extra.MaxShortTermSummaryTokens)
-                            MaxOverflowSummaryTokens = 64,// Standard would probably be 1024
+                            SummarizeLastXTokens = 128,// Standard would probably be 512 (about 25% of Extra.MaxShortTermSummaryTokens)
+                            MaxOverflowSummaryTokens = 256,// Standard would probably be 1024
                         },
                     }
                 });

@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Core.Services;
+﻿using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 
@@ -17,7 +18,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             this.chatDbModel = chatDbModel;
         }
 
-        public async Task<string> BuildAsync()
+        public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             string worldTitle = $"Terra";//TODO: fetch from Db
             string worldContent = $"Infer the world from the roleplay context.";//TODO: fetch from Db
@@ -28,10 +29,11 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 worldContent = $"Infer the relevant characters from the roleplay context.{Environment.NewLine}{Environment.NewLine}";
             }
 
-            return $"# World{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+            return ($"# World{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{item_description}}", worldContent)
                 .Replace("{{item_header}}", worldTitle)
-                .Replace("{{user}}", userPersonaName)}";
+                .Replace("{{user}}", userPersonaName)}",
+                new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

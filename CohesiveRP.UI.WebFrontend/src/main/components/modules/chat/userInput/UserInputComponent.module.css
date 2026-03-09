@@ -29,15 +29,15 @@
 }
 
 .inputControlContainer {
-    flex: 1 0 auto;
+    flex: 1;
+    display: flex;
+    align-items: center;
 }
 
 .inputControl {
+    box-sizing: border-box; /* CRITICAL: Includes padding in height calculations */
     display: block;
-    min-width: 0;
-    min-height: 0;
     width: 100%;
-    height: auto;
     
     margin: 0;
     padding: 0.5em 0.6em;
@@ -45,8 +45,7 @@
     border: none;
     outline: none;
     
-    color:rgb(168, 167, 167);
-    
+    color: rgb(168, 167, 167);
     font-size: 1em;
     line-height: 1.4em;
     background-color: transparent;

@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -19,12 +20,12 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             this.chatDbModel = chatDbModel;
         }
 
-        public async Task<string> BuildAsync()
+        public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             if (promptContextFormatElement == null || chatDbModel == null)
             {
                 LoggingManager.LogToFile("8a023c77-6471-4185-9308-fdab9267d658", $"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
-                return null;
+                return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
             // TODO: Get the amount of messages to keep as-is from settings
@@ -36,7 +37,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             if (hotMessages == null || hotMessages.Length <= 0)
             {
                 // TODO: if user hasn't talked in recent messages (hot), well...we could always fetch cold I guess, but that would be highly irregular for roleplay..
-                return null;
+                return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
             IMessageDbModel lastUserMessage = hotMessages.OrderByDescending(o => o.CreatedAtUtc).First();
@@ -44,10 +45,15 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             if (string.IsNullOrWhiteSpace(lastUserMessage.Content))
             {
-                return string.Empty;
+                return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            return $"# Last message by {userPersonaName}{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content)}";
+            return ($"# Last message by {userPersonaName}{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content)}", 
+                new ShareableContextLink
+                {
+                    LinkedBuilder = this,
+                    Value = lastUserMessage.MessageId,
+                });
         }
     }
 }

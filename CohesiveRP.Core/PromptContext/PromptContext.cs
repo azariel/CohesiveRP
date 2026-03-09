@@ -10,5 +10,6 @@ namespace CohesiveRP.Core.PromptContext
         public string Value { get; set; }
 
         public IPromptMessage[] Messages { get; set; }
+        public List<IShareableContextLink> ShareableContextLinks { get; set; } = new();
     }
 }

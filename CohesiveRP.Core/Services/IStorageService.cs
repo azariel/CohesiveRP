@@ -31,6 +31,7 @@ namespace CohesiveRP.Core.Services
         Task<ISummaryEntryDbModel> AddMediumTermSummaryAsync(CreateSummaryQueryModel queryModel);
         Task<ISummaryEntryDbModel> AddLongTermSummaryAsync(CreateSummaryQueryModel queryModel);
         Task<ISummaryEntryDbModel> AddExtraTermSummaryAsync(CreateSummaryQueryModel queryModel);
+        Task<ISummaryEntryDbModel> AddOverflowTermSummaryAsync(CreateSummaryQueryModel queryModel);
         Task<SummaryDbModel> GetSummaryAsync(string chatId);
         Task<bool> DeleteShortTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteMediumTermSummariesEntriesAsync(string chatId, string[] summariesIds);

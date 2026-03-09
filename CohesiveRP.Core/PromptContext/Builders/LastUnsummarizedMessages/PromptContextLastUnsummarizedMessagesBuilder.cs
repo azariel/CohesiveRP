@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -22,18 +23,18 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             this.chatDbModel = chatDbModel;
         }
 
-        public async Task<string> BuildAsync()
+        public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             if (promptContextFormatElement == null || chatDbModel == null)
             {
                 LoggingManager.LogToFile("c8344a9d-ebf9-4ab2-83dc-06f949e46a5c", $"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
-                return null;
+                return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
             IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatDbModel.ChatId);
             if (hotMessages.Length <= 0)
             {
-                return null;
+                return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
             // TODO: handle cold storage here if all hot messages are unsummarized?
@@ -48,7 +49,11 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 output += value;
             }
 
-            return output;
+            return (output, new ShareableContextLink
+            {
+                LinkedBuilder = this,
+                Value = hotMessages.Select(s => s.MessageId).ToArray()
+            });
         }
     }
 }

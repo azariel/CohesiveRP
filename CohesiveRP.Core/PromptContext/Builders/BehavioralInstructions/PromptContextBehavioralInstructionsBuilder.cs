@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Core.Services;
+﻿using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 
@@ -17,13 +18,13 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             this.chatDbModel = chatDbModel;
         }
 
-        public async Task<string> BuildAsync()
+        public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             string userPersonaName = "Azariel";// TODO: fetch from Db
 
-            return $"# Your Behavioral Instruction{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+            return ($"# Your Behavioral Instruction{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 //.Replace("{{item_description}}", behaviorInstructionsContent)
-                .Replace("{{user}}", userPersonaName)}";
+                .Replace("{{user}}", userPersonaName)}", new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

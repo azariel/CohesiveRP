@@ -1,8 +1,10 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
+using CohesiveRP.Core.PromptContext;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
+using CohesiveRP.Core.PromptContext.Builders.Directive;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
@@ -82,7 +84,11 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
 
                 // Update the summarized messages in db
-                await UpdateSummarizedMessagesAsync(messageQueryModel.ChatId, messageQueryModel.MessageIdTracker, globalSettings.Summary.Short.NbMessageInChunk);
+                if(!await UpdateSummarizedMessagesAsync(messageQueryModel.ChatId, messageQueryModel.MessageIdTracker, globalSettings.Summary.Short.NbMessageInChunk))
+                {
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                    return;
+                }
 
                 //backgroundQueryDbModel.LinkedId = newSummaryEntryInStorage.MessageIdTracker;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
@@ -94,30 +100,24 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             }
         }
 
-        private async Task UpdateSummarizedMessagesAsync(string chatId, string mostRecentSummarizedMessageId, int nbMessagesSummarized)
+        private async Task<bool> UpdateSummarizedMessagesAsync(string chatId, string mostRecentSummarizedMessageId, int nbMessagesSummarized)
         {
             IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatId);
 
             hotMessages = hotMessages.OrderByDescending(o => o.CreatedAtUtc).ToArray();
-            int indexOfTargetLastMessage = hotMessages.IndexOf(hotMessages.FirstOrDefault(f => f.MessageId == mostRecentSummarizedMessageId));
-            if (indexOfTargetLastMessage < 0)
+            string[] messageIdsProcessedAgainstLLM = promptContext.ShareableContextLinks.FirstOrDefault(f => f.LinkedBuilder is PromptContextLastXMessagesToSummarizeBuilder)?.Value as string[];
+            if (messageIdsProcessedAgainstLLM == null)
             {
-                throw new Exception($"Invalid contextLinkedId [{mostRecentSummarizedMessageId}]. ChatId: [{chatId}] hot messages did not contain this messageId.");
-            }
-
-            IMessageDbModel[] messagesToProcess = hotMessages.Skip(indexOfTargetLastMessage).Take(nbMessagesSummarized).ToArray();
-
-            if (messagesToProcess.Length < nbMessagesSummarized)
-            {
-                throw new Exception($"Not enough messages to summarize to short summary module. MostRecentSummarizedMessageId: [{mostRecentSummarizedMessageId}]. ChatId: [{chatId}].");
+                LoggingManager.LogToFile("6653a400-18f7-4d98-a0ed-b8959e4049f6", $"No ShareableContextLink of type [{nameof(PromptContextLastXMessagesToSummarizeBuilder)} found.]");
+                return false;
             }
 
             // Process the messages
             hotMessages = hotMessages.OrderBy(o => o.CreatedAtUtc).ToArray();
 
-            foreach (var message in messagesToProcess)
+            foreach (var message in messageIdsProcessedAgainstLLM)
             {
-                hotMessages.FirstOrDefault(w => w.MessageId == message.MessageId)?.Summarized = true;
+                hotMessages.FirstOrDefault(w => w.MessageId == message)?.Summarized = true;
             }
 
             HotMessagesDbModel request = new HotMessagesDbModel
@@ -127,6 +127,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             };
 
             await storageService.UpdateHotMessagesAsync(request);
+            return true;
         }
     }
 }

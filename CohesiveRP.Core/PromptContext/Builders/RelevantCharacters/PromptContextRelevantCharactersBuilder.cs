@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -18,7 +19,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             this.chatDbModel = chatDbModel;
         }
 
-        public async Task<string> BuildAsync()
+        public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             Dictionary<string, string> loreByQueryContent = [];
             string userPersonaName = "userName";// TODO: fetch from Db
@@ -46,7 +47,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 str.Append($"Infer the relevant characters from the roleplay context.{Environment.NewLine}{Environment.NewLine}");
             }
 
-            return $"# Relevant Characters{Environment.NewLine}{str}";
+            return ($"# Relevant Characters{Environment.NewLine}{str}", new ShareableContextLink { LinkedBuilder = this });
         }
     }
 }

@@ -59,7 +59,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         {
             ChatId = requestDto.ChatId,
             Priority = BackgroundQueryPriority.Highest,// User is waiting!
-            DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString()],
+            DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString()],// Can't run as long as another one with one of these tag is running or pending
             Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'
         };
 

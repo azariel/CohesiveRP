@@ -128,6 +128,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             }
 
             // Filter only those that have no dependencies currently queued up
+            //List<BackgroundQueryDbModel> inProgressQueries = allProcessingQueries.Where(w => w.Status == BackgroundQueryStatus.InProgress || w.Status == BackgroundQueryStatus.ProcessingFinalInstruction).ToList();
             List<BackgroundQueryDbModel> validQueries = new();
             foreach (var query in allProcessingQueries)
             {

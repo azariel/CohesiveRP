@@ -2,16 +2,16 @@
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.Utils.Parsers;
+using CohesiveRP.Core.PromptContext;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
+using CohesiveRP.Core.PromptContext.Builders.Directive;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
-using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Summary;
 using CohesiveRP.Storage.QueryModels.Chat;
@@ -87,51 +87,34 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
         {
             GlobalSettingsDbModel settings = await storageService.GetGlobalSettingsAsync();
             SummaryDbModel summaryDbModel = await storageService.GetSummaryAsync(backgroundQueryDbModel.ChatId);
-            List<SummaryEntryDbModel> summariesToParse = null;
-            int summarizeLastXTokens = 0;
+            List<SummaryEntryDbModel> lowerTermSummariesToSummarize = new();
+
+            IShareableContextLink shareableContextLink = promptContext.ShareableContextLinks.FirstOrDefault(f => f.LinkedBuilder is PromptContextSummarizeSummariesBuilder);
+            if (shareableContextLink == null)
+            {
+                LoggingManager.LogToFile("b41cdb3d-4013-4fe7-bb09-6104afc0b3f3", $"No ShareableContextLink of type [{nameof(PromptContextSummarizeSummariesBuilder)} found.]");
+                return false;
+            }
+
+            // This one is special
+            if (tag == BackgroundQuerySystemTags.overflowSummary)
+            {
+                return await HandleOverflowSummaryAsync(backgroundQueryDbModel.ChatId, settings, summaryDbModel, shareableContextLink);
+            }
 
             switch (tag)
             {
-                case BackgroundQuerySystemTags.shortSummary:
-                    summariesToParse = summaryDbModel.ShortTermSummaries;
-                    summarizeLastXTokens = settings.Summary.Medium.SummarizeLastXTokens;
-                    break;
                 case BackgroundQuerySystemTags.mediumSummary:
-                    summariesToParse = summaryDbModel.ShortTermSummaries;
-                    summarizeLastXTokens = settings.Summary.Long.SummarizeLastXTokens;
+                    lowerTermSummariesToSummarize = summaryDbModel.ShortTermSummaries.Where(w => ((string[])shareableContextLink.Value).Contains(w.SummaryEntryId)).ToList();
                     break;
                 case BackgroundQuerySystemTags.longSummary:
-                    summariesToParse = summaryDbModel.MediumTermSummaries;
-                    summarizeLastXTokens = settings.Summary.Extra.SummarizeLastXTokens;
+                    lowerTermSummariesToSummarize = summaryDbModel.MediumTermSummaries.Where(w => ((string[])shareableContextLink.Value).Contains(w.SummaryEntryId)).ToList();
                     break;
                 case BackgroundQuerySystemTags.extraSummary:
-                    summariesToParse = summaryDbModel.LongTermSummaries;
-                    summarizeLastXTokens = settings.Summary.Overflow.SummarizeLastXTokens;
+                    lowerTermSummariesToSummarize = summaryDbModel.LongTermSummaries.Where(w => ((string[])shareableContextLink.Value).Contains(w.SummaryEntryId)).ToList();
                     break;
                 default:
                     throw new Exception($"Unhandled tag [{tag}] in .");
-            }
-
-            summariesToParse ??= new();
-
-            List<SummaryEntryDbModel> lowerTermSummariesToSummarize = new();
-            int tokensCounter = 0;
-            var orderedSummariesToParse = summariesToParse.OrderBy(o => o.CreatedAtUtc);
-            foreach (SummaryEntryDbModel lowerTermSummary in orderedSummariesToParse)
-            {
-                lowerTermSummariesToSummarize.Add(lowerTermSummary);
-                tokensCounter += TokensUtils.Count(lowerTermSummary.Content);
-
-                if (tokensCounter >= summarizeLastXTokens)
-                {
-                    break;
-                }
-            }
-
-            // You can't summarize a single chunk, so despite what the config says, we'll do at least 2
-            if (lowerTermSummariesToSummarize.Count < 2 && summariesToParse.Count > 1)
-            {
-                lowerTermSummariesToSummarize = orderedSummariesToParse.Take(2).ToList();
             }
 
             // We now need to remove the summaries that were merged and add the merged summary to the next tier
@@ -157,29 +140,68 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             switch (tag)
             {
                 case BackgroundQuerySystemTags.mediumSummary:
-                    if(await storageService.AddMediumTermSummaryAsync(messageQueryModel) == null)
+                    if (await storageService.AddMediumTermSummaryAsync(messageQueryModel) == null)
                         return false;
 
-                    if (!await storageService.DeleteShortTermSummariesEntriesAsync(backgroundQueryDbModel.ChatId, [..lowerTermSummariesToSummarize.Select(s => s.SummaryEntryId)]))
+                    if (!await storageService.DeleteShortTermSummariesEntriesAsync(backgroundQueryDbModel.ChatId, [.. lowerTermSummariesToSummarize.Select(s => s.SummaryEntryId)]))
                         return false;
                     break;
                 case BackgroundQuerySystemTags.longSummary:
-                    if(await storageService.AddLongTermSummaryAsync(messageQueryModel) == null)
+                    if (await storageService.AddLongTermSummaryAsync(messageQueryModel) == null)
                         return false;
 
-                    if (!await storageService.DeleteMediumTermSummariesEntriesAsync(backgroundQueryDbModel.ChatId, [..lowerTermSummariesToSummarize.Select(s => s.SummaryEntryId)]))
+                    if (!await storageService.DeleteMediumTermSummariesEntriesAsync(backgroundQueryDbModel.ChatId, [.. lowerTermSummariesToSummarize.Select(s => s.SummaryEntryId)]))
                         return false;
                     break;
                 case BackgroundQuerySystemTags.extraSummary:
-                    if(await storageService.AddExtraTermSummaryAsync(messageQueryModel) == null)
+                    if (await storageService.AddExtraTermSummaryAsync(messageQueryModel) == null)
                         return false;
 
-                    if (!await storageService.DeleteLongTermSummariesEntriesAsync(backgroundQueryDbModel.ChatId, [..lowerTermSummariesToSummarize.Select(s => s.SummaryEntryId)]))
+                    if (!await storageService.DeleteLongTermSummariesEntriesAsync(backgroundQueryDbModel.ChatId, [.. lowerTermSummariesToSummarize.Select(s => s.SummaryEntryId)]))
                         return false;
                     break;
                 default:
                     throw new Exception($"Unhandled tag [{tag}] in .");
             }
+
+            return true;
+        }
+
+        private async Task<bool> HandleOverflowSummaryAsync(string chatId, GlobalSettingsDbModel settings, SummaryDbModel summaryDbModel, IShareableContextLink shareableContextLink)
+        {
+            var summariesProcessed = summaryDbModel.ExtraTermSummaries.Where(w => ((string[])shareableContextLink.Value).Contains(w.SummaryEntryId)).ToList();
+
+            // We now need to remove the summaries that were merged and add the merged summary to the next tier
+            // REPLACE new summary to higher tier
+            LLMApiResponseMessage[] messages = JsonCommonSerializer.DeserializeFromString<LLMApiResponseMessage[]>(backgroundQueryDbModel.Content);
+
+            if (messages.Length != 1)
+            {
+                LoggingManager.LogToFile("dcd06d1e-a7f4-4147-8f2d-6671d976b57e", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content embedding [{messages.Length}] messages generated from the inference server. One message was expected (no more, no less). Task will be set to Pending status for re-generation.");
+                backgroundQueryDbModel.Content = null;
+                backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                return false;
+            }
+
+            CreateSummaryQueryModel messageQueryModel = new()
+            {
+                ChatId = backgroundQueryDbModel.ChatId,
+                MessageIdTracker = backgroundQueryDbModel.LinkedId,
+                Content = ChatMessageParserUtils.ParseMessage(messages[0].Content),
+                CreatedAtUtc = DateTime.UtcNow,
+            };
+
+            if (summaryDbModel.OverflowTermSummaries != null && summaryDbModel.OverflowTermSummaries.Count > 0)
+            {
+                if (!await storageService.DeleteOverflowTermSummariesEntriesAsync(chatId, summaryDbModel.OverflowTermSummaries.Select(s => s.SummaryEntryId).ToArray()))
+                    return false;
+            }
+
+            if (await storageService.AddOverflowTermSummaryAsync(messageQueryModel) == null)
+                return false;
+
+            if (!await storageService.DeleteExtraTermSummariesEntriesAsync(backgroundQueryDbModel.ChatId, [.. summariesProcessed.Select(s => s.SummaryEntryId)]))
+                return false;
 
             return true;
         }

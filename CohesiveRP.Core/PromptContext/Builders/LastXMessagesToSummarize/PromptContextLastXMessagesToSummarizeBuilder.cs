@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Core.Services;
+﻿using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
@@ -23,7 +24,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             this.contextLinkedId = contextLinkedId;
         }
 
-        public async Task<string> BuildAsync()
+        public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             if (promptContextFormatElement == null || chatDbModel == null || contextLinkedId == null)
             {
@@ -59,7 +60,11 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             output = output.Replace("{{item_description}}", value);
-            return output;
+            return (output, new ShareableContextLink
+            {
+                LinkedBuilder = this,
+                Value = messagesToProcess.Select(s => s.MessageId).ToArray()
+            });
         }
     }
 }

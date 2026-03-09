@@ -1,6 +1,9 @@
-﻿using CohesiveRP.Core.Services;
+﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
@@ -20,16 +23,38 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             this.settings = settings;
         }
 
-        public async Task<string> BuildAsync()
+        public async Task<(string, IShareableContextLink)> BuildAsync()
         {
-            string ExtraMemoryContent = "";//TODO: fetch from Db
-
-            if(string.IsNullOrWhiteSpace(ExtraMemoryContent))
+            if (promptContextFormatElement == null || chatDbModel == null)
             {
-                return string.Empty;
+                LoggingManager.LogToFile("725022ce-942f-4d83-bea6-c85c400d603b", $"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
+                return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            return $"# Extra-Long-term memory{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", ExtraMemoryContent)}";
+            SummaryDbModel summaryDbModel = await storageService.GetSummaryAsync(chatDbModel.ChatId);
+            if (summaryDbModel?.ExtraTermSummaries == null)
+            {
+                // We still don't have any summary yet, so we have nothing to add to the prompt atm
+                return (null, new ShareableContextLink { LinkedBuilder = this });
+            }
+
+            // Inject that short term summary
+            string output = $"# Previous facts, events, speech and actions (Very Long-Term){Environment.NewLine}";
+
+            foreach (ISummaryEntryDbModel summaryElement in summaryDbModel.ExtraTermSummaries)
+            {
+                // TODO: add a notion of time?
+                string value = $"{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{summaryElement.Content}")}";
+                output += value;
+            }
+
+            output += Environment.NewLine;
+            return (output,
+                    new ShareableContextLink
+                    {
+                        LinkedBuilder = this,
+                        Value = summaryDbModel.ExtraTermSummaries.Select(s => s.SummaryEntryId).ToArray()
+                    });
         }
     }
 }

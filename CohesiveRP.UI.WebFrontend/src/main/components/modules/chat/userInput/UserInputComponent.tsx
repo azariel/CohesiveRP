@@ -49,16 +49,22 @@ export default function UserInputComponent({ messagesRef }: Props) {
     };
   }, [messagesRef]);
 
-  const adjustTextareaHeight = () => {
-    const element = textareaRef.current;
-    if (!element)
-      return;
+const adjustTextareaHeight = () => {
+    const el = textareaRef.current;
+    if (!el) return;
 
-    element.style.height = "auto";
-    const targetHeight = element.scrollHeight;
-    element.style.height = `${Math.min(targetHeight, 140)}px`;
-    element.style.overflowY = targetHeight > 140 ? "auto" : "hidden";
+    // 1. Reset height to 'auto' first so it can shrink if the user deletes text
+    el.style.height = "auto";
+    
+    // 2. Calculate the new height based on the content
+    const targetHeight = el.scrollHeight;
+    const maxHeight = 140;
 
+    // 3. Apply the constrained height and toggle the scrollbar
+    el.style.height = `${Math.min(targetHeight, maxHeight)}px`;
+    el.style.overflowY = targetHeight > maxHeight ? "auto" : "hidden";
+
+    // 4. Keep the main message window scrolled to the bottom
     if (messagesRef?.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
@@ -68,21 +74,9 @@ export default function UserInputComponent({ messagesRef }: Props) {
     adjustTextareaHeight();
   }, [playerMessage]);
 
-  const handleInput = () => {
-    const el = textareaRef.current;
-    if (!el) {
-      return;
-    }
-
-    el.style.marginBottom = "-0.3em";// hack...sigh
-    el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 140) + "px";
-    el.style.overflowY = el.scrollHeight > 140 ? "auto" : "hidden";
-
-    // Scroll parent messages container to bottom
-    if (messagesRef?.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    }
+const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPlayerMessage(e.target.value);
+    adjustTextareaHeight();
   };
 
   useEffect(() => {
@@ -245,7 +239,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
         <HiChip className={styles.autoCorrectIcon} />
         <div className={styles.inputAutoCorrectSeparator} />
         <div className={styles.inputControlContainer}>
-          <textarea className={styles.inputControl} rows={1} ref={textareaRef} onInput={handleInput} onChange={(e) => setPlayerMessage(e.target.value)} value={playerMessage} placeholder="Type a message..."/>
+          <textarea className={styles.inputControl} rows={1} ref={textareaRef} onChange={handleInput} value={playerMessage} placeholder="Type a message..."/>
         </div>
         <div className={styles.inputSendSeparator} />
           <div

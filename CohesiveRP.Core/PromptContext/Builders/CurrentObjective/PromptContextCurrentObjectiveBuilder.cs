@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Core.Services;
+﻿using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 
@@ -17,16 +18,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             this.chatDbModel = chatDbModel;
         }
 
-        public async Task<string> BuildAsync()
+        public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             string currentObjectiveContent = "";//TODO: fetch from Db
 
             if(string.IsNullOrWhiteSpace(currentObjectiveContent))
             {
-                return string.Empty;
+                return (string.Empty, new ShareableContextLink{ LinkedBuilder = this });
             }
 
-            return $"# Current Objective (story progression objective){Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", currentObjectiveContent)}";
+            return ($"# Current Objective (story progression objective){Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", currentObjectiveContent)}", new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

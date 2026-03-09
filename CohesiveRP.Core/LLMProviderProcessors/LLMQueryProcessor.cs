@@ -24,6 +24,7 @@ namespace CohesiveRP.Core.LLMProviderManager
         protected IHttpLLMApiProviderService httpLLMApiProviderService;
         protected ISummaryService summaryService;
         protected IPromptContextBuilder contextBuilder;
+        protected IPromptContext promptContext;
 
         public LLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
@@ -43,22 +44,22 @@ namespace CohesiveRP.Core.LLMProviderManager
             this.storageService = storageService;
             this.httpLLMApiProviderService = httpLLMApiProviderService;
             this.summaryService = summaryService;
+
+            this.promptContext = BuildContextAsync(backgroundQueryDbModel.LinkedId).Result;
+            if(promptContext == null)
+            {
+                LoggingManager.LogToFile("1a5f7d13-c2ef-46ad-a2dc-726510342f4c", $"Couldn't build promptContext because not one was configured for [{completionPresetType}].");
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                return;
+            }
         }
 
         public virtual async Task<BackgroundQueryDbModel> GetBackgroundQueryDbModelAsync() => backgroundQueryDbModel;
 
         protected virtual async Task ProcessQueryAsync()
         {
-            if (backgroundQueryDbModel.Status != BackgroundQueryStatus.InProgress)
+            if (backgroundQueryDbModel.Status != BackgroundQueryStatus.InProgress || promptContext == null)
             {
-                return;
-            }
-
-            IPromptContext promptContext = await BuildContextAsync(backgroundQueryDbModel.LinkedId);
-            if(promptContext == null)
-            {
-                LoggingManager.LogToFile("1a5f7d13-c2ef-46ad-a2dc-726510342f4c", $"Couldn't build promptContext because not one was configured for [{completionPresetType}].");
-                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
                 return;
             }
 

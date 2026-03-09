@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -22,19 +23,19 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             this.chatDbModel = chatDbModel;
         }
 
-        public async Task<string> BuildAsync()
+        public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             if (promptContextFormatElement == null || chatDbModel == null)
             {
                 LoggingManager.LogToFile("8a023c77-6471-4185-9308-fdab9267d658", $"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
-                return null;
+                return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
             // TODO: Get the amount of messages to keep as-is from settings
             IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatDbModel.ChatId);
-            if(hotMessages.Length <= 0)
+            if (hotMessages.Length <= 0)
             {
-                return null;
+                return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
             // TODO: If user configured for more than Hot messages, fetch the cold ones as well... Really not efficient, really not as-designed, but if they really want to, we'll handle it :shrug:
@@ -43,7 +44,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             // Remove the very most recent message if it was made by the user as this is handled by the LastUserMessage builder
             int skipNb = 0;
-            if(orderedMessagesByMostRecent.First().SourceType == Common.BusinessObjects.MessageSourceType.User)
+            if (orderedMessagesByMostRecent.First().SourceType == Common.BusinessObjects.MessageSourceType.User)
             {
                 skipNb = 1;
             }
@@ -52,7 +53,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             if (selectedMessages.Count <= 0)
             {
-                return string.Empty;
+                return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
             }
 
             string output = $"# Last messages between you and the User{Environment.NewLine}";
@@ -63,7 +64,12 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 output += value;
             }
 
-            return output;
+            return (output,
+                    new ShareableContextLink
+                    {
+                        LinkedBuilder = this,
+                        Value = selectedMessages.Select(s => s.MessageId).ToArray()
+                    });
         }
     }
 }
