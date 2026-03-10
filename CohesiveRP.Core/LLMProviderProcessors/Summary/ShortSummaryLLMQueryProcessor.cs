@@ -84,7 +84,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
 
                 // Update the summarized messages in db
-                if(!await UpdateSummarizedMessagesAsync(messageQueryModel.ChatId, messageQueryModel.MessageIdTracker, globalSettings.Summary.Short.NbMessageInChunk))
+                if(!await UpdateSummarizedMessagesAsync(messageQueryModel.ChatId))
                 {
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
                     return;
@@ -100,7 +100,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             }
         }
 
-        private async Task<bool> UpdateSummarizedMessagesAsync(string chatId, string mostRecentSummarizedMessageId, int nbMessagesSummarized)
+        private async Task<bool> UpdateSummarizedMessagesAsync(string chatId)
         {
             IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatId);
 

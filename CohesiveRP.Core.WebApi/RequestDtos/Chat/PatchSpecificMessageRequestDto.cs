@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Core.WebApi.RequestDtos.Chat
 {
-    public class PutSpecificMessageRequestDto : IWebApiRequestDto
+    public class PatchSpecificMessageRequestDto : IWebApiRequestDto
     {
         [FromRoute]
         [JsonPropertyName("chatId")]

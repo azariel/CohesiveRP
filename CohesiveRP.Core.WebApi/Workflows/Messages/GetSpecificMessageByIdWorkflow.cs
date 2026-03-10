@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Common.WebApi;
+﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
@@ -23,6 +24,7 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
 
         if(message == null)
         {
+            LoggingManager.LogToFile("52d724a4-a17a-4f4c-9ab1-6f79c02d5490", $"Couldn't get message from id [{requestDto.MessageId}] in chat [{requestDto.ChatId}]. Message was not found.");
             return null;
         }
 

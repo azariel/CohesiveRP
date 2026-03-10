@@ -3,8 +3,8 @@ using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions
 {
-    public interface IPutSpecificMessageByIdWorkflow
+    public interface IPatchSpecificMessageByIdWorkflow
     {
-        Task<IWebApiResponseDto> PutSpecificMessage(PutSpecificMessageRequestDto requestDto);
+        Task<IWebApiResponseDto> PatchSpecificMessage(PatchSpecificMessageRequestDto requestDto);
     }
 }

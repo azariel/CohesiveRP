@@ -33,7 +33,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ICreateNewChatWorkflow, CreateNewChatWorkflow>();
             services.AddSingleton<IGetAllHotMessagesWorkflow, GetAllHotMessagesWorkflow>();
             services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
-            services.AddSingleton<IPutSpecificMessageByIdWorkflow, PutSpecificMessageByIdWorkflow>();
+            services.AddSingleton<IPatchSpecificMessageByIdWorkflow, PatchSpecificMessageByIdWorkflow>();
             
 
             // Workflows.Settings

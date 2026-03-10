@@ -134,8 +134,9 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
               updatedMessages[tempAIReplyMessageIndex].messageId = response.linkedId;
               console.error(`Background main query was done, but the underlying message couldn't be retrieved from backend! Impersonating the message with the right id [${response.linkedId}] now, but state is finicky.`);
             }
-            
           }
+
+          UpdateInputControlState();
 
           // Query is done
           return { ...prev, messages: updatedMessages, mainQueryId: null };
@@ -173,6 +174,15 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
   // cleanup
   return () => clearInterval(pollInterval);
 }, [activeModule?.mainQueryId, setActiveModule]); // Only re-run if the ID changes
+
+  const UpdateInputControlState = async () => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      textareaRef.current?.blur();
+    } else {
+      textareaRef.current?.focus();
+    }
+  };
 
   const handleSendPlayerMessage = async () => {
     if (isSendingMessageToServer || !playerMessage || !playerMessage.trim()){
@@ -217,7 +227,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         mainQueryId: response.mainQueryId,// Track the main query id to know the status of the AI reply
     }));
 
-    textareaRef.current?.focus();
+    UpdateInputControlState();
 
     setTimeout(() => {
       if(messagesRef?.current) {

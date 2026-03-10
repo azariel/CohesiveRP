@@ -99,6 +99,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     },
                     Summary = new SummarySettings()
                     {
+                        NbRawMessagesToKeepInContext = 5,
                         Short = new ShortSummaryConfig
                         {
                             NbMessageInChunk = 3,

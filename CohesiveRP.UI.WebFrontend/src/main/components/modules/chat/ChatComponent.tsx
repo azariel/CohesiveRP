@@ -71,6 +71,7 @@ export default function ChatComponent() {
   };
 
   const lastMessageIndex = (activeModule?.messages?.length ?? 0) - 1;
+  const editableMessageIndex = lastMessageIndex - 3;
   const isSendingMessage = !!activeModule?.mainQueryId; // blocked while AI is replying
 
   return (
@@ -82,8 +83,8 @@ export default function ChatComponent() {
               key={index}
               messagesRef={messagesRef}
               message={message}
-              enableSwipeBtn={index === lastMessageIndex}
-              isEditable={!isSendingMessage && index === lastMessageIndex}
+              enableSwipeBtn={index >= editableMessageIndex}
+              isEditable={!isSendingMessage && index >= editableMessageIndex}
               onSave={handleSaveMessage}
             />
           ))

@@ -10,13 +10,13 @@ namespace CohesiveRP.Storage.WebApi.Controllers
     {
         private IGetAllHotMessagesWorkflow getAllHotMessagesWorkflow;
         private IGetSpecificMessageByIdWorkflow getSpecificMessageByIdWorkflow;
-        private IPutSpecificMessageByIdWorkflow putSpecificMessageByIdWorkflow;
+        private IPatchSpecificMessageByIdWorkflow putSpecificMessageByIdWorkflow;
         private IChatAddNewMessageWorkflow addNewMessageWorkflow;
 
         public ChatController(
             IGetAllHotMessagesWorkflow getAllHotMessagesWorkflow,
             IGetSpecificMessageByIdWorkflow getSpecificMessageByIdWorkflow,
-            IPutSpecificMessageByIdWorkflow putSpecificMessageByIdWorkflow,
+            IPatchSpecificMessageByIdWorkflow putSpecificMessageByIdWorkflow,
             IChatAddNewMessageWorkflow chatAddNewMessageWorkflow)
         {
             this.getAllHotMessagesWorkflow = getAllHotMessagesWorkflow;
@@ -52,9 +52,9 @@ namespace CohesiveRP.Storage.WebApi.Controllers
 
         [HttpPut]
         [Route("messages/{messageId}")]
-        public async Task<IActionResult> PutSpecificMessageById(PutSpecificMessageRequestDto requestDto)
+        public async Task<IActionResult> PutSpecificMessageById(PatchSpecificMessageRequestDto requestDto)
         {
-            return new JsonResult(await putSpecificMessageByIdWorkflow.PutSpecificMessage(requestDto));
+            return new JsonResult(await putSpecificMessageByIdWorkflow.PatchSpecificMessage(requestDto));
         }
     }
 }

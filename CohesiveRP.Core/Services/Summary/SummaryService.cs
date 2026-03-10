@@ -85,20 +85,14 @@ namespace CohesiveRP.Core.Services.Summary
             hotMessagesCopy.AddRange(hotMessages);
             hotMessagesCopy = hotMessagesCopy?.Where(w => !w.Summarized).ToList();
 
-            if (hotMessagesCopy.Count < settings.Summary.Short.NbMessageInChunk * 2)// 1 chunk to keep as-is, 1 to summarize
+            if (hotMessagesCopy.Count < settings.Summary.NbRawMessagesToKeepInContext + settings.Summary.Short.NbMessageInChunk)
             {
                 return;
             }
 
             // We know that the 'main' context builder is generating the last user message + {settings.LastXMessages} amount of raw messages
             // Skip the 'reserved' messages
-            hotMessagesCopy = hotMessagesCopy.OrderByDescending(o => o.CreatedAtUtc).Skip(settings.Summary.Short.NbMessageInChunk).ToList();
-
-            if (hotMessagesCopy.Count < settings.Summary.Short.NbMessageInChunk)
-            {
-                // Not enough messages to summarize to short summary module
-                return;
-            }
+            hotMessagesCopy = hotMessagesCopy.OrderByDescending(o => o.CreatedAtUtc).Skip(settings.Summary.NbRawMessagesToKeepInContext).ToList();
 
             // Filter for a chunk ordered by createdAt
             hotMessagesCopy.Reverse();

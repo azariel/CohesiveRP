@@ -18,5 +18,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings.Summary
 
         [JsonPropertyName("overflowConfig")]
         public OverflowSummaryConfig Overflow { get; set; } = new();
+
+        [JsonPropertyName("nbRawMessagesToKeepInContext")]
+        public int NbRawMessagesToKeepInContext { get; set; } = 3;
     }
 }
