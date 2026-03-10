@@ -38,7 +38,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 dbContext.GlobalSettings.Add(new GlobalSettingsDbModel
                 {
                     GlobalSettingsId = Guid.NewGuid().ToString(),
-                    InsertDateTimeUtc = DateTime.UtcNow,
+                    CreatedAtUtc = DateTime.UtcNow,
                     // TODO: replace this dev option
                     LLMProviders = new List<LLMProviderConfig>()
                     {
@@ -65,7 +65,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge],
+                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneTracker],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -93,6 +93,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             {
                                 Type = ChatCompletionPresetType.SummariesMerge,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_SUMMARIZES_MERGER_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.SceneTracker,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_TRACKER_COMPLETION_PRESET,
                                 IsDefault = true,
                             }
                         }

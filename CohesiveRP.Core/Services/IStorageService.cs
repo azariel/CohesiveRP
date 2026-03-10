@@ -2,11 +2,12 @@
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
-using CohesiveRP.Storage.DataAccessLayer.Summary.Short;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
+using CohesiveRP.Storage.QueryModels.SceneTracker;
 
 namespace CohesiveRP.Core.Services
 {
@@ -39,5 +40,8 @@ namespace CohesiveRP.Core.Services
         Task<bool> DeleteLongTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesId);
+        Task<SceneTrackerDbModel> GetSceneTracker(string chatId);
+        Task<SceneTrackerDbModel> AddSceneTracker(CreateSceneTrackerQueryModel queryModel);
+        Task<SceneTrackerDbModel> UpdateSceneTracker(CreateSceneTrackerQueryModel queryModel);
     }
 }

@@ -87,14 +87,28 @@
 }
 
 .sendInputSpinnerWaitingServerAck {
-    color: rgb(255, 255, 255);
+    color: rgb(247, 236, 81);
+    width: 1.2em;
+    height: 1.2em;
+    animation: spin 1s linear infinite;
+}
+
+.sendInputSpinnerWaitingMessagePending {
+    color: rgb(0, 115, 255);
     width: 1.2em;
     height: 1.2em;
     animation: spin 1s linear infinite;
 }
 
 .sendInputSpinnerWaitingMessageProcess {
-    color: rgb(0, 115, 255);
+    color: rgb(44, 207, 79);
+    width: 1.2em;
+    height: 1.2em;
+    animation: spin 1s linear infinite;
+}
+
+.sendInputSpinnerWaitingMessageDefault{
+    color: rgb(216, 216, 216);
     width: 1.2em;
     height: 1.2em;
     animation: spin 1s linear infinite;

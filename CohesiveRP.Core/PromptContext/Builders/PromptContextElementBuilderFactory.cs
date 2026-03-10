@@ -47,6 +47,8 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new PromptContextLastXMessagesBuilder(storageService, contextElement, settings, chatDbModel);
                 case PromptContextFormatTag.SceneTracker:
                     return new PromptContextSceneTrackerBuilder(storageService, contextElement, chatDbModel);
+                    case PromptContextFormatTag.SceneTrackerInstructions:
+                    return new PromptContextSceneTrackerInstrBuilder(storageService, contextElement, chatDbModel);
                 case PromptContextFormatTag.CurrentObjective:
                     return new PromptContextCurrentObjectiveBuilder(storageService, contextElement, chatDbModel);
                 case PromptContextFormatTag.LastUserMessage:

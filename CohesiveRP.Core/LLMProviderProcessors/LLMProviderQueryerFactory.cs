@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Core.LLMProviderManager.Main;
+using CohesiveRP.Core.LLMProviderProcessors.SceneTracker;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
@@ -71,7 +72,7 @@ namespace CohesiveRP.Core.LLMProviderManager
                 case BackgroundQuerySystemTags.main:
                     return new MainLLMQueryProcessor(ChatCompletionPresetType.Main, BackgroundQuerySystemTags.main, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.sceneTracker:
-                    return null;
+                    return new SceneTrackerLLMQueryProcessor(ChatCompletionPresetType.SceneTracker, BackgroundQuerySystemTags.sceneTracker, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.shortSummary:
                     return new ShortSummaryLLMQueryProcessor(ChatCompletionPresetType.Summarize, BackgroundQuerySystemTags.shortSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.mediumSummary:

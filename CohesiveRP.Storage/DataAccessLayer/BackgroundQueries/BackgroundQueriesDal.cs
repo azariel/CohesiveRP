@@ -69,7 +69,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 {
                     BackgroundQueryId = Guid.NewGuid().ToString(),
                     LinkedId = queryModel.LinkedId,
-                    InsertDateTimeUtc = DateTime.UtcNow,
+                    CreatedAtUtc = DateTime.UtcNow,
                     ChatId = queryModel.ChatId,
                     Status = BackgroundQueryStatus.Pending,
                     Tags = queryModel.Tags,

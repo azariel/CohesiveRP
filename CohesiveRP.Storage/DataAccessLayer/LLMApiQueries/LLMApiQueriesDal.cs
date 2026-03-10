@@ -58,7 +58,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 {
                     LLMApiQueryId = newQuery.LLMApiQueryId ?? Guid.NewGuid().ToString(),
                     LLMProviderConfigId = newQuery.LLMProviderConfigId,
-                    InsertDateTimeUtc = DateTime.UtcNow,
+                    CreatedAtUtc = DateTime.UtcNow,
                     Status = newQuery.Status,
                     Tag = newQuery.Tag,
                 };

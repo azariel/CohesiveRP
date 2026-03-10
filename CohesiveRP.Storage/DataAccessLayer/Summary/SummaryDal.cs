@@ -60,7 +60,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Summary.Short
                     {
                         SummaryId = Guid.NewGuid().ToString(),
                         ChatId = queryModel.ChatId,
-                        InsertDateTimeUtc = DateTime.UtcNow,
+                        CreatedAtUtc = DateTime.UtcNow,
                     };
 
                     switch (termSummary)
