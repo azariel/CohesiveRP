@@ -139,9 +139,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 using var dbContext = await contextFactory.CreateDbContextAsync();
 
                 // Constant fields not to update
-                var insertDateTimeUtc = dbContext.HotMessages.AsNoTracking().FirstOrDefault(f=>f.ChatId == dbModel.ChatId)?.InsertDateTimeUtc;
+                var insertDateTimeUtc = dbContext.HotMessages.AsNoTracking().FirstOrDefault(f => f.ChatId == dbModel.ChatId)?.InsertDateTimeUtc;
 
-                if(insertDateTimeUtc == null)
+                if (insertDateTimeUtc == null)
                 {
                     LoggingManager.LogToFile("fe04e764-2cb2-4f74-9d1e-7d20b801526a", $"Can't update hot messages associated with chatId [{dbModel.ChatId}]. HotMessages related to this chat are not in storage.");
                     return false;
@@ -161,6 +161,46 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("ba7aac69-13d6-402f-8777-b575a455a175", $"Error when querying pending queries on table messages.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateHotMessageAsync(string chatId, MessageDbModel message)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+
+                // Constant fields not to update
+                var hotMessages = dbContext.HotMessages.FirstOrDefault(f => f.ChatId == chatId);
+                if (hotMessages?.SerializedMessages == null)
+                {
+                    LoggingManager.LogToFile("f747bce8-4559-4bcd-bcf4-9387e78079fd", $"Can't update hot message associated with chatId [{chatId}]. HotMessages related to this chat are not in storage or messages to update didn't exist.");
+                    return false;
+                }
+
+                var index = hotMessages.SerializedMessages.FindIndex(f => f.MessageId == message.MessageId);
+                if (index >= 0)
+                {
+                    hotMessages.SerializedMessages[index] = message;
+                } else
+                {
+                    LoggingManager.LogToFile("8b0d7de3-5a7c-4c4f-97b6-af80742eb556", $"Message [{message.MessageId}] not found in hot messages for chat [{chatId}].");
+                    return false;
+                }
+
+                EntityEntry<HotMessagesDbModel> result = dbContext.HotMessages.Update(hotMessages);
+                if (result.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("afc42bed-13f5-49b7-8c43-a317225ca1cc", $"Error when updating Dbmodel on table messages. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. message: [{JsonCommonSerializer.SerializeToString(message)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("d51ab3f9-63e8-41fe-a4c9-0da0855d78de", $"Error when querying pending queries on table messages.", ex);
                 return false;
             }
         }

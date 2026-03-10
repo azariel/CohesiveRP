@@ -186,7 +186,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     // Fetch from server api
     const payload = {
       content: playerMessage,
-      timestampUtc: new Date().toUTCString()
+      createdAtUtc: new Date().toUTCString()
     };
     
     let response:ChatMessageResponseDto | null = await postToServerApiAsync<ChatMessageResponseDto>(`api/chat/${activeModule?.chatId}/messages`, payload);
@@ -216,6 +216,8 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1, messageIndex: prev.messages.length + 2, summarized: false }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
         mainQueryId: response.mainQueryId,// Track the main query id to know the status of the AI reply
     }));
+
+    textareaRef.current?.focus();
 
     setTimeout(() => {
       if(messagesRef?.current) {

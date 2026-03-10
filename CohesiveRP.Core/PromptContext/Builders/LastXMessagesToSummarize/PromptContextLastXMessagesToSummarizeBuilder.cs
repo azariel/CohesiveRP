@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Core.PromptContext.Abstractions;
+﻿using CohesiveRP.Common.BusinessObjects;
+using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -51,7 +52,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             // Filter for a chunk ordered by createdAt
             messagesToProcess = messagesToProcess.Reverse().ToArray();
 
-            string output = $"# Messages to summarize{Environment.NewLine}{promptContextFormatElement.Options?.Format}";
+            string output = $"# Messages to summarize{Environment.NewLine}Focus your attention on the {MessageSourceType.User} messages, try to keep as much details as possible. You must also consider {MessageSourceType.AI} messages in your summarization, but you must retains as much details from {MessageSourceType.User} as possible whilst keeping the summary short.{Environment.NewLine}{promptContextFormatElement.Options?.Format}";
 
             string value = string.Empty;
             foreach (IMessageDbModel message in messagesToProcess)
