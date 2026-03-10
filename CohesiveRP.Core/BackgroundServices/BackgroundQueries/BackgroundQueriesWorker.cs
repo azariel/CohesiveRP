@@ -77,6 +77,16 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                         {
                             // process the resulting completed query. If it was a 'main', it'll add a new AI message, if it was a sceneTracker, it'll attach the tracker, if it was a summary, it'll attach the summary to an existing message, etc.
                             await queryProcessor.ProcessCompletedQueryAsync();
+
+                            // TODO: if query was set to completed status, set a TTL for auto-delete
+
+                            break;
+                        }
+
+                        if (selectedQuery.Status == BackgroundQueryStatus.Pending)
+                        {
+                            // BackgroundQuery task was re-queued. Drop current after a timeout.
+                            await Task.Delay(ERROR_DELAY_MS);
                             break;
                         }
 
@@ -109,26 +119,29 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
         /// </summary>
         private async Task<BackgroundQueryDbModel> LockNextPendingQueryIfAnyAsync(string[] tagsAllowedByIdleProviders)
         {
-            var allPendingQueries = await backgroundQueriesDal.GetAllPendingQueriesAsync();
+            //var allPendingQueries = await backgroundQueriesDal.GetAllPendingQueriesAsync();
+            var allProcessingQueries = await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
 
-            if (allPendingQueries.Length <= 0)
+            if (allProcessingQueries.Length <= 0)
             {
                 return null;
             }
 
             // Filter only those that have no dependencies currently queued up
+            //List<BackgroundQueryDbModel> inProgressQueries = allProcessingQueries.Where(w => w.Status == BackgroundQueryStatus.InProgress || w.Status == BackgroundQueryStatus.ProcessingFinalInstruction).ToList();
             List<BackgroundQueryDbModel> validQueries = new();
-            foreach (var query in allPendingQueries)
+            foreach (var query in allProcessingQueries)
             {
                 if (query.DependenciesTags != null)
                 {
-                    if (query.DependenciesTags != null && allPendingQueries.Any(a => query.DependenciesTags.Any(an => a.Tags.Contains(an))))
+                    if (query.DependenciesTags != null && allProcessingQueries.Any(a => query.DependenciesTags.Any(an => a.Tags.Contains(an))))
                     {
                         continue;
                     }
                 }
 
-                validQueries.Add(query);
+                if (query.Status == BackgroundQueryStatus.Pending || query.Status == BackgroundQueryStatus.ProcessedWaitingForFinalInstruction)
+                    validQueries.Add(query);
             }
 
             // All queued queries depend on each other (possible, if we're waiting on a background process to add a query to unblock them)
@@ -151,6 +164,11 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                 {
                     return null;
                 }
+            }
+
+            if (validQueries.Count <= 0)
+            {
+                return null;
             }
 
             // change status

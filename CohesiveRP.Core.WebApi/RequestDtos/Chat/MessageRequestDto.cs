@@ -8,7 +8,10 @@ namespace CohesiveRP.Core.WebApi.RequestDtos.Chat
         [JsonPropertyName("content")]
         public string Content { get; set; }
 
-        [JsonPropertyName("timestampUtc")]
-        public string timestampUtc { get; set; }
+        [JsonPropertyName("createdAtUtc")]
+        public string CreatedAtUtc { get; set; }
+
+        [JsonPropertyName("messageId")]
+        public string MessageId { get; set; }
     }
 }

@@ -19,5 +19,11 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
 
         [JsonPropertyName("createdAtUtc")]
         public DateTime CreatedAtUtc { get; set; }
+
+        [JsonPropertyName("messageIndex")]
+        public int MessageIndex { get; set; }
+
+        [JsonPropertyName("summarized")]
+        public bool Summarized { get; internal set; }
     }
 }

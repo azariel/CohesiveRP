@@ -118,9 +118,14 @@ namespace CohesiveRP.Core.Services
 
             } catch (Exception e)
             {
-                if (e.Message.ToLowerInvariant().Contains("input should be a valid string"))
+                if (e.Message.Contains("input should be a valid string", StringComparison.InvariantCultureIgnoreCase))
                 {
                     LoggingManager.LogToFile("611e883a-f3c6-4e9a-9f35-458690125ede", $"The configured LLMProviderConfig [{selectedLLMApiQueryDbModel.ProviderConfigId}] is incorrectly configured. The OpenAI compliant inference server has refused to serve the request due to an incorrect configuration.");
+                }
+
+                if(e.Message.Contains("no connection could be made because the target machine actively refused it", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    LoggingManager.LogToFile("4b4683cf-e3a1-4494-8ecd-1e288bb61e81", $"Can't execute Http request. The requested Api is down. ApiUrl: [{selectedLLMApiQueryDbModel.ApiUrl}].");
                 }
                 
                 return null;

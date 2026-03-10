@@ -5,6 +5,7 @@ using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.TimeoutStrategies;
+using CohesiveRP.Storage.DataAccessLayer.Settings.Summary;
 using CohesiveRP.Storage.QueryModels.Chat;
 using Microsoft.EntityFrameworkCore;
 
@@ -81,8 +82,49 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Type = ChatCompletionPresetType.Main,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_CHAT_COMPLETION_PRESET,
                                 IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.Summarize,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_SUMMARIZE_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.SummariesMerge,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_SUMMARIZES_MERGER_COMPLETION_PRESET,
+                                IsDefault = true,
                             }
                         }
+                    },
+                    Summary = new SummarySettings()
+                    {
+                        NbRawMessagesToKeepInContext = 5,
+                        Short = new ShortSummaryConfig
+                        {
+                            NbMessageInChunk = 3,
+                            MaxShortTermSummaryTokens = 1024,// Standard would probably be 4096
+                        },
+                        Medium = new ExtensibleSummaryConfig
+                        {
+                            SummarizeLastXTokens = 256,// Standard would probably be 1024 (about 25% of Short.MaxShortTermSummaryTokens)
+                            MaxTotalSummariesTokens = 512,// Standard would probably be 2048
+                        },
+                        Long = new ExtensibleSummaryConfig
+                        {
+                            SummarizeLastXTokens = 128,// Standard would probably be 512 (about 25% of Medium.MaxShortTermSummaryTokens)
+                            MaxTotalSummariesTokens = 512,// Standard would probably be 2048
+                        },
+                        Extra = new ExtensibleSummaryConfig
+                        {
+                            SummarizeLastXTokens = 128,// Standard would probably be 512 (about 25% of Long.MaxShortTermSummaryTokens)
+                            MaxTotalSummariesTokens = 512,// Standard would probably be 2048
+                        },
+                        Overflow = new OverflowSummaryConfig
+                        {
+                            SummarizeLastXTokens = 128,// Standard would probably be 512 (about 25% of Extra.MaxShortTermSummaryTokens)
+                            MaxOverflowSummaryTokens = 256,// Standard would probably be 1024
+                        },
                     }
                 });
 

@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using CohesiveRP.Common.BusinessObjects;
+﻿using CohesiveRP.Common.BusinessObjects;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Messages
 {
@@ -9,5 +8,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         string Content { get; set; }
         MessageSourceType SourceType { get; set; }
         DateTime CreatedAtUtc { get; set; }
+        bool Summarized { get; set; }
     }
 }

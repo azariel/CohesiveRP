@@ -1,17 +1,25 @@
 ﻿using System.Text;
+using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
     public class PromptContextLoreByQueryBuilder : IPromptContextElementBuilder
     {
-        public PromptContextLoreByQueryBuilder(IStorageService storageService)
+        private IStorageService storageService;
+        private PromptContextFormatElement promptContextFormatElement;
+        private ChatDbModel chatDbModel;
+
+        public PromptContextLoreByQueryBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
         {
-            
+            this.storageService = storageService;
+            this.promptContextFormatElement = promptContextFormatElement;
+            this.chatDbModel = chatDbModel;
         }
 
-        public async Task<string> BuildAsync(PromptContextFormatElement promptContextFormatElement)
+        public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             Dictionary<string, string> loreByQueryContent = [];
             string userPersonaName = "userName";// TODO: fetch from Db
@@ -40,7 +48,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 str.Append($"Infer the lore from the roleplay context.{Environment.NewLine}{Environment.NewLine}");
             }
 
-            return $"# Lore (relevant in recent story context){Environment.NewLine}{str}";
+            return ($"# Lore (relevant in recent story context){Environment.NewLine}{str}", new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

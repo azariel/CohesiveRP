@@ -1,0 +1,13 @@
+.boldHighlight {
+  font-weight: bold;
+}
+
+.quoteHighlight {
+  color: #2faaf1; /* TODO: Load from character/user setting */
+}
+
+.thoughtsHighlight {
+  font-weight: 100;
+  font-style: italic;
+  color: #83d2ff; /* TODO: Load from character/user setting */
+}

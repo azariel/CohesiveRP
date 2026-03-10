@@ -14,8 +14,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.BackgroundQueries
         [JsonPropertyName("chatId")]
         public string ChatId { get; set; }
 
-        [JsonPropertyName("linkedMessageId")]
-        public string LinkedMessageId { get; set; }
+        [JsonPropertyName("linkedId")]
+        public string LinkedId { get; set; }
 
         [JsonPropertyName("backgroundQueryId")]
         public string BackgroundQueryId { get; set; }

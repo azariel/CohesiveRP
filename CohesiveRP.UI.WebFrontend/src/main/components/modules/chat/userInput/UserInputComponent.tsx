@@ -28,6 +28,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
   const [isSendingMessageToServer, setIsSendingMessageToServer] = useState(false);
   const [isWaitingOnPlayerMessageServerProcess, setIsWaitingOnPlayerMessageServerProcess] = useState(false);
+  const isStreamingQueryResult:boolean = false;
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -48,21 +49,34 @@ export default function UserInputComponent({ messagesRef }: Props) {
     };
   }, [messagesRef]);
 
-  const handleInput = () => {
+const adjustTextareaHeight = () => {
     const el = textareaRef.current;
-    if (!el) {
-      return;
-    }
+    if (!el) return;
 
-    el.style.marginBottom = "-0.3em";// hack...sigh
+    // 1. Reset height to 'auto' first so it can shrink if the user deletes text
     el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 140) + "px";
-    el.style.overflowY = el.scrollHeight > 140 ? "auto" : "hidden";
+    
+    // 2. Calculate the new height based on the content
+    const targetHeight = el.scrollHeight;
+    const maxHeight = 140;
 
-    // Scroll parent messages container to bottom
+    // 3. Apply the constrained height and toggle the scrollbar
+    el.style.height = `${Math.min(targetHeight, maxHeight)}px`;
+    el.style.overflowY = targetHeight > maxHeight ? "auto" : "hidden";
+
+    // 4. Keep the main message window scrolled to the bottom
     if (messagesRef?.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [playerMessage]);
+
+const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPlayerMessage(e.target.value);
+    adjustTextareaHeight();
   };
 
   useEffect(() => {
@@ -82,7 +96,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
       // If the query is not inProgress, we'll fetch the generated message
       let realMessageFromStorage:ChatMessageResponseDto | null = null;
       if (response?.status !== "InProgress") {
-        realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedMessageId}`);
+        realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedId}`);
 
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if(!response || response.code != 200 || serverApiException?.message) {
@@ -117,11 +131,12 @@ export default function UserInputComponent({ messagesRef }: Props) {
               updatedMessages[tempAIReplyMessageIndex].content = realMessageFromStorage.messageObj.content;
               updatedMessages[tempAIReplyMessageIndex].sourceType = realMessageFromStorage.messageObj.sourceType;
             } else {
-              updatedMessages[tempAIReplyMessageIndex].messageId = response.linkedMessageId;
-              console.error(`Background main query was done, but the underlying message couldn't be retrieved from backend! Impersonating the message with the right id [${response.linkedMessageId}] now, but state is finicky.`);
+              updatedMessages[tempAIReplyMessageIndex].messageId = response.linkedId;
+              console.error(`Background main query was done, but the underlying message couldn't be retrieved from backend! Impersonating the message with the right id [${response.linkedId}] now, but state is finicky.`);
             }
-            
           }
+
+          UpdateInputControlState();
 
           // Query is done
           return { ...prev, messages: updatedMessages, mainQueryId: null };
@@ -140,17 +155,34 @@ export default function UserInputComponent({ messagesRef }: Props) {
         setIsSendingMessageToServer(false);
         setIsWaitingOnPlayerMessageServerProcess(false);
         setIsInputBlockedDueToServer(false);
+
+        if (messagesRef?.current) {
+          setTimeout(() => {
+            if(messagesRef?.current) {
+              messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+            }
+          }, 200);
+        }
       }
 
     } catch (err) {
       console.error("Polling main background query error:", err);
       clearInterval(pollInterval);
     }
-  }, 1000);
+  }, isStreamingQueryResult ? 1000 : 3000);
 
   // cleanup
   return () => clearInterval(pollInterval);
 }, [activeModule?.mainQueryId, setActiveModule]); // Only re-run if the ID changes
+
+  const UpdateInputControlState = async () => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      textareaRef.current?.blur();
+    } else {
+      textareaRef.current?.focus();
+    }
+  };
 
   const handleSendPlayerMessage = async () => {
     if (isSendingMessageToServer || !playerMessage || !playerMessage.trim()){
@@ -164,7 +196,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
     // Fetch from server api
     const payload = {
       content: playerMessage,
-      timestampUtc: new Date().toUTCString()
+      createdAtUtc: new Date().toUTCString()
     };
     
     let response:ChatMessageResponseDto | null = await postToServerApiAsync<ChatMessageResponseDto>(`api/chat/${activeModule?.chatId}/messages`, payload);
@@ -185,14 +217,17 @@ export default function UserInputComponent({ messagesRef }: Props) {
     setPlayerMessage(""); // clear input on success
     
     // reflect those messages in the UI!
+    response.messageObj.messageIndex = activeModule.messages.length + 1;
     setActiveModule((prev) => ({
       ...prev,
       messages: [...(prev.messages || []),// Keep messages history
       response.messageObj,// Add new player message at the bottom
       {
-        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1 }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
-        mainQueryId: response.mainQueryId// Track the main query id to know the status of the AI reply
+        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1, messageIndex: prev.messages.length + 2, summarized: false }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
+        mainQueryId: response.mainQueryId,// Track the main query id to know the status of the AI reply
     }));
+
+    UpdateInputControlState();
 
     setTimeout(() => {
       if(messagesRef?.current) {
@@ -216,7 +251,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
         <HiChip className={styles.autoCorrectIcon} />
         <div className={styles.inputAutoCorrectSeparator} />
         <div className={styles.inputControlContainer}>
-          <textarea className={styles.inputControl} rows={1} ref={textareaRef} onInput={handleInput} onChange={(e) => setPlayerMessage(e.target.value)} value={playerMessage} placeholder="Type a message..."/>
+          <textarea className={styles.inputControl} rows={1} ref={textareaRef} onChange={handleInput} value={playerMessage} placeholder="Type a message..."/>
         </div>
         <div className={styles.inputSendSeparator} />
           <div

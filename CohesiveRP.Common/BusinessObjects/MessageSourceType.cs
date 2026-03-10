@@ -2,7 +2,8 @@
 {
     public enum MessageSourceType
     {
-        User,
-        AI,
+        User = 0,
+        AI = 1,
+        //System = 2,
     }
 }

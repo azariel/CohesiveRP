@@ -18,5 +18,6 @@
             # behavioral instruction (300 tokens) / think step by step
          * */
         public List<PromptContextFormatElement> OrderedElementsWithinTheGlobalPromptContext { get; set; } = new();
+        //public PromptContextSettings Settings { get; set; } = new();
     }
 }

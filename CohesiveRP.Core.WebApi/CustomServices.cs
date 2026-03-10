@@ -7,6 +7,7 @@ using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
+using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
@@ -15,6 +16,7 @@ using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.DataAccessLayer.Summary.Short;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 
 namespace CohesiveRP.Core.WebApi
@@ -31,6 +33,8 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ICreateNewChatWorkflow, CreateNewChatWorkflow>();
             services.AddSingleton<IGetAllHotMessagesWorkflow, GetAllHotMessagesWorkflow>();
             services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
+            services.AddSingleton<IPatchSpecificMessageByIdWorkflow, PatchSpecificMessageByIdWorkflow>();
+            
 
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();
@@ -41,6 +45,7 @@ namespace CohesiveRP.Core.WebApi
             // Services
             services.AddSingleton<IStorageService, StorageService>();
             services.AddSingleton<IHttpLLMApiProviderService, HttpLLMApiProviderService>();
+            services.AddSingleton<ISummaryService, SummaryService>();
 
             // Factories
             services.AddSingleton<ILLMProviderQueryerFactory, LLMProviderQueryerFactory>();
@@ -58,6 +63,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IChatCompletionPresetsDal, ChatCompletionPresetsDal>();
             services.AddSingleton<IBackgroundQueriesDal, BackgroundQueriesDal>();
             services.AddSingleton<ILLMApiQueriesDal, LLMApiQueriesDal>();
+            services.AddSingleton<ISummaryDal, SummaryDal>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

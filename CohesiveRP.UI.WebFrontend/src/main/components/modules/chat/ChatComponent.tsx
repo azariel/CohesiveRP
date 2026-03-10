@@ -1,12 +1,10 @@
 import styles from "./ChatComponent.module.css";
-import { useEffect, useRef  } from "react";
+import { useEffect, useRef } from "react";
 import ChatMessageComponent from "./message/ChatMessageComponent";
 import UserInputComponent from "./userInput/UserInputComponent";
-
-import { getFromServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
+import { getFromServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { ChatMessagesResponseDto } from "../../../../ResponsesDto/chat/ChatMessagesResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
-
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
@@ -18,52 +16,77 @@ export default function ChatComponent() {
 
   useEffect(() => {
     if (didComponentMountAlready.current)
-      return;
-
+        return;
     didComponentMountAlready.current = true;
 
     const fetchData = async () => {
       try {
         let chatModule = activeModule as SharedContextChatType;
-        const response:ChatMessagesResponseDto | null = await getFromServerApiAsync<ChatMessagesResponseDto>(`api/chat/${chatModule.chatId}/messages/hot`);
-
+        const response: ChatMessagesResponseDto | null = await getFromServerApiAsync<ChatMessagesResponseDto>(`api/chat/${chatModule.chatId}/messages/hot`);
         let serverApiException = response as ServerApiExceptionResponseDto | null;
-        if(!response || response.code != 200 || serverApiException?.message) {
+        if (!response || response.code != 200 || serverApiException?.message) {
           console.error(`Call to fetch specific chat failed. [${JSON.stringify(serverApiException)}]`);
           return;
         }
-
-        // TODO: also check the state of a 'main' backgroundQuery to know if we should add a tempAIReply message
-
-        setActiveModule({...activeModule, messages: response.messages ?? []});
+        setActiveModule({ ...activeModule, messages: response.messages ?? [] });
         console.log(`Specific chat fetched successfully.`);
-
         setTimeout(() => {
-        if(messagesRef?.current) {
-          messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-          }
+          if (messagesRef?.current)
+            messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
         }, 200);
       } catch (error) {
         console.error("Fetch error:", error);
       }
     };
-
     fetchData();
   }, []);
 
-  // Scroll to bottom when component mounts
   useEffect(() => {
-    if(messagesRef?.current) {
+    if (messagesRef?.current)
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-      }
   }, []);
+
+  const handleSaveMessage = async (messageId: string, newContent: string) => {
+    let updatedMessage = activeModule.messages.find(f=>f.messageId === messageId);
+
+    if(updatedMessage)
+    {
+      updatedMessage.content = newContent;
+
+      // Update local store immediately (optimistic)
+      setActiveModule((prev) => ({
+        ...prev,
+        messages: (prev.messages ?? []).map((m) =>
+          m.messageId === messageId ? { ...m, content: newContent } : m
+        ),
+      }));
+
+      // Save to backend
+      const response = await putToServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}`, updatedMessage);
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || serverApiException?.message) {
+        console.error(`Updating message failed. [${JSON.stringify(serverApiException)}]`);
+      }
+    }
+  };
+
+  const lastMessageIndex = (activeModule?.messages?.length ?? 0) - 1;
+  const editableMessageIndex = lastMessageIndex - 3;
+  const isSendingMessage = !!activeModule?.mainQueryId; // blocked while AI is replying
 
   return (
     <main className={styles.chatComponent}>
       <div className={styles.messagesContainer} ref={messagesRef}>
         {activeModule?.messages && activeModule.messages.length > 0 ? (
           activeModule.messages.map((message, index) => (
-            <ChatMessageComponent key={index} message={message} enableSwipeBtn={index === (activeModule.messages?.length ?? 0) - 1} />
+            <ChatMessageComponent
+              key={index}
+              messagesRef={messagesRef}
+              message={message}
+              enableSwipeBtn={index >= editableMessageIndex}
+              isEditable={!isSendingMessage && index >= editableMessageIndex}
+              onSave={handleSaveMessage}
+            />
           ))
         ) : (
           <p />
