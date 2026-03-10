@@ -15,16 +15,18 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="DataAccessLayer\Summary\Short\**" />
+      <EmbeddedResource Remove="DataAccessLayer\Summary\Short\**" />
+      <None Remove="DataAccessLayer\Summary\Short\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\CohesiveRP.Common\CohesiveRP.Common.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="DataAccessLayer\Summary\Short\" />
     </ItemGroup>
 
 </Project>

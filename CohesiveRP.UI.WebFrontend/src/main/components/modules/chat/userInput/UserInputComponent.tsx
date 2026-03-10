@@ -27,7 +27,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
   const [playerMessage, setPlayerMessage] = useState("");
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
   const [isSendingMessageToServer, setIsSendingMessageToServer] = useState(false);
-  const [isWaitingOnPlayerMessageServerProcess, setIsWaitingOnPlayerMessageServerProcess] = useState(false);
+  const [sendMessageQueryStatus, setSendMessageQueryStatus] = useState("");
   const isStreamingQueryResult:boolean = false;
 
   useEffect(() => {
@@ -95,7 +95,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 
       // If the query is not inProgress, we'll fetch the generated message
       let realMessageFromStorage:ChatMessageResponseDto | null = null;
-      if (response?.status !== "InProgress") {
+      if (response?.status !== "Pending" && response?.status !== "InProgress") {
         realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedId}`);
 
         let serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -103,6 +103,8 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
           console.error(`Fetching real message from main background query result failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
         }
       }
+
+      setSendMessageQueryStatus(response?.status ?? "");
 
       // TODO: if backend is closed whilst we're waiting here, we want to handle this cleanly!
 
@@ -122,7 +124,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         }
 
         // If the AI reply generation is done, update states
-        if(response != null && response.status !== "InProgress") {
+        if(response != null && response.status !== "InProgress" && response.status !== "Pending") {
           if (tempAIReplyMessageIndex !== -1) {
 
             if(realMessageFromStorage && realMessageFromStorage.messageObj) {
@@ -146,14 +148,14 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         return { ...prev, messages: updatedMessages };
       });
 
-      if (response?.status !== "InProgress") {
+      if (response?.status !== "InProgress" && response?.status !== "Pending") {
         console.log("Generation complete, clearing polling.");
         clearInterval(pollInterval);
         
         // These local state updates are now safe because they aren't 
         // nested inside another component's state update logic
         setIsSendingMessageToServer(false);
-        setIsWaitingOnPlayerMessageServerProcess(false);
+        setSendMessageQueryStatus(response?.status ?? "");
         setIsInputBlockedDueToServer(false);
 
         if (messagesRef?.current) {
@@ -206,14 +208,14 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       console.error(`Sending player message to backend failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
 
       // TODO: show err to user
-      setIsWaitingOnPlayerMessageServerProcess(false);
+      setSendMessageQueryStatus("");
       setIsSendingMessageToServer(false);
       setIsInputBlockedDueToServer(false);
       return;
     }
 
     console.log(`Sending player message to backend succeeded.`);
-    setIsWaitingOnPlayerMessageServerProcess(true);
+    setSendMessageQueryStatus("Completed");
     setPlayerMessage(""); // clear input on success
     
     // reflect those messages in the UI!
@@ -240,7 +242,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     // optional: cancel request / noop / show tooltip
     console.log("Cancelling... TODO (not implemented)");
     setIsSendingMessageToServer(false);
-    setIsWaitingOnPlayerMessageServerProcess(false);
+    setSendMessageQueryStatus("");
 
     // TODO: cancel and then setIsInputBlockedDueToServer(false)
   };
@@ -264,7 +266,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
               : handleSendPlayerMessage
           }>
             {isInputBlockedDueToServer ? (
-              <ImSpinner2 className={isWaitingOnPlayerMessageServerProcess ? styles.sendInputSpinnerWaitingMessageProcess : styles.sendInputSpinnerWaitingServerAck} />
+              <ImSpinner2 className={sendMessageQueryStatus === "" ? styles.sendInputSpinnerWaitingServerAck : (sendMessageQueryStatus === "Pending" ? styles.sendInputSpinnerWaitingMessagePending : ((sendMessageQueryStatus === "InProgress" ? styles.sendInputSpinnerWaitingMessageProcess : styles.sendInputSpinnerWaitingMessageDefault))) } />
             ) : hoveringSendBtn ? (
               <BiPaperPlane className={styles.sendInputIcon} />
             ) : (

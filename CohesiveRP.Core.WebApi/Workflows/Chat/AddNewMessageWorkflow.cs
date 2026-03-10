@@ -6,6 +6,7 @@ using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Message;
 
@@ -37,10 +38,9 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             };
         }
 
-        //if (!DateTime.TryParse(requestDto.Message.timestampUtc, out DateTime messageDate))
-        //{
-        //    messageDate = DateTime.UtcNow;
-        //}
+        // Add a background query to generate the sceneTracker first and foremost
+        // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
+        await AddSceneTrackerBackgroundQueryAsync(chat);
 
         // Add the message
         CreateMessageQueryModel messageQueryModel = new()
@@ -79,5 +79,21 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         };
 
         return responseDto;
+    }
+
+    private async Task<bool> AddSceneTrackerBackgroundQueryAsync(ChatDbModel chat)
+    {
+        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+        {
+            ChatId = chat.ChatId,
+            Priority = BackgroundQueryPriority.Highest,// User is waiting!
+            DependenciesTags = [],// No dependencies at all
+            Tags = [BackgroundQuerySystemTags.sceneTracker.ToString()],
+        };
+
+        if(await storageService.CreateBackgroundQueryAsync(backgroundQueryModel) == null)
+            return false;
+
+        return true;
     }
 }

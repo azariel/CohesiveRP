@@ -11,6 +11,6 @@ namespace CohesiveRP.Storage.Sqlite
         //                            Properties
         // ********************************************************************
         [Required]
-        public DateTime? InsertDateTimeUtc { get; set; } = null;
+        public DateTime? CreatedAtUtc { get; set; } = null;
     }
 }

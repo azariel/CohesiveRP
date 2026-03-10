@@ -20,14 +20,19 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
-            string sceneTrackerContent = "";//TODO: fetch from Db
+            var lastSceneTracker = await storageService.GetSceneTracker(chatDbModel.ChatId);
 
-            if(string.IsNullOrWhiteSpace(sceneTrackerContent))
+            if (string.IsNullOrWhiteSpace(lastSceneTracker?.Content))
             {
-                return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
+                return (null, new ShareableContextLink { LinkedBuilder = this, });
             }
 
-            return ($"# Scene Tracker (details on current scene){Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", sceneTrackerContent)}", new ShareableContextLink { LinkedBuilder = this });
+            return ($"# Scene Tracker (details on current scene){Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+                .Replace("{{item_description}}", lastSceneTracker.Content)}",
+                new ShareableContextLink
+                {
+                    LinkedBuilder = this,
+                });
         }
     }
 }

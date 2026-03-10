@@ -13,11 +13,12 @@
         RelevantCharacters = 8,
         LastXMessages = 9,
         SceneTracker = 10,
-        CurrentObjective = 11,
-        LastUserMessage = 12,
-        BehavioralInstructions = 13,
-        LastXMessagesToSummarize = 14,
-        LastUnsummarizedMessages = 15,
-        OverflowingSummariesToSummarize = 16,
+        SceneTrackerInstructions = 11,
+        CurrentObjective = 12,
+        LastUserMessage = 13,
+        BehavioralInstructions = 14,
+        LastXMessagesToSummarize = 15,
+        LastUnsummarizedMessages = 16,
+        OverflowingSummariesToSummarize = 17,
     }
 }

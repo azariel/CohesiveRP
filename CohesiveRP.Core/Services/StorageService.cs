@@ -4,6 +4,7 @@ using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Summary.Short;
@@ -11,6 +12,7 @@ using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
+using CohesiveRP.Storage.QueryModels.SceneTracker;
 
 namespace CohesiveRP.Core.Services
 {
@@ -26,6 +28,7 @@ namespace CohesiveRP.Core.Services
         private IBackgroundQueriesDal backgroundQueriesDal;
         private ILLMApiQueriesDal llmApiQueriesDal;
         private ISummaryDal summaryDal;
+        private ISceneTrackerDal sceneTrackerDal;
 
         public StorageService(
             IChatsDal chatsDal,
@@ -34,7 +37,8 @@ namespace CohesiveRP.Core.Services
             IChatCompletionPresetsDal chatCompletionPresetsDal,
             IBackgroundQueriesDal backgroundQueriesDal,
             ILLMApiQueriesDal llmApiQueriesDal,
-            ISummaryDal summaryDal)
+            ISummaryDal summaryDal,
+            ISceneTrackerDal sceneTrackerDal)
         {
             this.chatsDal = chatsDal;
             this.messagesDal = messagesDal;
@@ -43,6 +47,7 @@ namespace CohesiveRP.Core.Services
             this.backgroundQueriesDal = backgroundQueriesDal;
             this.llmApiQueriesDal = llmApiQueriesDal;
             this.summaryDal = summaryDal;
+            this.sceneTrackerDal = sceneTrackerDal;
         }
 
         // Chats
@@ -92,7 +97,7 @@ namespace CohesiveRP.Core.Services
         // Messages
         public async Task<IMessageDbModel[]> GetAllHotMessages(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);
         public async Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId) => await messagesDal.GetMessageByIdAsync(chatId, messageId);
-        public async Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message) => await messagesDal.CreateMessageAsync(message);
+        public async Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message) => await messagesDal.CreateOrUpdateMessageAsync(message);
         public async Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages) => await messagesDal.UpdateHotMessagesAsync(messages);
         public async Task<bool> UpdateHotMessageAsync(string chatId, MessageDbModel message) => await messagesDal.UpdateHotMessageAsync(chatId, message);
 
@@ -124,5 +129,10 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> DeleteLongTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteLongTermSummariesEntriesAsync(chatId, summariesIds);
         public async Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteExtraTermSummariesEntriesAsync(chatId, summariesIds);
         public async Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteOverflowTermSummariesEntriesAsync(chatId, summariesIds);
+
+        // SceneTracker
+        public async Task<SceneTrackerDbModel> GetSceneTracker(string chatId) => await sceneTrackerDal.GetSceneTracker(chatId);
+        public async Task<SceneTrackerDbModel> AddSceneTracker(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.AddSceneTracker(queryModel);
+        public async Task<SceneTrackerDbModel> UpdateSceneTracker(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.CreateOrUpdateSceneTracker(queryModel);
     }
 }

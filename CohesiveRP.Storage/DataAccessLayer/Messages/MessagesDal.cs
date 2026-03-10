@@ -71,7 +71,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
             }
         }
 
-        public async Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel queryModel)
+        public async Task<IMessageDbModel> CreateOrUpdateMessageAsync(CreateMessageQueryModel queryModel)
         {
             try
             {
@@ -97,7 +97,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     var newHotMessagesObj = new HotMessagesDbModel
                     {
                         ChatId = queryModel.ChatId,
-                        InsertDateTimeUtc = DateTime.UtcNow,
+                        CreatedAtUtc = DateTime.UtcNow,
                         SerializedMessages = new List<MessageDbModel> { messageDbModel },
                     };
 
@@ -139,7 +139,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 using var dbContext = await contextFactory.CreateDbContextAsync();
 
                 // Constant fields not to update
-                var insertDateTimeUtc = dbContext.HotMessages.AsNoTracking().FirstOrDefault(f => f.ChatId == dbModel.ChatId)?.InsertDateTimeUtc;
+                var insertDateTimeUtc = dbContext.HotMessages.AsNoTracking().FirstOrDefault(f => f.ChatId == dbModel.ChatId)?.CreatedAtUtc;
 
                 if (insertDateTimeUtc == null)
                 {
@@ -147,7 +147,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     return false;
                 }
 
-                dbModel.InsertDateTimeUtc = insertDateTimeUtc;
+                dbModel.CreatedAtUtc = insertDateTimeUtc;
 
                 EntityEntry<HotMessagesDbModel> result = dbContext.HotMessages.Update(dbModel);
                 if (result.State != EntityState.Modified)

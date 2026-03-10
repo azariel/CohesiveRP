@@ -15,6 +15,7 @@ using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Summary.Short;
 using CohesiveRP.Storage.DataAccessLayer.Users;
@@ -34,7 +35,6 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetAllHotMessagesWorkflow, GetAllHotMessagesWorkflow>();
             services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
             services.AddSingleton<IPatchSpecificMessageByIdWorkflow, PatchSpecificMessageByIdWorkflow>();
-            
 
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();
@@ -64,6 +64,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IBackgroundQueriesDal, BackgroundQueriesDal>();
             services.AddSingleton<ILLMApiQueriesDal, LLMApiQueriesDal>();
             services.AddSingleton<ISummaryDal, SummaryDal>();
+            services.AddSingleton<ISceneTrackerDal, SceneTrackerDal>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

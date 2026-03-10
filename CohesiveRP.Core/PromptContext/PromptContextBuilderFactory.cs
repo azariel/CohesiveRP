@@ -18,7 +18,7 @@ namespace CohesiveRP.Core.PromptContext
                 case BackgroundQuerySystemTags.main:
                     return new PromptContextBuilder(ChatCompletionPresetType.Main, promptContextElementBuilderFactory, storageService, globalSettings, contextLinkedId, generationTag);
                 case BackgroundQuerySystemTags.sceneTracker:
-                    return null;
+                    return new PromptContextBuilder(ChatCompletionPresetType.SceneTracker, promptContextElementBuilderFactory, storageService, globalSettings, contextLinkedId, generationTag);
                 case BackgroundQuerySystemTags.shortSummary:
                     return new PromptContextBuilder(ChatCompletionPresetType.Summarize, promptContextElementBuilderFactory, storageService, globalSettings, contextLinkedId, generationTag);
                 case BackgroundQuerySystemTags.mediumSummary:

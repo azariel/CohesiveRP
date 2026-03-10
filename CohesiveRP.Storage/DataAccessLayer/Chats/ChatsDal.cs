@@ -66,7 +66,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 ChatDbModel chatDbModel = new ChatDbModel
                 {
                     ChatId = Guid.NewGuid().ToString(),
-                    InsertDateTimeUtc = DateTime.UtcNow,
+                    CreatedAtUtc = DateTime.UtcNow,
                     SelectedChatCompletionPresets = queryModel.SelectedChatCompletionPresets,
                 };
 
