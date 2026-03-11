@@ -65,6 +65,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CharacterId = Guid.NewGuid().ToString(),
                     CreatedAtUtc = DateTime.UtcNow,
                     Name = queryModel.Name,
+                    Creator = queryModel.Creator,
+                    CreatorNotes = queryModel.CreatorNotes,
+                    Description = queryModel.Description,
+                    Tags = queryModel.Tags,
+                    FirstMessage = queryModel.FirstMessage,
+                    AlternateGreetings = queryModel.AlternateGreetings,
                 };
 
                 EntityEntry<CharacterDbModel> result = await dbContext.Characters.AddAsync(CharacterDbModel);

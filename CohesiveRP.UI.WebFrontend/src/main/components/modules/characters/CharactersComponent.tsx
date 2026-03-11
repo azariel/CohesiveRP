@@ -1,18 +1,44 @@
 import styles from "./CharactersComponent.module.css";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { FaFilter  } from "react-icons/fa";
 import { MdAddBox } from "react-icons/md";
 
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextType } from "../../../../store/SharedContextType";
-import { postToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
+import { getFromServerApiAsync, postToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+import type { CharactersResponseDto } from "../../../../ResponsesDto/characters/CharactersResponseDto";
 
 export default function CharactersComponent() {
   const { setActiveModule } = sharedContext();
+  const didComponentMountAlready = useRef(false);
   const newCharacterFileInputRef = useRef<HTMLInputElement | null>(null);
+  const [charactersResponse, setCharactersResponse] = useState<CharactersResponseDto | null>(null);
+
+  useEffect(() => {
+    if (didComponentMountAlready.current)
+        return;
+    didComponentMountAlready.current = true;
+
+    const fetchData = async () => {
+      try {
+        const response: CharactersResponseDto | null = await getFromServerApiAsync<CharactersResponseDto>(`api/characters`);
+        let serverApiException = response as ServerApiExceptionResponseDto | null;
+        if (!response || response.code != 200 || serverApiException?.message) {
+          console.error(`Call to fetch characters list failed. [${JSON.stringify(serverApiException)}]`);
+          return;
+        }
+
+        console.log(`Characters list fetched successfully.`);
+        setCharactersResponse(response);
+      } catch (error) {
+        console.error("Fetch characters list error:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleSpecificCharacterClick = (moduleName: string) => {
 
@@ -45,6 +71,25 @@ export default function CharactersComponent() {
       }
       
       console.log(`Character uploaded successfully.`);
+
+      const newCharacter = response as CharacterResponseDto;
+
+      // Add the new character to the list
+      setCharactersResponse((prev) => {
+        // If there is no previous state, create the wrapper object
+        if (!prev) {
+          return {
+            code: 200,
+            characters: [newCharacter.character]
+          } as CharactersResponseDto;
+        }
+
+        // If state exists, spread the old state and add the new character to the array
+        return {
+          ...prev,
+          characters: [...(prev.characters || []), newCharacter.character]
+        };
+    });
     } catch (err) {
       console.error(err);
       // TODO: show err to user
@@ -70,18 +115,19 @@ export default function CharactersComponent() {
         </div>
       </div>
       <div className={styles.charactersGridContainer}>
-        {Array.from({ length: 16 }).map((_, index) => (
-          <div className={styles.characterContainer} onClick={() => handleSpecificCharacterClick("character")}>
-            <div
-              key={index}
-              className={styles.characterAvatarContainer}
-            >
-              <img src="./dev/Seyrdis.png" alt="Avatar" />
+        {charactersResponse?.characters?.map(character => (
+          <div key={character.characterId} className={styles.characterContainer} onClick={() => handleSpecificCharacterClick("character")}>
+            <div className={styles.characterAvatarContainer}>
+              <img src={`./characters/${character.characterId}/avatar.png`} alt="dev/Placeholder.png" />
             </div>
             <div className={styles.characterInfoPanel}>
-              <label className={styles.characterCharNameLabel}>char name {index}</label>
-              <label className={styles.characterTagsLabel}>Angst Humor Drama Fantasy Adventure Isekai Magic Horror Combat Suspense</label>
-              <label className={styles.characterDescriptionLabel}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean cursus, lorem at luctus interdum, nisi risus volutpat ex, at dignissim nulla magna id dui. Pellentesque a dolor eleifend, congue orci elementum, tempor turpis. Praesent pretium a justo ut pretium. Morbi placerat quis massa ac euismod. Nunc facilisis vel enim sit amet finibus. Nulla aliquam odio vitae lacus mattis, at placerat purus elementum. Nulla facilisi. Ut laoreet suscipit metus nec elementum. Maecenas semper ullamcorper tortor, id vestibulum dolor egestas euismod. In vel fringilla ex. Sed tristique commodo interdum. Sed venenatis sodales justo vel egestas. </label>
+              <label className={styles.characterCharNameLabel}>{character.name}</label>
+              <label className={styles.characterTagsLabel}>{!character.tags ? "" : character.tags.join(" / ")}</label>
+              <label className={styles.characterDescriptionLabel}>
+                {character.creatorNotes.length > 512 ? 
+                  `${character.creatorNotes.substring(0, 512)}...` : 
+                  character.creatorNotes}
+              </label>
             </div>
           </div>
         ))}

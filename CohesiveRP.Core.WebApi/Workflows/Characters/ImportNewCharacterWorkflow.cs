@@ -5,7 +5,9 @@ using CohesiveRP.Core.CharacterCards.Loaders;
 using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
+using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.QueryModels.Chat;
 using SixLabors.ImageSharp;
 
@@ -62,9 +64,23 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         AddCharacterQueryModel queryModel = new()
         {
             Name = ccv3CharacterCard.Data.Name,
+            Creator = ccv3CharacterCard.Data.Creator,
+            CreatorNotes = ccv3CharacterCard.Data.CreatorNotes,
+            Description = ccv3CharacterCard.Data.Description,
+            Tags = ccv3CharacterCard.Data.Tags,
+            FirstMessage = ccv3CharacterCard.Data.FirstMessage,
+            AlternateGreetings = ccv3CharacterCard.Data.AlternateGreetings,
+
+            /*
+             * messageExample
+               systemPrompt
+               PostHistoryInstructions
+               Personality
+               GroupOnlyGreetings: array
+             * */
         };
 
-        var result = await storageService.ImportNewCharacterAsync(queryModel);
+        CharacterDbModel result = await storageService.ImportNewCharacterAsync(queryModel);
 
         if (result == null)
         {
@@ -75,20 +91,33 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
             };
         }
 
-        //// Convert DbModel to an acceptable web model (without sensitive information)
-        //var responseDto = new MessageResponseDto
-        //{
-        //    HttpResultCode = System.Net.HttpStatusCode.OK,
-        //    Message = new MessageDefinition
-        //    {
-        //        MessageId = message.MessageId,
-        //        Summarized = message.Summarized,
-        //        Content = message.Content,
-        //    },
-        //    MainQueryId = backgroundQuery.BackgroundQueryId,
-        //};
+        // Save the image (avatar) on disk
+        string directoryCharacter = Path.Combine($"../CohesiveRP.UI.WebFrontend/public", "characters", result.CharacterId);
+        if (!Directory.Exists(directoryCharacter))
+        {
+            Directory.CreateDirectory(directoryCharacter);
+        }
 
-        //return responseDto;
-        return null;
+        image?.Save(Path.Combine(directoryCharacter, "avatar.png"));
+
+        // Convert DbModel to an acceptable web model (without sensitive information)
+        // TODO: could really use automapper... todo
+        var responseDto = new CharacterResponseDto
+        {
+            HttpResultCode = System.Net.HttpStatusCode.OK,
+            Character = new()
+            {
+                CharacterId = result.CharacterId,
+                Name = result.Name,
+                Creator = result.Creator,
+                CreatorNotes = result.CreatorNotes,
+                Description = result.Description,
+                Tags = result.Tags,
+                FirstMessage = result.FirstMessage,
+                AlternateGreetings = result.AlternateGreetings,
+            }
+        };
+
+        return responseDto;
     }
 }
