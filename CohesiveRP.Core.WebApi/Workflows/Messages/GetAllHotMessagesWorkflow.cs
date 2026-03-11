@@ -19,7 +19,7 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
 
     public async Task<IWebApiResponseDto> GetAllMessages(GetHotMessagesRequestDto requestDto)
     {
-        IMessageDbModel[] messages = await storageService.GetAllHotMessages(requestDto.ChatId);
+        IMessageDbModel[] messages = await storageService.GetAllHotMessagesAsync(requestDto.ChatId);
 
         messages ??= Array.Empty<MessageDbModel>();
         var responseDto = new MessagesResponseDto

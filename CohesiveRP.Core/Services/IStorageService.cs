@@ -2,7 +2,6 @@
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
-using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
@@ -16,7 +15,7 @@ namespace CohesiveRP.Core.Services
         Task<ChatDbModel> CreateChatAsync(CreateChatQueryModel queryModel);
         Task<ChatDbModel[]> GetAllChatsAsync();
         Task<ChatDbModel> GetChatAsync(string chatId);
-        Task<IMessageDbModel[]> GetAllHotMessages(string chatId);
+        Task<IMessageDbModel[]> GetAllHotMessagesAsync(string chatId);
         Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId);
         Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message);
         Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages);
@@ -25,7 +24,7 @@ namespace CohesiveRP.Core.Services
         Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
         Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId);
         Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync();
-        Task<ChatCompletionPresetsDbModel> GetChatCompletionPreset(string mainChatCompletionPresetId);
+        Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId);
         Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag);
         Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery);
         Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId);
@@ -40,8 +39,11 @@ namespace CohesiveRP.Core.Services
         Task<bool> DeleteLongTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesId);
-        Task<SceneTrackerDbModel> GetSceneTracker(string chatId);
-        Task<SceneTrackerDbModel> AddSceneTracker(CreateSceneTrackerQueryModel queryModel);
-        Task<SceneTrackerDbModel> UpdateSceneTracker(CreateSceneTrackerQueryModel queryModel);
+        Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId);
+        Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
+        Task<SceneTrackerDbModel> UpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
+        Task<CharacterDbModel[]> GetCharactersAsync();
+        Task<CharacterDbModel> GetCharacterByIdAsync(string characterId);
+        Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel);
     }
 }

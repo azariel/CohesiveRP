@@ -6,6 +6,9 @@ import { MdAddBox } from "react-icons/md";
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextType } from "../../../../store/SharedContextType";
+import { postToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
+import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
+import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 
 export default function CharactersComponent() {
   const { setActiveModule } = sharedContext();
@@ -33,16 +36,15 @@ export default function CharactersComponent() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await postToServerApiAsync<CharacterResponseDto>("api/characters", formData);
 
-      if (!response.ok)
-        throw new Error("Upload failed");
+      let serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || response.code != 200 || serverApiException?.message)
+      {
+        console.error(`Upload new character failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
+      }
       
-      const data = await response.json();
-      console.log("Upload success:", data);
+      console.log(`Character uploaded successfully.`);
     } catch (err) {
       console.error(err);
       // TODO: show err to user

@@ -33,10 +33,11 @@ export async function getFromServerApiAsync<T extends ServerApiResponseDto>(url:
 
 export async function postToServerApiAsync<T extends ServerApiResponseDto>(url:string, payload: any): Promise<T | null> {
     try {
+      const isFormData = payload instanceof FormData;
       const response = await fetch(`${ServerApiUrlPrefix}${url}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        headers: isFormData ? {} : { "Content-Type": "application/json" },
+        body: isFormData ? payload : JSON.stringify(payload),
       });
 
       let result:T | null = await extractFromBody<T>(response.body);

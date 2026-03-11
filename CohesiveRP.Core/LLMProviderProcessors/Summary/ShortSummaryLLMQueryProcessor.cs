@@ -102,7 +102,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
         private async Task<bool> UpdateSummarizedMessagesAsync(string chatId)
         {
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatId);
+            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatId);
 
             hotMessages = hotMessages.OrderByDescending(o => o.CreatedAtUtc).ToArray();
             string[] messageIdsProcessedAgainstLLM = promptContext.ShareableContextLinks.FirstOrDefault(f => f.LinkedBuilder is PromptContextLastXMessagesToSummarizeBuilder)?.Value as string[];

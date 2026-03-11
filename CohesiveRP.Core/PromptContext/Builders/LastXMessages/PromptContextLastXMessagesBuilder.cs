@@ -32,7 +32,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             // TODO: Get the amount of messages to keep as-is from settings
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatDbModel.ChatId);
+            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
             if (hotMessages.Length <= 0)
             {
                 return (null, new ShareableContextLink { LinkedBuilder = this });

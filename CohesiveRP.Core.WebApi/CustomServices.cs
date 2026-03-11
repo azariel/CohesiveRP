@@ -8,6 +8,7 @@ using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
+using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
@@ -36,6 +37,10 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
             services.AddSingleton<IPatchSpecificMessageByIdWorkflow, PatchSpecificMessageByIdWorkflow>();
 
+            // Workflows.Characters
+            services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
+            services.AddSingleton<IImportNewCharacterWorkflow, ImportNewCharacterWorkflow>();
+
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();
 
@@ -58,6 +63,7 @@ namespace CohesiveRP.Core.WebApi
             //services.AddSingleton<IUsersDal, UsersDal>();
             // Those must be injected into StorageService ctor to make sure their CTOR is called upon service startup and thus default values are injected into storage at startup
             services.AddSingleton<IChatsDal, ChatsDal>();
+            services.AddSingleton<ICharactersDal, CharactersDal>();
             services.AddSingleton<IMessagesDal, MessagesDal>();
             services.AddSingleton<IGlobalSettingsDal, GlobalSettingsDal>();
             services.AddSingleton<IChatCompletionPresetsDal, ChatCompletionPresetsDal>();
