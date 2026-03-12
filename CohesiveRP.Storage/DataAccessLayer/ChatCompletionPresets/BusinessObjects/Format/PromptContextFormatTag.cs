@@ -20,5 +20,6 @@
         LastXMessagesToSummarize = 15,
         LastUnsummarizedMessages = 16,
         OverflowingSummariesToSummarize = 17,
+        DirectCharactersDescription = 18,
     }
 }

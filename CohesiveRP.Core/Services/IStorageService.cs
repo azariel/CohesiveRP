@@ -12,16 +12,16 @@ namespace CohesiveRP.Core.Services
 {
     public interface IStorageService
     {
-        Task<ChatDbModel> CreateChatAsync(CreateChatQueryModel queryModel);
+        Task<ChatDbModel> AddChatAsync(CreateChatQueryModel queryModel);
         Task<ChatDbModel[]> GetAllChatsAsync();
         Task<ChatDbModel> GetChatAsync(string chatId);
         Task<IMessageDbModel[]> GetAllHotMessagesAsync(string chatId);
         Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId);
-        Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message);
+        Task<IMessageDbModel> AddMessageAsync(CreateMessageQueryModel message);
         Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages);
         Task<bool> UpdateHotMessageAsync(string chatId, MessageDbModel message);
         Task<GlobalSettingsDbModel> GetGlobalSettingsAsync();
-        Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
+        Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
         Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId);
         Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync();
         Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId);
@@ -45,5 +45,6 @@ namespace CohesiveRP.Core.Services
         Task<CharacterDbModel[]> GetCharactersAsync();
         Task<CharacterDbModel> GetCharacterByIdAsync(string characterId);
         Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel);
+        Task<bool> UpdateCharacter(CharacterDbModel characterDbModel);
     }
 }

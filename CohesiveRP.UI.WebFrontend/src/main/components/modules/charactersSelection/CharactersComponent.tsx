@@ -11,6 +11,7 @@ import { getFromServerApiAsync, postToServerApiAsync } from "../../../../utils/h
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { CharactersResponseDto } from "../../../../ResponsesDto/characters/CharactersResponseDto";
+import { GetAvatarPathFromCharacterId } from "../../../../utils/avatarUtils";
 
 export default function CharactersComponent() {
   const { setActiveModule } = sharedContext();
@@ -94,7 +95,7 @@ export default function CharactersComponent() {
         // If state exists, spread the old state and add the new character to the array
         return {
           ...prev,
-          characters: [...(prev.characters || []), newCharacter.character]
+          characters: [newCharacter.character, ...(prev.characters || [])]
         };
     });
     } catch (err) {
@@ -132,7 +133,7 @@ export default function CharactersComponent() {
             {charactersResponse?.characters?.map(character => (
               <div key={character.characterId} className={styles.characterContainer} onClick={() => handleSpecificCharacterClick("character")}>
                 <div className={styles.characterAvatarContainer}>
-                  <img src={`./characters/${character.characterId}/avatar.png`} alt="dev/Placeholder.png" />
+                  <img src={GetAvatarPathFromCharacterId(character.characterId)} alt="dev/Placeholder.png" />
                 </div>
                 <div className={styles.characterInfoPanel}>
                   <label className={styles.characterCharNameLabel}>{character.name}</label>

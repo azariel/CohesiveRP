@@ -22,5 +22,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
 
         [JsonValueConverter]
         public List<ChatCompletionPresetSelection> SelectedChatCompletionPresets { get; set; }
+
+        /// <summary>
+        /// The list of characters tied to this chat. In a standard chat, it'll have a single character. In a group chat, there'll be multiple characters (+narrator?)
+        /// </summary>
+        [JsonValueConverter]
+        public List<string> CharacterIds { get; set; }
     }
 }

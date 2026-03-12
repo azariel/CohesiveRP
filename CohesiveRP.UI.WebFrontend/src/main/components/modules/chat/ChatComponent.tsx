@@ -8,6 +8,7 @@ import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exc
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
+//import type { ChatResponseDto } from "../../../../ResponsesDto/chat/ChatResponseDto";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -17,7 +18,26 @@ export default function ChatComponent() {
   useEffect(() => {
     if (didComponentMountAlready.current)
         return;
+
     didComponentMountAlready.current = true;
+
+    // const fetchChat = async () => {
+    //   try {
+    //     let chatModule = activeModule as SharedContextChatType;
+    //     const responseChat: ChatResponseDto | null = await getFromServerApiAsync<ChatResponseDto>(`api/chats/${chatModule.chatId}`);
+        
+    //     let serverApiException = responseChat as ServerApiExceptionResponseDto | null;
+    //     if (!responseChat || responseChat.code != 200 || serverApiException?.message) {
+    //       console.error(`Call to fetch specific chat failed. [${JSON.stringify(serverApiException)}]`);
+    //       return;
+    //     }
+
+    //     defaultChatAvatarId.current = responseChat.avatarCharacterId;
+    //     console.log(`Specific chat fetched successfully.`);
+    //   } catch (error) {
+    //     console.error("Fetch chat error:", error);
+    //   }
+    // };
 
     const fetchData = async () => {
       try {
@@ -26,21 +46,24 @@ export default function ChatComponent() {
         
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
-          console.error(`Call to fetch specific chat failed. [${JSON.stringify(serverApiException)}]`);
+          console.error(`Call to fetch specific chat messages failed. [${JSON.stringify(serverApiException)}]`);
           return;
         }
 
         setActiveModule({ ...activeModule, messages: response.messages ?? [] });
-        console.log(`Specific chat fetched successfully.`);
+        console.log(`Specific chat messages fetched successfully.`);
         setTimeout(() => {
           if (messagesRef?.current)
             messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
         }, 200);
       } catch (error) {
-        console.error("Fetch error:", error);
+        console.error("Fetch messages error:", error);
       }
     };
+
+    //fetchChat();
     fetchData();
+    
   }, []);
 
   useEffect(() => {
@@ -85,6 +108,7 @@ export default function ChatComponent() {
               key={index}
               messagesRef={messagesRef}
               message={message}
+              defaultChatAvatarId={activeModule.defaultChatAvatar ?? ""}
               enableSwipeBtn={index >= editableMessageIndex}
               isEditable={!isSendingMessage && index >= editableMessageIndex}
               onSave={handleSaveMessage}
@@ -94,7 +118,7 @@ export default function ChatComponent() {
           <p />
         )}
         <div className={styles.userInputContainer}>
-          <UserInputComponent messagesRef={messagesRef} />
+          <UserInputComponent messagesRef={messagesRef} defaultChatAvatarId={activeModule.defaultChatAvatar ?? ""} />
         </div>
       </div>
     </main>

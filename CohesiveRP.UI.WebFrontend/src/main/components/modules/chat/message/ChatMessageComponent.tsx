@@ -6,16 +6,18 @@ import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
 import { FormatUtcDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
+import { GetAvatarPathFromCharacterId } from "../../../../../utils/avatarUtils";
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
   message?: ChatMessage;
+  defaultChatAvatarId?: string;
   enableSwipeBtn?: boolean;
   isEditable?: boolean;
   onSave?: (messageId: string, newContent: string) => Promise<void>;
 }
 
-export default function ChatMessageComponent({ messagesRef, message, enableSwipeBtn = false, isEditable = false, onSave }: Props) {
+export default function ChatMessageComponent({ messagesRef, message, defaultChatAvatarId, enableSwipeBtn = false, isEditable = false, onSave }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
   const isRevertingRef = useRef(false);
@@ -86,15 +88,15 @@ export default function ChatMessageComponent({ messagesRef, message, enableSwipe
         <div className={styles.leftMessageContainer}>
           <div className={styles.messageAvatarContainer}>
             {message?.sourceType == 0 ? (
-              <img src="./dev/Seyrdis.png" alt="Avatar" />
-            ) : (
               <img src="./dev/Venelas.png" alt="Avatar" />
+            ) : (
+              <img src={GetAvatarPathFromCharacterId(message?.avatarId ?? defaultChatAvatarId ?? "")} alt="Avatar" />
             )}
           </div>
           <div className={styles.messageInfoContainer}>
-            <div title="messageId">{!message?.messageIndex ? "-" : "#" + message.messageIndex}</div>
-            <div title="message generation time">??s</div>
-            <div title="tokens in message">????t</div>
+            <div title="messageId">{!message?.messageIndex ? "-" : "# " + message.messageIndex}</div>
+            {/* <div title="message generation time">??s</div>
+            <div title="tokens in message">????t</div> */}
           </div>
         </div>
         <div className={styles.messageContent}>

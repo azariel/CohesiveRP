@@ -12,5 +12,6 @@ namespace CohesiveRP.Storage.QueryModels.Message
         [JsonConverter(typeof(JsonNumberEnumConverter<MessageSourceType>))]
         public MessageSourceType SourceType { get; set; }
         public bool Summarized { get; set; }
+        public string CharacterId { get; set; }
     }
 }

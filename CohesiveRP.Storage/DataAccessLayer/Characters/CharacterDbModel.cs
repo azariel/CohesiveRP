@@ -39,5 +39,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
 
         [JsonValueConverter]
         public List<string> AlternateGreetings { get; set; }
+
+        public DateTime LastActivityAtUtc { get; set; }
     }
 }

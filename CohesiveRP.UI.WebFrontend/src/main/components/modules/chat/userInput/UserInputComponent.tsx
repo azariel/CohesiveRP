@@ -18,9 +18,10 @@ import type { BackgroundQueryResponseDto } from "../../../../../ResponsesDto/cha
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
+  defaultChatAvatarId: string | null;
 }
 
-export default function UserInputComponent({ messagesRef }: Props) {
+export default function UserInputComponent({ messagesRef, defaultChatAvatarId }: Props) {
   const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hoveringSendBtn, setHoveringSendBtn] = useState(false);
@@ -225,7 +226,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       messages: [...(prev.messages || []),// Keep messages history
       response.messageObj,// Add new player message at the bottom
       {
-        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1, messageIndex: prev.messages.length + 2, summarized: false }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
+        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1, messageIndex: prev.messages.length + 2, summarized: false, avatarId: defaultChatAvatarId }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
         mainQueryId: response.mainQueryId,// Track the main query id to know the status of the AI reply
     }));
 

@@ -11,6 +11,10 @@ using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Chats;
+using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Messages;
+using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
@@ -29,6 +33,7 @@ namespace CohesiveRP.Core.WebApi
         {
             // Workflows.Chats
             services.AddSingleton<IGetAllSelectableChatsWorkflow, GetAllSelectableChatsWorkflow>();
+            services.AddSingleton<IGetSpecificChatWorkflow, GetSpecificChatWorkflow>();
 
             // Workflows.Chat
             services.AddSingleton<IChatAddNewMessageWorkflow, AddNewMessageWorkflow>();

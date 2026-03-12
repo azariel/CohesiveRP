@@ -115,6 +115,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
                 Tags = result.Tags,
                 FirstMessage = result.FirstMessage,
                 AlternateGreetings = result.AlternateGreetings,
+                LastActivityAtUtc = result.LastActivityAtUtc,
             }
         };
 

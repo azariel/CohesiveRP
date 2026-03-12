@@ -1,16 +1,18 @@
 ﻿using CohesiveRP.Common.Exceptions;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
-using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Message;
 
-namespace CohesiveRP.Core.WebApi.Workflows.Chat;
+namespace CohesiveRP.Core.WebApi.Workflows.Messages;
 
 public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
 {
@@ -38,6 +40,11 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             };
         }
 
+        var characters = await storageService.GetCharactersAsync();
+
+        // if it's the first player message in the chat, aseptise the previous messages
+        await AseptisePreviousMessageIfRequiredAsync(chat, characters);
+
         // Add a background query to generate the sceneTracker first and foremost
         // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
         await AddSceneTrackerBackgroundQueryAsync(chat);
@@ -50,9 +57,10 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             SourceType = Common.BusinessObjects.MessageSourceType.User,
             MessageContent = requestDto.Message.Content,
             CreatedAtUtc = DateTime.UtcNow,
+            CharacterId = null,// Null as this is from the User
         };
 
-        var message = await storageService.CreateMessageAsync(messageQueryModel);
+        var message = await storageService.AddMessageAsync(messageQueryModel);
 
         // The message was added to storage, we'll query a request for the backend to process a new AI reply
         var backgroundQueryModel = new CreateBackgroundQueryQueryModel
@@ -63,7 +71,21 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'
         };
 
-        var backgroundQuery = await storageService.CreateBackgroundQueryAsync(backgroundQueryModel);// Note that we're still not querying the LLM at this point, we're adding a query to be process async against the backend and that process will eventually query the LLMs
+        var backgroundQuery = await storageService.AddBackgroundQueryAsync(backgroundQueryModel);// Note that we're still not querying the LLM at this point, we're adding a query to be process async against the backend and that process will eventually query the LLMs
+
+        // Update the LastActivity field on the characters linked to this chat so that we can order them in the UI upon request
+        if (chat.CharacterIds != null)
+        {
+            foreach (string characterId in chat.CharacterIds)
+            {
+                try
+                {
+                    var characterToUpdate = await storageService.GetCharacterByIdAsync(characterId);
+                    characterToUpdate.LastActivityAtUtc = DateTime.UtcNow;
+                    await storageService.UpdateCharacter(characterToUpdate);
+                } catch (Exception) { } // nothing, just skip
+            }
+        }
 
         // Convert DbModel to an acceptable web model (without sensitive information)
         var responseDto = new MessageResponseDto
@@ -73,12 +95,33 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             {
                 MessageId = message.MessageId,
                 Summarized = message.Summarized,
-                Content = message.Content,
+                Content = message.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", "Azariel")
             },
             MainQueryId = backgroundQuery.BackgroundQueryId,
         };
 
         return responseDto;
+    }
+
+    private async Task AseptisePreviousMessageIfRequiredAsync(ChatDbModel chat, CharacterDbModel[] characters)
+    {
+        var messages = await storageService.GetAllHotMessagesAsync(chat.ChatId);
+
+        if (messages == null || messages.Length <= 0)
+        {
+            return;
+        }
+
+        if (messages.Any(a => a.SourceType == Common.BusinessObjects.MessageSourceType.User) || messages.Length >= 20)
+        {
+            return;
+        }
+
+        foreach (var message in messages)
+        {
+            message.Content = message.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", "Azariel");
+            await storageService.UpdateHotMessageAsync(chat.ChatId, (MessageDbModel)message);
+        }
     }
 
     private async Task<bool> AddSceneTrackerBackgroundQueryAsync(ChatDbModel chat)
@@ -91,7 +134,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             Tags = [BackgroundQuerySystemTags.sceneTracker.ToString()],
         };
 
-        if(await storageService.CreateBackgroundQueryAsync(backgroundQueryModel) == null)
+        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
             return false;
 
         return true;

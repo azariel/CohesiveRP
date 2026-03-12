@@ -2,10 +2,10 @@
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
-using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 
-namespace CohesiveRP.Core.WebApi.Workflows.Chat;
+namespace CohesiveRP.Core.WebApi.Workflows.Chats;
 
 public class GetAllSelectableChatsWorkflow : IGetAllSelectableChatsWorkflow
 {
@@ -23,12 +23,15 @@ public class GetAllSelectableChatsWorkflow : IGetAllSelectableChatsWorkflow
         chats ??= Array.Empty<ChatDbModel>();
         ChatDefinitionsResponseDto responseDto = new();
 
+        // TODO: pagination
+        var characters = await storageService.GetCharactersAsync();
         foreach (var chat in chats)
         {
             responseDto.Chats.Add(new ChatDefinition
             {
                 ChatId = chat.ChatId,
-                //ChatCompletionPresets = chat.ChatCompletionPresets,
+                CharacterId = chat.CharacterIds?.FirstOrDefault() ?? "unknown",
+                ChatName = characters.FirstOrDefault(f => f.CharacterId == chat.CharacterIds?.FirstOrDefault())?.Name ?? "unknown",
             });
         }
 

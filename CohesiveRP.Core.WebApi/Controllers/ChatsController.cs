@@ -1,6 +1,5 @@
-using CohesiveRP.Common.Serialization;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
-using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Storage.WebApi.Controllers
@@ -10,13 +9,16 @@ namespace CohesiveRP.Storage.WebApi.Controllers
     public class ChatsController : ControllerBase
     {
         private IGetAllSelectableChatsWorkflow getAllChatsWorkflow;
+        private IGetSpecificChatWorkflow getSpecificChat;
         private ICreateNewChatWorkflow createNewChatWorkflow;
 
         public ChatsController(
             IGetAllSelectableChatsWorkflow getAllChatsWorkflow,
+            IGetSpecificChatWorkflow getSpecificChat,
             ICreateNewChatWorkflow createNewChatWorkflow)
         {
             this.getAllChatsWorkflow = getAllChatsWorkflow;
+            this.getSpecificChat = getSpecificChat;
             this.createNewChatWorkflow = createNewChatWorkflow;
         }
 
@@ -28,6 +30,13 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> GetAllSelectableChats()
         {
             return new JsonResult(await getAllChatsWorkflow.GetAllSelectableChats());
+        }
+
+        [HttpGet]
+        [Route("{chatId}")]
+        public async Task<IActionResult> GetSpecificChatById(string chatId)
+        {
+            return new JsonResult(await getSpecificChat.GetChatById(chatId));
         }
 
         [HttpPost]

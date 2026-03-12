@@ -60,6 +60,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             {
                 LLMApiResponseMessage[] messages = JsonCommonSerializer.DeserializeFromString<LLMApiResponseMessage[]>(backgroundQueryDbModel.Content);
 
+                var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
                 foreach (var message in messages)
                 {
                     // Add the AI reply message to the end of the chat
@@ -67,12 +68,13 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     {
                         ChatId = backgroundQueryDbModel.ChatId,
                         SourceType = MessageSourceType.AI,
+                        CharacterId = chat.CharacterIds.FirstOrDefault(),
                         Summarized = false,// New message, so it's not summarized yet
                         MessageContent = ChatMessageParserUtils.ParseMessage(message.Content),
                         CreatedAtUtc = DateTime.UtcNow,
                     };
 
-                    IMessageDbModel newMessageInStorage = await storageService.CreateMessageAsync(messageQueryModel);
+                    IMessageDbModel newMessageInStorage = await storageService.AddMessageAsync(messageQueryModel);
                     backgroundQueryDbModel.LinkedId = newMessageInStorage.MessageId;
                 }
 

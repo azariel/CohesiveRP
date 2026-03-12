@@ -21,7 +21,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             string userPersonaName = "Azariel";// TODO: fetch from Db
-            return ($"# Directive{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{user}}", userPersonaName)}", new ShareableContextLink{ LinkedBuilder = this });
+            return ($"# Directive{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace(Constants.USER_PLACEHOLDER, userPersonaName)}", new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

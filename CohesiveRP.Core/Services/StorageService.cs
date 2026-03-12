@@ -54,7 +54,7 @@ namespace CohesiveRP.Core.Services
         }
 
         // Chats
-        public async Task<ChatDbModel> CreateChatAsync(CreateChatQueryModel queryModel)
+        public async Task<ChatDbModel> AddChatAsync(CreateChatQueryModel queryModel)
         {
             // If the new chat to create isn't linked to a chat completion preset configuration
             if (queryModel != null && (queryModel.SelectedChatCompletionPresets == null || queryModel.SelectedChatCompletionPresets.Count <= 0))
@@ -101,11 +101,12 @@ namespace CohesiveRP.Core.Services
         public async Task<CharacterDbModel[]> GetCharactersAsync() => await charactersDal.GetCharactersAsync();
         public async Task<CharacterDbModel> GetCharacterByIdAsync(string characterId) => await charactersDal.GetCharacterByIdAsync(characterId);
         public async Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel) => await charactersDal.AddCharacterAsync(queryModel);
+        public async Task<bool> UpdateCharacter(CharacterDbModel characterDbModel) => await charactersDal.UpdateCharacter(characterDbModel);
 
         // Messages
         public async Task<IMessageDbModel[]> GetAllHotMessagesAsync(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);
         public async Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId) => await messagesDal.GetMessageByIdAsync(chatId, messageId);
-        public async Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message) => await messagesDal.CreateOrUpdateMessageAsync(message);
+        public async Task<IMessageDbModel> AddMessageAsync(CreateMessageQueryModel message) => await messagesDal.CreateOrUpdateMessageAsync(message);
         public async Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages) => await messagesDal.UpdateHotMessagesAsync(messages);
         public async Task<bool> UpdateHotMessageAsync(string chatId, MessageDbModel message) => await messagesDal.UpdateHotMessageAsync(chatId, message);
 
@@ -113,7 +114,7 @@ namespace CohesiveRP.Core.Services
         public async Task<GlobalSettingsDbModel> GetGlobalSettingsAsync() => await globalSettingsDal.GetGlobalSettingsAsync();
 
         // BackgroundQueries
-        public async Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel) => await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
+        public async Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel) => await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
         public async Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId) => await backgroundQueriesDal.GetBackgroundQueryAsync(queryId);
         public async Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync() => await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
 

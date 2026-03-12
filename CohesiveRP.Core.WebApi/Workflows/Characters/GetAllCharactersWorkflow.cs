@@ -24,7 +24,8 @@ public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
         var responseDto = new CharactersResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
-            Characters = characters.Select(s => new CharacterResponse
+            // TODO: pagination instead of take(50)
+            Characters = characters.Take(50).Select(s => new CharacterResponse
             {
                 CharacterId = s.CharacterId,
                 Name = s.Name,
@@ -34,7 +35,8 @@ public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
                 Tags = s.Tags,
                 FirstMessage = s.FirstMessage,
                 AlternateGreetings = s.AlternateGreetings,
-            }).ToList()
+                LastActivityAtUtc = s.LastActivityAtUtc,
+            }).OrderByDescending(o => o.LastActivityAtUtc).ToList()
         };
 
         return responseDto;

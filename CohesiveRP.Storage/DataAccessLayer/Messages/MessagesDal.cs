@@ -86,6 +86,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     Content = queryModel.MessageContent,
                     SourceType = queryModel.SourceType,
                     CreatedAtUtc = queryModel.CreatedAtUtc,
+                    CharacterId = queryModel.CharacterId,
                 };
 
                 // Check if HotMessages for this chat already exist

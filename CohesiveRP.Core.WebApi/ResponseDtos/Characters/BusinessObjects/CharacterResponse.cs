@@ -27,5 +27,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Characters.BusinessObjects
 
         [JsonPropertyName("alternateGreetings")]
         public List<string> AlternateGreetings { get; set; }
+
+        [JsonPropertyName("lastActivityAtUtc")]
+        public DateTime LastActivityAtUtc { get; set; }
     }
 }

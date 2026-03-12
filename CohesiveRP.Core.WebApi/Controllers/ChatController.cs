@@ -1,5 +1,6 @@
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Storage.WebApi.Controllers

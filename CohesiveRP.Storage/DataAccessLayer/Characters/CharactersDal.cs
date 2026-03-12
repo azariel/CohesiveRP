@@ -71,6 +71,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     Tags = queryModel.Tags,
                     FirstMessage = queryModel.FirstMessage,
                     AlternateGreetings = queryModel.AlternateGreetings,
+                    LastActivityAtUtc = DateTime.UtcNow,
                 };
 
                 EntityEntry<CharacterDbModel> result = await dbContext.Characters.AddAsync(CharacterDbModel);
@@ -87,6 +88,35 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             {
                 LoggingManager.LogToFile("a2075ff5-1f27-4a80-82dd-615f2e454e41", $"Error when querying Db on table Characters.", ex);
                 return null;
+            }
+        }
+
+        public async Task<bool> UpdateCharacter(CharacterDbModel characterDbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var character = dbContext.Characters.AsNoTracking().FirstOrDefault(w => w.CharacterId == characterDbModel.CharacterId);
+
+                if (character == null)
+                {
+                    LoggingManager.LogToFile("20737745-2e05-4620-959c-92df2e03312c", $"Character [{characterDbModel.CharacterId}] to update wasn't found in storage.");
+                    return false;
+                }
+
+                EntityEntry<CharacterDbModel> result = dbContext.Characters.Update(characterDbModel);
+                if (result.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("b3cd56a6-f7b7-4bd5-be9f-a30748fec1d8", $"Error when updating LastActivity on table Characters. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(characterDbModel)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("1bdebfc9-b832-49ea-be6d-eff2027d83e6", $"Error when querying pending queries on table Characters.", ex);
+                return false;
             }
         }
     }

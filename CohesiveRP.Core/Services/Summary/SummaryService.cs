@@ -108,7 +108,7 @@ namespace CohesiveRP.Core.Services.Summary
                 Priority = BackgroundQueryPriority.Standard,
             };
 
-            await storageService.CreateBackgroundQueryAsync(backgroundQueryDbModel);
+            await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace CohesiveRP.Core.Services.Summary
                 Priority = BackgroundQueryPriority.Standard,
             };
 
-            await storageService.CreateBackgroundQueryAsync(backgroundQueryDbModel);
+            await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace CohesiveRP.Core.Services.Summary
                 Priority = BackgroundQueryPriority.Standard,
             };
 
-            await storageService.CreateBackgroundQueryAsync(backgroundQueryDbModel);
+            await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace CohesiveRP.Core.Services.Summary
                 Priority = BackgroundQueryPriority.Standard,
             };
 
-            await storageService.CreateBackgroundQueryAsync(backgroundQueryDbModel);
+            await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace CohesiveRP.Core.Services.Summary
                 Priority = BackgroundQueryPriority.Standard,
             };
 
-            await storageService.CreateBackgroundQueryAsync(backgroundQueryDbModel);
+            await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
         }
     }
 }

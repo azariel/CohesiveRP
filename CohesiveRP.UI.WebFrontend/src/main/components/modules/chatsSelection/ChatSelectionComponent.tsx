@@ -14,6 +14,8 @@ import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSel
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
+import { GetAvatarPathFromCharacterId } from "../../../../utils/avatarUtils";
+import { GetChatNameFontSize } from "../../../../utils/fontSizeUtils";
 
 export default function ChatSelectionComponent() {
   const { navigateTo } = sharedContext();
@@ -90,11 +92,13 @@ export default function ChatSelectionComponent() {
     try {
       let selectedChat = {
         chatId: chat.chatId,
-        moduleName: "chat"
+        defaultChatAvatar: chat.avatarCharacterId,
+        moduleName: "chat",
       } as SharedContextChatType;
 
       navigateTo(selectedChat);
       console.log(`Chat selected -> Module [${JSON.stringify(selectedChat)}] selected.`);
+      console.log(`defaultAvatar:${chat.avatarCharacterId}`);
     } finally{
       setIsLoading(false);
     }
@@ -124,9 +128,9 @@ export default function ChatSelectionComponent() {
         {isLoading || chatDefinitions?.chats && chatDefinitions.chats.length > 0 ? (
           chatDefinitions?.chats?.map((chat, index) => (
             <div key={index}>
-              <label className={styles.chatCharNameLabel}>{chat.name}</label>
+              <label className={styles.chatCharNameLabel} style={{ fontSize: GetChatNameFontSize(chat.name ?? "") }}>{chat.name}</label>
               <div className={styles.chatAvatarContainer} onClick={async () => await handleSpecificChatClick(chat)}>
-                <img src="./dev/Seyrdis.png" alt="Avatar" />
+                <img src={GetAvatarPathFromCharacterId(chat.avatarCharacterId)} alt="Avatar" />
               </div>
               <label className={styles.chatFootLabel}>{chat.lastActivityDateTime?.toDateString()}</label>
             </div>

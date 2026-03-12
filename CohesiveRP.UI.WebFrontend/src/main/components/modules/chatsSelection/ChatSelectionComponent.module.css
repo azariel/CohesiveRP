@@ -31,6 +31,7 @@
 .chatAddNewChatContainer {
     width: 100%;
     aspect-ratio: 1 / 1.5;
+    margin-top: 1.5em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -103,7 +104,13 @@
 }
 
 .chatCharNameLabel{
-    color:#dfdfdf;
+    color: #dfdfdf;
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    height: 1rem;
+    line-height: 1rem;
 }
 
 .chatFootLabel{
