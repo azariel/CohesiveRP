@@ -2,8 +2,8 @@ import styles from "./MainCenterComponent.module.css";
 
 /* modules components */
 import ChatComponent from '../modules/chat/ChatComponent';
-import ChatSelectionComponent from "../modules/chatSelection/ChatSelectionComponent";
-import CharactersComponent from "../modules/characters/CharactersComponent";
+import ChatSelectionComponent from "../modules/chatsSelection/ChatSelectionComponent";
+import CharactersComponent from "../modules/charactersSelection/CharactersComponent";
 import SettingsComponent from "../modules/settings/SettingsComponent";
 
 /* Store */

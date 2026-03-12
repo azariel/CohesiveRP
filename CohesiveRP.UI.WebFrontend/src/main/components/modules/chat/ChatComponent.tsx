@@ -23,11 +23,13 @@ export default function ChatComponent() {
       try {
         let chatModule = activeModule as SharedContextChatType;
         const response: ChatMessagesResponseDto | null = await getFromServerApiAsync<ChatMessagesResponseDto>(`api/chat/${chatModule.chatId}/messages/hot`);
+        
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
           console.error(`Call to fetch specific chat failed. [${JSON.stringify(serverApiException)}]`);
           return;
         }
+
         setActiveModule({ ...activeModule, messages: response.messages ?? [] });
         console.log(`Specific chat fetched successfully.`);
         setTimeout(() => {

@@ -16,7 +16,7 @@ import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 
 export default function ChatSelectionComponent() {
-  const { setActiveModule } = sharedContext();
+  const { navigateTo } = sharedContext();
   const [isLoading, setIsLoading] = useState(true);
   const didComponentMountAlready = useRef(false);
   const [chatDefinitions, setChatDefinitions] = useState<SelectableChatsResponseDto>();
@@ -93,7 +93,7 @@ export default function ChatSelectionComponent() {
         moduleName: "chat"
       } as SharedContextChatType;
 
-      setActiveModule(selectedChat);
+      navigateTo(selectedChat);
       console.log(`Chat selected -> Module [${JSON.stringify(selectedChat)}] selected.`);
     } finally{
       setIsLoading(false);

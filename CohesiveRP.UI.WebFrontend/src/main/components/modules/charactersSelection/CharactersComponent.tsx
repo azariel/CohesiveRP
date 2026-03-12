@@ -2,6 +2,7 @@ import styles from "./CharactersComponent.module.css";
 import { useRef, useEffect, useState } from "react";
 import { FaFilter  } from "react-icons/fa";
 import { MdAddBox } from "react-icons/md";
+import { AiOutlineDisconnect } from "react-icons/ai";
 
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
@@ -15,6 +16,7 @@ export default function CharactersComponent() {
   const { setActiveModule } = sharedContext();
   const didComponentMountAlready = useRef(false);
   const newCharacterFileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isNetworkDown, setIsNetworkDown] = useState(false);
   const [charactersResponse, setCharactersResponse] = useState<CharactersResponseDto | null>(null);
 
   useEffect(() => {
@@ -28,6 +30,11 @@ export default function CharactersComponent() {
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
           console.error(`Call to fetch characters list failed. [${JSON.stringify(serverApiException)}]`);
+          setIsNetworkDown(true);
+          setCharactersResponse({
+            code : -1,
+            characters: []
+          });
           return;
         }
 
@@ -100,38 +107,47 @@ export default function CharactersComponent() {
 
   return (
     <main className={styles.charactersComponent}>
-      <div className={styles.charactersHeader}>
-        <div className={styles.filterRow}>
-          <FaFilter />
-        </div>
-        <div className={styles.charactersToolsComponent}>
-          <MdAddBox className={styles.addNewCharacterIcon} onClick={handleAddCharacterClick} />
-          <input
-            type="file"
-            ref={newCharacterFileInputRef}
-            style={{ display: "none" }}
-            onChange={handleAddCharacterFileSelected}
-          />
-        </div>
-      </div>
-      <div className={styles.charactersGridContainer}>
-        {charactersResponse?.characters?.map(character => (
-          <div key={character.characterId} className={styles.characterContainer} onClick={() => handleSpecificCharacterClick("character")}>
-            <div className={styles.characterAvatarContainer}>
-              <img src={`./characters/${character.characterId}/avatar.png`} alt="dev/Placeholder.png" />
+      {isNetworkDown ? (
+          <div className={styles.networkDownContainer}>
+            <AiOutlineDisconnect className={styles.networkDownIcon} />
+            <label>CohesiveRP backend is unreachable</label>
+          </div>
+        ) : (
+        <div className={styles.charactersMainContainer}>
+          <div className={styles.charactersHeader}>
+            <div className={styles.filterRow}>
+              <FaFilter />
             </div>
-            <div className={styles.characterInfoPanel}>
-              <label className={styles.characterCharNameLabel}>{character.name}</label>
-              <label className={styles.characterTagsLabel}>{!character.tags ? "" : character.tags.join(" / ")}</label>
-              <label className={styles.characterDescriptionLabel}>
-                {character.creatorNotes.length > 512 ? 
-                  `${character.creatorNotes.substring(0, 512)}...` : 
-                  character.creatorNotes}
-              </label>
+            <div className={styles.charactersToolsComponent}>
+              <MdAddBox className={styles.addNewCharacterIcon} onClick={handleAddCharacterClick} />
+                <input
+                  type="file"
+                  ref={newCharacterFileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleAddCharacterFileSelected}
+              />
             </div>
           </div>
-        ))}
-      </div>
+          <div className={styles.charactersGridContainer}>
+            {charactersResponse?.characters?.map(character => (
+              <div key={character.characterId} className={styles.characterContainer} onClick={() => handleSpecificCharacterClick("character")}>
+                <div className={styles.characterAvatarContainer}>
+                  <img src={`./characters/${character.characterId}/avatar.png`} alt="dev/Placeholder.png" />
+                </div>
+                <div className={styles.characterInfoPanel}>
+                  <label className={styles.characterCharNameLabel}>{character.name}</label>
+                  <label className={styles.characterTagsLabel}>{!character.tags ? "" : character.tags.join(" / ")}</label>
+                  <label className={styles.characterDescriptionLabel}>
+                    {character.creatorNotes.length > 512 ? 
+                      `${character.creatorNotes.substring(0, 512)}...` : 
+                      character.creatorNotes}
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
