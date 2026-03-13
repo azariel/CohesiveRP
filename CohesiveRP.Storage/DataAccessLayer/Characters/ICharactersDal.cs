@@ -8,6 +8,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         Task<CharacterDbModel[]> GetCharactersAsync();
         Task<CharacterDbModel> GetCharacterByIdAsync(string characterId);
         Task<CharacterDbModel> AddCharacterAsync(AddCharacterQueryModel queryModel);
-        Task<bool> UpdateCharacter(CharacterDbModel characterDbModel);
+        Task<bool> UpdateCharacterAsync(CharacterDbModel characterDbModel);
+        Task<bool> DeleteCharacterAsync(CharacterDbModel characterDbModel);
     }
 }

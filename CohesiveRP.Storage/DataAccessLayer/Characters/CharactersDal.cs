@@ -91,7 +91,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             }
         }
 
-        public async Task<bool> UpdateCharacter(CharacterDbModel characterDbModel)
+        public async Task<bool> UpdateCharacterAsync(CharacterDbModel characterDbModel)
         {
             try
             {
@@ -116,6 +116,35 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("1bdebfc9-b832-49ea-be6d-eff2027d83e6", $"Error when querying pending queries on table Characters.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteCharacterAsync(CharacterDbModel characterDbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var character = dbContext.Characters.AsNoTracking().FirstOrDefault(w => w.CharacterId == characterDbModel.CharacterId);
+
+                if (character == null)
+                {
+                    LoggingManager.LogToFile("8aff54b1-92ef-4bc9-b594-6da73992c982", $"Character [{characterDbModel.CharacterId}] to update wasn't found in storage.");
+                    return false;
+                }
+
+                EntityEntry<CharacterDbModel> result = dbContext.Characters.Remove(characterDbModel);
+                if (result.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("9ece8490-e7c5-4f30-93e2-6794953d0afb", $"Error when deleting a Character. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(characterDbModel)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("2d6e9259-8fe1-4448-8d88-8dfb846dd2d3", $"Error when querying pending queries on table Characters.", ex);
                 return false;
             }
         }

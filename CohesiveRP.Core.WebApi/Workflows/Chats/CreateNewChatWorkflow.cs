@@ -57,7 +57,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                     {
                         var characterToUpdate = await storageService.GetCharacterByIdAsync(characterId);
                         characterToUpdate.LastActivityAtUtc = DateTime.UtcNow;
-                        await storageService.UpdateCharacter(characterToUpdate);
+                        await storageService.UpdateCharacterAsync(characterToUpdate);
                     } catch (Exception) { } // nothing, just skip
                 }
             }

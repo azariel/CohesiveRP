@@ -12,6 +12,7 @@ using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
+using CohesiveRP.Storage.QueryModels.Personas;
 using CohesiveRP.Storage.QueryModels.SceneTracker;
 
 namespace CohesiveRP.Core.Services
@@ -23,6 +24,7 @@ namespace CohesiveRP.Core.Services
     {
         private IChatsDal chatsDal;
         private ICharactersDal charactersDal;
+        private IPersonasDal personasDal;
         private IMessagesDal messagesDal;
         private IGlobalSettingsDal globalSettingsDal;
         private IChatCompletionPresetsDal chatCompletionPresetsDal;
@@ -34,6 +36,7 @@ namespace CohesiveRP.Core.Services
         public StorageService(
             IChatsDal chatsDal,
             ICharactersDal charactersDal,
+            IPersonasDal personasDal,
             IMessagesDal messagesDal,
             IGlobalSettingsDal globalSettingsDal,
             IChatCompletionPresetsDal chatCompletionPresetsDal,
@@ -44,6 +47,7 @@ namespace CohesiveRP.Core.Services
         {
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;
+            this.personasDal = personasDal;
             this.messagesDal = messagesDal;
             this.globalSettingsDal = globalSettingsDal;
             this.chatCompletionPresetsDal = chatCompletionPresetsDal;
@@ -101,7 +105,15 @@ namespace CohesiveRP.Core.Services
         public async Task<CharacterDbModel[]> GetCharactersAsync() => await charactersDal.GetCharactersAsync();
         public async Task<CharacterDbModel> GetCharacterByIdAsync(string characterId) => await charactersDal.GetCharacterByIdAsync(characterId);
         public async Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel) => await charactersDal.AddCharacterAsync(queryModel);
-        public async Task<bool> UpdateCharacter(CharacterDbModel characterDbModel) => await charactersDal.UpdateCharacter(characterDbModel);
+        public async Task<bool> UpdateCharacterAsync(CharacterDbModel characterDbModel) => await charactersDal.UpdateCharacterAsync(characterDbModel);
+        public async Task<bool> DeleteCharacterAsync(CharacterDbModel characterDbModel) => await charactersDal.DeleteCharacterAsync(characterDbModel);
+
+        // Personas
+        public async Task<PersonaDbModel[]> GetPersonasAsync() => await personasDal.GetPersonasAsync();
+        public async Task<PersonaDbModel> GetPersonaByIdAsync(string personaId) => await personasDal.GetPersonaByIdAsync(personaId);
+        public async Task<PersonaDbModel> ImportNewPersonaAsync(AddPersonaQueryModel queryModel) => await personasDal.AddPersonaAsync(queryModel);
+        public async Task<bool> UpdatePersonaAsync(PersonaDbModel personaDbModel) => await personasDal.UpdatePersonaAsync(personaDbModel);
+        public async Task<bool> DeletePersonaAsync(PersonaDbModel personaDbModel) => await personasDal.DeletePersonaAsync(personaDbModel);
 
         // Messages
         public async Task<IMessageDbModel[]> GetAllHotMessagesAsync(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);

@@ -48,6 +48,11 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IImportNewCharacterWorkflow, ImportNewCharacterWorkflow>();
             services.AddSingleton<IGetCharacterByIdWorkflow, GetCharacterByIdWorkflow>();
 
+            // Workflows.Personas
+            //services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
+            //services.AddSingleton<IImportNewCharacterWorkflow, ImportNewCharacterWorkflow>();
+            //services.AddSingleton<IGetCharacterByIdWorkflow, GetCharacterByIdWorkflow>();
+
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();
 
@@ -71,6 +76,7 @@ namespace CohesiveRP.Core.WebApi
             // Those must be injected into StorageService ctor to make sure their CTOR is called upon service startup and thus default values are injected into storage at startup
             services.AddSingleton<IChatsDal, ChatsDal>();
             services.AddSingleton<ICharactersDal, CharactersDal>();
+            services.AddSingleton<IPersonasDal, PersonasDal>();
             services.AddSingleton<IMessagesDal, MessagesDal>();
             services.AddSingleton<IGlobalSettingsDal, GlobalSettingsDal>();
             services.AddSingleton<IChatCompletionPresetsDal, ChatCompletionPresetsDal>();
