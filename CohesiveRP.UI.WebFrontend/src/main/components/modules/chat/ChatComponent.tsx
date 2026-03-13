@@ -8,11 +8,12 @@ import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exc
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
-//import type { ChatResponseDto } from "../../../../ResponsesDto/chat/ChatResponseDto";
+import { useChatMessages } from "../../../../store/MessagesStoreContext";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
-  const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
+  const { activeModule } = sharedContext<SharedContextChatType>();
+  const [messages, setMessages] = useChatMessages(activeModule?.chatId);
   const didComponentMountAlready = useRef(false);
 
   useEffect(() => {
@@ -21,34 +22,14 @@ export default function ChatComponent() {
 
     didComponentMountAlready.current = true;
 
-    // const fetchChat = async () => {
-    //   try {
-    //     let chatModule = activeModule as SharedContextChatType;
-    //     const responseChat: ChatResponseDto | null = await getFromServerApiAsync<ChatResponseDto>(`api/chats/${chatModule.chatId}`);
-        
-    //     let serverApiException = responseChat as ServerApiExceptionResponseDto | null;
-    //     if (!responseChat || responseChat.code != 200 || serverApiException?.message) {
-    //       console.error(`Call to fetch specific chat failed. [${JSON.stringify(serverApiException)}]`);
-    //       return;
-    //     }
-
-    //     defaultChatAvatarId.current = responseChat.avatarCharacterId;
-    //     console.log(`Specific chat fetched successfully.`);
-    //   } catch (error) {
-    //     console.error("Fetch chat error:", error);
-    //   }
-    // };
-
     const fetchData = async () => {
       try {
-        let chatModule = activeModule as SharedContextChatType;
-        
-        if(!chatModule?.chatId) {
+        if(!activeModule?.chatId) {
           console.error(`Couldn't load chat. ChatId was undefined.`);
           return;
         }
 
-        const response: ChatMessagesResponseDto | null = await getFromServerApiAsync<ChatMessagesResponseDto>(`api/chat/${chatModule.chatId}/messages/hot`);
+        const response: ChatMessagesResponseDto | null = await getFromServerApiAsync<ChatMessagesResponseDto>(`api/chat/${activeModule.chatId}/messages/hot`);
         
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
@@ -56,7 +37,7 @@ export default function ChatComponent() {
           return;
         }
 
-        setActiveModule({ ...activeModule, messages: response.messages ?? [] });
+        setMessages(() => response.messages ?? []);
         console.log(`Specific chat messages fetched successfully.`);
         setTimeout(() => {
           if (messagesRef?.current)
@@ -67,7 +48,6 @@ export default function ChatComponent() {
       }
     };
 
-    //fetchChat();
     fetchData();
     
   }, []);
@@ -78,35 +58,27 @@ export default function ChatComponent() {
   }, []);
 
   const handleSaveMessage = async (messageId: string, newContent: string) => {
-    let updatedMessage = activeModule.messages.find(f=>f.messageId === messageId);
+    const updatedMessage = messages.find((m) => m.messageId === messageId);
+    if (!updatedMessage)
+      return;
 
-    if(updatedMessage)
-    {
-      updatedMessage.content = newContent;
+  
+    const payload = { ...updatedMessage, content: newContent };
 
-      // Update local store immediately (optimistic)
-      setActiveModule((prev) => ({
-        ...prev,
-        messages: (prev.messages ?? []).map((m) =>
-          m.messageId === messageId ? { ...m, content: newContent } : m
-        ),
-      }));
+    // Optimistic update
+    setMessages((prev) => prev.map((m) => m.messageId === messageId ? payload : m));
 
-      // Save to backend
-      const response = await putToServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}`, updatedMessage);
-      const serverApiException = response as ServerApiExceptionResponseDto | null;
-      if (!response || serverApiException?.message) {
-        console.error(`Updating message failed. [${JSON.stringify(serverApiException)}]`);
-      }
+    // Save to backend
+    const response = await putToServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}`, updatedMessage);
+    const serverApiException = response as ServerApiExceptionResponseDto | null;
+    if (!response || serverApiException?.message) {
+      console.error(`Updating message failed. [${JSON.stringify(serverApiException)}]`);
     }
   };
 
   const handleDeleteMessage = async (messageId: string) => {
     // Optimistic removal from local store
-    setActiveModule((prev) => ({
-      ...prev,
-      messages: (prev.messages ?? []).filter((m) => m.messageId !== messageId),
-    }));
+    setMessages((prev) => prev.filter((m) => m.messageId !== messageId));
 
     // Delete on backend
     const response = await deleteFromServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}`);
@@ -114,27 +86,27 @@ export default function ChatComponent() {
     if (!response || serverApiException?.message) {
       console.error(`Deleting message failed. [${JSON.stringify(serverApiException)}]`);
 
-      // Optional: roll back optimistic removal on failure
+      // roll back optimistic removal on failure
     }
   };
 
-  const lastMessageIndex = (activeModule?.messages?.length ?? 0) - 1;
-  const editableMessageIndex = lastMessageIndex - 3;
+  // const lastMessageIndex = (activeModule?.messages?.length ?? 0) - 1;
+  // const editableMessageIndex = lastMessageIndex - 3;
   const isSendingMessage = !!activeModule?.mainQueryId; // blocked while AI is replying
 
   return (
     <main className={styles.chatComponent}>
       <div className={styles.messagesContainer} ref={messagesRef}>
-        {activeModule?.messages && activeModule.messages.length > 0 ? (
-          activeModule.messages.map((message, index) => (
+        {messages.length > 0 ? (
+          messages.map((message, index) => (
             <ChatMessageComponent
-              key={index}
+              key={message.messageId}  // ← use stable id, not index
               messagesRef={messagesRef}
               message={message}
               defaultChatAvatarId={activeModule.defaultChatAvatar ?? ""}
-              enableDeleteBtn={index >= activeModule.messages.length-1}
-              enableSwipeBtn={index >= activeModule.messages.length-1}
-              isEditable={!isSendingMessage && index >= editableMessageIndex}
+              enableDeleteBtn={index >= messages.length - 1}
+              enableSwipeBtn={index >= messages.length - 1}
+              isEditable={!isSendingMessage && !message.summarized}
               onSave={handleSaveMessage}
               onDelete={handleDeleteMessage}
             />
