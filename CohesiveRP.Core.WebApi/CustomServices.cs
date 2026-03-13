@@ -41,10 +41,12 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetAllHotMessagesWorkflow, GetAllHotMessagesWorkflow>();
             services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
             services.AddSingleton<IPatchSpecificMessageByIdWorkflow, PatchSpecificMessageByIdWorkflow>();
+            services.AddSingleton<IDeleteSpecificMessageByIdWorkflow, DeleteSpecificMessageByIdWorkflow>();
 
             // Workflows.Characters
             services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
             services.AddSingleton<IImportNewCharacterWorkflow, ImportNewCharacterWorkflow>();
+            services.AddSingleton<IGetCharacterByIdWorkflow, GetCharacterByIdWorkflow>();
 
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();

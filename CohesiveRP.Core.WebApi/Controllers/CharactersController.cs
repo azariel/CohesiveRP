@@ -1,5 +1,6 @@
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Chat;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Storage.WebApi.Controllers
@@ -9,13 +10,16 @@ namespace CohesiveRP.Storage.WebApi.Controllers
     public class CharactersController : ControllerBase
     {
         private IGetAllCharactersWorkflow getAllCharactersWorkflow;
+        private IGetCharacterByIdWorkflow getCharacterByIdWorkflow;
         private IImportNewCharacterWorkflow importNewCharacterWorkflow;
 
         public CharactersController(
             IGetAllCharactersWorkflow getAllCharactersWorkflow,
+            IGetCharacterByIdWorkflow getCharacterByIdWorkflow,
             IImportNewCharacterWorkflow importNewCharacterWorkflow)
         {
             this.getAllCharactersWorkflow = getAllCharactersWorkflow;
+            this.getCharacterByIdWorkflow = getCharacterByIdWorkflow;
             this.importNewCharacterWorkflow = importNewCharacterWorkflow;
         }
 
@@ -27,6 +31,13 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> GetAllCharacters()
         {
             return new JsonResult(await getAllCharactersWorkflow.GetAllCharactersAsync());
+        }
+
+        [HttpGet]
+        [Route("{characterId}")]
+        public async Task<IActionResult> GetCharacterById(string characterId)
+        {
+            return new JsonResult(await getCharacterByIdWorkflow.GetCharacterByIdAsync(characterId));
         }
 
         [HttpPost]

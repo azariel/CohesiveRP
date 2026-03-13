@@ -27,9 +27,9 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> GetImateapot() => new JsonResult("You're a teapot.");
 
         [HttpGet]
-        public async Task<IActionResult> GetAllSelectableChats()
+        public async Task<IActionResult> GetAllSelectableChats([FromQuery] string characterId)
         {
-            return new JsonResult(await getAllChatsWorkflow.GetAllSelectableChats());
+            return new JsonResult(await getAllChatsWorkflow.GetAllSelectableChats(characterId));
         }
 
         [HttpGet]

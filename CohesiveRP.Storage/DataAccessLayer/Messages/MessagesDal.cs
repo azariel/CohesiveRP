@@ -90,9 +90,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 };
 
                 // Check if HotMessages for this chat already exist
-                var chat = dbContext.HotMessages.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
+                var hotMessages = dbContext.HotMessages.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
 
-                if (chat == null)
+                if (hotMessages == null)
                 {
                     // Create the HotMessages row tied to this chat first
                     var newHotMessagesObj = new HotMessagesDbModel
@@ -114,14 +114,22 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 }
 
                 // Otherwise, Update the existing row with the new message
-                var currentMessages = chat.SerializedMessages;
+                var currentMessages = hotMessages.SerializedMessages;
                 currentMessages.Add(messageDbModel);
-                chat.SerializedMessages = currentMessages;
-                var resultUpdate = dbContext.HotMessages.Update(chat);
+                hotMessages.SerializedMessages = currentMessages;
+                var resultUpdate = dbContext.HotMessages.Update(hotMessages);
                 if (resultUpdate.State != EntityState.Modified)
                 {
                     LoggingManager.LogToFile("77cb56c7-238d-46e3-a110-d68dc4427a6e", $"Error when querying Db on table HOT messages. State was [{resultUpdate.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultUpdate)}].");
                     return null;
+                }
+
+                // Update linked chat
+                var chat = dbContext.Chats.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
+                if (hotMessages != null)
+                {
+                    chat.LastActivityAtUtc = DateTime.UtcNow;
+                    dbContext.Chats.Update(chat);
                 }
 
                 await dbContext.SaveChangesAsync();
@@ -155,6 +163,14 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 {
                     LoggingManager.LogToFile("b5bf0a01-1371-4373-be47-b06882018280", $"Error when updating Dbmodel on table messages. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");
                     return false;
+                }
+
+                // Update linked chat
+                var chat = dbContext.Chats.FirstOrDefault(f => f.ChatId == dbModel.ChatId);
+                if (chat != null)
+                {
+                    chat.LastActivityAtUtc = DateTime.UtcNow;
+                    dbContext.Chats.Update(chat);
                 }
 
                 await dbContext.SaveChangesAsync();
@@ -197,11 +213,50 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     return false;
                 }
 
+                // Update linked chat
+                var chat = dbContext.Chats.FirstOrDefault(f => f.ChatId == chatId);
+                if (chat != null)
+                {
+                    chat.LastActivityAtUtc = DateTime.UtcNow;
+                    dbContext.Chats.Update(chat);
+                }
+
                 await dbContext.SaveChangesAsync();
                 return true;
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("d51ab3f9-63e8-41fe-a4c9-0da0855d78de", $"Error when querying pending queries on table messages.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteSpecificMessageAsync(string chatId, string messageId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                HotMessagesDbModel chatHotMessages = dbContext.HotMessages.FirstOrDefault(w => w.ChatId == chatId);
+                var message = chatHotMessages?.SerializedMessages?.FirstOrDefault(w => w.MessageId == messageId);
+
+                if (chatHotMessages == null || message == null)
+                {
+                    LoggingManager.LogToFile("08ccbeee-a4a3-42a2-ba7e-8d814192773e", $"Message [{messageId}] in chat [{chatId}] could not be found in HOT messages storage. Parsing COLD storage isn't implemented yet. Can't delete this message.");
+                    return false;// TODO: parse Cold messages here before returning not found
+                }
+
+                chatHotMessages.SerializedMessages.Remove(message);
+                EntityEntry<HotMessagesDbModel> result = dbContext.HotMessages.Update(chatHotMessages);
+                if (result.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("c0c4f9f1-9b41-4942-ac0a-7cf3984c1de2", $"Error when deleting Dbmodel on table messages. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. message: [{JsonCommonSerializer.SerializeToString(message)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("ae78540c-8b82-4973-9439-c26dff6830cb", $"Error when querying Db on table HOT messages to delete message.", ex);
                 return false;
             }
         }

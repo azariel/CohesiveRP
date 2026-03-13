@@ -80,12 +80,6 @@
     transition: color 0.3s ease;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .sendInputSpinnerWaitingServerAck {
     color: rgb(247, 236, 81);
     width: 1.2em;
@@ -112,4 +106,10 @@
     width: 1.2em;
     height: 1.2em;
     animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

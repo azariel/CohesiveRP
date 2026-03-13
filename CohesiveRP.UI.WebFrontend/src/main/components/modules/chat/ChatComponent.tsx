@@ -2,7 +2,7 @@ import styles from "./ChatComponent.module.css";
 import { useEffect, useRef } from "react";
 import ChatMessageComponent from "./message/ChatMessageComponent";
 import UserInputComponent from "./userInput/UserInputComponent";
-import { getFromServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
+import { deleteFromServerApiAsync, getFromServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { ChatMessagesResponseDto } from "../../../../ResponsesDto/chat/ChatMessagesResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 /* Store */
@@ -42,6 +42,12 @@ export default function ChatComponent() {
     const fetchData = async () => {
       try {
         let chatModule = activeModule as SharedContextChatType;
+        
+        if(!chatModule?.chatId) {
+          console.error(`Couldn't load chat. ChatId was undefined.`);
+          return;
+        }
+
         const response: ChatMessagesResponseDto | null = await getFromServerApiAsync<ChatMessagesResponseDto>(`api/chat/${chatModule.chatId}/messages/hot`);
         
         let serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -95,6 +101,23 @@ export default function ChatComponent() {
     }
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    // Optimistic removal from local store
+    setActiveModule((prev) => ({
+      ...prev,
+      messages: (prev.messages ?? []).filter((m) => m.messageId !== messageId),
+    }));
+
+    // Delete on backend
+    const response = await deleteFromServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}`);
+    const serverApiException = response as ServerApiExceptionResponseDto | null;
+    if (!response || serverApiException?.message) {
+      console.error(`Deleting message failed. [${JSON.stringify(serverApiException)}]`);
+
+      // Optional: roll back optimistic removal on failure
+    }
+  };
+
   const lastMessageIndex = (activeModule?.messages?.length ?? 0) - 1;
   const editableMessageIndex = lastMessageIndex - 3;
   const isSendingMessage = !!activeModule?.mainQueryId; // blocked while AI is replying
@@ -109,9 +132,11 @@ export default function ChatComponent() {
               messagesRef={messagesRef}
               message={message}
               defaultChatAvatarId={activeModule.defaultChatAvatar ?? ""}
-              enableSwipeBtn={index >= editableMessageIndex}
+              enableDeleteBtn={index >= activeModule.messages.length-1}
+              enableSwipeBtn={index >= activeModule.messages.length-1}
               isEditable={!isSendingMessage && index >= editableMessageIndex}
               onSave={handleSaveMessage}
+              onDelete={handleDeleteMessage}
             />
           ))
         ) : (

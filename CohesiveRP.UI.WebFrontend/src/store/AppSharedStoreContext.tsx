@@ -12,14 +12,33 @@ type SharedContextWrapperType<T = SharedContextType> = {
 const SharedContext = createContext<SharedContextWrapperType<any> | null>(null);
 
 export const AppSharedStoreProvider = ({ children }: { children: ReactNode }) => {
-  const [activeModule, setActiveModule] = useState<SharedContextType>(() => {
+    const [activeModule, setActiveModule] = useState<SharedContextType>(() => {
     try {
-      // Initialize state from localStorage if available
-      const pathModule = window.location.pathname.replace('/', '');
-      if (pathModule) return { moduleName: pathModule };
+      // history.state is attached to the current history entry and survives F5
+      if (window.history.state?.moduleName) {
+        // Merge: history.state for navigation, localStorage for transient UI state
+        const saved = localStorage.getItem("activeModule");
+        const parsedSaved = saved ? JSON.parse(saved) : null;
 
+        if (parsedSaved?.moduleName === window.history.state.moduleName) {
+          return { ...window.history.state, currentUserInputValue: parsedSaved.currentUserInputValue ?? "" };
+        }
+
+        return window.history.state;
+      }
+
+      // Fallback: try localStorage matched against current path
+      const pathModule = window.location.pathname.replace('/', '');
       const saved = localStorage.getItem("activeModule");
-      return saved ? JSON.parse(saved) : { moduleName: "chats" };
+      const parsedSaved = saved ? JSON.parse(saved) : null;
+
+      if (parsedSaved && pathModule && parsedSaved.moduleName === pathModule) {
+        return parsedSaved;
+      }
+
+      if (pathModule)
+        return { moduleName: pathModule };
+      return parsedSaved ?? { moduleName: "chats" };
     } catch {
       return { moduleName: "chats" };
     }

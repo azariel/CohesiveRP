@@ -66,6 +66,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     SelectedChatCompletionPresets = queryModel.SelectedChatCompletionPresets,
                     CharacterIds = queryModel.CharacterIds,
+                    LastActivityAtUtc = DateTime.UtcNow,
                 };
 
                 EntityEntry<ChatDbModel> result = await dbContext.Chats.AddAsync(chatDbModel);

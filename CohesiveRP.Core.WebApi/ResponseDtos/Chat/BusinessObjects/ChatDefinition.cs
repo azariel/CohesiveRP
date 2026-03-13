@@ -13,5 +13,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
 
         [JsonPropertyName("name")]
         public string ChatName { get; set; }
+
+        [JsonPropertyName("lastActivityAtUtc")]
+        public DateTime LastActivityAtUtc { get; set; }
     }
 }

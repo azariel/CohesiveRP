@@ -7,17 +7,20 @@ import { MdOutlineSummarize } from "react-icons/md";
 import { FormatUtcDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
 import { GetAvatarPathFromCharacterId } from "../../../../../utils/avatarUtils";
+import { FaTrashAlt } from "react-icons/fa";
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
   message?: ChatMessage;
   defaultChatAvatarId?: string;
+  enableDeleteBtn?: boolean;
   enableSwipeBtn?: boolean;
   isEditable?: boolean;
   onSave?: (messageId: string, newContent: string) => Promise<void>;
+  onDelete?: (messageId: string) => Promise<void>;
 }
 
-export default function ChatMessageComponent({ messagesRef, message, defaultChatAvatarId, enableSwipeBtn = false, isEditable = false, onSave }: Props) {
+export default function ChatMessageComponent({ messagesRef, message, defaultChatAvatarId, enableSwipeBtn = false,  enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
   const isRevertingRef = useRef(false);
@@ -64,6 +67,13 @@ export default function ChatMessageComponent({ messagesRef, message, defaultChat
     setEditContent(message?.content ?? ""); // restore original
     setIsEditing(false);
     isRevertingRef.current = false;
+  };
+
+  const handleDelete = async () => {
+    if (!message?.messageId || !onDelete)
+    return;
+
+    await onDelete(message.messageId);
   };
 
   const handleBlur = async () => {
@@ -146,14 +156,22 @@ export default function ChatMessageComponent({ messagesRef, message, defaultChat
               <HiAdjustmentsHorizontal />
               <HiCog6Tooth />
             </div>
-            {enableSwipeBtn ? (
-              <div className={styles.messageContentFooterRightSideSwipeIcons}>
-                <label className={styles.messageContentFooterRightSideSwipeIconsLabel}>1/1</label>
-                <HiMiniChevronRight className={styles.messageContentFooterRightSideSwipeIconsBtn} />
-              </div>
-            ) : (
-              <div />
-            )}
+
+            <div className={styles.messageContentFooterRightSideIcons}>
+              {enableDeleteBtn ? (
+                  <FaTrashAlt className={styles.messageContentFooterRightSideDeleteIconsBtn} onClick={handleDelete} />
+              ) : (
+                <div />
+              )}
+              {enableSwipeBtn ? (
+                <div className={styles.messageContentFooterRightSideSwipeIcons}>
+                  <label className={styles.messageContentFooterRightSideSwipeIconsLabel}>1/1</label>
+                  <HiMiniChevronRight className={styles.messageContentFooterRightSideSwipeIconsBtn} />
+                </div>
+              ) : (
+                <div />
+              )}
+            </div>
           </div>
         </div>
       </div>

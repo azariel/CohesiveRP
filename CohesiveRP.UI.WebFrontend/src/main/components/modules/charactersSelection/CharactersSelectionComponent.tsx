@@ -1,4 +1,4 @@
-import styles from "./CharactersComponent.module.css";
+import styles from "./CharactersSelectionComponent.module.css";
 import { useRef, useEffect, useState } from "react";
 import { FaFilter  } from "react-icons/fa";
 import { MdAddBox } from "react-icons/md";
@@ -6,15 +6,15 @@ import { AiOutlineDisconnect } from "react-icons/ai";
 
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
-import type { SharedContextType } from "../../../../store/SharedContextType";
 import { getFromServerApiAsync, postToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { CharactersResponseDto } from "../../../../ResponsesDto/characters/CharactersResponseDto";
 import { GetAvatarPathFromCharacterId } from "../../../../utils/avatarUtils";
+import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
 
-export default function CharactersComponent() {
-  const { setActiveModule } = sharedContext();
+export default function CharactersSelectionComponent() {
+  const { navigateTo } = sharedContext();
   const didComponentMountAlready = useRef(false);
   const newCharacterFileInputRef = useRef<HTMLInputElement | null>(null);
   const [isNetworkDown, setIsNetworkDown] = useState(false);
@@ -48,13 +48,14 @@ export default function CharactersComponent() {
     fetchData();
   }, []);
 
-  const handleSpecificCharacterClick = (moduleName: string) => {
+  const handleSpecificCharacterClick = (characterId: string) => {
+    let selectedCharacter = {
+      selectedCharacterId: characterId,
+      moduleName: "characterDetails",
+    } as SharedContextCharacterType;
 
-    let module = {
-      moduleName: moduleName
-    } as SharedContextType;
-    setActiveModule(module);
-    console.log(`Character selected -> Module [${moduleName}] selected.`);
+    navigateTo(selectedCharacter);
+    console.log(`CharacterDetails selected -> Module characterDetails selected.`);
   };
 
   const handleAddCharacterClick = () => {
@@ -84,18 +85,23 @@ export default function CharactersComponent() {
 
       // Add the new character to the list
       setCharactersResponse((prev) => {
+        const charToAdd = newCharacter.character;
+
+        if (!charToAdd)
+          return prev;
+
         // If there is no previous state, create the wrapper object
         if (!prev) {
           return {
             code: 200,
-            characters: [newCharacter.character]
+            characters: [charToAdd]
           } as CharactersResponseDto;
         }
 
         // If state exists, spread the old state and add the new character to the array
         return {
           ...prev,
-          characters: [newCharacter.character, ...(prev.characters || [])]
+          characters: [charToAdd, ...(prev.characters || [])]
         };
     });
     } catch (err) {
@@ -131,7 +137,7 @@ export default function CharactersComponent() {
           </div>
           <div className={styles.charactersGridContainer}>
             {charactersResponse?.characters?.map(character => (
-              <div key={character.characterId} className={styles.characterContainer} onClick={() => handleSpecificCharacterClick("character")}>
+              <div key={character.characterId} className={styles.characterContainer} onClick={() => handleSpecificCharacterClick(character.characterId)}>
                 <div className={styles.characterAvatarContainer}>
                   <img src={GetAvatarPathFromCharacterId(character.characterId)} alt="dev/Placeholder.png" />
                 </div>

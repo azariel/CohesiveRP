@@ -5,6 +5,6 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions
 {
     public interface IGetAllSelectableChatsWorkflow : IWorkflow
     {
-        Task<IWebApiResponseDto> GetAllSelectableChats();
+        Task<IWebApiResponseDto> GetAllSelectableChats(string characterId);
     }
 }

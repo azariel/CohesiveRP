@@ -16,11 +16,16 @@ public class GetAllSelectableChatsWorkflow : IGetAllSelectableChatsWorkflow
         this.storageService = storageService;
     }
 
-    public async Task<IWebApiResponseDto> GetAllSelectableChats()
+    public async Task<IWebApiResponseDto> GetAllSelectableChats(string characterId)
     {
         ChatDbModel[] chats = await storageService.GetAllChatsAsync();
-
         chats ??= Array.Empty<ChatDbModel>();
+
+        if (!string.IsNullOrWhiteSpace(characterId))
+        {
+            chats = chats.Where(w => w.CharacterIds.Contains(characterId)).ToArray();
+        }
+
         ChatDefinitionsResponseDto responseDto = new();
 
         // TODO: pagination
@@ -32,9 +37,11 @@ public class GetAllSelectableChatsWorkflow : IGetAllSelectableChatsWorkflow
                 ChatId = chat.ChatId,
                 CharacterId = chat.CharacterIds?.FirstOrDefault() ?? "unknown",
                 ChatName = characters.FirstOrDefault(f => f.CharacterId == chat.CharacterIds?.FirstOrDefault())?.Name ?? "unknown",
+                LastActivityAtUtc = chat.LastActivityAtUtc,
             });
         }
 
+        responseDto.Chats = responseDto.Chats.OrderByDescending(o => o.LastActivityAtUtc).ToList();
         responseDto.HttpResultCode = System.Net.HttpStatusCode.OK;
         return responseDto;
     }

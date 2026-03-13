@@ -30,7 +30,6 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
 
         // Validate that the chat exists in storage
         var chat = await storageService.GetChatAsync(requestDto.ChatId);
-
         if (chat == null)
         {
             return new WebApiException
@@ -40,27 +39,42 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             };
         }
 
+        // If a background with main tag is already running, forbid adding a new message until we're done
+        var backgroundQueriesInProgress = await storageService.GetPendingOrProcessingBackgroundQueryAsync();
+        if (backgroundQueriesInProgress.Any(a => a.Tags.Contains(BackgroundQuerySystemTags.main.ToString())))
+        {
+            return new WebApiException
+            {
+                HttpResultCode = System.Net.HttpStatusCode.BadRequest,
+                Message = $"Chat with id {requestDto.ChatId} is already in the process of generating a reply. Please wait."
+            };
+        }
+
         var characters = await storageService.GetCharactersAsync();
 
         // if it's the first player message in the chat, aseptise the previous messages
         await AseptisePreviousMessageIfRequiredAsync(chat, characters);
 
-        // Add a background query to generate the sceneTracker first and foremost
-        // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
-        await AddSceneTrackerBackgroundQueryAsync(chat);
-
-        // Add the message
-        CreateMessageQueryModel messageQueryModel = new()
+        IMessageDbModel message = null;
+        if (!string.IsNullOrWhiteSpace(requestDto.Message.Content))
         {
-            ChatId = requestDto.ChatId,
-            Summarized = false,// adding a brand new message, so ofc it's not summarized yet
-            SourceType = Common.BusinessObjects.MessageSourceType.User,
-            MessageContent = requestDto.Message.Content,
-            CreatedAtUtc = DateTime.UtcNow,
-            CharacterId = null,// Null as this is from the User
-        };
+            // Add a background query to generate the sceneTracker first and foremost
+            // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
+            await AddSceneTrackerBackgroundQueryAsync(chat);
 
-        var message = await storageService.AddMessageAsync(messageQueryModel);
+            // Add the message
+            CreateMessageQueryModel messageQueryModel = new()
+            {
+                ChatId = requestDto.ChatId,
+                Summarized = false,// adding a brand new message, so ofc it's not summarized yet
+                SourceType = Common.BusinessObjects.MessageSourceType.User,
+                MessageContent = requestDto.Message.Content,
+                CreatedAtUtc = DateTime.UtcNow,
+                CharacterId = null,// Null as this is from the User
+            };
+
+            message = await storageService.AddMessageAsync(messageQueryModel);
+        }
 
         // The message was added to storage, we'll query a request for the backend to process a new AI reply
         var backgroundQueryModel = new CreateBackgroundQueryQueryModel
@@ -93,9 +107,9 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             HttpResultCode = System.Net.HttpStatusCode.OK,
             Message = new MessageDefinition
             {
-                MessageId = message.MessageId,
-                Summarized = message.Summarized,
-                Content = message.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", "Azariel")
+                MessageId = message?.MessageId,
+                Summarized = message?.Summarized ?? false,
+                Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", "Azariel")
             },
             MainQueryId = backgroundQuery.BackgroundQueryId,
         };

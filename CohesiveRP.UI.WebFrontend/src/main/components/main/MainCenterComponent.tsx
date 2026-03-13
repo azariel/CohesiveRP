@@ -3,7 +3,8 @@ import styles from "./MainCenterComponent.module.css";
 /* modules components */
 import ChatComponent from '../modules/chat/ChatComponent';
 import ChatSelectionComponent from "../modules/chatsSelection/ChatSelectionComponent";
-import CharactersComponent from "../modules/charactersSelection/CharactersComponent";
+import CharactersComponent from "../modules/charactersSelection/CharactersSelectionComponent";
+import CharacterDetailsComponent from "../modules/characterDetails/CharacterDetailsComponent";
 import SettingsComponent from "../modules/settings/SettingsComponent";
 
 /* Store */
@@ -20,7 +21,9 @@ export default function MainCenterComponent() {
         return <ChatComponent />;
       case "characters":
         return <CharactersComponent />;
-        case "settings":
+      case "characterDetails":
+        return <CharacterDetailsComponent />;
+      case "settings":
         return <SettingsComponent />;
       default:
         return null;

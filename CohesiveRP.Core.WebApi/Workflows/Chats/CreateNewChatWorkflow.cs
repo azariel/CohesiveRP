@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Common.WebApi;
+﻿using CohesiveRP.Common.Exceptions;
+using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
@@ -37,7 +38,11 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
 
             if (newlyCreatedChat == null)
             {
-                // TODO: creation failed...
+                return new WebApiException
+                {
+                    HttpResultCode = System.Net.HttpStatusCode.InternalServerError,
+                    Message = $"Chat creation failed."
+                };
             }
 
             // Add first message from AI

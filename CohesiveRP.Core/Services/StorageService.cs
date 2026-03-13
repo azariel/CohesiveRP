@@ -109,6 +109,7 @@ namespace CohesiveRP.Core.Services
         public async Task<IMessageDbModel> AddMessageAsync(CreateMessageQueryModel message) => await messagesDal.CreateOrUpdateMessageAsync(message);
         public async Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages) => await messagesDal.UpdateHotMessagesAsync(messages);
         public async Task<bool> UpdateHotMessageAsync(string chatId, MessageDbModel message) => await messagesDal.UpdateHotMessageAsync(chatId, message);
+        public async Task<bool> DeleteSpecificMessageAsync(string chatId, string messageId) => await messagesDal.DeleteSpecificMessageAsync(chatId, messageId);
 
         // Settings
         public async Task<GlobalSettingsDbModel> GetGlobalSettingsAsync() => await globalSettingsDal.GetGlobalSettingsAsync();

@@ -131,6 +131,23 @@
     gap: 0.5em;
 }
 
+.messageContentFooterRightSideDeleteIconsBtn {
+    margin-top:0.1em;
+    margin-right:1em;
+    font-size: 0.8em;
+}
+
+.messageContentFooterRightSideDeleteIconsBtn:hover {
+    cursor: pointer;
+    color:#3484e0;
+    transition: color 0.3s ease;
+}
+
+.messageContentFooterRightSideIcons {
+    display: flex;
+    gap: 1em;
+}
+
 .messageContentFooterRightSideSwipeIcons {
     display: flex;
     gap: 1em;
