@@ -82,6 +82,8 @@ namespace CohesiveRP.Storage.Common
 
         public DbSet<CharacterDbModel> Characters { get; set; }
 
+        public DbSet<PersonaDbModel> Personas { get; set; }
+
         // Recent message in a specific chat
         public DbSet<HotMessagesDbModel> HotMessages { get; set; }
 
