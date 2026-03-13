@@ -6,16 +6,21 @@ import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
 import { FormatUtcDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
+import { GetAvatarPathFromCharacterId } from "../../../../../utils/avatarUtils";
+import { FaTrashAlt } from "react-icons/fa";
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
   message?: ChatMessage;
+  defaultChatAvatarId?: string;
+  enableDeleteBtn?: boolean;
   enableSwipeBtn?: boolean;
   isEditable?: boolean;
   onSave?: (messageId: string, newContent: string) => Promise<void>;
+  onDelete?: (messageId: string) => Promise<void>;
 }
 
-export default function ChatMessageComponent({ messagesRef, message, enableSwipeBtn = false, isEditable = false, onSave }: Props) {
+export default function ChatMessageComponent({ messagesRef, message, defaultChatAvatarId, enableSwipeBtn = false,  enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
   const isRevertingRef = useRef(false);
@@ -64,6 +69,13 @@ export default function ChatMessageComponent({ messagesRef, message, enableSwipe
     isRevertingRef.current = false;
   };
 
+  const handleDelete = async () => {
+    if (!message?.messageId || !onDelete)
+    return;
+
+    await onDelete(message.messageId);
+  };
+
   const handleBlur = async () => {
     if (isRevertingRef.current) {
       isRevertingRef.current = false;
@@ -86,15 +98,15 @@ export default function ChatMessageComponent({ messagesRef, message, enableSwipe
         <div className={styles.leftMessageContainer}>
           <div className={styles.messageAvatarContainer}>
             {message?.sourceType == 0 ? (
-              <img src="./dev/Seyrdis.png" alt="Avatar" />
-            ) : (
               <img src="./dev/Venelas.png" alt="Avatar" />
+            ) : (
+              <img src={GetAvatarPathFromCharacterId(message?.avatarId ?? defaultChatAvatarId ?? "")} alt="Avatar" />
             )}
           </div>
           <div className={styles.messageInfoContainer}>
-            <div title="messageId">{!message?.messageIndex ? "-" : "#" + message.messageIndex}</div>
-            <div title="message generation time">??s</div>
-            <div title="tokens in message">????t</div>
+            <div title="messageId">{!message?.messageIndex ? "-" : "# " + message.messageIndex}</div>
+            {/* <div title="message generation time">??s</div>
+            <div title="tokens in message">????t</div> */}
           </div>
         </div>
         <div className={styles.messageContent}>
@@ -144,14 +156,22 @@ export default function ChatMessageComponent({ messagesRef, message, enableSwipe
               <HiAdjustmentsHorizontal />
               <HiCog6Tooth />
             </div>
-            {enableSwipeBtn ? (
-              <div className={styles.messageContentFooterRightSideSwipeIcons}>
-                <label className={styles.messageContentFooterRightSideSwipeIconsLabel}>1/1</label>
-                <HiMiniChevronRight className={styles.messageContentFooterRightSideSwipeIconsBtn} />
-              </div>
-            ) : (
-              <div />
-            )}
+
+            <div className={styles.messageContentFooterRightSideIcons}>
+              {enableDeleteBtn ? (
+                  <FaTrashAlt className={styles.messageContentFooterRightSideDeleteIconsBtn} onClick={handleDelete} />
+              ) : (
+                <div />
+              )}
+              {enableSwipeBtn ? (
+                <div className={styles.messageContentFooterRightSideSwipeIcons}>
+                  <label className={styles.messageContentFooterRightSideSwipeIconsLabel}>1/1</label>
+                  <HiMiniChevronRight className={styles.messageContentFooterRightSideSwipeIconsBtn} />
+                </div>
+              ) : (
+                <div />
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -35,7 +35,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 string value = promptContextFormatElement?.Options?.Format?
                     .Replace("{{item_header}}", loreQueryContent.Key)
                     .Replace("{{item_description}}", loreQueryContent.Key)
-                    .Replace("{{user}}", userPersonaName);
+                    .Replace(Constants.USER_PLACEHOLDER, userPersonaName);
 
                 if(value != null)
                 {

@@ -31,7 +31,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatDbModel.ChatId);
+            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
             if (hotMessages.Length <= 0)
             {
                 return (null, new ShareableContextLink { LinkedBuilder = this });

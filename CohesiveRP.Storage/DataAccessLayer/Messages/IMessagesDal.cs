@@ -10,5 +10,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         Task<IMessageDbModel> CreateOrUpdateMessageAsync(CreateMessageQueryModel queryModel);
         Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages);
         Task<bool> UpdateHotMessageAsync(string chatId, MessageDbModel message);
+        Task<bool> DeleteSpecificMessageAsync(string chatId, string messageId);
     }
 }

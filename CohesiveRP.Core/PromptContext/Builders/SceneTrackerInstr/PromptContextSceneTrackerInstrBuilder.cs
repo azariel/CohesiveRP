@@ -23,7 +23,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         {
             // Get the messages that should be included in our new sceneTracker generation. Logically, it would be all the messages at the end of the list until we match the latest user message.
             // So, if we're in a group chat and there's 3 messages from 3 characters after the user message, we'll include the last 4 messages
-            var hotMessages = await storageService.GetAllHotMessages(chatDbModel.ChatId);
+            var hotMessages = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
 
             if(hotMessages.Length <= 0)
             {
@@ -55,7 +55,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 sceneTrackerMessagesContent += $"- {message.Content}{Environment.NewLine}";
             }
 
-            var lastSceneTracker = await storageService.GetSceneTracker(chatDbModel.ChatId);
+            var lastSceneTracker = await storageService.GetSceneTrackerAsync(chatDbModel.ChatId);
             //if(lastSceneTracker != null && GetNbMessagesFromUserSinceMessageId(lastSceneTracker.LinkMessageId) <= 1)
             //{
                 // TODO: if it's stale, what should we do? cut it? may lead to inconsistencies... hm

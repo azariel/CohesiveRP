@@ -29,7 +29,7 @@ namespace CohesiveRP.Core.Services.Summary
             }
 
             SummaryDbModel summaryDbModel = await storageService.GetSummaryAsync(chatId);
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatId);
+            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatId);
             if (pendingRequests.Where(w => w.Tags.Contains(BackgroundQuerySystemTags.shortSummary.ToString())).ToArray().Length <= 0)
             {
                 await EvaluateShortTermSummaryAsync(chatId, settings, hotMessages);
@@ -108,7 +108,7 @@ namespace CohesiveRP.Core.Services.Summary
                 Priority = BackgroundQueryPriority.Standard,
             };
 
-            await storageService.CreateBackgroundQueryAsync(backgroundQueryDbModel);
+            await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace CohesiveRP.Core.Services.Summary
                 Priority = BackgroundQueryPriority.Standard,
             };
 
-            await storageService.CreateBackgroundQueryAsync(backgroundQueryDbModel);
+            await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace CohesiveRP.Core.Services.Summary
                 Priority = BackgroundQueryPriority.Standard,
             };
 
-            await storageService.CreateBackgroundQueryAsync(backgroundQueryDbModel);
+            await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace CohesiveRP.Core.Services.Summary
                 Priority = BackgroundQueryPriority.Standard,
             };
 
-            await storageService.CreateBackgroundQueryAsync(backgroundQueryDbModel);
+            await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace CohesiveRP.Core.Services.Summary
                 Priority = BackgroundQueryPriority.Standard,
             };
 
-            await storageService.CreateBackgroundQueryAsync(backgroundQueryDbModel);
+            await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
         }
     }
 }

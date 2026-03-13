@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Net;
+using System.Text.Json.Serialization;
 
 namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
 {
@@ -7,9 +8,13 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
         [JsonPropertyName("chatId")]
         public string ChatId { get; set; }
 
-        //[JsonPropertyName("chatCompletionPresets")]
-        //public string ChatCompletionPresets { get; set; }
+        [JsonPropertyName("avatarCharacterId")]
+        public string CharacterId { get; set; }
 
-        // TODO: Name, desc, avatar
+        [JsonPropertyName("name")]
+        public string ChatName { get; set; }
+
+        [JsonPropertyName("lastActivityAtUtc")]
+        public DateTime LastActivityAtUtc { get; set; }
     }
 }

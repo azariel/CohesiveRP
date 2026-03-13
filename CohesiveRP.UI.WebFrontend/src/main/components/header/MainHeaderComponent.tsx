@@ -7,7 +7,7 @@ import { sharedContext } from '../../../store/AppSharedStoreContext';
 import type { SharedContextType } from "../../../store/SharedContextType";
 
 export default function Header() {
-  const { setActiveModule } = sharedContext();
+  const { navigateTo } = sharedContext();
 
   const handleIconClick = (moduleName: string) => {
 
@@ -15,7 +15,7 @@ export default function Header() {
       moduleName: moduleName
     } as SharedContextType;
 
-    setActiveModule(module);
+    navigateTo(module);
     console.log(`Module [${moduleName}] selected.`);
   };
 

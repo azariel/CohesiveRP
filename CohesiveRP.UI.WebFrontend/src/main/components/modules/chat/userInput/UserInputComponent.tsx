@@ -18,13 +18,13 @@ import type { BackgroundQueryResponseDto } from "../../../../../ResponsesDto/cha
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
+  defaultChatAvatarId: string | null;
 }
 
-export default function UserInputComponent({ messagesRef }: Props) {
+export default function UserInputComponent({ messagesRef, defaultChatAvatarId }: Props) {
   const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hoveringSendBtn, setHoveringSendBtn] = useState(false);
-  const [playerMessage, setPlayerMessage] = useState("");
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
   const [isSendingMessageToServer, setIsSendingMessageToServer] = useState(false);
   const [sendMessageQueryStatus, setSendMessageQueryStatus] = useState("");
@@ -44,6 +44,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
     };
 
     textarea.addEventListener("focus", handleFocus);
+
     return () => {
       textarea.removeEventListener("focus", handleFocus);
     };
@@ -72,10 +73,17 @@ const adjustTextareaHeight = () => {
 
   useEffect(() => {
     adjustTextareaHeight();
-  }, [playerMessage]);
+  }, [activeModule]);
 
 const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setPlayerMessage(e.target.value);
+    const value = e.target.value;
+    setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: value } : prev);
+    
+    // Save per chatId
+    if (activeModule?.chatId) {
+      localStorage.setItem(`chatInput_${activeModule.chatId}`, value);
+    }
+    
     adjustTextareaHeight();
   };
 
@@ -187,7 +195,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
   };
 
   const handleSendPlayerMessage = async () => {
-    if (isSendingMessageToServer || !playerMessage || !playerMessage.trim()){
+    if (isSendingMessageToServer || !activeModule?.currentUserInputValue){
       return;
     }
     
@@ -197,7 +205,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     
     // Fetch from server api
     const payload = {
-      content: playerMessage,
+      content: activeModule?.currentUserInputValue,
       createdAtUtc: new Date().toUTCString()
     };
     
@@ -216,18 +224,38 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 
     console.log(`Sending player message to backend succeeded.`);
     setSendMessageQueryStatus("Completed");
-    setPlayerMessage(""); // clear input on success
+    setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "" } : prev); // clear input on success
     
     // reflect those messages in the UI!
     response.messageObj.messageIndex = activeModule.messages.length + 1;
-    setActiveModule((prev) => ({
-      ...prev,
-      messages: [...(prev.messages || []),// Keep messages history
-      response.messageObj,// Add new player message at the bottom
-      {
-        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY, content: "...", createdAtUtc: null, sourceType: 1, messageIndex: prev.messages.length + 2, summarized: false }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
+    const newPlayerMsg = response.messageObj;
+
+    if (!newPlayerMsg) 
+      return;
+
+    setActiveModule((prev) => {
+      if (!prev)
+        return prev;
+
+      const currentMessages = prev.messages ?? [];
+      return {
+        ...prev,
+        messages: [
+          ...currentMessages,// Keep messages history
+        newPlayerMsg,// Add new player message at the bottom
+        {
+          messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
+          content: "...", 
+          createdAtUtc: null,
+          sourceType: 1,
+          messageIndex: prev.messages.length + 2,
+          summarized: false,
+          avatarId: defaultChatAvatarId,
+          characterId: null
+        }],// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
         mainQueryId: response.mainQueryId,// Track the main query id to know the status of the AI reply
-    }));
+      }
+    });
 
     UpdateInputControlState();
 
@@ -253,7 +281,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         <HiChip className={styles.autoCorrectIcon} />
         <div className={styles.inputAutoCorrectSeparator} />
         <div className={styles.inputControlContainer}>
-          <textarea className={styles.inputControl} rows={1} ref={textareaRef} onChange={handleInput} value={playerMessage} placeholder="Type a message..."/>
+          <textarea className={styles.inputControl} rows={1} ref={textareaRef} onChange={handleInput} value={activeModule?.currentUserInputValue} placeholder="Type a message..."/>
         </div>
         <div className={styles.inputSendSeparator} />
           <div

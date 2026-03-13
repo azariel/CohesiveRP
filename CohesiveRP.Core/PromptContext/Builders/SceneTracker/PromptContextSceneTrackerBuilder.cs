@@ -20,7 +20,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
-            var lastSceneTracker = await storageService.GetSceneTracker(chatDbModel.ChatId);
+            var lastSceneTracker = await storageService.GetSceneTrackerAsync(chatDbModel.ChatId);
 
             if (string.IsNullOrWhiteSpace(lastSceneTracker?.Content))
             {

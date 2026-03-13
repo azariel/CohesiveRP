@@ -6,5 +6,8 @@ namespace CohesiveRP.Storage.QueryModels.Chat
     {
         [JsonPropertyName("selectedChatCompletionPresets")]
         public List<ChatCompletionPresetSelection> SelectedChatCompletionPresets { get; set; }
+        
+        [JsonPropertyName("characterIds")]
+        public List<string> CharacterIds { get; set; }
     }
 }

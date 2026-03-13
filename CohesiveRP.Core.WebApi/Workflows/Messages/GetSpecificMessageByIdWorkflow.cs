@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
@@ -28,16 +29,18 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
             return null;
         }
 
+        var character = await storageService.GetCharacterByIdAsync(message.CharacterId);
         var responseDto = new MessageResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
             Message = new MessageDefinition
             {
                 MessageId = message.MessageId,
-                Content = message.Content,
+                Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", "Azariel"),
                 SourceType = message.SourceType,
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,
+                CharacterId = message.CharacterId,
             },
             MainQueryId = null
         };

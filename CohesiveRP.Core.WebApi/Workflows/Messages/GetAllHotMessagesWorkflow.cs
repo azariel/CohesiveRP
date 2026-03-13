@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Common.WebApi;
+﻿using CohesiveRP.Common.Utils;
+using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
@@ -19,8 +20,9 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
 
     public async Task<IWebApiResponseDto> GetAllMessages(GetHotMessagesRequestDto requestDto)
     {
-        IMessageDbModel[] messages = await storageService.GetAllHotMessages(requestDto.ChatId);
+        IMessageDbModel[] messages = await storageService.GetAllHotMessagesAsync(requestDto.ChatId);
 
+        var characters = await storageService.GetCharactersAsync();
         messages ??= Array.Empty<MessageDbModel>();
         var responseDto = new MessagesResponseDto
         {
@@ -29,10 +31,11 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
             {
                 MessageId = s.MessageId,
                 MessageIndex = index + 1,
-                Content = s.Content,
+                Content = s.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == s.CharacterId)?.Name ?? "(the character)", "Azariel"),
                 SourceType = s.SourceType,
                 Summarized = s.Summarized,
                 CreatedAtUtc = s.CreatedAtUtc,
+                CharacterId = s.CharacterId,
             }).ToArray(),
         };
 

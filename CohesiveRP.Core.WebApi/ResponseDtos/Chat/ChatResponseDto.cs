@@ -12,5 +12,11 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat
 
         [JsonPropertyName("chatId")]
         public string ChatId { get; set; }
+
+        [JsonPropertyName("name")]
+        public string ChatName { get; set; }
+
+        [JsonPropertyName("avatarCharacterId")]
+        public string CharacterId { get; set; }
     }
 }

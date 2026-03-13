@@ -31,7 +31,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             // TODO: Get the amount of messages to keep as-is from settings
             const int nbMessages = 5;// For Debug
 
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatDbModel.ChatId);
+            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
             hotMessages = hotMessages?.Where(w => w.SourceType == Common.BusinessObjects.MessageSourceType.User).ToArray();
 
             if (hotMessages == null || hotMessages.Length <= 0)

@@ -32,7 +32,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                //await dbContext.Chats.LoadAsync();
                 return dbContext.Chats.ToArray();
             } catch (Exception ex)
             {
@@ -46,7 +45,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                //await dbContext.Chats.LoadAsync();
                 return dbContext.Chats.FirstOrDefault(w => w.ChatId == id);
             } catch (Exception ex)
             {
@@ -60,7 +58,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                //dbContext.Chats.Load();
 
                 // Convert models
                 ChatDbModel chatDbModel = new ChatDbModel
@@ -68,6 +65,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     ChatId = Guid.NewGuid().ToString(),
                     CreatedAtUtc = DateTime.UtcNow,
                     SelectedChatCompletionPresets = queryModel.SelectedChatCompletionPresets,
+                    CharacterIds = queryModel.CharacterIds,
+                    LastActivityAtUtc = DateTime.UtcNow,
                 };
 
                 EntityEntry<ChatDbModel> result = await dbContext.Chats.AddAsync(chatDbModel);

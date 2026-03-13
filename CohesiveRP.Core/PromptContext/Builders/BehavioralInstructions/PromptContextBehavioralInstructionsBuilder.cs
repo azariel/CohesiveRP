@@ -24,7 +24,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             return ($"# Your Behavioral Instruction{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 //.Replace("{{item_description}}", behaviorInstructionsContent)
-                .Replace("{{user}}", userPersonaName)}", new ShareableContextLink{ LinkedBuilder = this });
+                .Replace(Constants.USER_PLACEHOLDER, userPersonaName)}", new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

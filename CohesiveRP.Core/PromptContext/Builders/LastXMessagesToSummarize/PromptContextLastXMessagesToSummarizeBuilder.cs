@@ -33,7 +33,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             // TODO: Get the amount of messages to keep as-is from settings
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessages(chatDbModel.ChatId);
+            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
             hotMessages = hotMessages.OrderByDescending(o => o.CreatedAtUtc).ToArray();
 
             int indexOfTargetLastMessage = hotMessages.IndexOf(hotMessages.FirstOrDefault(f => f.MessageId == contextLinkedId));

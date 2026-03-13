@@ -22,6 +22,7 @@ namespace CohesiveRP.Core.Services
     public class StorageService : IStorageService
     {
         private IChatsDal chatsDal;
+        private ICharactersDal charactersDal;
         private IMessagesDal messagesDal;
         private IGlobalSettingsDal globalSettingsDal;
         private IChatCompletionPresetsDal chatCompletionPresetsDal;
@@ -32,6 +33,7 @@ namespace CohesiveRP.Core.Services
 
         public StorageService(
             IChatsDal chatsDal,
+            ICharactersDal charactersDal,
             IMessagesDal messagesDal,
             IGlobalSettingsDal globalSettingsDal,
             IChatCompletionPresetsDal chatCompletionPresetsDal,
@@ -41,6 +43,7 @@ namespace CohesiveRP.Core.Services
             ISceneTrackerDal sceneTrackerDal)
         {
             this.chatsDal = chatsDal;
+            this.charactersDal = charactersDal;
             this.messagesDal = messagesDal;
             this.globalSettingsDal = globalSettingsDal;
             this.chatCompletionPresetsDal = chatCompletionPresetsDal;
@@ -51,7 +54,7 @@ namespace CohesiveRP.Core.Services
         }
 
         // Chats
-        public async Task<ChatDbModel> CreateChatAsync(CreateChatQueryModel queryModel)
+        public async Task<ChatDbModel> AddChatAsync(CreateChatQueryModel queryModel)
         {
             // If the new chat to create isn't linked to a chat completion preset configuration
             if (queryModel != null && (queryModel.SelectedChatCompletionPresets == null || queryModel.SelectedChatCompletionPresets.Count <= 0))
@@ -94,23 +97,30 @@ namespace CohesiveRP.Core.Services
         public async Task<ChatDbModel[]> GetAllChatsAsync() => await chatsDal.GetChatsAsync();
         public async Task<ChatDbModel> GetChatAsync(string chatId) => await chatsDal.GetChatByIdAsync(chatId);
 
+        // Characters
+        public async Task<CharacterDbModel[]> GetCharactersAsync() => await charactersDal.GetCharactersAsync();
+        public async Task<CharacterDbModel> GetCharacterByIdAsync(string characterId) => await charactersDal.GetCharacterByIdAsync(characterId);
+        public async Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel) => await charactersDal.AddCharacterAsync(queryModel);
+        public async Task<bool> UpdateCharacter(CharacterDbModel characterDbModel) => await charactersDal.UpdateCharacter(characterDbModel);
+
         // Messages
-        public async Task<IMessageDbModel[]> GetAllHotMessages(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);
+        public async Task<IMessageDbModel[]> GetAllHotMessagesAsync(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);
         public async Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId) => await messagesDal.GetMessageByIdAsync(chatId, messageId);
-        public async Task<IMessageDbModel> CreateMessageAsync(CreateMessageQueryModel message) => await messagesDal.CreateOrUpdateMessageAsync(message);
+        public async Task<IMessageDbModel> AddMessageAsync(CreateMessageQueryModel message) => await messagesDal.CreateOrUpdateMessageAsync(message);
         public async Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages) => await messagesDal.UpdateHotMessagesAsync(messages);
         public async Task<bool> UpdateHotMessageAsync(string chatId, MessageDbModel message) => await messagesDal.UpdateHotMessageAsync(chatId, message);
+        public async Task<bool> DeleteSpecificMessageAsync(string chatId, string messageId) => await messagesDal.DeleteSpecificMessageAsync(chatId, messageId);
 
         // Settings
         public async Task<GlobalSettingsDbModel> GetGlobalSettingsAsync() => await globalSettingsDal.GetGlobalSettingsAsync();
 
         // BackgroundQueries
-        public async Task<BackgroundQueryDbModel> CreateBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel) => await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
+        public async Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel) => await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
         public async Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId) => await backgroundQueriesDal.GetBackgroundQueryAsync(queryId);
         public async Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync() => await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
 
         // ChatCompletionPresets
-        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPreset(string mainChatCompletionPresetId) => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync(mainChatCompletionPresetId);
+        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId) => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync(mainChatCompletionPresetId);
 
         // LLMQueries
         public async Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag) => await llmApiQueriesDal.GetQueriesOnLLMApisAsync(tag);
@@ -131,8 +141,8 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteOverflowTermSummariesEntriesAsync(chatId, summariesIds);
 
         // SceneTracker
-        public async Task<SceneTrackerDbModel> GetSceneTracker(string chatId) => await sceneTrackerDal.GetSceneTracker(chatId);
-        public async Task<SceneTrackerDbModel> AddSceneTracker(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.AddSceneTracker(queryModel);
-        public async Task<SceneTrackerDbModel> UpdateSceneTracker(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.CreateOrUpdateSceneTracker(queryModel);
+        public async Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId) => await sceneTrackerDal.GetSceneTracker(chatId);
+        public async Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.AddSceneTracker(queryModel);
+        public async Task<SceneTrackerDbModel> UpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.CreateOrUpdateSceneTracker(queryModel);
     }
 }

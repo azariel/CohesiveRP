@@ -2,10 +2,10 @@
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
-using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 
-namespace CohesiveRP.Core.WebApi.Workflows.Chat;
+namespace CohesiveRP.Core.WebApi.Workflows.Chats;
 
 public class GetAllSelectableChatsWorkflow : IGetAllSelectableChatsWorkflow
 {
@@ -16,22 +16,32 @@ public class GetAllSelectableChatsWorkflow : IGetAllSelectableChatsWorkflow
         this.storageService = storageService;
     }
 
-    public async Task<IWebApiResponseDto> GetAllSelectableChats()
+    public async Task<IWebApiResponseDto> GetAllSelectableChats(string characterId)
     {
         ChatDbModel[] chats = await storageService.GetAllChatsAsync();
-
         chats ??= Array.Empty<ChatDbModel>();
+
+        if (!string.IsNullOrWhiteSpace(characterId))
+        {
+            chats = chats.Where(w => w.CharacterIds.Contains(characterId)).ToArray();
+        }
+
         ChatDefinitionsResponseDto responseDto = new();
 
+        // TODO: pagination
+        var characters = await storageService.GetCharactersAsync();
         foreach (var chat in chats)
         {
             responseDto.Chats.Add(new ChatDefinition
             {
                 ChatId = chat.ChatId,
-                //ChatCompletionPresets = chat.ChatCompletionPresets,
+                CharacterId = chat.CharacterIds?.FirstOrDefault() ?? "unknown",
+                ChatName = characters.FirstOrDefault(f => f.CharacterId == chat.CharacterIds?.FirstOrDefault())?.Name ?? "unknown",
+                LastActivityAtUtc = chat.LastActivityAtUtc,
             });
         }
 
+        responseDto.Chats = responseDto.Chats.OrderByDescending(o => o.LastActivityAtUtc).ToList();
         responseDto.HttpResultCode = System.Net.HttpStatusCode.OK;
         return responseDto;
     }

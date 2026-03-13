@@ -19,6 +19,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages.Hot
         [Key]// Partition key AND FK
         public string ChatId { get; set; }
 
+        [Required]
+        [MaxLength(32)]
+        public string CharacterId { get; set; }// The character that is at the origin of this message
+
         //[MaxLength(256)]
         [JsonValueConverter]
         public List<MessageDbModel> SerializedMessages { get; set; }

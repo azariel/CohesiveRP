@@ -19,6 +19,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages.Hot
         [Key]// Partition key AND FK
         public string ChatId { get; set; }
 
+        [MaxLength(32)]
+        public string CharacterId { get; set; }// The character that is at the origin of this message
+
         //[MaxLength(256)]
         // Pretty much using it as NoSQL for performance. Sqlite is good, but not enterprise level. This circumvent most of the performance issues
         [JsonValueConverter]

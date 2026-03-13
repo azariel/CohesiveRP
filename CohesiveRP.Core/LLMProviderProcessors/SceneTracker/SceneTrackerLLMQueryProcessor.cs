@@ -80,7 +80,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                     Content = LLMmessage.Content,
                 };
 
-                SceneTrackerDbModel updatedMessageInStorage = await storageService.UpdateSceneTracker(queryModel);
+                SceneTrackerDbModel updatedMessageInStorage = await storageService.UpdateSceneTrackerAsync(queryModel);
                 if(updatedMessageInStorage == null)
                 { 
                     LoggingManager.LogToFile("c352fa3d-7019-4ed1-923a-d4b17db6d7a1", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Couldn't update storage. Skipping.");

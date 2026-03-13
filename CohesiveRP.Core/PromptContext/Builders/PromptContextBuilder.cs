@@ -56,7 +56,7 @@ namespace CohesiveRP.Core.PromptContext.Summary
                 }
 
                 // Now we need the ChatCompletionPreset mapped to the presetType promptContext configuration of that chat
-                presetTypeChatCompletionPreset = await storageService.GetChatCompletionPreset(chatCompletionPresetId);
+                presetTypeChatCompletionPreset = await storageService.GetChatCompletionPresetAsync(chatCompletionPresetId);
 
                 if (presetTypeChatCompletionPreset?.Format?.OrderedElementsWithinTheGlobalPromptContext == null)
                 {

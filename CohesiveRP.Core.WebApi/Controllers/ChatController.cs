@@ -1,5 +1,6 @@
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Storage.WebApi.Controllers
@@ -10,17 +11,20 @@ namespace CohesiveRP.Storage.WebApi.Controllers
     {
         private IGetAllHotMessagesWorkflow getAllHotMessagesWorkflow;
         private IGetSpecificMessageByIdWorkflow getSpecificMessageByIdWorkflow;
+        private IDeleteSpecificMessageByIdWorkflow deleteSpecificMessageByIdWorkflow;
         private IPatchSpecificMessageByIdWorkflow putSpecificMessageByIdWorkflow;
         private IChatAddNewMessageWorkflow addNewMessageWorkflow;
 
         public ChatController(
             IGetAllHotMessagesWorkflow getAllHotMessagesWorkflow,
             IGetSpecificMessageByIdWorkflow getSpecificMessageByIdWorkflow,
+            IDeleteSpecificMessageByIdWorkflow deleteSpecificMessageByIdWorkflow,
             IPatchSpecificMessageByIdWorkflow putSpecificMessageByIdWorkflow,
             IChatAddNewMessageWorkflow chatAddNewMessageWorkflow)
         {
             this.getAllHotMessagesWorkflow = getAllHotMessagesWorkflow;
             this.getSpecificMessageByIdWorkflow = getSpecificMessageByIdWorkflow;
+            this.deleteSpecificMessageByIdWorkflow = deleteSpecificMessageByIdWorkflow;
             this.putSpecificMessageByIdWorkflow = putSpecificMessageByIdWorkflow;
             this.addNewMessageWorkflow = chatAddNewMessageWorkflow;
         }
@@ -48,6 +52,13 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> GetSpecificMessageById(GetSpecificMessageRequestDto requestDto)
         {
             return new JsonResult(await getSpecificMessageByIdWorkflow.GetSpecificMessage(requestDto));
+        }
+
+        [HttpDelete]
+        [Route("messages/{messageId}")]
+        public async Task<IActionResult> DeleteSpecificMessageById(GetSpecificMessageRequestDto requestDto)
+        {
+            return new JsonResult(await deleteSpecificMessageByIdWorkflow.DeleteSpecificMessage(requestDto));
         }
 
         [HttpPut]

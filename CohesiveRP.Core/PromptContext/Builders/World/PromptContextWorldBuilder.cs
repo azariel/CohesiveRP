@@ -32,7 +32,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             return ($"# World{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{item_description}}", worldContent)
                 .Replace("{{item_header}}", worldTitle)
-                .Replace("{{user}}", userPersonaName)}",
+                .Replace(Constants.USER_PLACEHOLDER, userPersonaName)}",
                 new ShareableContextLink{ LinkedBuilder = this });
         }
     }
