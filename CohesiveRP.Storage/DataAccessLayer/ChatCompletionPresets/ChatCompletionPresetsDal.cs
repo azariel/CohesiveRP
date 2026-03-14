@@ -232,7 +232,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Tag = PromptContextFormatTag.BehavioralInstructions,
                                 Options = new PromptContextFormatElementOptions
                                 {
-                                    Format = "How do you respond?\r\nThink about it first. Recall the available lore, characters, objective, scene and messages. Consider the current point in the narrative and how the characters got there.\r\nWrite in past tense third-person omniscient narration.\r\nFocus your summary on what happened in the messages_to_summarize instead of lore, world or characters.\r\n\r\nNow, continue directly with your summarization of the messages_to_summarize content only.\r\n\r\n",
+                                    Format = "How do you respond?\r\nThink about it first. Recall the available lore, characters, objective, scene and messages. Consider the current point in the narrative and how the characters got there.\r\nWrite in past tense third-person omniscient narration.\r\nFocus your summary on what happened in the messages_to_summarize instead of lore, world or characters.\r\nKeep in your summary the details about what exactly {{user}} said.\r\nKeep in your summary the details about what {{user}}'s actions were.\r\n\r\nNow, continue directly with your summarization of the messages_to_summarize content only.\r\n\r\n",
                                 }
                             }
                         }
@@ -252,7 +252,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Tag = PromptContextFormatTag.Directive,
                                 Options = new PromptContextFormatElementOptions
                                 {
-                                    Format = "Role:Summarizer | Goal:summarize the provided text into a cohesive summary | MaxLen:512\r\n\r\n## Task\r\nStop your roleplay. You are now an helpful assistant. Your task is to summarize a roleplay session. You will be given a fictional narrative which you need to summarize into a single, very short and concise statement of facts, events, speech and actions. You must ignore the roleplay, your role isn't to continue the roleplay, but to summarize the text.\r\n\r\nNote that {{user}} will always use first-person pronouns.\r\n\r\nResponses should be no more than 100 words an a single paragraph long.\r\nInclude names when possible.\r\nResponse must be in the past tense.\r\nYour response must ONLY contain the summary.\r\n\r\n",
+                                    Format = "Role:Summarizer | Goal:summarize the provided text into a cohesive summary | MaxLen:512\r\n\r\n## Task\r\nStop your roleplay. You are now an helpful assistant. Your task is to summarize a roleplay session. You will be given a fictional narrative which you need to summarize into a single, very short and concise statement of facts, events, speech and actions. You must ignore the roleplay, your role isn't to continue the roleplay, but to summarize the text.\r\n\r\nResponses should be no more than 150 words an a single paragraph long.\r\nInclude names when possible.\r\nResponse must be in the past tense.\r\nYour response must ONLY contain the summary.\r\n\r\n",
                                 }
                             },
                             new PromptContextFormatElement
@@ -284,7 +284,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Tag = PromptContextFormatTag.BehavioralInstructions,
                                 Options = new PromptContextFormatElementOptions
                                 {
-                                    Format = "How do you respond?\r\nThink about it first. Recall the available lore, characters, objective, scene and messages. Consider the current point in the narrative and how the characters got there.\r\nWrite in past tense third-person omniscient narration.\r\nFocus your summary on what happened in the messages_to_summarize instead of lore, world or characters.\r\n\r\nNow, continue directly with your summarization of the messages_to_summarize content only.\r\n\r\n",
+                                    Format = "How do you respond?\r\nThink about it first. Consider the current point in the narrative and how the characters got there.\r\nWrite in past tense third-person omniscient narration.\r\nFocus your summary on what happened in the summary_to_summarize instead of lore, world or characters.\r\nKeep in your summary the details about what exactly {{user}} said.\r\nKeep in your summary the details about what {{user}}'s actions were.\r\n\r\nNow, continue directly with your summarization of the summary_to_summarize content only.\r\n\r\n",
                                 }
                             }
                         }
@@ -328,7 +328,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Tag = PromptContextFormatTag.SceneTrackerInstructions,
                                 Options = new PromptContextFormatElementOptions
                                 {
-                                    Format = "<messages_after_last_scene_tracker>\r\n{{messages_after_last_scene_tracker}}</messages_after_last_scene_tracker>\r\n\r\n<last_scene_tracker>{{last_scene_tracker}}</last_scene_tracker>\r\n\r\n",
+                                    Format = "<messages_after_last_scene_tracker>\r\n{{messages_after_last_scene_tracker}}</messages_after_last_scene_tracker>\r\n\r\nKeep your scene tracker coherent with the one generated previously a few messages ago (keep the base such as clothes, mood, etc and build a new immersive and coherent scene tracker from all the information)\r\n<last_scene_tracker>{{last_scene_tracker}}</last_scene_tracker>\r\n\r\n",
                                 }
                             },
                             new PromptContextFormatElement

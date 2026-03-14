@@ -1,4 +1,3 @@
-using CohesiveRP.Common.Serialization;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,11 +8,14 @@ namespace CohesiveRP.Storage.WebApi.Controllers
     public class BackgroundQueriesController : ControllerBase
     {
         private IGetBackgroundQueryWorkflow getBackgroundQueryWorkflow;
+        private IGetBackgroundQueriesByChatIdWorkflow getBackgroundQueriesByChatIdWorkflow;
 
         public BackgroundQueriesController(
-            IGetBackgroundQueryWorkflow getBackgroundQueryWorkflow)
+            IGetBackgroundQueryWorkflow getBackgroundQueryWorkflow,
+            IGetBackgroundQueriesByChatIdWorkflow getBackgroundQueriesByChatIdWorkflow)
         {
             this.getBackgroundQueryWorkflow = getBackgroundQueryWorkflow;
+            this.getBackgroundQueriesByChatIdWorkflow = getBackgroundQueriesByChatIdWorkflow;
         }
 
         [HttpGet]
@@ -22,9 +24,15 @@ namespace CohesiveRP.Storage.WebApi.Controllers
 
         [Route("{queryId}")]
         [HttpGet]
-        public async Task<IActionResult> GetBackgroundQuery(string queryId)
+        public async Task<IActionResult> GetBackgroundQueryByQueryId(string queryId)
         {
             return new JsonResult(await getBackgroundQueryWorkflow.GetBackgroundQuery(queryId));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetBackgroundQueryByChatId([FromQuery] string chatId)
+        {
+            return new JsonResult(await getBackgroundQueriesByChatIdWorkflow.GetBackgroundQueries(chatId));
         }
     }
 }

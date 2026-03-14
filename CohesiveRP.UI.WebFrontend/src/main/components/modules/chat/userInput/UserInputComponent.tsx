@@ -3,6 +3,7 @@ import { useRef, useState, useEffect  } from "react";
 import { HiChip } from "react-icons/hi";
 import { BiSolidPaperPlane, BiPaperPlane  } from "react-icons/bi";
 import { ImSpinner2 } from "react-icons/im";
+import { LuServerOff } from "react-icons/lu";
 
 // Backend webapi
 import { getFromServerApiAsync, postToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
@@ -16,6 +17,7 @@ import type { SharedContextChatType } from "../../../../../store/SharedContextCh
 import type { ChatMessageResponseDto } from "../../../../../ResponsesDto/chat/ChatMessageResponseDto";
 import type { BackgroundQueryResponseDto } from "../../../../../ResponsesDto/chat/BackgroundQueryResponseDto";
 import { useChatMessages } from "../../../../../store/MessagesStoreContext";
+import type { BackgroundQueriesResponseDto } from "../../../../../ResponsesDto/chat/BackgroundQueriesResponseDto";
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
@@ -30,14 +32,27 @@ export default function UserInputComponent({ messagesRef, defaultChatAvatarId }:
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hoveringSendBtn, setHoveringSendBtn] = useState(false);
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
-  const [isSendingMessageToServer, setIsSendingMessageToServer] = useState(false);
   const [sendMessageQueryStatus, setSendMessageQueryStatus] = useState("");
+  const [networkError, setNetworkError] = useState(false);
+  const [isLoadingInitialState, setIsLoadingInitialState] = useState(true);
+  const backgroundQueryNetworkError = useRef(0);
   const isStreamingQueryResult:boolean = false;
 
-  // Sync localInput when the active chat changes
   useEffect(() => {
-    setLocalInput(activeModule?.currentUserInputValue ?? "");
-  }, [activeModule?.chatId]); // only re-sync on chat switch, not every module update
+    console.log(`${activeModule?.mainQueryId}`);
+    if (messages.length <= 0)
+      return;
+
+    const lastMessageContent = messages[messages.length - 1].content;
+    if (lastMessageContent && lastMessageContent === localInput) {
+      setLocalInput("");
+      if (activeModule?.chatId) {
+        localStorage.setItem(`chatInput_${activeModule.chatId}`, "");
+      }
+
+      setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "" } : prev);
+    }
+  }, [messages]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -59,22 +74,61 @@ export default function UserInputComponent({ messagesRef, defaultChatAvatarId }:
     };
   }, [messagesRef]);
 
+  useEffect(() => {
+    if (!activeModule?.chatId)
+      return;
+
+    const abortController = new AbortController();
+    const fetchBackgroundQueries = async () => {
+      const response = await getFromServerApiAsync<BackgroundQueriesResponseDto>(`api/backgroundQueries?chatId=${activeModule?.chatId}`, abortController.signal);
+
+      if (abortController.signal.aborted)
+        return;
+
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || response.code !== 200 || serverApiException?.message) {
+        console.error(`Fetching background queries on load failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
+        setNetworkError(true);
+        return;
+      }
+
+      if(!response.queries || response.queries.length <= 0){
+        return;
+      }
+
+      const mainQuery = response.queries.find(query => query.tags.some(tag => tag === "main"));
+      if (mainQuery) {
+        setIsInputBlockedDueToServer(true);
+        setActiveModule((prev) =>
+          prev ? { ...prev, mainQueryId: mainQuery.backgroundQueryId } : prev
+        );
+      }
+
+      setIsLoadingInitialState(false);
+    };
+
+    fetchBackgroundQueries();
+    return () => abortController.abort();
+
+  }, [activeModule?.chatId]);
+
 const adjustTextareaHeight = () => {
     const el = textareaRef.current;
     if (!el) return;
 
-    // 1. Reset height to 'auto' first so it can shrink if the user deletes text
-    el.style.height = "auto";
+    // Reset height to 'auto' first so it can shrink if the user deletes text
+    el.style.height = "0px";
     
-    // 2. Calculate the new height based on the content
+    // Calculate the new height based on the content
     const targetHeight = el.scrollHeight;
-    const maxHeight = 140;
 
-    // 3. Apply the constrained height and toggle the scrollbar
+    let maxHeight = 140;
+
+    // Apply the constrained height and toggle the scrollbar
     el.style.height = `${Math.min(targetHeight, maxHeight)}px`;
     el.style.overflowY = targetHeight > maxHeight ? "auto" : "hidden";
 
-    // 4. Keep the main message window scrolled to the bottom
+    // Keep the main message window scrolled to the bottom
     if (messagesRef?.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
@@ -89,7 +143,7 @@ const adjustTextareaHeight = () => {
 
     // Update local state immediately — only this component re-renders
     setLocalInput(value);
-    adjustTextareaHeight();
+    UpdateInputControlState();
 
     // Debounce the expensive side-effects
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -98,77 +152,74 @@ const adjustTextareaHeight = () => {
       if (activeModule?.chatId) {
         localStorage.setItem(`chatInput_${activeModule.chatId}`, value);
       }
-    }, 300); // ms — tune to taste
+    }, 300);
   };
 
-// const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-//     const value = e.target.value;
-//     setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: value } : prev);
-    
-//     // Save per chatId
-//     if (activeModule?.chatId) {
-//       localStorage.setItem(`chatInput_${activeModule.chatId}`, value);
-//     }
-    
-//     adjustTextareaHeight();
-//   };
-
   useEffect(() => {
-  // Only run if we have a query to track
-  if (!activeModule?.mainQueryId)
-    return;
+    // Only run if we have a query to track
+    if (!activeModule?.mainQueryId || networkError)
+      return;
 
-  const pollInterval = setInterval(async () => {
-    try {
-      let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${activeModule?.mainQueryId}`);
-
-      let serverApiException = response as ServerApiExceptionResponseDto | null;
-      if(!response || response.code != 200 || serverApiException?.message) {
-        console.error(`Fetching Main background query failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
-      }
-
-      // If the query is not inProgress, we'll fetch the generated message
-      let realMessageFromStorage:ChatMessageResponseDto | null = null;
-      if (response?.status !== "Pending" && response?.status !== "InProgress") {
-        realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedId}`);
+    const pollInterval = setInterval(async () => {
+      try {
+        let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${activeModule?.mainQueryId}`);
 
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if(!response || response.code != 200 || serverApiException?.message) {
-          console.error(`Fetching real message from main background query result failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
+          console.error(`Fetching Main background query failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
+
+          if(backgroundQueryNetworkError.current >= 4){
+            setSendMessageQueryStatus("");
+            setIsInputBlockedDueToServer(false);
+            clearInterval(pollInterval);
+            setNetworkError(true);
+            return;
+          }
+          
+          backgroundQueryNetworkError.current += 1;
+          return;
         }
-      }
 
-      setSendMessageQueryStatus(response?.status ?? "");
+        // If the query is not inProgress, we'll fetch the generated message
+        let realMessageFromStorage:ChatMessageResponseDto | null = null;
+        if (response?.status !== "Pending" && response?.status !== "InProgress") {
+          realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedId}`);
 
-      setMessages((prev) => {
-        const updated = [...prev];
-        const tempAIReplyMessageIndex = updated.findIndex(f => f.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
-
-        // Update the fake AI message to show generation progress
-        if (tempAIReplyMessageIndex !== -1) {
-          updated[tempAIReplyMessageIndex] = { ...updated[tempAIReplyMessageIndex], content: response?.content ?? "..." };
-          if (response?.status !== "InProgress" && response?.status !== "Pending") {
-            // swap temp id for real id
-            if (realMessageFromStorage?.messageObj) {
-              updated[tempAIReplyMessageIndex] = realMessageFromStorage.messageObj;
-            } else {
-              updated[tempAIReplyMessageIndex].messageId = response?.linkedId ?? "";
-            }
+          let serverApiException = realMessageFromStorage as ServerApiExceptionResponseDto | null;
+          if(!response || response.code != 200 || serverApiException?.message) {
+            console.error(`Fetching real message from main background query result failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
           }
         }
-        return updated;
+
+        setSendMessageQueryStatus(response?.status ?? "");
+        setMessages((prev) => {
+          const updated = [...prev];
+          const tempAIReplyMessageIndex = updated.findIndex(f => f.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
+
+          // Update the fake AI message to show generation progress
+          if (tempAIReplyMessageIndex !== -1) {
+            updated[tempAIReplyMessageIndex] = { ...updated[tempAIReplyMessageIndex], content: response?.content ?? "..." };
+            if (response?.status !== "InProgress" && response?.status !== "Pending") {
+              // swap temp id for real id
+              if (realMessageFromStorage?.messageObj) {
+                updated[tempAIReplyMessageIndex] = realMessageFromStorage.messageObj;
+              } else {
+                updated[tempAIReplyMessageIndex].messageId = response?.linkedId ?? "";
+              }
+            }
+          }
+          return updated;
       });
 
       if (response?.status !== "InProgress" && response?.status !== "Pending") {
         console.log("Generation complete, clearing polling.");
+        backgroundQueryNetworkError.current = 0;
         clearInterval(pollInterval);
         
         // These local state updates are now safe because they aren't 
         // nested inside another component's state update logic
-        setIsSendingMessageToServer(false);
-        setSendMessageQueryStatus(response?.status ?? "");
         setIsInputBlockedDueToServer(false);
-
+        setSendMessageQueryStatus(response?.status ?? "");
         setActiveModule((prev) => prev ? { ...prev, mainQueryId: null } : prev);
         
         if (messagesRef?.current) {
@@ -197,16 +248,17 @@ const adjustTextareaHeight = () => {
     } else {
       textareaRef.current?.focus();
     }
+
+    adjustTextareaHeight();
   };
 
   const handleSendPlayerMessage = async () => {
-    if (isSendingMessageToServer || !localInput){
+    if (isInputBlockedDueToServer || localInput === undefined){
       return;
     }
     
     console.log(`Sending new message from player to server.`);
     setIsInputBlockedDueToServer(true)
-    setIsSendingMessageToServer(true);
     
     // Fetch from server api
     const payload = {
@@ -222,7 +274,6 @@ const adjustTextareaHeight = () => {
 
       // TODO: show err to user
       setSendMessageQueryStatus("");
-      setIsSendingMessageToServer(false);
       setIsInputBlockedDueToServer(false);
       return;
     }
@@ -230,7 +281,7 @@ const adjustTextareaHeight = () => {
     console.log(`Sending player message to backend succeeded.`);
     setSendMessageQueryStatus("Completed");
     setLocalInput(""); // clear immediately
-    setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "" } : prev); // clear input on success
+    setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "" } : prev);
     
     // reflect those messages in the UI!
     response.messageObj.messageIndex = messages.length + 1;
@@ -238,24 +289,41 @@ const adjustTextareaHeight = () => {
 
     if (!newPlayerMsg) 
       return;
-    
-    setMessages((prev) => [
-      ...prev,
-      newPlayerMsg,
-      {
-        messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
-        content: "...",
-        createdAtUtc: null,
-        sourceType: 1,
-        messageIndex: prev.length + 2,
-        summarized: false,
-        avatarId: defaultChatAvatarId,
-        characterId: null,
-      },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
-    ]);
+
+    if(newPlayerMsg.messageId !== null) {
+      setMessages((prev) => [
+        ...prev,
+        newPlayerMsg,
+        {
+          messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
+          content: "...",
+          createdAtUtc: null,
+          sourceType: 1,
+          messageIndex: prev.length + 2,
+          summarized: false,
+          avatarId: defaultChatAvatarId,
+          characterId: null,
+        },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
+      ]);
+    } else {
+      setMessages((prev) => [
+        ...prev,
+        {
+          messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
+          content: "...",
+          createdAtUtc: null,
+          sourceType: 1,
+          messageIndex: prev.length + 2,
+          summarized: false,
+          avatarId: defaultChatAvatarId,
+          characterId: null,
+        },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
+      ]);
+    }
 
     setActiveModule((prev) => prev ? { ...prev, mainQueryId: response.mainQueryId, currentUserInputValue: "" } : prev);
     UpdateInputControlState();
+    // setIsInputBlockedDueToServer(false);
 
     setTimeout(() => {
       if(messagesRef?.current) {
@@ -267,8 +335,8 @@ const adjustTextareaHeight = () => {
   const handleCancelLatestPlayerMessage = () => {
     // optional: cancel request / noop / show tooltip
     console.log("Cancelling... TODO (not implemented)");
-    setIsSendingMessageToServer(false);
-    setSendMessageQueryStatus("");
+    // setIsInputBlockedDueToServer(false);
+    // setSendMessageQueryStatus("");
 
     // TODO: cancel and then setIsInputBlockedDueToServer(false)
   };
@@ -287,16 +355,21 @@ const adjustTextareaHeight = () => {
           onMouseEnter={() => setHoveringSendBtn(true)}
           onMouseLeave={() => setHoveringSendBtn(false)}
           onClick={
-            isSendingMessageToServer
+            networkError || isLoadingInitialState ? undefined : 
+            isInputBlockedDueToServer
               ? handleCancelLatestPlayerMessage
               : handleSendPlayerMessage
           }>
-            {isInputBlockedDueToServer ? (
-              <ImSpinner2 className={sendMessageQueryStatus === "" ? styles.sendInputSpinnerWaitingServerAck : (sendMessageQueryStatus === "Pending" ? styles.sendInputSpinnerWaitingMessagePending : ((sendMessageQueryStatus === "InProgress" ? styles.sendInputSpinnerWaitingMessageProcess : styles.sendInputSpinnerWaitingMessageDefault))) } />
-            ) : hoveringSendBtn ? (
-              <BiPaperPlane className={styles.sendInputIcon} />
+            {networkError ? (
+              <LuServerOff />
             ) : (
-              <BiSolidPaperPlane className={styles.sendInputIcon} />
+              isInputBlockedDueToServer || isLoadingInitialState ? (
+              <ImSpinner2 className={sendMessageQueryStatus === "" ? styles.sendInputSpinnerWaitingServerAck : (sendMessageQueryStatus === "Pending" ? styles.sendInputSpinnerWaitingMessagePending : ((sendMessageQueryStatus === "InProgress" ? styles.sendInputSpinnerWaitingMessageProcess : styles.sendInputSpinnerWaitingMessageDefault))) } />
+              ) : hoveringSendBtn ? (
+                <BiPaperPlane className={styles.sendInputIcon} />
+              ) : (
+                <BiSolidPaperPlane className={styles.sendInputIcon} />
+              )
             )}
         </div>
       </div>

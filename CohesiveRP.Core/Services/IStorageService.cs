@@ -24,6 +24,7 @@ namespace CohesiveRP.Core.Services
         Task<GlobalSettingsDbModel> GetGlobalSettingsAsync();
         Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
         Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId);
+        Task<BackgroundQueryDbModel[]> GetBackgroundQueriesByChatIdAsync(string chatId);
         Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync();
         Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId);
         Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag);
@@ -48,6 +49,5 @@ namespace CohesiveRP.Core.Services
         Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel);
         Task<bool> UpdateCharacterAsync(CharacterDbModel characterDbModel);
         Task<bool> DeleteCharacterAsync(CharacterDbModel characterDbModel);
-
     }
 }

@@ -5,11 +5,12 @@ import { extractFromBody } from "./response/HttpResponseUtils";
 // Avoid CORS batshit mistmatches TODO: doesn't work..?
 const ServerApiUrlPrefix = `http://${window.location.hostname}:7081/`;
 
-export async function getFromServerApiAsync<T extends ServerApiResponseDto>(url:string): Promise<T | null> {
+export async function getFromServerApiAsync<T extends ServerApiResponseDto>(url:string, signal?: AbortSignal): Promise<T | null> {
     try {
       const response = await fetch(`${ServerApiUrlPrefix}${url}`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+        signal
       });
 
       // TODO: generalize this, it's the same as POST
@@ -31,13 +32,14 @@ export async function getFromServerApiAsync<T extends ServerApiResponseDto>(url:
     return null;
 }
 
-export async function postToServerApiAsync<T extends ServerApiResponseDto>(url:string, payload: any): Promise<T | null> {
+export async function postToServerApiAsync<T extends ServerApiResponseDto>(url:string, payload: any, signal?: AbortSignal): Promise<T | null> {
     try {
       const isFormData = payload instanceof FormData;
       const response = await fetch(`${ServerApiUrlPrefix}${url}`, {
         method: "POST",
         headers: isFormData ? {} : { "Content-Type": "application/json" },
         body: isFormData ? payload : JSON.stringify(payload),
+        signal
       });
 
       let result:T | null = await extractFromBody<T>(response.body);
@@ -58,12 +60,13 @@ export async function postToServerApiAsync<T extends ServerApiResponseDto>(url:s
     return null;
 }
 
-export async function putToServerApiAsync<T extends ServerApiResponseDto>(url:string, payload: any): Promise<T | null> {
+export async function putToServerApiAsync<T extends ServerApiResponseDto>(url:string, payload: any, signal?: AbortSignal): Promise<T | null> {
     try {
       const response = await fetch(`${ServerApiUrlPrefix}${url}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        signal
       });
 
       let result:T | null = await extractFromBody<T>(response.body);
@@ -84,10 +87,11 @@ export async function putToServerApiAsync<T extends ServerApiResponseDto>(url:st
     return null;
 }
 
-export async function deleteFromServerApiAsync<T extends ServerApiResponseDto>(url:string): Promise<T | null> {
+export async function deleteFromServerApiAsync<T extends ServerApiResponseDto>(url:string, signal?: AbortSignal): Promise<T | null> {
     try {
       const response = await fetch(`${ServerApiUrlPrefix}${url}`, {
         method: "DELETE",
+        signal
       });
 
       let result:T | null = await extractFromBody<T>(response.body);

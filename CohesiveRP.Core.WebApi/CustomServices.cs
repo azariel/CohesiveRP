@@ -42,6 +42,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
             services.AddSingleton<IPatchSpecificMessageByIdWorkflow, PatchSpecificMessageByIdWorkflow>();
             services.AddSingleton<IDeleteSpecificMessageByIdWorkflow, DeleteSpecificMessageByIdWorkflow>();
+            
 
             // Workflows.Characters
             services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
@@ -58,6 +59,7 @@ namespace CohesiveRP.Core.WebApi
 
             // Workflows.BackgroundQueries
             services.AddSingleton<IGetBackgroundQueryWorkflow, GetBackgroundQueryWorkflow>();
+            services.AddSingleton<IGetBackgroundQueriesByChatIdWorkflow, GetBackgroundQueriesByChatIdWorkflow>();
 
             // Services
             services.AddSingleton<IStorageService, StorageService>();
