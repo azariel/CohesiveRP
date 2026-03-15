@@ -66,3 +66,16 @@
   outline: none;
   cursor: default;
 }
+
+.spinnerLoading {
+  color: rgb(216, 216, 216);
+  width: 1.2em;
+  height: 1.2em;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

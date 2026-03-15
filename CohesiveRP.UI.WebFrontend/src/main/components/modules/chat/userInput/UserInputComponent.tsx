@@ -37,6 +37,7 @@ export default function UserInputComponent({ messagesRef, defaultChatAvatarId }:
   const [isLoadingInitialState, setIsLoadingInitialState] = useState(true);
   const backgroundQueryNetworkError = useRef(0);
   const isStreamingQueryResult:boolean = false;
+  const didSentSceneTrackerRefreshToken = useRef(false);
 
   useEffect(() => {
     if (messages.length <= 0)
@@ -129,29 +130,31 @@ export default function UserInputComponent({ messagesRef, defaultChatAvatarId }:
 
 const adjustTextareaHeight = () => {
     const el = textareaRef.current;
-    if (!el) return;
+  const container = messagesRef?.current;
+  if (!el) return;
 
-    // Reset height to 'auto' first so it can shrink if the user deletes text
-    el.style.height = "0px";
-    
-    // Calculate the new height based on the content
-    const targetHeight = el.scrollHeight;
+  // Check if user is at (or near) the bottom BEFORE collapsing the textarea
+  const wasAtBottom = container
+    ? container.scrollHeight - container.scrollTop - container.clientHeight < 10
+    : false;
 
-    let maxHeight = 140;
+  el.style.height = "0px";
+  const targetHeight = el.scrollHeight;
+  const maxHeight = 140;
+  const newHeight = Math.min(targetHeight, maxHeight);
 
-    // Apply the constrained height and toggle the scrollbar
-    el.style.height = `${Math.min(targetHeight, maxHeight)}px`;
-    el.style.overflowY = targetHeight > maxHeight ? "auto" : "hidden";
+  el.style.height = `${newHeight}px`;
+  el.style.overflowY = targetHeight > maxHeight ? "auto" : "hidden";
 
-    // Keep the main message window scrolled to the bottom
-    if (messagesRef?.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    }
+  // Only restore scroll to bottom if they were already there
+  if (wasAtBottom && container) {
+    container.scrollTop = container.scrollHeight;
+  }
   };
 
-  // useEffect(() => {
-  //   adjustTextareaHeight();
-  // }, [activeModule?.]);
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [localInput]);
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -175,6 +178,10 @@ const adjustTextareaHeight = () => {
     if (!activeModule?.mainQueryId || networkError)
       return;
 
+    setActiveModule((prev) =>
+      prev ? { ...prev, sceneTrackerRefreshing: true } : prev
+    );
+
     const pollInterval = setInterval(async () => {
       try {
         let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${activeModule?.mainQueryId}`);
@@ -197,6 +204,13 @@ const adjustTextareaHeight = () => {
 
         // If the query is not inProgress, we'll fetch the generated message
         let realMessageFromStorage:ChatMessageResponseDto | null = null;
+        if (response?.status === "InProgress" && !didSentSceneTrackerRefreshToken.current) {
+          didSentSceneTrackerRefreshToken.current = true;
+          setActiveModule((prev) =>
+            prev ? { ...prev, sceneTrackerRefreshToken: (prev.sceneTrackerRefreshToken ?? 0) + 1, sceneTrackerRefreshing: false } : prev
+          );
+        }
+
         if (response?.status !== "Pending" && response?.status !== "InProgress") {
           realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedId}`);
 
@@ -215,6 +229,8 @@ const adjustTextareaHeight = () => {
           if (tempAIReplyMessageIndex !== -1) {
             updated[tempAIReplyMessageIndex] = { ...updated[tempAIReplyMessageIndex], content: response?.content ?? "..." };
             if (response?.status !== "InProgress" && response?.status !== "Pending") {
+              didSentSceneTrackerRefreshToken.current = false;
+
               // swap temp id for real id
               if (realMessageFromStorage?.messageObj) {
                 let index = updated[tempAIReplyMessageIndex].messageIndex;
@@ -259,8 +275,6 @@ const adjustTextareaHeight = () => {
 }, [activeModule?.mainQueryId, setActiveModule]); // Only re-run if the ID changes
 
   const UpdateInputControlState = async () => {
-    adjustTextareaHeight();
-
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) {
       //textareaRef.current?.blur();
@@ -343,7 +357,6 @@ const adjustTextareaHeight = () => {
       ]);
 
       cleanupMessages();
-      adjustTextareaHeight();
     }
 
     setActiveModule((prev) => prev ? { ...prev, mainQueryId: response.mainQueryId, currentUserInputValue: "" } : prev);
