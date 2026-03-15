@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Common.Utils;
+﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
@@ -26,6 +27,8 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
 
         if(messagesDbModel == null)
         {
+            LoggingManager.LogToFile("4fcf8cab-2137-470e-a916-ea274ed86301", $"Couldn't get hot messages in chat [{requestDto.ChatId}]. Message were not found.");
+            return null;
         }
 
         messagesDbModel.Messages ??= new();

@@ -259,14 +259,14 @@ const adjustTextareaHeight = () => {
 }, [activeModule?.mainQueryId, setActiveModule]); // Only re-run if the ID changes
 
   const UpdateInputControlState = async () => {
+    adjustTextareaHeight();
+
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) {
-      textareaRef.current?.blur();
+      //textareaRef.current?.blur();
     } else {
       textareaRef.current?.focus();
     }
-
-    adjustTextareaHeight();
   };
 
   const handleSendPlayerMessage = async () => {
@@ -340,6 +340,8 @@ const adjustTextareaHeight = () => {
           personaName: "",
         },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
       ]);
+
+      cleanupMessages();
     }
 
     setActiveModule((prev) => prev ? { ...prev, mainQueryId: response.mainQueryId, currentUserInputValue: "" } : prev);
@@ -351,6 +353,26 @@ const adjustTextareaHeight = () => {
         messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
       }
     }, 200);
+  };
+
+  const cleanupMessages = () => {
+    // TODO: keep settings in state from Db and references that
+    if(messages.length >= 30){
+      // Keep only the 30 most recent messages
+      setMessages((prev) =>
+        [...prev]
+          .sort((a, b) => {
+            if (!a.createdAtUtc)
+              return 1;
+            
+            if (!b.createdAtUtc)
+              return -1;
+
+            return new Date(a.createdAtUtc).getTime() - new Date(b.createdAtUtc).getTime();
+          })
+          .slice(-30)
+      );
+    }
   };
 
   const handleCancelLatestPlayerMessage = () => {
