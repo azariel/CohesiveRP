@@ -9,6 +9,7 @@ import SettingsComponent from "../modules/settings/SettingsComponent";
 
 /* Store */
 import { sharedContext } from '../../../store/AppSharedStoreContext';
+import PersonasSelectionComponent from "../modules/personasSelection/PersonasSelectionComponent";
 
 export default function MainCenterComponent() {
   const { activeModule } = sharedContext();
@@ -21,6 +22,8 @@ export default function MainCenterComponent() {
         return <ChatComponent />;
       case "characters":
         return <CharactersComponent />;
+      case "personas":
+        return <PersonasSelectionComponent />;
       case "characterDetails":
         return <CharacterDetailsComponent />;
       case "settings":

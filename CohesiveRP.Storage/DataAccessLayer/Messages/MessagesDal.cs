@@ -280,17 +280,16 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 using var dbContext = await contextFactory.CreateDbContextAsync();
 
                 // Constant fields not to update
-                var insertDateTimeUtc = dbContext.HotMessages.AsNoTracking().FirstOrDefault(f => f.ChatId == dbModel.ChatId)?.CreatedAtUtc;
-
-                if (insertDateTimeUtc == null)
+                var initialDbModel = dbContext.HotMessages.AsNoTracking().FirstOrDefault(f => f.ChatId == dbModel.ChatId);
+                if (initialDbModel == null)
                 {
                     LoggingManager.LogToFile("fe04e764-2cb2-4f74-9d1e-7d20b801526a", $"Can't update hot messages associated with chatId [{dbModel.ChatId}]. HotMessages related to this chat are not in storage.");
                     return false;
                 }
 
-                dbModel.CreatedAtUtc = insertDateTimeUtc;
+                initialDbModel.Messages = dbModel.Messages;
 
-                EntityEntry<HotMessagesDbModel> result = dbContext.HotMessages.Update(dbModel);
+                EntityEntry<HotMessagesDbModel> result = dbContext.HotMessages.Update(initialDbModel);
                 if (result.State != EntityState.Modified)
                 {
                     LoggingManager.LogToFile("b5bf0a01-1371-4373-be47-b06882018280", $"Error when updating Dbmodel on table messages. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");

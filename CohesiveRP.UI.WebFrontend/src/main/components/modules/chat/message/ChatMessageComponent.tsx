@@ -114,7 +114,7 @@ export default function ChatMessageComponent({ message, defaultChatAvatarId, ena
             <div className={styles.messageHeaderContentName}>
               {message?.sourceType == 0 ? <label>{message?.personaName ?? "User"}</label> : <label>{message?.characterName ?? "User"}</label>}
             </div>
-            <div className={styles.messageHeaderContentModel}>glm-reasoner (?m??s)</div>
+            <div className={styles.messageHeaderContentModel}>model-name (?m??s)</div>
             <div className={styles.messageHeaderContentCreatedAt}>
               {message?.summarized ? (<MdOutlineSummarize className={styles.messageHeaderSummarizeIcon} title="Summarized" />) : ""}
               {message?.createdAtUtc ? FormatUtcDate(message.createdAtUtc) : ""}

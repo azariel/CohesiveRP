@@ -23,5 +23,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
 
         [MaxLength(8196)]
         public string Description { get; set; }
+
+        public DateTime LastActivityAtUtc { get; set; }
     }
 }

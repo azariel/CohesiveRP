@@ -64,6 +64,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 {
                     PersonaId = Guid.NewGuid().ToString(),
                     CreatedAtUtc = DateTime.UtcNow,
+                    LastActivityAtUtc = DateTime.UtcNow,
                     Name = queryModel.Name,
                     Description = queryModel.Description,
                 };
@@ -98,6 +99,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return false;
                 }
 
+                personaDbModel.LastActivityAtUtc = DateTime.UtcNow;
                 EntityEntry<PersonaDbModel> result = dbContext.Personas.Update(personaDbModel);
                 if (result.State != EntityState.Modified)
                 {
