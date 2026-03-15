@@ -2,6 +2,7 @@
 import type { SharedContextType } from "./SharedContextType";
 
 interface SharedContextChatType extends SharedContextType {
+  isSceneTrackerOpened: boolean | null;
   chatId: string;
   defaultChatAvatar: string;
   currentUserInputValue: string;

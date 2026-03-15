@@ -149,9 +149,9 @@ const adjustTextareaHeight = () => {
     }
   };
 
-  useEffect(() => {
-    adjustTextareaHeight();
-  }, [activeModule]);
+  // useEffect(() => {
+  //   adjustTextareaHeight();
+  // }, [activeModule?.]);
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -298,6 +298,7 @@ const adjustTextareaHeight = () => {
     console.log(`Sending player message to backend succeeded.`);
     setSendMessageQueryStatus("Completed");
     setLocalInput(""); // clear immediately
+    localStorage.setItem(`chatInput_${activeModule.chatId}`, "");
     setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "" } : prev);
     
     // reflect those messages in the UI!
@@ -342,6 +343,7 @@ const adjustTextareaHeight = () => {
       ]);
 
       cleanupMessages();
+      adjustTextareaHeight();
     }
 
     setActiveModule((prev) => prev ? { ...prev, mainQueryId: response.mainQueryId, currentUserInputValue: "" } : prev);

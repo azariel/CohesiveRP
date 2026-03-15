@@ -1,5 +1,5 @@
 import styles from "./ChatComponent.module.css";
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import ChatMessageComponent from "./message/ChatMessageComponent";
 import UserInputComponent from "./userInput/UserInputComponent";
 import { deleteFromServerApiAsync, getFromServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
@@ -9,6 +9,7 @@ import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exc
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 import { useChatMessages } from "../../../../store/MessagesStoreContext";
+import SceneTrackerComponent from "./sceneTracker/SceneTrackerComponent";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -30,7 +31,6 @@ export default function ChatComponent() {
         }
 
         const response: ChatMessagesResponseDto | null = await getFromServerApiAsync<ChatMessagesResponseDto>(`api/chat/${activeModule.chatId}/messages/hot`);
-        console.log(`NB COLD: ${response?.nbColdMessages}`);
         
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
@@ -98,19 +98,25 @@ export default function ChatComponent() {
     <main className={styles.chatComponent}>
       <div className={styles.messagesContainer} ref={messagesRef}>
         {messages.length > 0 ? (
-          messages.map((message, index) => (
-            <ChatMessageComponent
-              key={message.messageId}  // ← use stable id, not index
-              //messagesRef={messagesRef}
-              message={message}
-              defaultChatAvatarId={activeModule.defaultChatAvatar ?? ""}
-              enableDeleteBtn={index >= messages.length - 1}
-              enableSwipeBtn={index >= messages.length - 1}
-              isEditable={!message.summarized && index >= messages.length - 3}
-              onSave={handleSaveMessage}
-              onDelete={handleDeleteMessage}
-            />
-          ))
+          messages.map((message, index) => {
+            const isLastMessage = index === messages.length - 1;
+
+            return (
+              <Fragment key={message.messageId}>
+                {isLastMessage && <SceneTrackerComponent />} 
+
+                <ChatMessageComponent
+                  message={message}
+                  defaultChatAvatarId={activeModule.defaultChatAvatar ?? ""}
+                  enableDeleteBtn={isLastMessage} 
+                  enableSwipeBtn={isLastMessage}
+                  isEditable={!message.summarized && index >= messages.length - 3}
+                  onSave={handleSaveMessage}
+                  onDelete={handleDeleteMessage}
+                />
+              </Fragment>
+            );
+          })
         ) : (
           <p />
         )}

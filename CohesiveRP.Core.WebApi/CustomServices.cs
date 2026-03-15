@@ -15,6 +15,7 @@ using CohesiveRP.Core.WebApi.Workflows.Chats;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Messages;
 using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.SceneTrackers.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
@@ -42,7 +43,6 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
             services.AddSingleton<IPatchSpecificMessageByIdWorkflow, PatchSpecificMessageByIdWorkflow>();
             services.AddSingleton<IDeleteSpecificMessageByIdWorkflow, DeleteSpecificMessageByIdWorkflow>();
-            
 
             // Workflows.Characters
             services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
@@ -53,6 +53,9 @@ namespace CohesiveRP.Core.WebApi
             //services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
             //services.AddSingleton<IImportNewCharacterWorkflow, ImportNewCharacterWorkflow>();
             //services.AddSingleton<IGetCharacterByIdWorkflow, GetCharacterByIdWorkflow>();
+
+            // Workflows.SceneTrackers
+            services.AddSingleton<IGetSceneTrackerByIdWorkflow, GetSceneTrackerByIdWorkflow>();
 
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();
