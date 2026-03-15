@@ -39,7 +39,6 @@ export default function UserInputComponent({ messagesRef, defaultChatAvatarId }:
   const isStreamingQueryResult:boolean = false;
 
   useEffect(() => {
-    console.log(`${activeModule?.mainQueryId}`);
     if (messages.length <= 0)
       return;
 
@@ -92,6 +91,8 @@ export default function UserInputComponent({ messagesRef, defaultChatAvatarId }:
         return;
       }
 
+      setIsLoadingInitialState(false);
+      
       if(!response.queries || response.queries.length <= 0){
         return;
       }
@@ -102,9 +103,23 @@ export default function UserInputComponent({ messagesRef, defaultChatAvatarId }:
         setActiveModule((prev) =>
           prev ? { ...prev, mainQueryId: mainQuery.backgroundQueryId } : prev
         );
-      }
 
-      setIsLoadingInitialState(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
+            content: "...",
+            createdAtUtc: null,
+            sourceType: 1,
+            messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 1,
+            summarized: false,
+            avatarId: defaultChatAvatarId,
+            characterId: null,
+            characterName: "",
+            personaName: "",
+          },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
+        ]);
+      }
     };
 
     fetchBackgroundQueries();
@@ -202,7 +217,9 @@ const adjustTextareaHeight = () => {
             if (response?.status !== "InProgress" && response?.status !== "Pending") {
               // swap temp id for real id
               if (realMessageFromStorage?.messageObj) {
+                let index = updated[tempAIReplyMessageIndex].messageIndex;
                 updated[tempAIReplyMessageIndex] = realMessageFromStorage.messageObj;
+                updated[tempAIReplyMessageIndex].messageIndex = index;
               } else {
                 updated[tempAIReplyMessageIndex].messageId = response?.linkedId ?? "";
               }
@@ -284,7 +301,7 @@ const adjustTextareaHeight = () => {
     setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "" } : prev);
     
     // reflect those messages in the UI!
-    response.messageObj.messageIndex = messages.length + 1;
+    response.messageObj.messageIndex = (activeModule.nbColdMessages ?? 0) + messages.length + 1;
     const newPlayerMsg = response.messageObj;
 
     if (!newPlayerMsg) 
@@ -299,10 +316,12 @@ const adjustTextareaHeight = () => {
           content: "...",
           createdAtUtc: null,
           sourceType: 1,
-          messageIndex: prev.length + 2,
+          messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
           summarized: false,
           avatarId: defaultChatAvatarId,
           characterId: null,
+          characterName: "",
+          personaName: "",
         },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
       ]);
     } else {
@@ -313,10 +332,12 @@ const adjustTextareaHeight = () => {
           content: "...",
           createdAtUtc: null,
           sourceType: 1,
-          messageIndex: prev.length + 2,
+          messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
           summarized: false,
           avatarId: defaultChatAvatarId,
           characterId: null,
+          characterName: "",
+          personaName: "",
         },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
       ]);
     }

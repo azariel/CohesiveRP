@@ -41,6 +41,8 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,
                 CharacterId = message.CharacterId,
+                CharacterName = character.Name,
+                PersonaName = "Azariel"// TODO
             },
             MainQueryId = null
         };

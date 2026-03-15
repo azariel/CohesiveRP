@@ -1,13 +1,23 @@
+/* **text** */
 .boldHighlight {
   font-weight: bold;
-}
-
-.quoteHighlight {
-  color: #2faaf1; /* TODO: Load from character/user setting */
-}
-
-.thoughtsHighlight {
-  font-weight: 100;
   font-style: italic;
-  color: #83d2ff; /* TODO: Load from character/user setting */
+  color: #83d2ff;
+}
+
+/* *text* inside a quote — inherits quote color, adds bold */
+.boldQuoteHighlight {
+  font-weight: bold;
+  color: #2faaf1;
+}
+
+/* "text" */
+.quoteHighlight {
+  color: #2faaf1;
+}
+
+/* *text* outside a quote */
+.thoughtsHighlight {
+  font-style: italic;
+  color: #c0e8ff;
 }

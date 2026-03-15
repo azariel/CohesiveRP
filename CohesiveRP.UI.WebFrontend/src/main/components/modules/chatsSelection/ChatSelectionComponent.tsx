@@ -15,6 +15,8 @@ import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 import { GetAvatarPathFromCharacterId } from "../../../../utils/avatarUtils";
 import { GetChatNameFontSize } from "../../../../utils/fontSizeUtils";
+import { MdAddBox } from "react-icons/md";
+import type { SharedContextType } from "../../../../store/SharedContextType";
 
 export default function ChatSelectionComponent() {
   const { navigateTo } = sharedContext();
@@ -58,33 +60,13 @@ export default function ChatSelectionComponent() {
     fetchData();
   }, []);
   
-  // const handleCreateNewChatClick = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     // TODO: load a screen to select the char, initial scenario, configuration, etc!
-  //     const payload = {};
-  //     const response:SelectableChatResponseDto | null = await postToServerApiAsync<SelectableChatResponseDto>("api/chats", payload);
+  const handleCreateNewChatClick = async () => {
+    let module = {
+      moduleName: 'characters'
+    } as SharedContextType;
 
-  //     // add the newly created chat to state
-  //     if(response) {
-  //       setChatDefinitions(previousCollection => {
-  //         if (!previousCollection) {
-  //           return { chats: [response]} as SelectableChatsResponseDto;
-  //         }
-  //         return {
-  //           ...previousCollection,// copy other fields
-  //           chats: [...(previousCollection.chats || []), response],// add newly created chat on top of others
-  //         };
-  //       });
-
-  //       console.log(`New chat created. Response: [${JSON.stringify(response)}].`);
-  //     } else {
-  //       console.error(`Failed to create a new chat. Response:[${response}] json: [${JSON.stringify(response)}].`);
-  //     }
-  //   } finally{
-  //     setIsLoading(false);
-  //   }
-  // };
+    navigateTo(module);
+  };
 
   const handleSpecificChatClick = async (chat: SelectableChatResponseDto) => {
     setIsLoading(true);
@@ -120,10 +102,9 @@ export default function ChatSelectionComponent() {
               <AiOutlineDisconnect className={styles.chatAddNewChatBtn} />
             </div>
           ) : (
-            // <div className={styles.chatAddNewChatContainer} onClick={async () => await handleCreateNewChatClick()}>
-            //   <MdAddBox className={styles.chatAddNewChatBtn} />
-            // </div>
-            <p />
+            <div className={styles.chatAddNewChatContainer} onClick={async () => await handleCreateNewChatClick()}>
+              <MdAddBox className={styles.chatAddNewChatBtn} />
+            </div>
           )
         )}
         {isLoading || chatDefinitions?.chats && chatDefinitions.chats.length > 0 ? (

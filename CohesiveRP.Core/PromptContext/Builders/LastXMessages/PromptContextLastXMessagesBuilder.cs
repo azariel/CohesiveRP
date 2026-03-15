@@ -4,6 +4,7 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
@@ -32,15 +33,15 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             // TODO: Get the amount of messages to keep as-is from settings
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
-            if (hotMessages.Length <= 0)
+            HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
+            if (hotMessagesDbModel?.Messages == null || hotMessagesDbModel.Messages.Count <= 0)
             {
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
             // TODO: If user configured for more than Hot messages, fetch the cold ones as well... Really not efficient, really not as-designed, but if they really want to, we'll handle it :shrug:
 
-            IOrderedEnumerable<IMessageDbModel> orderedMessagesByMostRecent = hotMessages.OrderByDescending(o => o.CreatedAtUtc);
+            IOrderedEnumerable<IMessageDbModel> orderedMessagesByMostRecent = hotMessagesDbModel.Messages.OrderByDescending(o => o.CreatedAtUtc);
 
             // Remove the very most recent message if it was made by the user as this is handled by the LastUserMessage builder
             int skipNb = 0;

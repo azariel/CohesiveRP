@@ -4,6 +4,7 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
@@ -31,19 +32,19 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
-            if (hotMessages.Length <= 0)
+            HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
+            if (hotMessagesDbModel.Messages.Count <= 0)
             {
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
             // TODO: handle cold storage here if all hot messages are unsummarized?
 
-            hotMessages = hotMessages.Where(w => !w.Summarized).OrderBy(o => o.CreatedAtUtc).ToArray();
+            hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.Where(w => !w.Summarized).OrderBy(o => o.CreatedAtUtc).ToList();
 
             string output = $"# Last messages between you and the User{Environment.NewLine}";
 
-            foreach (IMessageDbModel message in hotMessages)
+            foreach (IMessageDbModel message in hotMessagesDbModel.Messages)
             {
                 string value = $"{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{message.SourceType}:{Environment.NewLine}<message>{message.Content}</message>")}";
                 output += value;
@@ -52,7 +53,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             return (output, new ShareableContextLink
             {
                 LinkedBuilder = this,
-                Value = hotMessages.Select(s => s.MessageId).ToArray()
+                Value = hotMessagesDbModel.Messages.Select(s => s.MessageId).ToArray()
             });
         }
     }

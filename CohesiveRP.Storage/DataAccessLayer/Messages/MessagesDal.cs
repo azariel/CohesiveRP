@@ -3,6 +3,7 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.Message;
 using Microsoft.EntityFrameworkCore;
@@ -25,15 +26,143 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
             dbContext.Database.EnsureCreated();
         }
 
-        // ********************************************************************
-        //                            Public
-        // ********************************************************************
-        public async Task<IMessageDbModel[]> GetHotMessagesAsync(string chatId)
+        /// <summary>
+        /// Push the oldest Hot message into the Cold storage if the amount of hot messages is too great to keep hot messages model lean and fast.
+        /// </summary>
+        private async Task HandleColdStorageAsync(string chatId)
         {
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                //await dbContext.HotMessages.LoadAsync();
+                HotMessagesDbModel hotMessages = dbContext.HotMessages.FirstOrDefault(w => w.ChatId == chatId);
+                if (hotMessages == null)
+                {
+                    LoggingManager.LogToFile("dc27c98b-690d-4bac-baeb-589759f5ae1e", $"No Hot Messages found for chatId [{chatId}] when handling Cold storage logic.");
+                    return;
+                }
+
+                GlobalSettingsDbModel settings = dbContext.GlobalSettings.FirstOrDefault();
+                int? nbMaxHotMessages = settings?.Summary?.HotMessagesAmountLimit;
+                if (nbMaxHotMessages == null)
+                {
+                    LoggingManager.LogToFile("aee83319-e96a-4e6f-9218-6d3267e999fe", $"No GlobalSettings found for chatId [{chatId}] when handling Cold storage logic.");
+                    return;
+                }
+
+                if (hotMessages.Messages.Count < nbMaxHotMessages)
+                {
+                    return;
+                }
+
+                // Take the X oldest hot messages and put them into cold storage (we're doing three to avoid having to do this every single time
+                int nbMessagesToTransfert = settings.Summary.HotMessagesAmountLimit / 5;
+                MessageDbModel[] messagesToTransfert = hotMessages.Messages.OrderBy(o => o.CreatedAtUtc).Take(nbMessagesToTransfert).ToArray();
+
+                // Add those messages to Cold Storage
+                int? nbColdMessages = await AddMessagesToColdStorageAsync(dbContext, settings, messagesToTransfert, chatId, nbMessagesToTransfert);
+
+                // Remove those messages from HOT storage
+                var currentMessages = hotMessages.Messages;
+
+                foreach (var messageToRemove in messagesToTransfert)
+                {
+                    currentMessages.Remove(messageToRemove);
+                }
+
+                if(nbColdMessages != null && nbColdMessages.HasValue)
+                {
+                    hotMessages.NbColdMessages = nbColdMessages.Value;
+                }
+
+                hotMessages.Messages = currentMessages;
+                var resultUpdate = dbContext.HotMessages.Update(hotMessages);
+                if (resultUpdate.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("241d22ae-09ca-4913-aba1-26353f6cd32e", $"Error when querying Db on table HOT messages. Couldn't remove old messages past the configured HOT limitation. State was [{resultUpdate.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultUpdate)}].");
+                    return;
+                }
+
+                dbContext.SaveChanges();
+
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("c018d21d-38d7-4576-9d2a-83624687aaaa", $"Error when querying Db on table messages.", ex);
+            }
+        }
+
+        private async Task<int?> AddMessagesToColdStorageAsync(StorageDbContext dbContext, GlobalSettingsDbModel globalSettings, MessageDbModel[] messagesToTransfert, string chatId, int nbMessagesToTransfert)
+        {
+            // Check if ColdMessages for this chat already exist
+            var coldMessages = dbContext.ColdMessages.FirstOrDefault(f => f.ChatId == chatId);
+            if (coldMessages == null)
+            {
+                // Create the ColdMessages row tied to this chat first
+                var newColdMessagesObj = new ColdMessagesDbModel
+                {
+                    ChatId = chatId,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    Messages = new List<MessageDbModel>(),
+                };
+
+                EntityEntry<ColdMessagesDbModel> resultAdd = dbContext.ColdMessages.Add(newColdMessagesObj);
+                if (resultAdd.State != EntityState.Added)
+                {
+                    LoggingManager.LogToFile("9d7af073-4e21-4f4d-85a7-56dfc5287109", $"Error when querying Db on table COLD messages. State was [{resultAdd.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultAdd)}].");
+                    return null;
+                }
+
+                await dbContext.SaveChangesAsync();
+                coldMessages = dbContext.ColdMessages.FirstOrDefault(f => f.ChatId == chatId);
+            }
+
+            // Add the new messages
+            var currentMessages = coldMessages.Messages;
+            currentMessages.AddRange(messagesToTransfert);
+            coldMessages.Messages = currentMessages;
+
+            var resultUpdate = dbContext.ColdMessages.Update(coldMessages);
+            if (resultUpdate.State != EntityState.Modified)
+            {
+                LoggingManager.LogToFile("c72298d3-4d84-4a5d-9641-dabb68cdcc83", $"Error when querying Db on table COLD messages. State was [{resultUpdate.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultUpdate)}].");
+                return null;
+            }
+
+            // Do some cleanup. We want to keep at most X cold messages
+            if (coldMessages.Messages.Count < globalSettings.Summary.ColdMessagesAmountLimit)
+            {
+                return coldMessages.Messages.Count;
+            }
+
+            List<MessageDbModel> messagesToRemove = [.. coldMessages.Messages.OrderBy(o => o.CreatedAtUtc).Take(nbMessagesToTransfert)];
+
+            currentMessages = coldMessages.Messages;
+
+            foreach (var messageToRemove in messagesToRemove)
+            {
+                currentMessages.Remove(messageToRemove);
+            }
+
+            coldMessages.Messages = currentMessages;
+            resultUpdate = dbContext.ColdMessages.Update(coldMessages);
+
+            if (resultUpdate.State != EntityState.Modified)
+            {
+                LoggingManager.LogToFile("d4cceec5-3c3e-4ccf-9848-84a384367fa9", $"Error when querying Db on table COLD messages. Couldn't remove old messages past the configured COLD limitation. State was [{resultUpdate.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultUpdate)}].");
+                return null;
+            }
+
+            dbContext.SaveChanges();
+            return coldMessages.Messages.Count;
+        }
+
+        // ********************************************************************
+        //                            Public
+        // ********************************************************************
+        public async Task<HotMessagesDbModel> GetHotMessagesAsync(string chatId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
                 var hotMessages = dbContext.HotMessages.FirstOrDefault(w => w.ChatId == chatId);
 
                 if (hotMessages == null)
@@ -43,7 +172,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 }
 
                 // Convert the wrapper into individual messages
-                return hotMessages.SerializedMessages?.ToArray();
+                return hotMessages;
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("54337d85-dc06-436d-88f2-c3d952154a16", $"Error when querying Db on table messages.", ex);
@@ -56,7 +185,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
             try
             {
                 var hotMessages = await GetHotMessagesAsync(chatId);
-                var message = hotMessages?.FirstOrDefault(w => w.MessageId == messageId);
+                var message = hotMessages?.Messages?.FirstOrDefault(w => w.MessageId == messageId);
                 if (hotMessages == null || message == null)
                 {
                     LoggingManager.LogToFile("365f420cf8-db05-495b-a6b9-a5a9c23f8837", $"Message [{messageId}] in chat [{chatId}] could not be found in HOT messages storage. Parsing COLD storage isn't implemented yet.");
@@ -76,7 +205,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                //dbContext.HotMessages.Load();
 
                 // Convert model
                 MessageDbModel messageDbModel = new MessageDbModel
@@ -91,7 +219,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
 
                 // Check if HotMessages for this chat already exist
                 var hotMessages = dbContext.HotMessages.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
-
                 if (hotMessages == null)
                 {
                     // Create the HotMessages row tied to this chat first
@@ -99,7 +226,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     {
                         ChatId = queryModel.ChatId,
                         CreatedAtUtc = DateTime.UtcNow,
-                        SerializedMessages = new List<MessageDbModel> { messageDbModel },
+                        NbColdMessages = 0,
+                        Messages = new List<MessageDbModel> { messageDbModel },
                     };
 
                     EntityEntry<HotMessagesDbModel> resultAdd = dbContext.HotMessages.Add(newHotMessagesObj);
@@ -114,9 +242,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 }
 
                 // Otherwise, Update the existing row with the new message
-                var currentMessages = hotMessages.SerializedMessages;
+                var currentMessages = hotMessages.Messages;
                 currentMessages.Add(messageDbModel);
-                hotMessages.SerializedMessages = currentMessages;
+                hotMessages.Messages = currentMessages;
                 var resultUpdate = dbContext.HotMessages.Update(hotMessages);
                 if (resultUpdate.State != EntityState.Modified)
                 {
@@ -133,6 +261,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 }
 
                 await dbContext.SaveChangesAsync();
+
+                // Handle cold storage in an async process
+                _ = HandleColdStorageAsync(queryModel.ChatId);
+
                 return messageDbModel;
             } catch (Exception ex)
             {
@@ -190,16 +322,16 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
 
                 // Constant fields not to update
                 var hotMessages = dbContext.HotMessages.FirstOrDefault(f => f.ChatId == chatId);
-                if (hotMessages?.SerializedMessages == null)
+                if (hotMessages?.Messages == null)
                 {
                     LoggingManager.LogToFile("f747bce8-4559-4bcd-bcf4-9387e78079fd", $"Can't update hot message associated with chatId [{chatId}]. HotMessages related to this chat are not in storage or messages to update didn't exist.");
                     return false;
                 }
 
-                var index = hotMessages.SerializedMessages.FindIndex(f => f.MessageId == message.MessageId);
+                var index = hotMessages.Messages.FindIndex(f => f.MessageId == message.MessageId);
                 if (index >= 0)
                 {
-                    hotMessages.SerializedMessages[index] = message;
+                    hotMessages.Messages[index] = message;
                 } else
                 {
                     LoggingManager.LogToFile("8b0d7de3-5a7c-4c4f-97b6-af80742eb556", $"Message [{message.MessageId}] not found in hot messages for chat [{chatId}].");
@@ -236,7 +368,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
                 HotMessagesDbModel chatHotMessages = dbContext.HotMessages.FirstOrDefault(w => w.ChatId == chatId);
-                var message = chatHotMessages?.SerializedMessages?.FirstOrDefault(w => w.MessageId == messageId);
+                var message = chatHotMessages?.Messages?.FirstOrDefault(w => w.MessageId == messageId);
 
                 if (chatHotMessages == null || message == null)
                 {
@@ -244,7 +376,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     return false;// TODO: parse Cold messages here before returning not found
                 }
 
-                chatHotMessages.SerializedMessages.Remove(message);
+                chatHotMessages.Messages.Remove(message);
                 EntityEntry<HotMessagesDbModel> result = dbContext.HotMessages.Update(chatHotMessages);
                 if (result.State != EntityState.Modified)
                 {

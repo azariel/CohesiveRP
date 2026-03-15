@@ -12,7 +12,7 @@ import { useChatMessages } from "../../../../store/MessagesStoreContext";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
-  const { activeModule } = sharedContext<SharedContextChatType>();
+  const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
   const [messages, setMessages] = useChatMessages(activeModule?.chatId);
   const didComponentMountAlready = useRef(false);
 
@@ -30,6 +30,7 @@ export default function ChatComponent() {
         }
 
         const response: ChatMessagesResponseDto | null = await getFromServerApiAsync<ChatMessagesResponseDto>(`api/chat/${activeModule.chatId}/messages/hot`);
+        console.log(`NB COLD: ${response?.nbColdMessages}`);
         
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
@@ -38,6 +39,7 @@ export default function ChatComponent() {
         }
 
         setMessages(() => response.messages ?? []);
+        setActiveModule((prev) => prev ? { ...prev, nbColdMessages: response.nbColdMessages } : prev);
         console.log(`Specific chat messages fetched successfully.`);
         setTimeout(() => {
           if (messagesRef?.current)
@@ -61,7 +63,6 @@ export default function ChatComponent() {
     const updatedMessage = messages.find((m) => m.messageId === messageId);
     if (!updatedMessage)
       return;
-
   
     const payload = { ...updatedMessage, content: newContent };
 
@@ -69,6 +70,7 @@ export default function ChatComponent() {
     setMessages((prev) => prev.map((m) => m.messageId === messageId ? payload : m));
 
     // Save to backend
+    updatedMessage.content = newContent;
     const response = await putToServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}`, updatedMessage);
     const serverApiException = response as ServerApiExceptionResponseDto | null;
     if (!response || serverApiException?.message) {
@@ -90,9 +92,7 @@ export default function ChatComponent() {
     }
   };
 
-  // const lastMessageIndex = (activeModule?.messages?.length ?? 0) - 1;
-  // const editableMessageIndex = lastMessageIndex - 3;
-  const isSendingMessage = !!activeModule?.mainQueryId; // blocked while AI is replying
+  //const isSendingMessage = !!activeModule?.mainQueryId; // blocked while AI is replying
 
   return (
     <main className={styles.chatComponent}>
@@ -101,12 +101,12 @@ export default function ChatComponent() {
           messages.map((message, index) => (
             <ChatMessageComponent
               key={message.messageId}  // ← use stable id, not index
-              messagesRef={messagesRef}
+              //messagesRef={messagesRef}
               message={message}
               defaultChatAvatarId={activeModule.defaultChatAvatar ?? ""}
               enableDeleteBtn={index >= messages.length - 1}
               enableSwipeBtn={index >= messages.length - 1}
-              isEditable={!isSendingMessage && !message.summarized}
+              isEditable={!message.summarized && index >= messages.length - 3}
               onSave={handleSaveMessage}
               onDelete={handleDeleteMessage}
             />

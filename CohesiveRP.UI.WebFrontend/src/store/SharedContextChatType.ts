@@ -5,7 +5,7 @@ interface SharedContextChatType extends SharedContextType {
   chatId: string;
   defaultChatAvatar: string;
   currentUserInputValue: string;
-  //messages: ChatMessage[];
+  nbColdMessages: number | null,
   mainQueryId: string | null;// The id of the background query running to generate the ai reply
 };
 

@@ -9,6 +9,7 @@ using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Message;
 
@@ -55,13 +56,13 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         // if it's the first player message in the chat, aseptise the previous messages
         await AseptisePreviousMessageIfRequiredAsync(chat, characters);
 
+        // Add a background query to generate the sceneTracker first and foremost
+        // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
+        await AddSceneTrackerBackgroundQueryAsync(chat);
+
         IMessageDbModel message = null;
         if (!string.IsNullOrWhiteSpace(requestDto.Message.Content))
         {
-            // Add a background query to generate the sceneTracker first and foremost
-            // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
-            await AddSceneTrackerBackgroundQueryAsync(chat);
-
             // Add the message
             CreateMessageQueryModel messageQueryModel = new()
             {
@@ -119,19 +120,19 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
 
     private async Task AseptisePreviousMessageIfRequiredAsync(ChatDbModel chat, CharacterDbModel[] characters)
     {
-        var messages = await storageService.GetAllHotMessagesAsync(chat.ChatId);
+        HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
 
-        if (messages == null || messages.Length <= 0)
+        if (hotMessagesDbModel?.Messages == null || hotMessagesDbModel.Messages.Count <= 0)
         {
             return;
         }
 
-        if (messages.Any(a => a.SourceType == Common.BusinessObjects.MessageSourceType.User) || messages.Length >= 20)
+        if (hotMessagesDbModel.Messages.Any(a => a.SourceType == Common.BusinessObjects.MessageSourceType.User) || hotMessagesDbModel.Messages.Count >= 20)
         {
             return;
         }
 
-        foreach (var message in messages)
+        foreach (var message in hotMessagesDbModel.Messages)
         {
             message.Content = message.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", "Azariel");
             await storageService.UpdateHotMessageAsync(chat.ChatId, (MessageDbModel)message);

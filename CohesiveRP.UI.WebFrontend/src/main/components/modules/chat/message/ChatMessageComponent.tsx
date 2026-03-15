@@ -10,7 +10,7 @@ import { GetAvatarPathFromCharacterId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
 
 interface Props {
-  messagesRef?: React.RefObject<HTMLDivElement | null>;
+  // messagesRef?: React.RefObject<HTMLDivElement | null>;
   message?: ChatMessage;
   defaultChatAvatarId?: string;
   enableDeleteBtn?: boolean;
@@ -20,7 +20,7 @@ interface Props {
   onDelete?: (messageId: string) => Promise<void>;
 }
 
-export default function ChatMessageComponent({ messagesRef, message, defaultChatAvatarId, enableSwipeBtn = false,  enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
+export default function ChatMessageComponent({ message, defaultChatAvatarId, enableSwipeBtn = false,  enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
   const isRevertingRef = useRef(false);
@@ -56,10 +56,10 @@ export default function ChatMessageComponent({ messagesRef, message, defaultChat
     setEditContent(message?.content ?? "");
     setIsEditing(true);
 
-    setTimeout(() => {
-      if (messagesRef?.current)
-        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    }, 0);
+    // setTimeout(() => {
+    //   if (messagesRef?.current)
+    //     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    // }, 0);
   };
 
   const handleRevert = () => {
@@ -112,7 +112,7 @@ export default function ChatMessageComponent({ messagesRef, message, defaultChat
         <div className={styles.messageContent}>
           <div className={styles.messageHeaderContent}>
             <div className={styles.messageHeaderContentName}>
-              {message?.sourceType == 0 ? <label>User</label> : <label>AI</label>}
+              {message?.sourceType == 0 ? <label>{message?.personaName ?? "User"}</label> : <label>{message?.characterName ?? "User"}</label>}
             </div>
             <div className={styles.messageHeaderContentModel}>glm-reasoner (?m??s)</div>
             <div className={styles.messageHeaderContentCreatedAt}>

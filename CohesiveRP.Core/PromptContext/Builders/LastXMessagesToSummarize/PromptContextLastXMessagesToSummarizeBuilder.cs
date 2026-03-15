@@ -4,6 +4,7 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
@@ -33,16 +34,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             // TODO: Get the amount of messages to keep as-is from settings
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
-            hotMessages = hotMessages.OrderByDescending(o => o.CreatedAtUtc).ToArray();
+            HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
+            hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.OrderByDescending(o => o.CreatedAtUtc).ToList();
 
-            int indexOfTargetLastMessage = hotMessages.IndexOf(hotMessages.FirstOrDefault(f => f.MessageId == contextLinkedId));
+            int indexOfTargetLastMessage = hotMessagesDbModel.Messages.IndexOf(hotMessagesDbModel.Messages.FirstOrDefault(f => f.MessageId == contextLinkedId));
             if (indexOfTargetLastMessage < 0)
             {
                 throw new Exception($"Invalid contextLinkedId [{contextLinkedId}]. ChatId: [{chatDbModel?.ChatId}] hot messages did not contain this messageId.");
             }
 
-            IMessageDbModel[] messagesToProcess = hotMessages.Skip(indexOfTargetLastMessage).Take(settings.Summary.Short.NbMessageInChunk).ToArray();
+            IMessageDbModel[] messagesToProcess = hotMessagesDbModel.Messages.Skip(indexOfTargetLastMessage).Take(settings.Summary.Short.NbMessageInChunk).ToArray();
 
             if (messagesToProcess.Length < settings.Summary.Short.NbMessageInChunk)
             {
