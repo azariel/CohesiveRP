@@ -40,6 +40,16 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             };
         }
 
+        var persona = await storageService.GetPersonaByIdAsync(chat.PersonaId);
+        if (persona == null)
+        {
+            return new WebApiException
+            {
+                HttpResultCode = System.Net.HttpStatusCode.NotFound,
+                Message = $"Persona with id {chat.PersonaId} was not found."
+            };
+        }
+
         // If a background with main tag is already running, forbid adding a new message until we're done
         var backgroundQueriesInProgress = await storageService.GetPendingOrProcessingBackgroundQueryAsync();
         if (backgroundQueriesInProgress.Any(a => a.Tags.Contains(BackgroundQuerySystemTags.main.ToString())))
@@ -109,6 +119,8 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             Message = new MessageDefinition
             {
                 MessageId = message?.MessageId,
+                PersonaId = chat?.PersonaId,
+                PersonaName = persona?.Name,
                 Summarized = message?.Summarized ?? false,
                 Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", "Azariel")
             },

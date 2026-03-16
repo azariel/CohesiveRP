@@ -54,5 +54,6 @@ namespace CohesiveRP.Core.Services
         Task<bool> UpdatePersonaAsync(PersonaDbModel personaDbModel);
         Task<bool> DeletePersonaAsync(PersonaDbModel personaDbModel);
         Task<PersonaDbModel> AddEmptyPersonaAsync();
+        //Task<PersonaDbModel> GetDefaultPersonaAsync();
     }
 }

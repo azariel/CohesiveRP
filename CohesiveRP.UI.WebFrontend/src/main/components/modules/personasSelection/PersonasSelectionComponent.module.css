@@ -83,11 +83,19 @@
 
 /* Highlight the default persona with a subtle accent border */
 .personaContainerDefault {
-    border-color: #1a6a7a;
+    cursor: pointer;
+    border: 1px solid #888;
+    border-radius: 9px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.5em;
+    border-color: #1b7586;
     box-shadow: 0 0 0 1px #1a6a7a44;
 }
 .personaContainerDefault:hover {
-    border-color: #22a0b8;
+    border-color: #187d8f;
+    transition: border-color 0.3s ease;
 }
 
 /* ─── Avatar ────────────────────────────────────────────────────── */

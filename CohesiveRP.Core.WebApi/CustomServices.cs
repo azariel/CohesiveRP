@@ -54,6 +54,9 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetAllPersonasWorkflow, GetAllPersonasWorkflow>();
             services.AddSingleton<IGetPersonaByIdWorkflow, GetPersonaByIdWorkflow>();
             services.AddSingleton<IAddPersonaWorkflow, AddPersonaWorkflow>();
+            services.AddSingleton<IUpdatePersonaWorkflow, UpdatePersonaWorkflow>();
+            services.AddSingleton<IDeletePersonaWorkflow, DeletePersonaWorkflow>();
+            services.AddSingleton<IImportAndReplaceAvatarWorkflow, ImportAndReplacePersonaAvatarWorkflow>();
 
             // Workflows.SceneTrackers
             services.AddSingleton<IGetSceneTrackerByIdWorkflow, GetSceneTrackerByIdWorkflow>();

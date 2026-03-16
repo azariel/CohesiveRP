@@ -66,6 +66,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     SelectedChatCompletionPresets = queryModel.SelectedChatCompletionPresets,
                     CharacterIds = queryModel.CharacterIds,
+                    PersonaId = queryModel.PersonaId,
                     LastActivityAtUtc = DateTime.UtcNow,
                 };
 

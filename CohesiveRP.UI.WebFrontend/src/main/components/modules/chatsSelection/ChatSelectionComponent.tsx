@@ -124,10 +124,11 @@ export default function ChatSelectionComponent() {
             </div>
           ):(
             // Show information about adding a new chat for the first time
-            <div className={styles.addChatTutorial}>
-              <label>Click on the '+' card </label>
-              <label>to add a new chat</label>
-            </div>
+            // <div className={styles.addChatTutorial}>
+            //   <label>Click on the '+' card </label>
+            //   <label>to add a new chat</label>
+            // </div>
+            <div />
           )
         )}
       </div>

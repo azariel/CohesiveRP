@@ -33,6 +33,7 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
 
         messagesDbModel.Messages ??= new();
 
+        var persona = await storageService.GetPersonaByIdAsync(chat.PersonaId);
         List<MessageDefinition> messageDefinitions = new List<MessageDefinition>();
         for (int i = 0; i < messagesDbModel.Messages.Count; i++)
         {
@@ -47,7 +48,8 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
                 CreatedAtUtc = messagesDbModel.Messages[i].CreatedAtUtc,
                 CharacterId = messagesDbModel.Messages[i].CharacterId,
                 CharacterName = characterName,
-                PersonaName = "Azariel",// get persona from chat.PersonaId
+                PersonaId = chat.PersonaId,
+                PersonaName = persona?.Name ?? "User",
             });
         }
 

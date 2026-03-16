@@ -7,6 +7,7 @@ interface ChatMessage {
     summarized: boolean | null;
     characterId: string | null;
     characterName: string | null;
+    personaId: string | null;
     personaName: string | null;
     avatarId: string | null;// if a specific message has an avatar override
 }

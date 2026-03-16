@@ -22,7 +22,8 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             Dictionary<string, string> loreByKeywordsContent = [];
-            string userPersonaName = "userName";// TODO: fetch from Db
+            PersonaDbModel defaultPersona = await storageService.GetPersonaByIdAsync(chatDbModel?.PersonaId);
+            string userPersonaName = defaultPersona.Name;
 
             //TODO: fetch from Db
             //loreByKeywordsContent.Add("loreDummyKey1", "loreDummyValue1");

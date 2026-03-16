@@ -113,7 +113,7 @@ namespace CohesiveRP.Core.Services
         public async Task<PersonaDbModel> GetPersonaByIdAsync(string personaId) => await personasDal.GetPersonaByIdAsync(personaId);
         public async Task<bool> UpdatePersonaAsync(PersonaDbModel personaDbModel) => await personasDal.UpdatePersonaAsync(personaDbModel);
         public async Task<bool> DeletePersonaAsync(PersonaDbModel personaDbModel) => await personasDal.DeletePersonaAsync(personaDbModel);
-        public async Task<PersonaDbModel> AddEmptyPersonaAsync() => await personasDal.AddPersonaAsync(new AddPersonaQueryModel { Name = "New Persona" });
+        public async Task<PersonaDbModel> AddEmptyPersonaAsync() => await personasDal.AddPersonaAsync(new AddPersonaQueryModel { Name = "New Persona", Description = "Description of your new persona." });
 
         // Messages
         public async Task<HotMessagesDbModel> GetAllHotMessagesAsync(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);

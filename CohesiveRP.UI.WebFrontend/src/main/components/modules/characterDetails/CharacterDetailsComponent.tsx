@@ -13,12 +13,14 @@ import { GetCharacterDetailsNameFontSize } from "../../../../utils/fontSizeUtils
 import { ImSpinner2 } from "react-icons/im";
 import type { SelectableChatsResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatsResponseDto";
 import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatResponseDto";
+import type { AddChatRequestDto } from "../../../../RequestDto/chat/AddChatRequestDto";
 import { MdAddBox } from "react-icons/md";
 import { FormatDateTimeToMinutes } from "../../../../utils/DateUtils";
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 
 export default function CharacterDetailsComponent() {
-  const { activeModule, navigateTo } = sharedContext();
+  const { activeModule } = sharedContext<SharedContextCharacterType>();
+  const { navigateTo } = sharedContext();
   const didComponentMountAlready = useRef(false);
   const chatsContainerRef = useRef<HTMLDivElement>(null);
   const [isNetworkDown, setIsNetworkDown] = useState(false);
@@ -49,13 +51,12 @@ export default function CharacterDetailsComponent() {
 
     const fetchCharacterDetails = async () => {
       try {
-        let characterModule = activeModule as SharedContextCharacterType;
-        const response: CharacterResponseDto | null = await getFromServerApiAsync<CharacterResponseDto>(`api/characters/${characterModule.selectedCharacterId}`);
+        const response: CharacterResponseDto | null = await getFromServerApiAsync<CharacterResponseDto>(`api/characters/${activeModule.selectedCharacterId}`);
         
         setIsLoadingCharacterDetails(false);
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
-          console.error(`Call to fetch characters list failed. [${JSON.stringify(serverApiException)}]`);
+          console.error(`Call to fetch characters details failed. [${JSON.stringify(serverApiException)}]`);
           setIsNetworkDown(true);
           setCharacterResponse({
             code : -1,
@@ -64,10 +65,10 @@ export default function CharacterDetailsComponent() {
           return;
         }
 
-        console.log(`Characters list fetched successfully.`);
+        console.log(`Characters details fetched successfully.`);
         setCharacterResponse(response);
       } catch (error) {
-        console.error("Fetch characters list error:", error);
+        console.error("Fetch characters details error:", error);
       }
     };
 
@@ -79,7 +80,7 @@ export default function CharacterDetailsComponent() {
         setIsLoadingChatsDetails(false);
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
-          console.error(`Call to fetch characters list failed. [${JSON.stringify(serverApiException)}]`);
+          console.error(`Call to fetch characters details failed. [${JSON.stringify(serverApiException)}]`);
           setIsNetworkDown(true);
           setChatsDetailsResponse({
             code : -1,
@@ -88,10 +89,10 @@ export default function CharacterDetailsComponent() {
           return;
         }
 
-        console.log(`Characters list fetched successfully.`);
+        console.log(`Characters details fetched successfully.`);
         setChatsDetailsResponse(response);
       } catch (error) {
-        console.error("Fetch characters list error:", error);
+        console.error("Fetch characters details error:", error);
       }
     };
 
@@ -129,7 +130,10 @@ export default function CharacterDetailsComponent() {
 
       setIsLoadingChat(true);
       try {
-        const payload = {};
+        const payload:AddChatRequestDto = {
+          characterId: activeModule.selectedCharacterId
+        };
+        
         const response:SelectableChatResponseDto | null = await postToServerApiAsync<SelectableChatResponseDto>("api/chats", payload);
   
         // add the newly created chat to state

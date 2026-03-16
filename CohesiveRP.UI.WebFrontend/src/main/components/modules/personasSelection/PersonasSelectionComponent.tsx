@@ -11,7 +11,7 @@ import type { PersonaResponseDto } from "../../../../ResponsesDto/personas/Perso
 import type { PersonasResponseDto } from "../../../../ResponsesDto/personas/PersonasResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { SharedContextPersonaType } from "../../../../store/SharedContextPersonaType";
-import { GetAvatarPathFromCharacterId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromCharacterId, GetAvatarPathFromPersonaId } from "../../../../utils/avatarUtils";
 
 export default function PersonasSelectionComponent() {
   const { navigateTo } = sharedContext();
@@ -106,13 +106,13 @@ export default function PersonasSelectionComponent() {
             {personasResponse?.personas?.map((persona) => (
               <div
                 key={persona.personaId}
-                className={styles.personaContainer}
+                className={persona.isDefault ? styles.personaContainerDefault : styles.personaContainer}
                 onClick={() => handleSpecificPersonaClick(persona.personaId)}
               >
                 <div className={styles.personaAvatarContainer}>
                   {persona.personaId ? (
                     <img
-                      src={GetAvatarPathFromCharacterId(persona.personaId)}
+                      src={GetAvatarPathFromPersonaId(persona.personaId)}
                       alt={persona.name}
                     />
                   ) : (

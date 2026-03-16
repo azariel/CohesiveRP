@@ -21,6 +21,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         [MaxLength(128)]
         public string Name { get; set; }
 
+        // New chat created will automatically reference the default persona
+        public bool IsDefault { get; set; }
+
         [MaxLength(8196)]
         public string Description { get; set; }
 

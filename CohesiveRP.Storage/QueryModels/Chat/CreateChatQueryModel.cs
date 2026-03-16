@@ -9,5 +9,8 @@ namespace CohesiveRP.Storage.QueryModels.Chat
         
         [JsonPropertyName("characterIds")]
         public List<string> CharacterIds { get; set; }
+
+        [JsonPropertyName("personaId")]
+        public string PersonaId { get; set; }
     }
 }

@@ -1,11 +1,9 @@
-﻿using CohesiveRP.Common.Exceptions;
-using CohesiveRP.Common.WebApi;
+﻿using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Personas;
 using CohesiveRP.Core.WebApi.ResponseDtos.Personas.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Personas.Abstractions;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -30,6 +28,7 @@ public class AddPersonaWorkflow : IAddPersonaWorkflow
             {
                 PersonaId = persona.PersonaId,
                 Name = persona.Name,
+                IsDefault = persona.IsDefault,
                 Description = persona.Description,
                 LastActivityAtUtc = persona.LastActivityAtUtc,
             }

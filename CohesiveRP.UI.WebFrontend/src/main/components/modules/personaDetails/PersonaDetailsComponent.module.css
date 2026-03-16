@@ -1,4 +1,4 @@
-.characterDetailsComponent {
+.personaDetailsComponent {
     height: 100dvh;
     margin-top: 1em;
     display: flex;
@@ -35,7 +35,7 @@
 
 .chatsContainer::-webkit-scrollbar { display: none; }
 
-.characterDetailsContainer {
+.personaDetailsContainer {
     height: 100dvh;
     width: 100%;
     display: flex;
@@ -43,23 +43,30 @@
     align-items: flex-start;
 }
 
-.characterName {
+.personaName {
     padding-top: 0.2em;
     padding-left: 0.5em;
     color: rgb(212, 144, 17);
     font-weight: 600;
     align-content: flex-start;
+
+    width: 95%;
+    height: 7%;
+    display: flex;
+    align-self: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-.characterId {
-    margin-top: -0.7em;
+.personaId {
+    /* margin-top: -0.2em; */
     padding-left: 1.7em;
     color: rgb(214, 214, 214);
     font-size: 0.5em;
     align-content: flex-start;
 }
 
-.characterHeaderContainer {
+.personaHeaderContainer {
     width: 100%;
     height: 24%;
     display: flex;
@@ -69,7 +76,7 @@
     overflow: visible;
 }
 
-.characterHeaderRightSideContainer {
+.personaHeaderRightSideContainer {
     width: 100%;
     height: 100%;
     display: flex;
@@ -77,7 +84,7 @@
     align-items: flex-start;
 }
 
-.characterChatsDetailsContainer {
+.personaChatsDetailsContainer {
     margin-top: auto;
     padding-top:1em;
     width: 100%;
@@ -87,18 +94,19 @@
     justify-content: center;
 }
 
-.characterChatsDetailsChatsLabel {
+.personaChatsDetailsChatsLabel {
     padding-top: 1em;
     align-self: flex-start;
     padding-left: 0.8em;
     font-size: 0.8em;
 }
 
-.characterAvatarContainer {
+.personaAvatarContainer {
     height: 100%;
     width: auto;
     aspect-ratio: 1 / 1.5;
     flex-shrink: 0;
+    display: flex;
     align-items: center;
     justify-content: center;
     
@@ -119,45 +127,27 @@
     mask-size: 100% 100%;
 }
 
-.characterAvatarContainer img {
+.personaAvatarContainer img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.chatAddNewChatContainer {
-    width: 18%;
-    flex-shrink: 0;
-    aspect-ratio: 1 / 1.5;
+.addNewAvatarImageContainer {
+    width: 97%;
+    height: 97%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #686868;
+    border: 1px solid #838383;
     border-radius: 8px;
     cursor: pointer;
 }
 
-.chatItem {
-    width: 18%;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    overflow: hidden;
-}
-
-.chatFootLabel {
-    flex-shrink: 0;
-    font-size: 0.45em;
-}
-
-.chatAddNewChatBtn {
-    flex: 1;
+.addNewAvatarImageBtn {
     height: 20%;
     width: 20%;
-    color:#3f3f3f;
+    color:#919191;
 }
 
 .chatAvatarContainer {
@@ -174,39 +164,13 @@
     object-fit: cover;
 }
 
-.characterCreatorNotesContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-top: 1em;
+.detailsContainer {
+    width: 100%;
+    height: 100%;
 }
 
-.characterCreatorNotesLabel {
-    font-size: 1.0em;
-    font-weight: 500;
-}
-
-.characterCreatorNotes {
-    font-size: 0.8em;
-}
-
-.characterTagsContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-top: 1em;
-}
-
-.characterTagsLabel {
-    font-size: 1.0em;
-    font-weight: 500;
-}
-
-.characterTags {
-    font-size: 0.8em;
-}
-
-.characterDescriptionContainer {
+.personaDescriptionContainer {
+    width: 100%;
     display: flex;
     align-self: flex-start;
     flex-direction: column;
@@ -214,16 +178,104 @@
     margin-top: 1em;/* TODO: replace with parent gap */
 }
 
-.characterDescriptionLabel {
+.personaDescriptionLabel {
     font-size: 1.0em;
     font-weight: 500;
 }
 
-.characterDescription {
+.personaDescription {
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    border: 1px solid rgb(58, 138, 230);
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
     font-size: 0.8em;
+    font-family: inherit;
+    line-height: inherit;
+    padding: 0.2em 0.4em;
+    outline: none;
+    overflow: hidden;
+    overflow-y: auto;
+    max-height: 400px;
+    min-height: 200px;
 }
 
-.loadingCharacterDetailsSpinner {
+.saveButton {
+  align-self: flex-end;
+  margin-top: 0.5em;
+  padding: 0.35em 1.2em;
+  background: transparent;
+  color: rgb(51, 174, 231);
+  border: 1px solid rgb(51, 174, 231);
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  /* transition: background 0.15s, color 0.15s; */
+}
+
+.saveButton:hover:not(:disabled) {
+  background: rgb(51, 174, 231);
+  color: #fff;
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deleteButton {
+  align-self: flex-end;
+  margin-top: 0.5em;
+  padding: 0.35em 1.2em;
+  background: transparent;
+  color: rgb(255, 39, 39);
+  border: 1px solid rgb(51, 174, 231);
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  /* transition: background 0.15s, color 0.15s; */
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: rgb(231, 51, 51);
+  color: #fff;
+}
+
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.saveSpinner {
+  width: 1em;
+  height: 1em;
+  animation: spin 1s linear infinite;
+}
+
+.saveErrorLabel {
+  font-size: 0.75em;
+  color: rgb(220, 80, 80);
+  align-self: flex-end;
+  margin-top: 0.25em;
+}
+
+.operationsButtons {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
+}
+
+.loadingPersonaDetailsSpinner {
     color: rgb(51, 174, 231);
     align-items: center;
     justify-content: center;

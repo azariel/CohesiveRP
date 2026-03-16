@@ -103,7 +103,7 @@ export default function ChatComponent() {
 
             return (
               <Fragment key={message.messageId}>
-                {isLastMessage && <SceneTrackerComponent />} 
+                {messages.length > 1 && isLastMessage && <SceneTrackerComponent />} 
 
                 <ChatMessageComponent
                   message={message}

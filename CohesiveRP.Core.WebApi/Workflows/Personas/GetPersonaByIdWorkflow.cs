@@ -34,11 +34,11 @@ public class GetPersonaByIdWorkflow : IGetPersonaByIdWorkflow
         var responseDto = new PersonaResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
-            // TODO: pagination instead of take(50)
             Persona = new PersonaResponse
             {
                 PersonaId = persona.PersonaId,
                 Name = persona.Name,
+                IsDefault = persona.IsDefault,
                 Description = persona.Description,
                 LastActivityAtUtc = persona.LastActivityAtUtc,
             }

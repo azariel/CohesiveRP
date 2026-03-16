@@ -6,7 +6,7 @@ import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
 import { FormatUtcDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
-import { GetAvatarPathFromCharacterId } from "../../../../../utils/avatarUtils";
+import { GetAvatarPathFromCharacterId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
 
 interface Props {
@@ -98,7 +98,7 @@ export default function ChatMessageComponent({ message, defaultChatAvatarId, ena
         <div className={styles.leftMessageContainer}>
           <div className={styles.messageAvatarContainer}>
             {message?.sourceType == 0 ? (
-              <img src="./dev/Venelas.png" alt="Avatar" />
+              <img src={GetAvatarPathFromPersonaId(message?.personaId ?? "")} alt="Avatar" />
             ) : (
               <img src={GetAvatarPathFromCharacterId(message?.avatarId ?? defaultChatAvatarId ?? "")} alt="Avatar" />
             )}
