@@ -6,6 +6,7 @@ using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
@@ -47,6 +48,14 @@ public class PatchSpecificMessageByIdWorkflow : IPatchSpecificMessageByIdWorkflo
             }
         }
 
+        ChatDbModel chat = await storageService.GetChatAsync(requestDto.ChatId);
+        PersonaDbModel persona = null;
+
+        if (chat != null)
+        {
+            persona = await storageService.GetPersonaByIdAsync(chat.PersonaId);
+        }
+
         var character = await storageService.GetCharacterByIdAsync(message.CharacterId);
         var responseDto = new MessageResponseDto
         {
@@ -54,7 +63,7 @@ public class PatchSpecificMessageByIdWorkflow : IPatchSpecificMessageByIdWorkflo
             Message = new MessageDefinition
             {
                 MessageId = message.MessageId,
-                Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", "Azariel"),
+                Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", persona?.Name ?? "User"),
                 SourceType = message.SourceType,
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,

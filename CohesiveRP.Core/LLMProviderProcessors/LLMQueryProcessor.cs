@@ -4,7 +4,6 @@ using CohesiveRP.Core.HttpLLMApiProvider;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
-using CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Response;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;

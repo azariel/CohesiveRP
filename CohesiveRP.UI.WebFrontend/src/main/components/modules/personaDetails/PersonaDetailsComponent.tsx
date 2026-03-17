@@ -48,9 +48,9 @@ export default function PersonaDetailsComponent() {
       }
 
       try {
+        setIsLoadingPersonaDetails(true);
         const response: PersonaResponseDto | null = await getFromServerApiAsync<PersonaResponseDto>(`api/personas/${activeModule.selectedPersonaId}`);
         
-        setIsLoadingPersonaDetails(false);
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
           console.error(`Call to fetch personas details failed. [${JSON.stringify(serverApiException)}]`);
@@ -59,9 +59,10 @@ export default function PersonaDetailsComponent() {
             code : -1,
             persona: null
           });
+
           return;
         }
-
+        
         console.log(`Personas details fetched successfully.`);
         setPersonaResponse(response);
         setName(response?.persona?.name ?? "");
@@ -69,6 +70,8 @@ export default function PersonaDetailsComponent() {
         isDefault.current = response?.persona?.isDefault ?? false;
       } catch (error) {
         console.error("Fetch persona error:", error);
+      } finally {
+        setIsLoadingPersonaDetails(false);
       }
     };
 
@@ -80,7 +83,6 @@ export default function PersonaDetailsComponent() {
     setOperationError(false);
 
     try {
-
       const response = await putToServerApiAsync(`api/personas/${activeModule.selectedPersonaId}`,{ description, name, isDefault: isDefault.current });
 
       const serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -207,7 +209,6 @@ export default function PersonaDetailsComponent() {
               <div className={styles.personaHeaderRightSideContainer}>
                 <textarea
                   className={styles.personaName}
-                  // style={{ fontSize: GetCharacterDetailsNameFontSize(personaResponse?.persona?.name ?? "") }}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />

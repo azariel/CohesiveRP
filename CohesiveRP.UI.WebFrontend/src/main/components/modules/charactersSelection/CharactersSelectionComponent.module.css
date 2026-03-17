@@ -148,6 +148,22 @@
     padding: 0.5em;
 }
 
+.loadingCharactersSpinner {
+    margin: auto;
+    color: rgb(51, 174, 231);
+    width: 3.5em;
+    height: 3.5em;
+    animation: spin 1s linear infinite;
+}
+
+.importingCharacterSpinner {
+    margin: auto;
+    color: rgb(51, 174, 231);
+    width: 1em;
+    height: 1em;
+    animation: spin 1s linear infinite;
+}
+
 .networkDownContainer {
     display: flex;
     flex-direction: column;
@@ -157,4 +173,10 @@
 
 .networkDownIcon {
     font-size: 2em;;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

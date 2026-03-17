@@ -38,7 +38,7 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
             Message = new MessageDefinition
             {
                 MessageId = message.MessageId,
-                Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", "Azariel"),
+                Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", persona.Name),
                 SourceType = message.SourceType,
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,

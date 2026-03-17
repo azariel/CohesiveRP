@@ -12,11 +12,14 @@ import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exc
 import type { CharactersResponseDto } from "../../../../ResponsesDto/characters/CharactersResponseDto";
 import { GetAvatarPathFromCharacterId } from "../../../../utils/avatarUtils";
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
+import { ImSpinner2 } from "react-icons/im";
 
 export default function CharactersSelectionComponent() {
   const { navigateTo } = sharedContext();
   const didComponentMountAlready = useRef(false);
   const newCharacterFileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isLoadingCharacters, setIsLoadingCharacters] = useState(true);
+  const [isImportingCharacter, setIsImportingCharacter] = useState(false);
   const [isNetworkDown, setIsNetworkDown] = useState(false);
   const [charactersResponse, setCharactersResponse] = useState<CharactersResponseDto | null>(null);
 
@@ -27,6 +30,7 @@ export default function CharactersSelectionComponent() {
 
     const fetchData = async () => {
       try {
+        setIsLoadingCharacters(true);
         const response: CharactersResponseDto | null = await getFromServerApiAsync<CharactersResponseDto>(`api/characters`);
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
@@ -36,6 +40,7 @@ export default function CharactersSelectionComponent() {
             code : -1,
             characters: []
           });
+          
           return;
         }
 
@@ -43,8 +48,11 @@ export default function CharactersSelectionComponent() {
         setCharactersResponse(response);
       } catch (error) {
         console.error("Fetch characters list error:", error);
+      } finally{
+        setIsLoadingCharacters(false);
       }
     };
+
     fetchData();
   }, []);
 
@@ -71,6 +79,7 @@ export default function CharactersSelectionComponent() {
     formData.append("file", file);
 
     try {
+      setIsImportingCharacter(true);
       const response = await postToServerApiAsync<CharacterResponseDto>("api/characters", formData);
 
       let serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -109,6 +118,7 @@ export default function CharactersSelectionComponent() {
       // TODO: show err to user
     } finally {
       event.target.value = ""; // reset file input for future uploads
+      setIsImportingCharacter(false);
     }
   };
 
@@ -119,6 +129,8 @@ export default function CharactersSelectionComponent() {
             <AiOutlineDisconnect className={styles.networkDownIcon} />
             <label>CohesiveRP backend is unreachable</label>
           </div>
+        ) : isLoadingCharacters ? (
+          <ImSpinner2 className={ styles.loadingCharactersSpinner } />
         ) : (
         <div className={styles.charactersMainContainer}>
           <div className={styles.charactersHeader}>
@@ -126,13 +138,19 @@ export default function CharactersSelectionComponent() {
               <FaFilter />
             </div>
             <div className={styles.charactersToolsComponent}>
-              <MdAddBox className={styles.addNewCharacterIcon} onClick={handleAddCharacterClick} />
-                <input
-                  type="file"
-                  ref={newCharacterFileInputRef}
-                  style={{ display: "none" }}
-                  onChange={handleAddCharacterFileSelected}
-              />
+              {isImportingCharacter ? (
+                <ImSpinner2 className={ styles.importingCharacterSpinner } />
+              ) : (
+                <div>
+                  <MdAddBox className={styles.addNewCharacterIcon} onClick={handleAddCharacterClick} />
+                  <input
+                    type="file"
+                    ref={newCharacterFileInputRef}
+                    style={{ display: "none" }}
+                    onChange={handleAddCharacterFileSelected}
+                  />
+              </div>
+              )}
             </div>
           </div>
           <div className={styles.charactersGridContainer}>
@@ -145,7 +163,7 @@ export default function CharactersSelectionComponent() {
                   <label className={styles.characterCharNameLabel}>{character.name}</label>
                   <label className={styles.characterTagsLabel}>{!character.tags ? "" : character.tags.join(" / ")}</label>
                   <label className={styles.characterDescriptionLabel}>
-                    {character.creatorNotes.length > 512 ? 
+                    {character.creatorNotes?.length ?? 0 > 512 ? 
                       `${character.creatorNotes.substring(0, 512)}...` : 
                       character.creatorNotes}
                   </label>

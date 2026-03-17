@@ -42,7 +42,7 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
             {
                 MessageId = messagesDbModel.Messages[i].MessageId,
                 MessageIndex = messagesDbModel.NbColdMessages + i + 1,
-                Content = messagesDbModel.Messages[i].Content.ReplacePromptBasicPlaceholders(characterName ?? "(the character)", "Azariel"),
+                Content = messagesDbModel.Messages[i].Content.ReplacePromptBasicPlaceholders(characterName ?? "(the character)", persona?.Name ?? "User"),
                 SourceType = messagesDbModel.Messages[i].SourceType,
                 Summarized = messagesDbModel.Messages[i].Summarized,
                 CreatedAtUtc = messagesDbModel.Messages[i].CreatedAtUtc,

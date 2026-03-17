@@ -64,7 +64,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         var characters = await storageService.GetCharactersAsync();
 
         // if it's the first player message in the chat, aseptise the previous messages
-        await AseptisePreviousMessageIfRequiredAsync(chat, characters);
+        await AseptisePreviousMessageIfRequiredAsync(chat, persona, characters);
 
         // Add a background query to generate the sceneTracker first and foremost
         // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
@@ -122,7 +122,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 PersonaId = chat?.PersonaId,
                 PersonaName = persona?.Name,
                 Summarized = message?.Summarized ?? false,
-                Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", "Azariel")
+                Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User")
             },
             MainQueryId = backgroundQuery.BackgroundQueryId,
         };
@@ -130,7 +130,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         return responseDto;
     }
 
-    private async Task AseptisePreviousMessageIfRequiredAsync(ChatDbModel chat, CharacterDbModel[] characters)
+    private async Task AseptisePreviousMessageIfRequiredAsync(ChatDbModel chat, PersonaDbModel persona, CharacterDbModel[] characters)
     {
         HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
 
@@ -146,7 +146,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
 
         foreach (var message in hotMessagesDbModel.Messages)
         {
-            message.Content = message.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", "Azariel");
+            message.Content = message.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User");
             await storageService.UpdateHotMessageAsync(chat.ChatId, (MessageDbModel)message);
         }
     }

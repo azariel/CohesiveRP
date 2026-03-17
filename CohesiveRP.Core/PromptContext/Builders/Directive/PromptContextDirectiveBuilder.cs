@@ -20,8 +20,8 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
-            string userPersonaName = "Azariel";// TODO: fetch from Db
-            return ($"# Directive{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace(Constants.USER_PLACEHOLDER, userPersonaName)}", new ShareableContextLink{ LinkedBuilder = this });
+            PersonaDbModel linkedPersona = await storageService.GetPersonaByIdAsync(chatDbModel?.PersonaId);
+            return ($"# Directive{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace(Constants.USER_PLACEHOLDER, linkedPersona.Name)}", new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

@@ -1,6 +1,5 @@
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
-using CohesiveRP.Core.WebApi.Workflows.Chat;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Storage.WebApi.Controllers
@@ -12,15 +11,21 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         private IGetAllCharactersWorkflow getAllCharactersWorkflow;
         private IGetCharacterByIdWorkflow getCharacterByIdWorkflow;
         private IImportNewCharacterWorkflow importNewCharacterWorkflow;
+        private IUpdateCharacterWorkflow updateCharacterWorkflow;
+        private IDeleteCharacterWorkflow deleteCharacterWorkflow;
 
         public CharactersController(
             IGetAllCharactersWorkflow getAllCharactersWorkflow,
             IGetCharacterByIdWorkflow getCharacterByIdWorkflow,
+            IUpdateCharacterWorkflow updateCharacterWorkflow,
+            IDeleteCharacterWorkflow deleteCharacterWorkflow,
             IImportNewCharacterWorkflow importNewCharacterWorkflow)
         {
             this.getAllCharactersWorkflow = getAllCharactersWorkflow;
             this.getCharacterByIdWorkflow = getCharacterByIdWorkflow;
             this.importNewCharacterWorkflow = importNewCharacterWorkflow;
+            this.updateCharacterWorkflow = updateCharacterWorkflow;
+            this.deleteCharacterWorkflow = deleteCharacterWorkflow;
         }
 
         [HttpGet]
@@ -38,6 +43,20 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> GetCharacterById(string characterId)
         {
             return new JsonResult(await getCharacterByIdWorkflow.GetCharacterByIdAsync(characterId));
+        }
+
+        [HttpPut]
+        [Route("{characterId}")]
+        public async Task<IActionResult> UpdateCharacter(UpdateCharacterRequestDto requestDto)
+        {
+            return new JsonResult(await updateCharacterWorkflow.UpdateCharacterAsync(requestDto));
+        }
+
+        [HttpDelete]
+        [Route("{characterId}")]
+        public async Task<IActionResult> DeleteCharacter(string characterId)
+        {
+            return new JsonResult(await deleteCharacterWorkflow.DeleteCharacterAsync(characterId));
         }
 
         [HttpPost]

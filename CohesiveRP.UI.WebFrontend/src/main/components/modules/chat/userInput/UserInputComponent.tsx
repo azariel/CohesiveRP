@@ -117,6 +117,7 @@ export default function UserInputComponent({ messagesRef, defaultChatAvatarId }:
             avatarId: defaultChatAvatarId,
             characterId: null,
             characterName: "",
+            personaId: null,
             personaName: "",
           },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
         ]);
@@ -336,6 +337,7 @@ const adjustTextareaHeight = () => {
           avatarId: defaultChatAvatarId,
           characterId: null,
           characterName: "",
+          personaId: null,
           personaName: "",
         },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
       ]);
@@ -352,6 +354,7 @@ const adjustTextareaHeight = () => {
           avatarId: defaultChatAvatarId,
           characterId: null,
           characterName: "",
+          personaId: null,
           personaName: "",
         },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
       ]);

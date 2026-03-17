@@ -46,14 +46,14 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             IMessageDbModel lastUserMessage = hotMessagesDbModel.Messages.OrderByDescending(o => o.CreatedAtUtc).First();
-            string userPersonaName = "Azariel";// TODO: fetch from db
+            PersonaDbModel linkedPersona = await storageService.GetPersonaByIdAsync(chatDbModel?.PersonaId);
 
             if (string.IsNullOrWhiteSpace(lastUserMessage.Content))
             {
                 return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            return ($"# Last message by {userPersonaName}{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content)}",
+            return ($"# Last message by {linkedPersona.Name}{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content)}",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

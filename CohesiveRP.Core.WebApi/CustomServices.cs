@@ -49,6 +49,8 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
             services.AddSingleton<IImportNewCharacterWorkflow, ImportNewCharacterWorkflow>();
             services.AddSingleton<IGetCharacterByIdWorkflow, GetCharacterByIdWorkflow>();
+            services.AddSingleton<IUpdateCharacterWorkflow, UpdateCharacterWorkflow>();
+            services.AddSingleton<IDeleteCharacterWorkflow, DeleteCharacterWorkflow>();
 
             // Workflows.Personas
             services.AddSingleton<IGetAllPersonasWorkflow, GetAllPersonasWorkflow>();

@@ -134,7 +134,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 }
 
                 EntityEntry<CharacterDbModel> result = dbContext.Characters.Remove(characterDbModel);
-                if (result.State != EntityState.Modified)
+                if (result.State != EntityState.Deleted)
                 {
                     LoggingManager.LogToFile("9ece8490-e7c5-4f30-93e2-6794953d0afb", $"Error when deleting a Character. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(characterDbModel)}].");
                     return false;

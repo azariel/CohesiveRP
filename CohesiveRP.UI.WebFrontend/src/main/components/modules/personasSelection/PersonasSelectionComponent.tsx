@@ -11,11 +11,14 @@ import type { PersonaResponseDto } from "../../../../ResponsesDto/personas/Perso
 import type { PersonasResponseDto } from "../../../../ResponsesDto/personas/PersonasResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { SharedContextPersonaType } from "../../../../store/SharedContextPersonaType";
-import { GetAvatarPathFromCharacterId, GetAvatarPathFromPersonaId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromPersonaId } from "../../../../utils/avatarUtils";
+import { ImSpinner2 } from "react-icons/im";
 
 export default function PersonasSelectionComponent() {
   const { navigateTo } = sharedContext();
   const didComponentMountAlready = useRef(false);
+  const [isLoadingPersonas, setIsLoadingPersonas] = useState(true);
+  const [isAddingPersona, setIsAddingPersona] = useState(false);
   const [isNetworkDown, setIsNetworkDown] = useState(false);
   const [personasResponse, setPersonasResponse] = useState<PersonasResponseDto | null>(null);
 
@@ -26,6 +29,7 @@ export default function PersonasSelectionComponent() {
 
     const fetchData = async () => {
       try {
+        setIsLoadingPersonas(true);
         const response: PersonasResponseDto | null = await getFromServerApiAsync<PersonasResponseDto>("api/personas");
 
         const serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -40,6 +44,8 @@ export default function PersonasSelectionComponent() {
         setPersonasResponse(response);
       } catch (error) {
         console.error("Fetch personas list error:", error);
+      } finally {
+        setIsLoadingPersonas(false);
       }
     };
 
@@ -58,6 +64,7 @@ export default function PersonasSelectionComponent() {
 
   const handleAddPersonaClick = async () => {
     try {
+      setIsAddingPersona(true);
       const response = await postToServerApiAsync<PersonaResponseDto>("api/personas", {});
 
       const serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -81,6 +88,8 @@ export default function PersonasSelectionComponent() {
     } catch (err) {
       console.error(err);
       // TODO: show err to user
+    } finally {
+      setIsAddingPersona(false);
     }
   };
 
@@ -91,14 +100,20 @@ export default function PersonasSelectionComponent() {
           <AiOutlineDisconnect className={styles.networkDownIcon} />
           <label>CohesiveRP backend is unreachable</label>
         </div>
-      ) : (
+      ) : isLoadingPersonas ? (
+          <ImSpinner2 className={ styles.loadingPersonasSpinner } />
+        ) : (
         <div className={styles.personasMainContainer}>
           <div className={styles.personasHeader}>
             <div className={styles.personasToolsComponent}>
-              <MdAddBox
+              {isAddingPersona ? (
+                <ImSpinner2 className={ styles.addingPersonaSpinner } />
+              ) : (
+                <MdAddBox
                 className={styles.addNewPersonaIcon}
                 onClick={handleAddPersonaClick}
               />
+              )}
             </div>
           </div>
 

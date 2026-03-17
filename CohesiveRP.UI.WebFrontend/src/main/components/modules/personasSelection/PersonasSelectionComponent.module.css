@@ -196,3 +196,25 @@
 .networkDownIcon {
     font-size: 2em;
 }
+
+.loadingPersonasSpinner {
+    margin: auto;
+    color: rgb(51, 174, 231);
+    width: 3.5em;
+    height: 3.5em;
+    animation: spin 1s linear infinite;
+}
+
+.addingPersonaSpinner {
+    margin: auto;
+    color: rgb(51, 174, 231);
+    width: 1%;
+    height: 1em;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
