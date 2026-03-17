@@ -2,10 +2,8 @@
 using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Png.Chunks;
-using static System.Net.Mime.MediaTypeNames;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3
