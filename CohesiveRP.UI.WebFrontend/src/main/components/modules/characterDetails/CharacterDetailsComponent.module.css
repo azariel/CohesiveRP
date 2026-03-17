@@ -56,15 +56,22 @@
 }
 
 .characterName {
-    box-sizing: border-box;
+    font-size: 1em;
     width: 100%;
-    height: 1.9em;
-    padding-top: 0.2em;
-    padding-left: 0.5em;
-    color: rgb(212, 144, 17);
-    font-weight: 600;
-    align-content: flex-start;
+    min-height: 2em;
+    max-height: 2em;
+    box-sizing: border-box;
+    display: block;
     resize: none;
+    background-color: #12121f;
+    color:#f6911d;
+    border: 1px solid #2e2e48;
+    border-radius: 6px;
+    padding-left: 0.5em;
+    font-family: "Georgia", serif;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    outline: none;
 }
 
 .characterId {
@@ -213,9 +220,19 @@
     font-size: 1em;
     width: 100%;
     min-height: 20em;
-    resize: none;
+    max-height: 50em;
     box-sizing: border-box;
     display: block;
+    resize: vertical;
+    background-color: #12121f;
+    color: #d4d4e8;
+    border: 1px solid #2e2e48;
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: "Georgia", serif;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    outline: none;
 }
 
 .characterTagsContainer {
@@ -236,8 +253,19 @@
     font-size: 1em;
     width: 100%;
     min-height: 2rem;
-    resize: none;
+    max-height: 30em;
+    resize: vertical;
     box-sizing: border-box;
+    width: 100%;
+    background-color: #12121f;
+    color: #d4d4e8;
+    border: 1px solid #2e2e48;
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: "Georgia", serif;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    outline: none;
 }
 
 .characterDescriptionContainer {
@@ -258,9 +286,19 @@
     font-size: 1em;
     width: 100%;
     min-height: 40em;
-    resize: none;
+    max-height: 100em;
     box-sizing: border-box;
     display: block;
+    resize: vertical;
+    background-color: #12121f;
+    color: #d4d4e8;
+    border: 1px solid #2e2e48;
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: "Georgia", serif;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    outline: none;
 }
 
 .operationsButtons {
@@ -272,6 +310,60 @@
     width: 100%;
     box-sizing: border-box;
     flex-shrink: 0;
+}
+
+.saveButton {
+  align-self: flex-end;
+  margin-top: 0.5em;
+  padding: 0.35em 1.2em;
+  background: transparent;
+  color: rgb(51, 174, 231);
+  border: 1px solid rgb(51, 174, 231);
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  /* transition: background 0.15s, color 0.15s; */
+}
+
+.saveButton:hover:not(:disabled) {
+  color: #fff;
+  order: 1px solid rgb(51, 174, 231);
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.deleteButton {
+  align-self: flex-end;
+  margin-top: 0.5em;
+  padding: 0.35em 1.2em;
+  background: transparent;
+  color: rgb(255, 39, 39);
+  border: 1px solid rgb(51, 174, 231);
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  /* transition: background 0.15s, color 0.15s; */
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: rgb(231, 51, 51);
+  color: #fff;
+}
+
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .loadingCharacterDetailsSpinner {

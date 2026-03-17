@@ -30,8 +30,8 @@
 
 .chatAddNewChatContainer {
     width: 100%;
+    margin-top: 1em;
     aspect-ratio: 1 / 1.5;
-    margin-top: 1.5em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -46,6 +46,7 @@
 
 .chatAddNewChatContainerDisconnected {
     width: 100%;
+    margin-top: 1em;
     aspect-ratio: 1 / 1.5;
     display: flex;
     align-items: center;
@@ -105,6 +106,30 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.chatCard {
+    position: relative;
+}
+
+.chatCard::after {
+    content: '';
+    position: absolute;
+    bottom: 2.2rem;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    border-radius: 90px;
+    background: #61eaff; /* your accent color */
+    box-shadow: 0 0 10px 3px #61e7ff88;
+    opacity: 0;
+    transform: scaleX(0.6);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.chatCard:hover::after {
+    opacity: 1;
+    transform: scaleX(1);
 }
 
 .chatCharNameLabel{
