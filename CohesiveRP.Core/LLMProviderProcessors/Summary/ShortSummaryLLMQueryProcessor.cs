@@ -102,9 +102,9 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
         private async Task<bool> UpdateSummarizedMessagesAsync(string chatId)
         {
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatId);
+            HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chatId);
 
-            hotMessages = hotMessages.OrderByDescending(o => o.CreatedAtUtc).ToArray();
+            hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.OrderByDescending(o => o.CreatedAtUtc).ToList();
             string[] messageIdsProcessedAgainstLLM = promptContext.ShareableContextLinks.FirstOrDefault(f => f.LinkedBuilder is PromptContextLastXMessagesToSummarizeBuilder)?.Value as string[];
             if (messageIdsProcessedAgainstLLM == null)
             {
@@ -113,17 +113,17 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             }
 
             // Process the messages
-            hotMessages = hotMessages.OrderBy(o => o.CreatedAtUtc).ToArray();
+            hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.OrderBy(o => o.CreatedAtUtc).ToList();
 
             foreach (var message in messageIdsProcessedAgainstLLM)
             {
-                hotMessages.FirstOrDefault(w => w.MessageId == message)?.Summarized = true;
+                hotMessagesDbModel.Messages.FirstOrDefault(w => w.MessageId == message)?.Summarized = true;
             }
 
             HotMessagesDbModel request = new HotMessagesDbModel
             {
                 ChatId = chatId,
-                SerializedMessages = hotMessages.Cast<MessageDbModel>().ToList(),
+                Messages = hotMessagesDbModel.Messages.Cast<MessageDbModel>().ToList(),
             };
 
             await storageService.UpdateHotMessagesAsync(request);

@@ -3,6 +3,7 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
@@ -23,16 +24,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         {
             // Get the messages that should be included in our new sceneTracker generation. Logically, it would be all the messages at the end of the list until we match the latest user message.
             // So, if we're in a group chat and there's 3 messages from 3 characters after the user message, we'll include the last 4 messages
-            var hotMessages = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
+            HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
 
-            if(hotMessages.Length <= 0)
+            if(hotMessagesDbModel.Messages.Count <= 0)
             {
                 return (null, new ShareableContextLink(){ LinkedBuilder = this });
             }
 
-            hotMessages = hotMessages.Reverse().ToArray();
+            hotMessagesDbModel.Messages.Reverse();
             List<IMessageDbModel> messagesToInclude = new();
-            foreach (IMessageDbModel message in hotMessages)
+            foreach (IMessageDbModel message in hotMessagesDbModel.Messages)
             {
                 messagesToInclude.Add(message);
                 if(message.SourceType == Common.BusinessObjects.MessageSourceType.User)

@@ -15,7 +15,7 @@ namespace CohesiveRP.Core.Services
         Task<ChatDbModel> AddChatAsync(CreateChatQueryModel queryModel);
         Task<ChatDbModel[]> GetAllChatsAsync();
         Task<ChatDbModel> GetChatAsync(string chatId);
-        Task<IMessageDbModel[]> GetAllHotMessagesAsync(string chatId);
+        Task<HotMessagesDbModel> GetAllHotMessagesAsync(string chatId);
         Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId);
         Task<IMessageDbModel> AddMessageAsync(CreateMessageQueryModel message);
         Task<bool> DeleteSpecificMessageAsync(string chatId, string messageId);
@@ -24,6 +24,7 @@ namespace CohesiveRP.Core.Services
         Task<GlobalSettingsDbModel> GetGlobalSettingsAsync();
         Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
         Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId);
+        Task<BackgroundQueryDbModel[]> GetBackgroundQueriesByChatIdAsync(string chatId);
         Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync();
         Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId);
         Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag);
@@ -48,6 +49,11 @@ namespace CohesiveRP.Core.Services
         Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel);
         Task<bool> UpdateCharacterAsync(CharacterDbModel characterDbModel);
         Task<bool> DeleteCharacterAsync(CharacterDbModel characterDbModel);
-
+        Task<PersonaDbModel[]> GetPersonasAsync();
+        Task<PersonaDbModel> GetPersonaByIdAsync(string personaId);
+        Task<bool> UpdatePersonaAsync(PersonaDbModel personaDbModel);
+        Task<bool> DeletePersonaAsync(PersonaDbModel personaDbModel);
+        Task<PersonaDbModel> AddEmptyPersonaAsync();
+        //Task<PersonaDbModel> GetDefaultPersonaAsync();
     }
 }

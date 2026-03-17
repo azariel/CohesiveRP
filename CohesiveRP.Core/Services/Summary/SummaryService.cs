@@ -2,6 +2,7 @@
 using CohesiveRP.Common.Utils;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Summary;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
@@ -29,10 +30,10 @@ namespace CohesiveRP.Core.Services.Summary
             }
 
             SummaryDbModel summaryDbModel = await storageService.GetSummaryAsync(chatId);
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatId);
+            HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chatId);
             if (pendingRequests.Where(w => w.Tags.Contains(BackgroundQuerySystemTags.shortSummary.ToString())).ToArray().Length <= 0)
             {
-                await EvaluateShortTermSummaryAsync(chatId, settings, hotMessages);
+                await EvaluateShortTermSummaryAsync(chatId, settings, hotMessagesDbModel.Messages.ToArray());
             } else
             {
                 LoggingManager.LogToFile("07b58dae-333d-4235-b02b-143bcf963e69", $"A short-term summary background query is already processing. Delaying.");

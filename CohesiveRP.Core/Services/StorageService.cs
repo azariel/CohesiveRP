@@ -111,12 +111,12 @@ namespace CohesiveRP.Core.Services
         // Personas
         public async Task<PersonaDbModel[]> GetPersonasAsync() => await personasDal.GetPersonasAsync();
         public async Task<PersonaDbModel> GetPersonaByIdAsync(string personaId) => await personasDal.GetPersonaByIdAsync(personaId);
-        public async Task<PersonaDbModel> ImportNewPersonaAsync(AddPersonaQueryModel queryModel) => await personasDal.AddPersonaAsync(queryModel);
         public async Task<bool> UpdatePersonaAsync(PersonaDbModel personaDbModel) => await personasDal.UpdatePersonaAsync(personaDbModel);
         public async Task<bool> DeletePersonaAsync(PersonaDbModel personaDbModel) => await personasDal.DeletePersonaAsync(personaDbModel);
+        public async Task<PersonaDbModel> AddEmptyPersonaAsync() => await personasDal.AddPersonaAsync(new AddPersonaQueryModel { Name = "New Persona", Description = "Description of your new persona." });
 
         // Messages
-        public async Task<IMessageDbModel[]> GetAllHotMessagesAsync(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);
+        public async Task<HotMessagesDbModel> GetAllHotMessagesAsync(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);
         public async Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId) => await messagesDal.GetMessageByIdAsync(chatId, messageId);
         public async Task<IMessageDbModel> AddMessageAsync(CreateMessageQueryModel message) => await messagesDal.CreateOrUpdateMessageAsync(message);
         public async Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages) => await messagesDal.UpdateHotMessagesAsync(messages);
@@ -130,6 +130,7 @@ namespace CohesiveRP.Core.Services
         public async Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel) => await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
         public async Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId) => await backgroundQueriesDal.GetBackgroundQueryAsync(queryId);
         public async Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync() => await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
+        public async Task<BackgroundQueryDbModel[]> GetBackgroundQueriesByChatIdAsync(string chatId) => await backgroundQueriesDal.GetBackgroundQueriesByChatIdAsync(chatId);
 
         // ChatCompletionPresets
         public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId) => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync(mainChatCompletionPresetId);

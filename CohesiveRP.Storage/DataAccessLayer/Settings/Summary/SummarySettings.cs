@@ -20,6 +20,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings.Summary
         public OverflowSummaryConfig Overflow { get; set; } = new();
 
         [JsonPropertyName("nbRawMessagesToKeepInContext")]
-        public int NbRawMessagesToKeepInContext { get; set; } = 3;
+        public int NbRawMessagesToKeepInContext { get; set; } = 5;
+
+        [JsonPropertyName("hotMessagesAmountLimit")]
+        public int HotMessagesAmountLimit { get; set; } = 30;
+
+        [JsonPropertyName("coldMessagesAmountLimit")]
+        public int ColdMessagesAmountLimit { get; set; } = 200;
     }
 }

@@ -21,7 +21,11 @@ export const AppSharedStoreProvider = ({ children }: { children: ReactNode }) =>
         const parsedSaved = saved ? JSON.parse(saved) : null;
 
         if (parsedSaved?.moduleName === window.history.state.moduleName) {
-          return { ...window.history.state, currentUserInputValue: parsedSaved.currentUserInputValue ?? "" };
+          return {
+            ...window.history.state,
+            currentUserInputValue: parsedSaved.currentUserInputValue ?? "",
+            isSceneTrackerOpened: parsedSaved.isSceneTrackerOpened ?? null,
+          };
         }
 
         return window.history.state;
@@ -67,6 +71,20 @@ export const AppSharedStoreProvider = ({ children }: { children: ReactNode }) =>
   // Use this instead of setActiveModule when navigating
   const navigateTo = (module: SharedContextType) => {
     window.history.pushState(module, "", `/${module.moduleName}`);
+
+    try {
+      const saved = localStorage.getItem("activeModule");
+      const parsedSaved = saved ? JSON.parse(saved) : null;
+      if (parsedSaved?.moduleName === module.moduleName) {
+        setActiveModule({
+          ...module,
+          currentUserInputValue: parsedSaved.currentUserInputValue ?? "",
+          isSceneTrackerOpened: parsedSaved.isSceneTrackerOpened ?? null,
+        } as SharedContextType);
+        return;
+      }
+    } catch { /* ignore */ }
+
     setActiveModule(module as any);
   };
 

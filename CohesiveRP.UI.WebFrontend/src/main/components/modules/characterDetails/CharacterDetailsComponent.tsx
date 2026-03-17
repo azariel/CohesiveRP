@@ -4,21 +4,23 @@ import { AiOutlineDisconnect } from "react-icons/ai";
 
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
-import { getFromServerApiAsync, postToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
+import { deleteFromServerApiAsync, getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
 import { GetAvatarPathFromCharacterId } from "../../../../utils/avatarUtils";
-import { GetCharacterDetailsNameFontSize } from "../../../../utils/fontSizeUtils";
 import { ImSpinner2 } from "react-icons/im";
 import type { SelectableChatsResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatsResponseDto";
 import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatResponseDto";
+import type { AddChatRequestDto } from "../../../../RequestDto/chat/AddChatRequestDto";
 import { MdAddBox } from "react-icons/md";
 import { FormatDateTimeToMinutes } from "../../../../utils/DateUtils";
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
+import type { SharedContextType } from "../../../../store/SharedContextType";
 
 export default function CharacterDetailsComponent() {
-  const { activeModule, navigateTo } = sharedContext();
+  const { activeModule } = sharedContext<SharedContextCharacterType>();
+  const { navigateTo } = sharedContext();
   const didComponentMountAlready = useRef(false);
   const chatsContainerRef = useRef<HTMLDivElement>(null);
   const [isNetworkDown, setIsNetworkDown] = useState(false);
@@ -27,6 +29,14 @@ export default function CharacterDetailsComponent() {
   const [isLoadingChatsDetails, setIsLoadingChatsDetails] = useState(true);
   const [characterResponse, setCharacterResponse] = useState<CharacterResponseDto | null>(null);
   const [chatsDetailsResponse, setChatsDetailsResponse] = useState<SelectableChatsResponseDto | null>(null);
+
+  // saving state
+  const [characterName, setCharacterName] = useState("");
+  const [creatorNotes, setCreatorNotes] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [characterDescription, setCharacterDescription] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [operationError, setOperationError] = useState(false);
 
   useEffect(() => {
     const el = chatsContainerRef.current;
@@ -45,29 +55,36 @@ export default function CharacterDetailsComponent() {
   useEffect(() => {
     if (didComponentMountAlready.current)
         return;
+
     didComponentMountAlready.current = true;
+    setIsLoadingCharacterDetails(true);
 
     const fetchCharacterDetails = async () => {
       try {
-        let characterModule = activeModule as SharedContextCharacterType;
-        const response: CharacterResponseDto | null = await getFromServerApiAsync<CharacterResponseDto>(`api/characters/${characterModule.selectedCharacterId}`);
+        const response: CharacterResponseDto | null = await getFromServerApiAsync<CharacterResponseDto>(`api/characters/${activeModule.selectedCharacterId}`);
         
-        setIsLoadingCharacterDetails(false);
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
-          console.error(`Call to fetch characters list failed. [${JSON.stringify(serverApiException)}]`);
+          console.error(`Call to fetch characters details failed. [${JSON.stringify(serverApiException)}]`);
           setIsNetworkDown(true);
           setCharacterResponse({
             code : -1,
             character: null
           });
+
           return;
         }
 
-        console.log(`Characters list fetched successfully.`);
+        console.log(`Characters details fetched successfully.`);
         setCharacterResponse(response);
+        setCharacterName(response?.character?.name ?? "");
+        setCreatorNotes(response?.character?.creatorNotes ?? "");
+        setTags(response?.character?.tags ?? []);
+        setCharacterDescription(response?.character?.description ?? "");
       } catch (error) {
-        console.error("Fetch characters list error:", error);
+        console.error("Fetch characters details error:", error);
+      } finally{
+        setIsLoadingCharacterDetails(false);
       }
     };
 
@@ -76,22 +93,24 @@ export default function CharacterDetailsComponent() {
         let characterModule = activeModule as SharedContextCharacterType;
         const response: SelectableChatsResponseDto | null = await getFromServerApiAsync<SelectableChatsResponseDto>(`api/chats?characterId=${characterModule.selectedCharacterId}`);
         
-        setIsLoadingChatsDetails(false);
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if (!response || response.code != 200 || serverApiException?.message) {
-          console.error(`Call to fetch characters list failed. [${JSON.stringify(serverApiException)}]`);
+          console.error(`Call to fetch characters details failed. [${JSON.stringify(serverApiException)}]`);
           setIsNetworkDown(true);
           setChatsDetailsResponse({
             code : -1,
             chats: []
           });
+
           return;
         }
-
-        console.log(`Characters list fetched successfully.`);
+        
+        console.log(`Characters details fetched successfully.`);
         setChatsDetailsResponse(response);
       } catch (error) {
-        console.error("Fetch characters list error:", error);
+        console.error("Fetch characters details error:", error);
+      } finally{
+        setIsLoadingChatsDetails(false);
       }
     };
 
@@ -123,35 +142,98 @@ export default function CharacterDetailsComponent() {
   };
 
   const handleCreateNewChatClick = async () => {
+    if(isLoadingChat)
+      return;
 
-      if(isLoadingChat)
-        return;
+    setIsLoadingChat(true);
+    try {
+      const payload:AddChatRequestDto = {
+        characterId: activeModule.selectedCharacterId
+      };
+      
+      const response:SelectableChatResponseDto | null = await postToServerApiAsync<SelectableChatResponseDto>("api/chats", payload);
 
-      setIsLoadingChat(true);
-      try {
-        const payload = {};
-        const response:SelectableChatResponseDto | null = await postToServerApiAsync<SelectableChatResponseDto>("api/chats", payload);
-  
-        // add the newly created chat to state
-        if(response) {
-          setChatsDetailsResponse(previousCollection => {
-            if (!previousCollection) {
-              return { chats: [response]} as SelectableChatsResponseDto;
-            }
-            return {
-              ...previousCollection,// copy other fields
-              chats: [...(previousCollection.chats || []), response],// add newly created chat on top of others
-            };
-          });
-  
-          console.log(`New chat created. Response: [${JSON.stringify(response)}].`);
-        } else {
-          console.error(`Failed to create a new chat. Response:[${response}] json: [${JSON.stringify(response)}].`);
-        }
-      } finally{
-        setIsLoadingChat(false);
+      // add the newly created chat to state
+      if(response) {
+        setChatsDetailsResponse(previousCollection => {
+          if (!previousCollection) {
+            return { chats: [response]} as SelectableChatsResponseDto;
+          }
+          return {
+            ...previousCollection,// copy other fields
+            chats: [...(previousCollection.chats || []), response],// add newly created chat on top of others
+          };
+        });
+
+        console.log(`New chat created. Response: [${JSON.stringify(response)}].`);
+      } else {
+        console.error(`Failed to create a new chat. Response:[${response}] json: [${JSON.stringify(response)}].`);
       }
-    };
+    } finally{
+      setIsLoadingChat(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!activeModule?.selectedCharacterId || isSaving)
+      return;
+
+    setIsSaving(true);
+    setOperationError(false);
+
+    try {
+
+      const response = await putToServerApiAsync(`api/characters/${activeModule.selectedCharacterId}`, {
+        characterId: activeModule.selectedCharacterId,
+        characterDescription,
+        characterName,
+        creatorNotes,
+        tags });
+
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || serverApiException?.message) {
+        console.error(`Save failed. [${JSON.stringify(serverApiException)}]`);
+        setOperationError(true);
+      }
+
+    } catch (error) {
+      console.error("Save character error:", error);
+      setOperationError(true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!activeModule?.selectedCharacterId || isSaving)
+      return;
+
+    setIsSaving(true);
+    setOperationError(false);
+
+    try {
+
+      const response = await deleteFromServerApiAsync(`api/characters/${activeModule.selectedCharacterId}`);
+
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || serverApiException?.message) {
+        console.error(`Deletion failed. [${JSON.stringify(serverApiException)}]`);
+        setOperationError(true);
+      } else{
+        let module = {
+          moduleName: "characters"
+        } as SharedContextType;
+
+        navigateTo(module);
+      }
+
+    } catch (error) {
+      console.error("Deletion character error:", error);
+      setOperationError(true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <main className={styles.characterDetailsComponent}>
@@ -170,10 +252,12 @@ export default function CharacterDetailsComponent() {
                 <img src={GetAvatarPathFromCharacterId(characterResponse?.character?.characterId ?? "")} alt="dev/Placeholder.png" />
               </div>
               <div className={styles.characterHeaderRightSideContainer}>
-                <label className={styles.characterName} style={{ fontSize: GetCharacterDetailsNameFontSize(characterResponse?.character?.name ?? "") }}>{characterResponse?.character?.name ?? ""}</label>
+                <textarea
+                  className={styles.characterName}
+                  value={characterName}
+                  onChange={(e) => setCharacterName(e.target.value)}
+                />
                 <label className={styles.characterId}>{characterResponse?.character?.characterId ?? ""}</label>
-                {/* <label className={styles.characterCreator}>Creator: {characterResponse?.character?.creator ?? ""}</label> */}
-                {/* <label className={styles.characterCreatedAtUtc}>Creation Date: {FormatDateTimeToMinutes(characterResponse?.character?.createdAtUtc) ?? ""}</label> */}
                 <div className={styles.characterChatsDetailsContainer}>
                   <label className={styles.characterChatsDetailsChatsLabel}>Chats</label>
                   {isLoadingChatsDetails ? (
@@ -196,22 +280,45 @@ export default function CharacterDetailsComponent() {
                 </div>
               </div>
             </div>
-            <div>
+            <div className={styles.characterDetailsBody}>
               <div className={styles.characterCreatorNotesContainer}>
                 <label className={styles.characterCreatorNotesLabel}>Creator Notes</label>
-                <label className={styles.characterCreatorNotes}>{characterResponse?.character?.creatorNotes ?? ""}</label>
+                <textarea
+                  className={styles.characterCreatorNotes}
+                  value={creatorNotes}
+                  onChange={(e) => setCreatorNotes(e.target.value)}
+                />
               </div>
 
               <div className={styles.characterTagsContainer}>
                 <label className={styles.characterTagsLabel}>Tags</label>
-                <label className={styles.characterTags}>{characterResponse?.character?.tags ?? ""}</label>
+                <textarea
+                  className={styles.characterTags}
+                  value={tags?.join(",")}
+                  onChange={(e) => setTags(e.target.value?.split(",")?.map(t => t.trim()))}
+                />
               </div>
 
               <div className={styles.characterDescriptionContainer}>
                 <label className={styles.characterDescriptionLabel}>Description</label>
-                <label className={styles.characterDescription}>{characterResponse?.character?.description ?? ""}</label>
+                <textarea
+                  className={styles.characterDescription}
+                  value={characterDescription}
+                  onChange={(e) => setCharacterDescription(e.target.value)}
+                />
               </div>
             </div>
+            <div className={styles.operationsButtons}>
+              <button className={styles.deleteButton} onClick={handleDelete} disabled={isSaving}>
+              {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Delete"}
+              </button>
+              <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
+                {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Save"}
+              </button>
+            </div>
+            {operationError && (
+              <label className={styles.saveErrorLabel}>Failed to save/delete. Please try again.</label>
+            )}
           </div>
         )
       )}

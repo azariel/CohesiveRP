@@ -22,7 +22,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         {
             string worldTitle = $"Terra";//TODO: fetch from Db
             string worldContent = $"Infer the world from the roleplay context.";//TODO: fetch from Db
-            string userPersonaName = "Azariel";// TODO: fetch from Db
+
+            PersonaDbModel defaultPersona = await storageService.GetPersonaByIdAsync(chatDbModel?.PersonaId);
+            string userPersonaName = defaultPersona.Name;
 
             if (string.IsNullOrWhiteSpace(worldContent))
             {

@@ -13,5 +13,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat
 
         [JsonPropertyName("messages")]
         public MessageDefinition[] Messages { get; set; }
+
+        [JsonPropertyName("nbColdMessages")]
+        public int NbColdMessages { get; set; }
     }
 }

@@ -9,6 +9,8 @@ import SettingsComponent from "../modules/settings/SettingsComponent";
 
 /* Store */
 import { sharedContext } from '../../../store/AppSharedStoreContext';
+import PersonasSelectionComponent from "../modules/personasSelection/PersonasSelectionComponent";
+import PersonaDetailsComponent from "../modules/personaDetails/PersonaDetailsComponent";
 
 export default function MainCenterComponent() {
   const { activeModule } = sharedContext();
@@ -21,8 +23,12 @@ export default function MainCenterComponent() {
         return <ChatComponent />;
       case "characters":
         return <CharactersComponent />;
+      case "personas":
+        return <PersonasSelectionComponent />;
       case "characterDetails":
         return <CharacterDetailsComponent />;
+      case "personaDetails":
+        return <PersonaDetailsComponent />;
       case "settings":
         return <SettingsComponent />;
       default:

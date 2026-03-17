@@ -64,6 +64,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 {
                     PersonaId = Guid.NewGuid().ToString(),
                     CreatedAtUtc = DateTime.UtcNow,
+                    LastActivityAtUtc = DateTime.UtcNow,
                     Name = queryModel.Name,
                     Description = queryModel.Description,
                 };
@@ -90,7 +91,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                var persona = dbContext.Personas.AsNoTracking().FirstOrDefault(w => w.PersonaId == personaDbModel.PersonaId);
+                var persona = dbContext.Personas.FirstOrDefault(w => w.PersonaId == personaDbModel.PersonaId);
 
                 if (persona == null)
                 {
@@ -98,7 +99,43 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return false;
                 }
 
-                EntityEntry<PersonaDbModel> result = dbContext.Personas.Update(personaDbModel);
+                persona.LastActivityAtUtc = DateTime.UtcNow;
+
+                // Only handle overridable fields
+                persona.Description = personaDbModel.Description;
+                persona.Name = personaDbModel.Name;
+                persona.IsDefault = personaDbModel.IsDefault;
+
+                if (persona.IsDefault)
+                {
+                    // Disable any other that is default currently
+                    var personasToDisableDefault = dbContext.Personas.Where(w => w.PersonaId != personaDbModel.PersonaId && w.IsDefault).ToArray();
+
+                    foreach (PersonaDbModel item in personasToDisableDefault)
+                    {
+                        item.IsDefault = false;
+                    }
+                } else
+                {
+                    // Make sure there's one default
+                    var personasToDisableDefault = dbContext.Personas.Where(w => w.IsDefault).ToArray();
+
+                    if (personasToDisableDefault.Length <= 0)
+                    {
+                        var personaToEnableDefault = dbContext.Personas.Where(w => w.PersonaId != persona.PersonaId).OrderBy(w => w.LastActivityAtUtc).FirstOrDefault();
+
+                        if (personaToEnableDefault != null)
+                        {
+                            personaToEnableDefault.IsDefault = true;
+                        } else
+                        {
+                            // There's no default persona and there's only one persona in db, so it is what it is
+                            persona.IsDefault = true;
+                        }
+                    }
+                }
+
+                EntityEntry<PersonaDbModel> result = dbContext.Personas.Update(persona);
                 if (result.State != EntityState.Modified)
                 {
                     LoggingManager.LogToFile("16b64607-90d7-4d18-be09-6f70f38509e7", $"Error when updating LastActivity on table Personas. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(personaDbModel)}].");
@@ -128,7 +165,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 }
 
                 EntityEntry<PersonaDbModel> result = dbContext.Personas.Remove(personaDbModel);
-                if (result.State != EntityState.Modified)
+                if (result.State != EntityState.Deleted)
                 {
                     LoggingManager.LogToFile("a72236f5-5a06-43e8-9bc3-fc5c04a9e472", $"Error when deleting a Persona. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(personaDbModel)}].");
                     return false;

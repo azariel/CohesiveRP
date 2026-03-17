@@ -21,18 +21,33 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
 
         public async Task<IWebApiResponseDto> AddNewChatAsync(AddNewChatRequestDto requestDto)
         {
+            if (string.IsNullOrWhiteSpace(requestDto?.CharacterId))
+            {
+                return new WebApiException
+                {
+                    HttpResultCode = System.Net.HttpStatusCode.BadRequest,
+                    Message = $"Chat creation failed. The specified characterId was null or empty."
+                };
+            }
+
+            PersonaDbModel[] personas = await storageService.GetPersonasAsync();
+            PersonaDbModel defaultPersona = personas?.FirstOrDefault(w => w.IsDefault);
+
+            if(defaultPersona == null)
+            {
+                return new WebApiException
+                {
+                    HttpResultCode = System.Net.HttpStatusCode.BadRequest,
+                    Message = $"There is no default Persona in storage. Please select one before creating a new chat."
+                };
+            }
+
             CreateChatQueryModel queryModel = new()
             {
-                SelectedChatCompletionPresets = null
+                SelectedChatCompletionPresets = null,
+                PersonaId = defaultPersona.PersonaId,
+                CharacterIds = [requestDto.CharacterId]
             };
-
-            // TEMP
-            var chars = await storageService.GetCharactersAsync();
-            if (chars.Length > 0)
-            {
-                queryModel.CharacterIds = [chars.OrderByDescending(o => o.LastActivityAtUtc).First().CharacterId];
-            }
-            //---------
 
             ChatDbModel newlyCreatedChat = await storageService.AddChatAsync(queryModel);
 

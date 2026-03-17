@@ -4,6 +4,7 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
@@ -31,24 +32,28 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             // TODO: Get the amount of messages to keep as-is from settings
             const int nbMessages = 5;// For Debug
 
-            IMessageDbModel[] hotMessages = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
-            hotMessages = hotMessages?.Where(w => w.SourceType == Common.BusinessObjects.MessageSourceType.User).ToArray();
+            HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chatDbModel.ChatId);
+            if (hotMessagesDbModel?.Messages == null)
+            {
+                return (null, new ShareableContextLink { LinkedBuilder = this });
+            }
 
-            if (hotMessages == null || hotMessages.Length <= 0)
+            hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.Where(w => w.SourceType == Common.BusinessObjects.MessageSourceType.User).ToList();
+            if (hotMessagesDbModel.Messages.Count <= 0)
             {
                 // TODO: if user hasn't talked in recent messages (hot), well...we could always fetch cold I guess, but that would be highly irregular for roleplay..
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            IMessageDbModel lastUserMessage = hotMessages.OrderByDescending(o => o.CreatedAtUtc).First();
-            string userPersonaName = "Azariel";// TODO: fetch from db
+            IMessageDbModel lastUserMessage = hotMessagesDbModel.Messages.OrderByDescending(o => o.CreatedAtUtc).First();
+            PersonaDbModel linkedPersona = await storageService.GetPersonaByIdAsync(chatDbModel?.PersonaId);
 
             if (string.IsNullOrWhiteSpace(lastUserMessage.Content))
             {
                 return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            return ($"# Last message by {userPersonaName}{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content)}", 
+            return ($"# Last message by {linkedPersona.Name}{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content)}",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

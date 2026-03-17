@@ -32,6 +32,7 @@ public class GetBackgroundQueryWorkflow : IGetBackgroundQueryWorkflow
             Priority = backgroundQuery.Priority,
             Content = backgroundQuery.Content,
         };
+
         return responseDto;
     }
 }

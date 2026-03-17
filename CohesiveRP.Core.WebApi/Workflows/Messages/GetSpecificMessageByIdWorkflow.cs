@@ -29,6 +29,8 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
             return null;
         }
 
+        var chat = await storageService.GetChatAsync(requestDto.ChatId);
+        var persona = await storageService.GetPersonaByIdAsync(chat.PersonaId);
         var character = await storageService.GetCharacterByIdAsync(message.CharacterId);
         var responseDto = new MessageResponseDto
         {
@@ -36,11 +38,14 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
             Message = new MessageDefinition
             {
                 MessageId = message.MessageId,
-                Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", "Azariel"),
+                Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", persona.Name),
                 SourceType = message.SourceType,
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,
                 CharacterId = message.CharacterId,
+                CharacterName = character.Name,
+                PersonaId = persona.PersonaId,
+                PersonaName = persona.Name,
             },
             MainQueryId = null
         };

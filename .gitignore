@@ -354,4 +354,4 @@ MigrationBackup/
 *.db-wal
 /CohesiveRP.Core.WebApi/CohesiveRP-Storage.db-shm
 /.github
-/CohesiveRP.UI.WebFrontend/public/characters
+/CohesiveRP.UI.WebFrontend/public

@@ -22,32 +22,25 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             Dictionary<string, string> loreByQueryContent = [];
-            string userPersonaName = "userName";// TODO: fetch from Db
-
-            //TODO: fetch from Db
-            //loreByQueryContent.Add("myCharacter1", "bunch of details");
-            //loreByQueryContent.Add("myCharacter2", "bunch of details 2");
+            PersonaDbModel linkedPersona = await storageService.GetPersonaByIdAsync(chatDbModel?.PersonaId);
+            string userPersonaName = linkedPersona.Name;
 
             StringBuilder str = new();
-            foreach (var loreQueryContent in loreByQueryContent)
-            {
-                string value = promptContextFormatElement?.Options?.Format?
-                    .Replace("{{item_header}}", loreQueryContent.Key)
-                    .Replace("{{item_description}}", loreQueryContent.Key)
-                    .Replace(Constants.USER_PLACEHOLDER, userPersonaName);
 
-                if(value != null)
-                {
-                    str.Append(value);
-                }
+            //Start with the player persona
+            string value = promptContextFormatElement?.Options?.Format?
+                .Replace("{{item_header}}", userPersonaName)
+                .Replace("{{item_description}}", linkedPersona.Description)
+                .Replace(Constants.USER_PLACEHOLDER, userPersonaName);
+
+            if (value != null)
+            {
+                str.Append(value);
             }
 
-            if (loreByQueryContent.Count <= 0)
-            {
-                str.Append($"Infer the relevant characters from the roleplay context.{Environment.NewLine}{Environment.NewLine}");
-            }
+            // TODO: add characters
 
             return ($"# Relevant Characters{Environment.NewLine}{str}", new ShareableContextLink { LinkedBuilder = this });
         }
-    }
+}
 }

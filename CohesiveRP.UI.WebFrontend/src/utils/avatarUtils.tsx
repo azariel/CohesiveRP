@@ -10,7 +10,20 @@ const GetAvatarPathFromCharacterId = (characterId: string): string => {
   }
 };
 
+const GetAvatarPathFromPersonaId = (personaId: string): string => {
+    try {
+      if(personaId === "") {
+        return `./dev/Placeholder.png`;
+      }
+      
+      return `./personas/${personaId}/avatar.png`;
+  }catch(err){
+    return "";
+  }
+};
+
 
 export {
-    GetAvatarPathFromCharacterId
+    GetAvatarPathFromCharacterId,
+    GetAvatarPathFromPersonaId
 };

@@ -9,5 +9,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         Task<bool> UpdateBackgroundQueryAsync(BackgroundQueryDbModel selectedQuery);
         Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId);
         Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync();
+        Task<BackgroundQueryDbModel[]> GetBackgroundQueriesByChatIdAsync(string chatId);
     }
 }

@@ -20,7 +20,8 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
-            string userPersonaName = "Azariel";// TODO: fetch from Db
+            PersonaDbModel defaultPersona = await storageService.GetPersonaByIdAsync(chatDbModel?.PersonaId);
+            string userPersonaName = defaultPersona.Name;
 
             return ($"# Your Behavioral Instruction{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 //.Replace("{{item_description}}", behaviorInstructionsContent)

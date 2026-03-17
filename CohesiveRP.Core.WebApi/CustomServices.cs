@@ -15,6 +15,8 @@ using CohesiveRP.Core.WebApi.Workflows.Chats;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Messages;
 using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Personas.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.SceneTrackers.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
@@ -47,17 +49,26 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
             services.AddSingleton<IImportNewCharacterWorkflow, ImportNewCharacterWorkflow>();
             services.AddSingleton<IGetCharacterByIdWorkflow, GetCharacterByIdWorkflow>();
+            services.AddSingleton<IUpdateCharacterWorkflow, UpdateCharacterWorkflow>();
+            services.AddSingleton<IDeleteCharacterWorkflow, DeleteCharacterWorkflow>();
 
             // Workflows.Personas
-            //services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
-            //services.AddSingleton<IImportNewCharacterWorkflow, ImportNewCharacterWorkflow>();
-            //services.AddSingleton<IGetCharacterByIdWorkflow, GetCharacterByIdWorkflow>();
+            services.AddSingleton<IGetAllPersonasWorkflow, GetAllPersonasWorkflow>();
+            services.AddSingleton<IGetPersonaByIdWorkflow, GetPersonaByIdWorkflow>();
+            services.AddSingleton<IAddPersonaWorkflow, AddPersonaWorkflow>();
+            services.AddSingleton<IUpdatePersonaWorkflow, UpdatePersonaWorkflow>();
+            services.AddSingleton<IDeletePersonaWorkflow, DeletePersonaWorkflow>();
+            services.AddSingleton<IImportAndReplaceAvatarWorkflow, ImportAndReplacePersonaAvatarWorkflow>();
+
+            // Workflows.SceneTrackers
+            services.AddSingleton<IGetSceneTrackerByIdWorkflow, GetSceneTrackerByIdWorkflow>();
 
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();
 
             // Workflows.BackgroundQueries
             services.AddSingleton<IGetBackgroundQueryWorkflow, GetBackgroundQueryWorkflow>();
+            services.AddSingleton<IGetBackgroundQueriesByChatIdWorkflow, GetBackgroundQueriesByChatIdWorkflow>();
 
             // Services
             services.AddSingleton<IStorageService, StorageService>();

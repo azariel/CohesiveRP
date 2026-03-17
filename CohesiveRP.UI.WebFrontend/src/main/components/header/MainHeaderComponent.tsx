@@ -29,7 +29,7 @@ export default function Header() {
           <button className={styles.iconBtn} onClick={() => handleIconClick("characters")} aria-label="Characters Module"  title="Characters">
             <HiMiniUsers />
           </button>
-          <button className={styles.iconBtn} onClick={() => handleIconClick("player")} aria-label="Player Module"  title="Player">
+          <button className={styles.iconBtn} onClick={() => handleIconClick("personas")} aria-label="Player Module"  title="Player">
             <HiIdentification />
           </button>
         </div>

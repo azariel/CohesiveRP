@@ -46,10 +46,10 @@ namespace CohesiveRP.Core.LLMProviderManager
             this.summaryService = summaryService;
 
             this.promptContext = BuildContextAsync(backgroundQueryDbModel.LinkedId).Result;
-            if(promptContext == null)
+            if (promptContext == null)
             {
                 LoggingManager.LogToFile("1a5f7d13-c2ef-46ad-a2dc-726510342f4c", $"Couldn't build promptContext because not one was configured for [{completionPresetType}].");
-                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
                 return;
             }
         }
@@ -76,6 +76,25 @@ namespace CohesiveRP.Core.LLMProviderManager
                 }
 
                 IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(completionPresetType.ToString(), availableLLMApiProviders, promptContext);
+                //IHttpLLMApiQueryResponseDto response = new OpenAIChatCompletionResponseDto()
+                //{
+                //    HttpResultCode = System.Net.HttpStatusCode.OK,
+                //    Messages = new List<OpenAIMessage>()
+                //    {
+                //        new OpenAIMessage()
+                //        {
+                //            Message = new Services.LLMApiProvider.OpenAI.BusinessObjects.Request.OpenAIChatCompletionMessage
+                //            {
+                //                Role = Services.LLMApiProvider.OpenAI.BusinessObjects.Request.OpenAIChatCompletionRole.assistant,
+                //                Content = "e144df85-8280-4b4a-b3f1-d6b41ce930e0",
+                //            },
+                //            FinishReason = "",
+                //            Index = 0,
+                //        }
+                //    }.ToArray()
+                //};
+                //await Task.Delay(180000);
+
                 if (response == null)
                 {
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;

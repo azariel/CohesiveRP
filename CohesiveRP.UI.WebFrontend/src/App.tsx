@@ -6,11 +6,13 @@ import MainRightBody from './main/components/main/MainRightComponent';
 
 /* Store */
 import { AppSharedStoreProvider } from './store/AppSharedStoreContext';
+import { MessagesStoreProvider } from "./store/MessagesStoreContext";
 
 function App() {
   return (
     <>
     <AppSharedStoreProvider>
+      <MessagesStoreProvider>
       <MainHeader />
         <div className='bodyControl'>
           <div className='bodyControlLeft'>
@@ -23,6 +25,7 @@ function App() {
             <MainRightBody />
           </div>
         </div>
+        </MessagesStoreProvider>
       </AppSharedStoreProvider>
     </>
   )

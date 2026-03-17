@@ -40,6 +40,10 @@
     cursor: pointer;
 }
 
+.chatAddNewChatContainer:hover {
+    border: 1px solid #a8a8a8;
+}
+
 .chatAddNewChatContainerDisconnected {
     width: 100%;
     aspect-ratio: 1 / 1.5;

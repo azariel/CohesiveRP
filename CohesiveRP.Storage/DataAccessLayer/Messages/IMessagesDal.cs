@@ -5,7 +5,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
 {
     public interface IMessagesDal
     {
-        Task<IMessageDbModel[]> GetHotMessagesAsync(string chatId);
+        Task<HotMessagesDbModel> GetHotMessagesAsync(string chatId);
         Task<IMessageDbModel> GetMessageByIdAsync(string chatId, string messageId);
         Task<IMessageDbModel> CreateOrUpdateMessageAsync(CreateMessageQueryModel queryModel);
         Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages);

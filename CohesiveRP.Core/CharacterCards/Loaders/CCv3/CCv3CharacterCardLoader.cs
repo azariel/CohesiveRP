@@ -2,9 +2,9 @@
 using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Png.Chunks;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3
 {
@@ -19,12 +19,25 @@ namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3
                 return null;
             }
 
+            ICharacterCard card = null;
+            card = TryLoadCCv3Format(image);
+
+            //if (card == null)
+            //{
+            //    card = TryLoadCharaFormat(image);
+            //}
+
+            return card;
+        }
+
+        private static ICharacterCard TryLoadCCv3Format(Image image)
+        {
             try
             {
                 PngMetadata pngMeta = image.Metadata.GetFormatMetadata(PngFormat.Instance);
-                PngTextData? ccv3Chunk = pngMeta.TextData.FirstOrDefault(f => f.Keyword.Equals("ccv3", StringComparison.OrdinalIgnoreCase));
+                PngTextData? ccv3Chunk = pngMeta.TextData.FirstOrDefault(f => f.Keyword.Equals("ccv3", StringComparison.OrdinalIgnoreCase) || f.Keyword.Equals("chara", StringComparison.OrdinalIgnoreCase));
 
-                if (ccv3Chunk == null || !ccv3Chunk.HasValue)
+                if (ccv3Chunk == null || !ccv3Chunk.HasValue || ccv3Chunk.Value.Value == null)
                     return null;
 
                 var json = Decode(ccv3Chunk.Value.Value);

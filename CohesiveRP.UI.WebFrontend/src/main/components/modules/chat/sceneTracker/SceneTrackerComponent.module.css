@@ -1,0 +1,81 @@
+.chatMessageComponent {
+  padding: 0.5rem;
+}
+
+.collapsible {
+  border: 1px solid #3a3a4a;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #1a1a2e;
+}
+
+.collapseToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background-color: #1e1e35;
+  border: none;
+  cursor: pointer;
+  color: #c9c9e0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease;
+}
+
+.collapseToggle:hover {
+  background-color: #26263f;
+}
+
+.toggleLabel {
+  user-select: none;
+}
+
+.toggleIcon {
+  font-size: 1.1rem;
+  transition: transform 0.25s ease;
+  transform: rotate(-90deg);
+}
+
+.toggleIcon.open {
+  transform: rotate(0deg);
+}
+
+.collapseBody {
+  padding: 0.75rem;
+}
+
+.contentArea {
+  width: 100%;
+  min-height: 300px;
+  max-height: 420px;
+  resize: vertical;
+  background-color: #12121f;
+  color: #d4d4e8;
+  border: 1px solid #2e2e48;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-family: "Georgia", serif;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+  outline: none;
+  cursor: default;
+}
+
+.spinnerLoading {
+  color: rgb(216, 216, 216);
+  width: 1.2em;
+  height: 1.2em;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

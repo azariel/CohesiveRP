@@ -1,159 +1,157 @@
-// import styles from "./PersonasSelectionComponent.module.css";
-// import { useRef, useEffect, useState } from "react";
-// import { FaFilter  } from "react-icons/fa";
-// import { MdAddBox } from "react-icons/md";
-// import { AiOutlineDisconnect } from "react-icons/ai";
+import styles from "./PersonasSelectionComponent.module.css";
+import { useRef, useEffect, useState } from "react";
+import { MdAddBox } from "react-icons/md";
+import { AiOutlineDisconnect } from "react-icons/ai";
+import { HiUserCircle } from "react-icons/hi";
 
-// /* Store */
-// import { sharedContext } from '../../../../store/AppSharedStoreContext';
-// import { getFromServerApiAsync, postToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
-// import type { PersonaResponseDto } from "../../../../ResponsesDto/personas/PersonaResponseDto";
-// import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
-// import type { PersonasResponseDto } from "../../../../ResponsesDto/personas/PersonasResponseDto";
-// import { GetAvatarPathFromPersonaId } from "../../../../utils/avatarUtils";
-// import type { SharedContextPersonaType } from "../../../../store/SharedContextPersonaType";
+/* Store */
+import { sharedContext } from "../../../../store/AppSharedStoreContext";
+import { getFromServerApiAsync, postToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
+import type { PersonaResponseDto } from "../../../../ResponsesDto/personas/PersonaResponseDto";
+import type { PersonasResponseDto } from "../../../../ResponsesDto/personas/PersonasResponseDto";
+import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+import type { SharedContextPersonaType } from "../../../../store/SharedContextPersonaType";
+import { GetAvatarPathFromPersonaId } from "../../../../utils/avatarUtils";
+import { ImSpinner2 } from "react-icons/im";
 
-// export default function PersonasSelectionComponent() {
-//   const { setActiveModule } = sharedContext();
-//   const didComponentMountAlready = useRef(false);
-//   const newPersonaFileInputRef = useRef<HTMLInputElement | null>(null);
-//   const [isNetworkDown, setIsNetworkDown] = useState(false);
-//   const [personasResponse, setPersonasResponse] = useState<PersonasResponseDto | null>(null);
+export default function PersonasSelectionComponent() {
+  const { navigateTo } = sharedContext();
+  const didComponentMountAlready = useRef(false);
+  const [isLoadingPersonas, setIsLoadingPersonas] = useState(true);
+  const [isAddingPersona, setIsAddingPersona] = useState(false);
+  const [isNetworkDown, setIsNetworkDown] = useState(false);
+  const [personasResponse, setPersonasResponse] = useState<PersonasResponseDto | null>(null);
 
-//   useEffect(() => {
-//     if (didComponentMountAlready.current)
-//         return;
-//     didComponentMountAlready.current = true;
+  useEffect(() => {
+    if (didComponentMountAlready.current)
+      return;
+    didComponentMountAlready.current = true;
 
-//     const fetchData = async () => {
-//       try {
-//         const response: PersonasResponseDto | null = await getFromServerApiAsync<PersonasResponseDto>(`api/personas`);
-//         let serverApiException = response as ServerApiExceptionResponseDto | null;
-//         if (!response || response.code != 200 || serverApiException?.message) {
-//           console.error(`Call to fetch personas list failed. [${JSON.stringify(serverApiException)}]`);
-//           setIsNetworkDown(true);
-//           setPersonasResponse({
-//             code : -1,
-//             personas: []
-//           });
-//           return;
-//         }
+    const fetchData = async () => {
+      try {
+        setIsLoadingPersonas(true);
+        const response: PersonasResponseDto | null = await getFromServerApiAsync<PersonasResponseDto>("api/personas");
 
-//         console.log(`Personas list fetched successfully.`);
-//         setPersonasResponse(response);
-//       } catch (error) {
-//         console.error("Fetch personas list error:", error);
-//       }
-//     };
-//     fetchData();
-//   }, []);
+        const serverApiException = response as ServerApiExceptionResponseDto | null;
+        if (!response || response.code !== 200 || serverApiException?.message) {
+          console.error(`Call to fetch personas list failed. [${JSON.stringify(serverApiException)}]`);
+          setIsNetworkDown(true);
+          setPersonasResponse({ code: -1, personas: [] });
+          return;
+        }
 
-//   const handleSpecificPersonaClick = (personaId: string) => {
-//     let selectedPersona = {
-//       selectedPersonaId: personaId,
-//       moduleName: "personaDetails",
-//     } as SharedContextPersonaType;
-//     setActiveModule(selectedPersona);
-//     console.log(`PersonaDetails selected -> Module personaDetails selected.`);
-//   };
+        console.log("Personas list fetched successfully.");
+        setPersonasResponse(response);
+      } catch (error) {
+        console.error("Fetch personas list error:", error);
+      } finally {
+        setIsLoadingPersonas(false);
+      }
+    };
 
-//   const handleAddPersonaClick = () => {
-//     newPersonaFileInputRef.current?.click();
-//   };
+    fetchData();
+  }, []);
 
-//   const handleAddPersonaFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
-//     const file = event.target.files?.[0];
-//     if (!file)
-//       return;
+  const handleSpecificPersonaClick = (personaId: string) => {
+    const selectedPersona = {
+      selectedPersonaId: personaId,
+      moduleName: "personaDetails",
+    } as SharedContextPersonaType;
 
-//     const formData = new FormData();
-//     formData.append("file", file);
+    navigateTo(selectedPersona);
+    console.log("PersonaDetails selected -> Module personaDetails selected.");
+  };
 
-//     try {
-//       const response = await postToServerApiAsync<PersonaResponseDto>("api/personas", formData);
+  const handleAddPersonaClick = async () => {
+    try {
+      setIsAddingPersona(true);
+      const response = await postToServerApiAsync<PersonaResponseDto>("api/personas", {});
 
-//       let serverApiException = response as ServerApiExceptionResponseDto | null;
-//       if (!response || response.code != 200 || serverApiException?.message)
-//       {
-//         console.error(`Upload new persona failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
-//       }
-      
-//       console.log(`Persona uploaded successfully.`);
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || response.code !== 200 || serverApiException?.message) {
+        console.error(`Create new persona failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
+        return;
+      }
 
-//       const newPersona = response as PersonaResponseDto;
+      console.log("Persona created successfully.");
 
-//       // Add the new persona to the list
-//       setPersonasResponse((prev) => {
-//         const charToAdd = newPersona.persona;
+      const personaToAdd = response.persona;
+      if (!personaToAdd)
+        return;
 
-//         if (!charToAdd)
-//           return prev;
+      setPersonasResponse((prev) => {
+        if (!prev)
+          return { code: 200, personas: [personaToAdd] } as PersonasResponseDto;
 
-//         // If there is no previous state, create the wrapper object
-//         if (!prev) {
-//           return {
-//             code: 200,
-//             personas: [charToAdd]
-//           } as PersonasResponseDto;
-//         }
+        return { ...prev, personas: [personaToAdd, ...(prev.personas || [])] };
+      });
+    } catch (err) {
+      console.error(err);
+      // TODO: show err to user
+    } finally {
+      setIsAddingPersona(false);
+    }
+  };
 
-//         // If state exists, spread the old state and add the new persona to the array
-//         return {
-//           ...prev,
-//           personas: [charToAdd, ...(prev.personas || [])]
-//         };
-//     });
-//     } catch (err) {
-//       console.error(err);
-//       // TODO: show err to user
-//     } finally {
-//       event.target.value = ""; // reset file input for future uploads
-//     }
-//   };
+  return (
+    <main className={styles.personasComponent}>
+      {isNetworkDown ? (
+        <div className={styles.networkDownContainer}>
+          <AiOutlineDisconnect className={styles.networkDownIcon} />
+          <label>CohesiveRP backend is unreachable</label>
+        </div>
+      ) : isLoadingPersonas ? (
+          <ImSpinner2 className={ styles.loadingPersonasSpinner } />
+        ) : (
+        <div className={styles.personasMainContainer}>
+          <div className={styles.personasHeader}>
+            <div className={styles.personasToolsComponent}>
+              {isAddingPersona ? (
+                <ImSpinner2 className={ styles.addingPersonaSpinner } />
+              ) : (
+                <MdAddBox
+                className={styles.addNewPersonaIcon}
+                onClick={handleAddPersonaClick}
+              />
+              )}
+            </div>
+          </div>
 
-//   return (
-//     <main className={styles.personasComponent}>
-//       {isNetworkDown ? (
-//           <div className={styles.networkDownContainer}>
-//             <AiOutlineDisconnect className={styles.networkDownIcon} />
-//             <label>CohesiveRP backend is unreachable</label>
-//           </div>
-//         ) : (
-//         <div className={styles.personasMainContainer}>
-//           <div className={styles.personasHeader}>
-//             <div className={styles.filterRow}>
-//               <FaFilter />
-//             </div>
-//             <div className={styles.personasToolsComponent}>
-//               <MdAddBox className={styles.addNewPersonaIcon} onClick={handleAddPersonaClick} />
-//                 <input
-//                   type="file"
-//                   ref={newPersonaFileInputRef}
-//                   style={{ display: "none" }}
-//                   onChange={handleAddPersonaFileSelected}
-//               />
-//             </div>
-//           </div>
-//           <div className={styles.personasGridContainer}>
-//             {personasResponse?.personas?.map(persona => (
-//               <div key={persona.personaId} className={styles.personaContainer} onClick={() => handleSpecificPersonaClick(persona.personaId)}>
-//                 <div className={styles.personaAvatarContainer}>
-//                   <img src={GetAvatarPathFromPersonaId(persona.personaId)} alt="dev/Placeholder.png" />
-//                 </div>
-//                 <div className={styles.personaInfoPanel}>
-//                   <label className={styles.personaCharNameLabel}>{persona.name}</label>
-//                   <label className={styles.personaTagsLabel}>{!persona.tags ? "" : persona.tags.join(" / ")}</label>
-//                   <label className={styles.personaDescriptionLabel}>
-//                     {persona.creatorNotes.length > 512 ? 
-//                       `${persona.creatorNotes.substring(0, 512)}...` : 
-//                       persona.creatorNotes}
-//                   </label>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-//     </main>
-//   );
-// }
+          <div className={styles.personasGridContainer}>
+            {personasResponse?.personas?.map((persona) => (
+              <div
+                key={persona.personaId}
+                className={persona.isDefault ? styles.personaContainerDefault : styles.personaContainer}
+                onClick={() => handleSpecificPersonaClick(persona.personaId)}
+              >
+                <div className={styles.personaAvatarContainer}>
+                  {persona.personaId ? (
+                    <img
+                      src={GetAvatarPathFromPersonaId(persona.personaId)}
+                      alt={persona.name}
+                    />
+                  ) : (
+                    <HiUserCircle className={styles.personaAvatarFallback} />
+                  )}
+                </div>
+
+                <div className={styles.personaInfoPanel}>
+                  <div className={styles.personaNameRow}>
+                    <label className={styles.personaNameLabel}>
+                      {persona.name}
+                    </label>
+                  </div>
+                  <label className={styles.personaDescriptionLabel}>
+                    {persona.description?.length ?? 0 > 512
+                      ? `${persona.description?.substring(0, 512) ?? ""}...`
+                      : persona.description}
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
