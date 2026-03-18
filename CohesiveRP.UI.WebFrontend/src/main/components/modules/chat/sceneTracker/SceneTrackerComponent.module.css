@@ -51,7 +51,7 @@
 .contentArea {
   width: 100%;
   min-height: 300px;
-  max-height: 420px;
+  max-height: 800px;
   resize: vertical;
   background-color: #12121f;
   color: #d4d4e8;

@@ -26,6 +26,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (null, new ShareableContextLink{ LinkedBuilder = this });
             }
 
+            var persona = await storageService.GetPersonaByIdAsync(chatDbModel.PersonaId);
             var characters = await storageService.GetCharactersAsync();
             string str = "";
             foreach (var characterId in chatDbModel.CharacterIds)
@@ -37,7 +38,8 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                     str += promptContextFormatElement?.Options?.Format?
                         .Replace("{{character_name}}", character.Name)
                         .Replace("{{character_description}}", character.Description)
-                        .Replace(Constants.CHARACTER_PLACEHOLDER, character.Name);
+                        .Replace(Constants.CHARACTER_PLACEHOLDER, character?.Name ?? "the character")
+                        .Replace(Constants.USER_PLACEHOLDER, persona?.Name ?? "User");
                 }
             }
             

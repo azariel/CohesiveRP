@@ -62,6 +62,8 @@ namespace CohesiveRP.Core.WebApi
 
             // Workflows.SceneTrackers
             services.AddSingleton<IGetSceneTrackerByIdWorkflow, GetSceneTrackerByIdWorkflow>();
+            services.AddSingleton<IUpdateSceneTrackerWorkflow, UpdateSceneTrackerWorkflow>();
+            services.AddSingleton<IForceRefreshSceneTrackerWorkflow, ForceRefreshSceneTrackerWorkflow>();
 
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();

@@ -109,12 +109,12 @@ export default function ChatSelectionComponent() {
         )}
         {isLoading || chatDefinitions?.chats && chatDefinitions.chats.length > 0 ? (
           chatDefinitions?.chats?.map((chat, index) => (
-            <div key={index}>
+            <div key={index} className={styles.chatCard}>
               <label className={styles.chatCharNameLabel} style={{ fontSize: GetChatNameFontSize(chat.name ?? "") }}>{chat.name}</label>
               <div className={styles.chatAvatarContainer} onClick={async () => await handleSpecificChatClick(chat)}>
                 <img src={GetAvatarPathFromCharacterId(chat.avatarCharacterId)} alt="Avatar" />
               </div>
-              <label className={styles.chatFootLabel}>{chat.lastActivityDateTime?.toDateString()}</label>
+              <label className={styles.chatFootLabel}>{chat.lastActivityDateTime?.toDateString() ?? "dsdsd"}</label>
             </div>
           ))
         ) : (

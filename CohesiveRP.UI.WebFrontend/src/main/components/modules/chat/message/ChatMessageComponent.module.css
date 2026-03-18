@@ -172,10 +172,6 @@
 .messageContentValueEditable {
   cursor: text;
 }
-/* .messageContentValueEditable:hover {
-  outline: 1px dashed rgba(100, 100, 100, 0.4);
-  border-radius: 4px;
-} */
 
 .messageRevertBtn {
   cursor: pointer;

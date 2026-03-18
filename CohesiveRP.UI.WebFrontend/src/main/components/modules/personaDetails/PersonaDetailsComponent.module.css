@@ -44,19 +44,22 @@
 }
 
 .personaName {
-    padding-top: 0.2em;
-    padding-left: 0.5em;
-    color: rgb(212, 144, 17);
-    font-weight: 600;
-    align-content: flex-start;
-
-    width: 95%;
-    height: 7%;
-    display: flex;
-    align-self: flex-start;
-    flex-direction: column;
-    align-items: flex-start;
+    font-size: 1em;
+    width: 100%;
+    min-height: 2em;
+    max-height: 2em;
+    box-sizing: border-box;
+    display: block;
     resize: none;
+    background-color: #12121f;
+    color:#f6911d;
+    border: 1px solid #2e2e48;
+    border-radius: 6px;
+    padding-left: 0.5em;
+    font-family: "Georgia", serif;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    outline: none;
 }
 
 .personaId {
@@ -185,22 +188,22 @@
 }
 
 .personaDescription {
+    font-size: 1em;
     width: 100%;
+    min-height: 20em;
+    max-height: 100em;
     box-sizing: border-box;
-    resize: none;
-    border: 1px solid rgb(58, 138, 230);
-    border-radius: 4px;
-    background: transparent;
-    color: inherit;
-    font-size: 0.8em;
-    font-family: inherit;
-    line-height: inherit;
-    padding: 0.2em 0.4em;
+    display: block;
+    resize: vertical;
+    background-color: #12121f;
+    color: #d4d4e8;
+    border: 1px solid #2e2e48;
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: "Georgia", serif;
+    line-height: 1.65;
+    white-space: pre-wrap;
     outline: none;
-    overflow: hidden;
-    overflow-y: auto;
-    max-height: 400px;
-    min-height: 200px;
 }
 
 .saveButton {
@@ -211,7 +214,7 @@
   color: rgb(51, 174, 231);
   border: 1px solid rgb(51, 174, 231);
   border-radius: 4px;
-  font-size: 0.85em;
+  font-size: 0.9em;
   font-family: inherit;
   cursor: pointer;
   display: flex;
@@ -221,8 +224,8 @@
 }
 
 .saveButton:hover:not(:disabled) {
-  background: rgb(51, 174, 231);
   color: #fff;
+  order: 1px solid rgb(51, 174, 231);
 }
 
 .saveButton:disabled {
@@ -238,7 +241,7 @@
   color: rgb(255, 39, 39);
   border: 1px solid rgb(51, 174, 231);
   border-radius: 4px;
-  font-size: 0.85em;
+  font-size: 0.9em;
   font-family: inherit;
   cursor: pointer;
   display: flex;
@@ -273,7 +276,12 @@
 .operationsButtons {
     display: flex;
     flex-direction: row;
-    gap: 0.5em;
+    gap: 0.8em;
+    justify-content: flex-end;
+    padding: 1em 0.8em;
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .loadingPersonaDetailsSpinner {
