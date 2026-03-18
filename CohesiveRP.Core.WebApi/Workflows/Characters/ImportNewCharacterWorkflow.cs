@@ -3,6 +3,7 @@ using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.CharacterCards;
 using CohesiveRP.Core.CharacterCards.Loaders;
 using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
+using CohesiveRP.Core.Lorebooks;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
@@ -99,6 +100,8 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         image?.Save(Path.Combine(directoryCharacter, "avatar.png"));
+
+        // TODO: handle the embedded lorebook if any
 
         // Convert DbModel to an acceptable web model (without sensitive information)
         // TODO: could really use automapper... todo

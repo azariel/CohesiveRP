@@ -23,7 +23,6 @@
     scrollbar-gutter: stable;
 }
 
-/* Optional: Ensure the second item doesn't shrink below its content if needed */
 .chatsEmptyContainer > *:last-child {
     min-width: 0; 
 }
@@ -120,7 +119,7 @@
     width: 80%;
     height: 2px;
     border-radius: 90px;
-    background: #61eaff; /* your accent color */
+    background: #61eaff;
     box-shadow: 0 0 10px 3px #61e7ff88;
     opacity: 0;
     transform: scaleX(0.6);
@@ -130,6 +129,7 @@
 .chatCard:hover::after {
     opacity: 1;
     transform: scaleX(1);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .chatCharNameLabel{

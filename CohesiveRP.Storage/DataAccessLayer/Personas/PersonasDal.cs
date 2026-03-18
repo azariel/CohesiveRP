@@ -138,7 +138,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 EntityEntry<PersonaDbModel> result = dbContext.Personas.Update(persona);
                 if (result.State != EntityState.Modified)
                 {
-                    LoggingManager.LogToFile("16b64607-90d7-4d18-be09-6f70f38509e7", $"Error when updating LastActivity on table Personas. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(personaDbModel)}].");
+                    LoggingManager.LogToFile("16b64607-90d7-4d18-be09-6f70f38509e7", $"Error when updating Persona. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(personaDbModel)}].");
                     return false;
                 }
 

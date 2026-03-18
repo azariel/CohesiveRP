@@ -46,7 +46,8 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             {
                 SelectedChatCompletionPresets = null,
                 PersonaId = defaultPersona.PersonaId,
-                CharacterIds = [requestDto.CharacterId]
+                CharacterIds = [requestDto.CharacterId],
+                LorebookIds = requestDto.LorebookIds,
             };
 
             ChatDbModel newlyCreatedChat = await storageService.AddChatAsync(queryModel);

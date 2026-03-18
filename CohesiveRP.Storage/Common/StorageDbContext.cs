@@ -100,6 +100,9 @@ namespace CohesiveRP.Storage.Common
         public DbSet<LLMApiQueryDbModel> LLMApiQueries { get; set; }
 
         public DbSet<SummaryDbModel> Summaries { get; set; }
+        
         public DbSet<SceneTrackerDbModel> SceneTrackers { get; set; }
+
+        public DbSet<LorebookDbModel> Lorebooks { get; set; }
     }
 }

@@ -30,6 +30,7 @@ public class GetAllPersonasWorkflow : IGetAllPersonasWorkflow
                 PersonaId = s.PersonaId,
                 Name = s.Name,
                 IsDefault = s.IsDefault,
+                LastActivityAtUtc = s.LastActivityAtUtc,
                 Description = s.Description,
             }).OrderByDescending(o => o.LastActivityAtUtc).ToList()
         };

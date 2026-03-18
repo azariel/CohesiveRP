@@ -59,7 +59,7 @@ namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects
     public long? ModificationDate { get; init; }
 
     [JsonPropertyName("character_book")]
-    public CCv3Lorebook? CharacterBook { get; init; }
+    public CCv3CharacterLorebook? CharacterBook { get; init; }
 
     [JsonPropertyName("assets")]
     public List<CCv3Asset>? Assets { get; init; }

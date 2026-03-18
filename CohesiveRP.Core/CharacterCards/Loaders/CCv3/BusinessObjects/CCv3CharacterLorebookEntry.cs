@@ -2,7 +2,7 @@
 
 namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects
 {
-    public record CCv3LorebookEntry
+    public record CCv3CharacterLorebookEntry
     {
         [JsonPropertyName("keys")]
         public List<string> Keys { get; init; } = [];

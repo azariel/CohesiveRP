@@ -4,8 +4,8 @@ using CohesiveRP.Core.WebApi.RequestDtos.Personas;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Personas.Abstractions
 {
-    public interface IImportAndReplaceAvatarWorkflow : IWorkflow
+    public interface IImportAndReplacePersonaAvatarWorkflow : IWorkflow
     {
-        Task<IWebApiResponseDto> ImportAvatarAsync(ImportAndReplaceAvatarRequestDto requestDto);
+        Task<IWebApiResponseDto> ImportAvatarAsync(ImportAndReplacePersonaAvatarRequestDto requestDto);
     }
 }

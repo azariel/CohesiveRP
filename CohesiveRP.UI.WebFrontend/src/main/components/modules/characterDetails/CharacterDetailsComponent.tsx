@@ -148,7 +148,8 @@ export default function CharacterDetailsComponent() {
     setIsLoadingChat(true);
     try {
       const payload:AddChatRequestDto = {
-        characterId: activeModule.selectedCharacterId
+        characterId: activeModule.selectedCharacterId,
+        lorebookIds: [],
       };
       
       const response:SelectableChatResponseDto | null = await postToServerApiAsync<SelectableChatResponseDto>("api/chats", payload);

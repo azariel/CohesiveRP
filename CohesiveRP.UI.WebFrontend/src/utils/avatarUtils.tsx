@@ -22,8 +22,21 @@ const GetAvatarPathFromPersonaId = (personaId: string): string => {
   }
 };
 
+const GetAvatarPathFromLorebookId = (lorebookId: string): string => {
+    try {
+      if(lorebookId === "") {
+        return `./dev/Placeholder.png`;
+      }
+      
+      return `./lorebooks/${lorebookId}/avatar.png`;
+  }catch(err){
+    return "";
+  }
+};
+
 
 export {
     GetAvatarPathFromCharacterId,
-    GetAvatarPathFromPersonaId
+    GetAvatarPathFromPersonaId,
+    GetAvatarPathFromLorebookId
 };

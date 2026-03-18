@@ -114,7 +114,7 @@ export default function ChatSelectionComponent() {
               <div className={styles.chatAvatarContainer} onClick={async () => await handleSpecificChatClick(chat)}>
                 <img src={GetAvatarPathFromCharacterId(chat.avatarCharacterId)} alt="Avatar" />
               </div>
-              <label className={styles.chatFootLabel}>{chat.lastActivityDateTime?.toDateString() ?? "dsdsd"}</label>
+              <label className={styles.chatFootLabel}>{chat.lastActivityDateTime?.toDateString() ?? ""}</label>
             </div>
           ))
         ) : (

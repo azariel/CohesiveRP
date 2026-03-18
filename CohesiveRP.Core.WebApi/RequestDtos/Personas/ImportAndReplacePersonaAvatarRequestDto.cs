@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Core.WebApi.RequestDtos.Personas
 {
-    public class ImportAndReplaceAvatarRequestDto : IWebApiRequestDto
+    public class ImportAndReplacePersonaAvatarRequestDto : IWebApiRequestDto
     {
         [FromRoute]
         public string PersonaId { get; set; }

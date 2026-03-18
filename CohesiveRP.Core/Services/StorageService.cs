@@ -11,6 +11,7 @@ using CohesiveRP.Storage.DataAccessLayer.Summary.Short;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
+using CohesiveRP.Storage.QueryModels.Lorebooks;
 using CohesiveRP.Storage.QueryModels.Message;
 using CohesiveRP.Storage.QueryModels.Personas;
 using CohesiveRP.Storage.QueryModels.SceneTracker;
@@ -25,6 +26,7 @@ namespace CohesiveRP.Core.Services
         private IChatsDal chatsDal;
         private ICharactersDal charactersDal;
         private IPersonasDal personasDal;
+        private ILorebooksDal lorebooksDal;
         private IMessagesDal messagesDal;
         private IGlobalSettingsDal globalSettingsDal;
         private IChatCompletionPresetsDal chatCompletionPresetsDal;
@@ -37,6 +39,7 @@ namespace CohesiveRP.Core.Services
             IChatsDal chatsDal,
             ICharactersDal charactersDal,
             IPersonasDal personasDal,
+            ILorebooksDal lorebooksDal,
             IMessagesDal messagesDal,
             IGlobalSettingsDal globalSettingsDal,
             IChatCompletionPresetsDal chatCompletionPresetsDal,
@@ -48,6 +51,7 @@ namespace CohesiveRP.Core.Services
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;
             this.personasDal = personasDal;
+            this.lorebooksDal = lorebooksDal;
             this.messagesDal = messagesDal;
             this.globalSettingsDal = globalSettingsDal;
             this.chatCompletionPresetsDal = chatCompletionPresetsDal;
@@ -114,6 +118,15 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> UpdatePersonaAsync(PersonaDbModel personaDbModel) => await personasDal.UpdatePersonaAsync(personaDbModel);
         public async Task<bool> DeletePersonaAsync(PersonaDbModel personaDbModel) => await personasDal.DeletePersonaAsync(personaDbModel);
         public async Task<PersonaDbModel> AddEmptyPersonaAsync() => await personasDal.AddPersonaAsync(new AddPersonaQueryModel { Name = "New Persona", Description = "Description of your new persona." });
+
+        // Lorebooks
+        public async Task<LorebookDbModel[]> GetLorebooksAsync() => await lorebooksDal.GetLorebooksAsync();
+        public async Task<LorebookDbModel[]> GetLorebooksAsync(Func<LorebookDbModel, bool> func) => await lorebooksDal.GetLorebooksByFuncAsync(func);
+        public async Task<LorebookDbModel> GetLorebookByIdAsync(string lorebookId) => await lorebooksDal.GetLorebookByIdAsync(lorebookId);
+        public async Task<bool> UpdateLorebookAsync(LorebookDbModel lorebookDbModel) => await lorebooksDal.UpdateLorebookAsync(lorebookDbModel);
+        public async Task<bool> DeleteLorebookAsync(LorebookDbModel lorebookDbModel) => await lorebooksDal.DeleteLorebookAsync(lorebookDbModel);
+        public async Task<LorebookDbModel> AddEmptyLorebookAsync() => await lorebooksDal.AddLorebookAsync(new AddLorebookQueryModel { Name = "New Lorebook", Entries = [] });
+        public async Task<LorebookDbModel> AddLorebookAsync(LorebookDbModel dbModel) => await lorebooksDal.AddLorebookAsync(dbModel);
 
         // Messages
         public async Task<HotMessagesDbModel> GetAllHotMessagesAsync(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);

@@ -1,7 +1,5 @@
-using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.RequestDtos.Personas;
-using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Personas.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +14,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         private IAddPersonaWorkflow addPersonaWorkflow;
         private IUpdatePersonaWorkflow updatePersonaWorkflow;
         private IDeletePersonaWorkflow deletePersonaWorkflow;
-        private IImportAndReplaceAvatarWorkflow importAndReplacePersonaAvatarWorkflow;
+        private IImportAndReplacePersonaAvatarWorkflow importAndReplacePersonaAvatarWorkflow;
 
         public PersonasController(
             IGetAllPersonasWorkflow getAllPersonasWorkflow,
@@ -24,7 +22,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             IAddPersonaWorkflow addPersonaWorkflow,
             IUpdatePersonaWorkflow updatePersonaWorkflow,
             IDeletePersonaWorkflow deletePersonaWorkflow,
-            IImportAndReplaceAvatarWorkflow importAndReplacePersonaAvatarWorkflow)
+            IImportAndReplacePersonaAvatarWorkflow importAndReplacePersonaAvatarWorkflow)
         {
             this.getAllPersonasWorkflow = getAllPersonasWorkflow;
             this.getPersonaByIdWorkflow = getPersonaByIdWorkflow;
@@ -66,7 +64,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
 
         [HttpPost]
         [Route("{personaId}/avatar")]
-        public async Task<IActionResult> ImportNewAvatar([FromForm] ImportAndReplaceAvatarRequestDto requestDto)
+        public async Task<IActionResult> ImportNewAvatar([FromForm] ImportAndReplacePersonaAvatarRequestDto requestDto)
         {
             return new JsonResult(await importAndReplacePersonaAvatarWorkflow.ImportAvatarAsync(requestDto));
         }
