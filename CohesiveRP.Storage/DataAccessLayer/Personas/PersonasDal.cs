@@ -60,21 +60,29 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 using var dbContext = await contextFactory.CreateDbContextAsync();
 
                 // Convert models
-                PersonaDbModel PersonaDbModel = new PersonaDbModel
+                PersonaDbModel personaDbModel = new PersonaDbModel
                 {
                     PersonaId = Guid.NewGuid().ToString(),
                     CreatedAtUtc = DateTime.UtcNow,
                     LastActivityAtUtc = DateTime.UtcNow,
                     Name = queryModel.Name,
+                    IsDefault = false,
                     Description = queryModel.Description,
                 };
 
-                EntityEntry<PersonaDbModel> result = await dbContext.Personas.AddAsync(PersonaDbModel);
+                EntityEntry<PersonaDbModel> result = await dbContext.Personas.AddAsync(personaDbModel);
 
                 if (result.State != EntityState.Added)
                 {
                     LoggingManager.LogToFile("a3e0e0f5-822f-4e26-a1b6-85611c0b4dbe", $"Error when querying Db on table Personas. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}].");
                     return null;
+                }
+
+
+                if (dbContext.Personas.Count() <= 0)
+                {
+                    personaDbModel.IsDefault = true;
+                    await UpdatePersonaAsync(personaDbModel);
                 }
 
                 await dbContext.SaveChangesAsync();

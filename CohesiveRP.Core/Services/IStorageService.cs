@@ -6,6 +6,7 @@ using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
+using CohesiveRP.Storage.QueryModels.Personas;
 using CohesiveRP.Storage.QueryModels.SceneTracker;
 using Microsoft.EntityFrameworkCore;
 
@@ -69,7 +70,7 @@ namespace CohesiveRP.Core.Services
         Task<PersonaDbModel> GetPersonaByIdAsync(string personaId);
         Task<bool> UpdatePersonaAsync(PersonaDbModel personaDbModel);
         Task<bool> DeletePersonaAsync(PersonaDbModel personaDbModel);
-        Task<PersonaDbModel> AddEmptyPersonaAsync();
+        Task<PersonaDbModel> AddPersonaAsync(AddPersonaQueryModel queryModel);
 
         // Lorebooks
         Task<LorebookDbModel[]> GetLorebooksAsync();

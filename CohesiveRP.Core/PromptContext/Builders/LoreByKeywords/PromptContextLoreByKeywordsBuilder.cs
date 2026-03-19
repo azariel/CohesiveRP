@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using CohesiveRP.Common;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
@@ -44,25 +45,62 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             HotMessagesDbModel hotMessages = await storageService.GetAllHotMessagesAsync(chat.ChatId);
             IOrderedEnumerable<MessageDbModel> orderedMessages = hotMessages.Messages.OrderByDescending(o => o.CreatedAtUtc);
 
-            StringBuilder str = new();
+            int nbTotalMessages = hotMessages.NbColdMessages + hotMessages.Messages.Count;
+            List<LorebookEntry> entriesToInclude = new();
             foreach (LorebookDbModel lorebook in lorebooks)
             {
-                foreach (LorebookEntry entry in lorebook.Entries)
+                foreach (LorebookEntry entry in lorebook.Entries.Where(w => !w.OnlyTriggeredByRecursion).ToArray())
                 {
-                    if (!EvaluateIfLorebookKeyTriggers(entry, orderedMessages))
+                    List<MessageDbModel> messagesToProcess = orderedMessages.Take(entry.Depth).Where(w => !string.IsNullOrWhiteSpace(w.Content)).ToList();
+                    if (!EvaluateLorebookKeyTriggers(entry, string.Join(" ", messagesToProcess.Select(s => s.Content).ToArray()), nbTotalMessages))
                     {
                         continue;
                     }
 
-                    string value = promptContextFormatElement?.Options?.Format?
-                        .Replace("{{item_header}}", entry.Name)
-                        .Replace("{{item_description}}", entry.Content)
-                        .Replace(Constants.USER_PLACEHOLDER, userPersonaName);
+                    entriesToInclude.Add(entry);
+                }
 
-                    if (value != null)
+                // Now, handle all entries that triggers on recursivity
+                List<LorebookEntry> entriesAllowingRecursion = entriesToInclude.Where(w => !w.PreventRecursion).ToList();
+                foreach (LorebookEntry entry in lorebook.Entries.Where(w => !entriesToInclude.Contains(w) && !w.ExcludeRecursion).ToArray())
+                {
+                    // Second chance to this entry. We'll check if it can triggers on another entry content
+                    foreach (var entryAllowingRecursion in entriesAllowingRecursion)
                     {
-                        str.Append(value);
+                        if (EvaluateLorebookKeyTriggers(entry, entryAllowingRecursion.Content, nbTotalMessages))
+                        {
+                            entriesToInclude.Add(entry);
+                            break;
+                        }
                     }
+
+                }
+            }
+
+            // Handle probabilities
+            List<LorebookEntry> finalEntries = [..entriesToInclude.Where(w => w.ProbabilityPercentage >= 100)];
+
+            foreach (var entry in entriesToInclude.Where(w => w.ProbabilityPercentage < 100).ToArray())
+            {
+                Random random = new Random(DateTime.Now.Millisecond);
+                if (random.Next(0, 100) >= entry.ProbabilityPercentage)
+                {
+                    continue;
+                }
+
+                finalEntries.Add(entry);
+            }
+
+            StringBuilder str = new();
+            foreach (LorebookEntry entryToInclude in entriesToInclude)
+            {
+                string value = promptContextFormatElement?.Options?.Format?
+                        .Replace("{{item_header}}", entryToInclude.Name)
+                        .Replace("{{item_description}}", entryToInclude.Content);
+
+                if (value != null)
+                {
+                    str.Append(value);
                 }
             }
 
@@ -71,35 +109,74 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 str.Append($"Infer the lore from the roleplay context.{Environment.NewLine}{Environment.NewLine}");
             }
 
-            return ($"# Lore{Environment.NewLine}{str}", new ShareableContextLink { LinkedBuilder = this });
+            return ($"# Lore{Environment.NewLine}{str.Replace(Constants.USER_PLACEHOLDER, userPersonaName)}", new ShareableContextLink { LinkedBuilder = this });
         }
 
         /// <summary>
         /// Only inject the key/value when relevant in context.
         /// </summary>
-        private bool EvaluateIfLorebookKeyTriggers(LorebookEntry entry, IOrderedEnumerable<MessageDbModel> messages)
+        private bool EvaluateLorebookKeyTriggers(LorebookEntry entry, string contentToEvaluate, int nbTotalMessages)
         {
-            if (entry.Depth <= 0)
+            // TODO: handle insertionOrder
+            // TODO: handle Vectorized
+            // TODO: handle PositionInPrompt, but this looks incompatible with cohesiveRP
+            // TODO: handle sticky AND cooldown.. this will most likely require db interface for persistence..
+            // TODO: handle IgnoreTokensBudget
+
+            if (!entry.Enabled ||
+                entry.Depth <= 0 ||
+                (entry.Delay > 0 && nbTotalMessages < entry.Delay) ||
+                ((entry.Keys == null || entry.Keys.Count <= 0) && entry.SelectiveLogicBetweenKeysAndSecondaryKeys == KeysEvaluationLogicGate.MainKeysOnly) ||
+                ((entry.Keys == null || entry.Keys.Count <= 0) && (entry.SecondaryKeys == null || entry.SecondaryKeys.Count <= 0)))
             {
                 return false;
             }
 
-            List<MessageDbModel> messagesToProcess = messages.Take(entry.Depth).ToList();
+            if (entry.Constant)
+            {
+                return true;
+            }
 
-            var stringComparison = StringComparison.InvariantCulture;
+            StringComparison stringComparison = StringComparison.InvariantCulture;
+            StringComparer stringComparer = StringComparer.InvariantCulture;
             if (entry.CaseSensitive)
             {
                 stringComparison = StringComparison.InvariantCultureIgnoreCase;
+                stringComparer = StringComparer.InvariantCultureIgnoreCase;
             }
 
-            foreach (MessageDbModel message in messagesToProcess)
+            List<string> words = contentToEvaluate.Split(" ").Select(a => a.Trim()).ToList();
+            switch (entry.SelectiveLogicBetweenKeysAndSecondaryKeys)
             {
-                if (entry.Keys.Any(a => message.Content.Contains(a, stringComparison)))
-                {
-                    return true;
-                }
+                case KeysEvaluationLogicGate.MainKeysOnly:
+                    if (entry.MatchWholeWord)
+                    {
+                        return entry.Keys.Any(a => words.Contains(a, stringComparer));
+                    } else
+                    {
+                        return entry.Keys.Any(a => contentToEvaluate.Contains(a, stringComparison));
+                    }
+                case KeysEvaluationLogicGate.OR:
+                    if (entry.MatchWholeWord)
+                    {
+                        return entry.Keys.Any(a => words.Contains(a, stringComparer)) ||
+                        entry.SecondaryKeys.Any(a => words.Contains(a, stringComparer));
+                    } else
+                    {
+                        return entry.Keys.Any(a => contentToEvaluate.Contains(a, stringComparison)) ||
+                        entry.SecondaryKeys.Any(a => contentToEvaluate.Contains(a, stringComparison));
+                    }
+                case KeysEvaluationLogicGate.AND:
+                    if (entry.MatchWholeWord)
+                    {
+                        return entry.Keys.Any(a => words.Contains(a, stringComparer)) &&
+                        entry.SecondaryKeys.Any(a => words.Contains(a, stringComparer));
+                    } else
+                    {
+                        return entry.Keys.Any(a => contentToEvaluate.Contains(a, stringComparison)) &&
+                        entry.SecondaryKeys.Any(a => contentToEvaluate.Contains(a, stringComparison));
+                    }
             }
-
 
             return false;
         }

@@ -114,7 +114,7 @@
 .chatCard::after {
     content: '';
     position: absolute;
-    bottom: 2.2rem;
+    bottom: 0.6rem;
     left: 10%;
     width: 80%;
     height: 2px;

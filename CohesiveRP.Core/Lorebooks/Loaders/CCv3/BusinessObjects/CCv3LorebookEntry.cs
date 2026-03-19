@@ -47,13 +47,13 @@ namespace CohesiveRP.Core.Lorebooks.Loaders.CCv3.BusinessObjects
     public int Position { get; set; }
  
     [JsonPropertyName("depth")]
-    public int Depth { get; set; }
+    public int Depth { get; set; } = 4;
  
     [JsonPropertyName("displayIndex")]
     public int DisplayIndex { get; set; }
  
     [JsonPropertyName("probability")]
-    public int Probability { get; set; }
+    public int Probability { get; set; } = 100;
  
     [JsonPropertyName("useProbability")]
     public bool UseProbability { get; set; }
