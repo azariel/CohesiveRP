@@ -8,7 +8,6 @@ using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
 using CohesiveRP.Storage.QueryModels.Personas;
 using CohesiveRP.Storage.QueryModels.SceneTracker;
-using Microsoft.EntityFrameworkCore;
 
 namespace CohesiveRP.Core.Services
 {
@@ -18,14 +17,17 @@ namespace CohesiveRP.Core.Services
         Task<ChatDbModel> AddChatAsync(CreateChatQueryModel queryModel);
         Task<ChatDbModel[]> GetAllChatsAsync();
         Task<ChatDbModel> GetChatAsync(string chatId);
+        Task<bool> DeleteChatAsync(string chatId);
 
         // Messages
         Task<HotMessagesDbModel> GetAllHotMessagesAsync(string chatId);
         Task<IMessageDbModel> GetSpecificMessageAsync(string chatId, string messageId);
-        Task<IMessageDbModel> AddMessageAsync(CreateMessageQueryModel message);
         Task<bool> DeleteSpecificMessageAsync(string chatId, string messageId);
+        Task<IMessageDbModel> AddMessageAsync(CreateMessageQueryModel message);
         Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages);
         Task<bool> UpdateHotMessageAsync(string chatId, MessageDbModel message);
+        Task<bool> DeleteColdMessagesAsync(string chatId);
+        Task<bool> DeleteHotMessagesAsync(string chatId);
 
         // GlobalSettings
         Task<GlobalSettingsDbModel> GetGlobalSettingsAsync();
@@ -39,6 +41,7 @@ namespace CohesiveRP.Core.Services
         Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag);
         Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery);
         Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId);
+        Task<bool> DeleteBackgroundQueriesByChatIdAsync(string chatId);
 
         // Summary
         Task<ISummaryEntryDbModel> AddShortTermSummaryAsync(CreateSummaryQueryModel queryModel);
@@ -52,11 +55,13 @@ namespace CohesiveRP.Core.Services
         Task<bool> DeleteLongTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesId);
+        Task<bool> DeleteSummaryFromChatIdAsync(string chatId);
 
         // SceneTracker
         Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId);
         Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
         Task<SceneTrackerDbModel> UpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
+        Task<bool> DeleteSceneTrackerAsync(string chatId);
 
         // Character
         Task<CharacterDbModel[]> GetCharactersAsync();

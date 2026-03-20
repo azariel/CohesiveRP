@@ -6,6 +6,8 @@ using CohesiveRP.Core.Lorebooks;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Personas;
 using CohesiveRP.Core.WebApi.ResponseDtos;
+using CohesiveRP.Core.WebApi.ResponseDtos.Personas;
+using CohesiveRP.Core.WebApi.ResponseDtos.Personas.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Lorebooks.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using SixLabors.ImageSharp;
@@ -91,9 +93,16 @@ public class ImportLorebookWorkflow : IImportLorebookWorkflow
             }
         }
 
-        return new BasicResponseDto
+        return new LorebookResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
+            Lorebook = new LorebookResponse
+            {
+                LorebookId = result.LorebookId,
+                Name = result.Name,
+                LastActivityAtUtc = result.LastActivityAtUtc,
+                Entries = result.Entries,
+            }
         };
     }
 }

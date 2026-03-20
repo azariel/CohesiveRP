@@ -16,5 +16,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Summary.Short
         Task<bool> DeleteLongTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesIds);
+        Task<bool> DeleteSummaryFromChatIdAsync(string chatId);
     }
 }

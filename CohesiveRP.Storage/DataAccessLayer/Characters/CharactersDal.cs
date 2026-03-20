@@ -129,14 +129,14 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 if (character == null)
                 {
-                    LoggingManager.LogToFile("8aff54b1-92ef-4bc9-b594-6da73992c982", $"Character [{characterDbModel.CharacterId}] to update wasn't found in storage.");
+                    LoggingManager.LogToFile("8aff54b1-92ef-4bc9-b594-6da73992c982", $"Character [{characterDbModel.CharacterId}] to delete wasn't found in storage.");
                     return false;
                 }
 
                 EntityEntry<CharacterDbModel> result = dbContext.Characters.Remove(characterDbModel);
                 if (result.State != EntityState.Deleted)
                 {
-                    LoggingManager.LogToFile("9ece8490-e7c5-4f30-93e2-6794953d0afb", $"Error when deleting a Character. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(characterDbModel)}].");
+                    LoggingManager.LogToFile("9ece8490-e7c5-4f30-93e2-6794953d0afb", $"Error when deleting a specific Character. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(characterDbModel)}].");
                     return false;
                 }
 

@@ -5,8 +5,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.SceneTracker
 {
     public interface ISceneTrackerDal
     {
-        Task<SceneTrackerDbModel> AddSceneTracker(CreateSceneTrackerQueryModel queryModel);
-        Task<SceneTrackerDbModel> CreateOrUpdateSceneTracker(CreateSceneTrackerQueryModel queryModel);
-        Task<SceneTrackerDbModel> GetSceneTracker(string chatId);
+        Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
+        Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
+        Task<bool> DeleteSceneTrackerAsync(string chatId);
+        Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId);
     }
 }

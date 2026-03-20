@@ -11,15 +11,18 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         private IGetAllSelectableChatsWorkflow getAllChatsWorkflow;
         private IGetSpecificChatWorkflow getSpecificChat;
         private ICreateNewChatWorkflow createNewChatWorkflow;
+        private IDeleteSpecificChatWorkflow deleteSpecificChat;
 
         public ChatsController(
             IGetAllSelectableChatsWorkflow getAllChatsWorkflow,
             IGetSpecificChatWorkflow getSpecificChat,
-            ICreateNewChatWorkflow createNewChatWorkflow)
+            ICreateNewChatWorkflow createNewChatWorkflow,
+            IDeleteSpecificChatWorkflow deleteSpecificChat)
         {
             this.getAllChatsWorkflow = getAllChatsWorkflow;
             this.getSpecificChat = getSpecificChat;
             this.createNewChatWorkflow = createNewChatWorkflow;
+            this.deleteSpecificChat = deleteSpecificChat;
         }
 
         [HttpGet]
@@ -43,6 +46,13 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> CreateNewChat(AddNewChatRequestDto requestDto)
         {
             return new JsonResult(await createNewChatWorkflow.AddNewChatAsync(requestDto));
+        }
+
+        [HttpDelete]
+        [Route("{chatId}")]
+        public async Task<IActionResult> DeleteSpecificChatById(string chatId)
+        {
+            return new JsonResult(await deleteSpecificChat.DeleteChatById(chatId));
         }
     }
 }

@@ -220,5 +220,34 @@ namespace CohesiveRP.Storage.DataAccessLayer.Summary.Short
         public async Task<bool> DeleteLongTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await DeleteSummaryAsync(chatId, summariesIds, BackgroundQuerySystemTags.longSummary);
         public async Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await DeleteSummaryAsync(chatId, summariesIds, BackgroundQuerySystemTags.extraSummary);
         public async Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await DeleteSummaryAsync(chatId, summariesIds, BackgroundQuerySystemTags.overflowSummary);
+
+        public async Task<bool> DeleteSummaryFromChatIdAsync(string chatId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var summaryDbModel = dbContext.Summaries.FirstOrDefault(w => w.ChatId == chatId);
+
+                if (summaryDbModel == null)
+                {
+                    LoggingManager.LogToFile("e6d3b0fd-3141-472e-82a3-192fe3d707b8", $"SummaryDbModel tethered to chat [{chatId}] to delete wasn't found in storage.");
+                    return false;
+                }
+
+                var result = dbContext.Summaries.Remove(summaryDbModel);
+                if (result.State != EntityState.Deleted)
+                {
+                    LoggingManager.LogToFile("aa98130e-d3d0-46b0-9e17-04e12e9a1cc4", $"Error when deleting a specific SummaryDbModel tethered to chat [{chatId}]. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(summaryDbModel)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("f4315e1a-3448-4e4f-a351-d13da7446e96", $"Error when querying pending queries on table Summaries.", ex);
+                return false;
+            }
+        }
     }
 }

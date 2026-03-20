@@ -2,11 +2,37 @@
     height: 100dvh;
     display: flex;
     flex-direction: column;
+    align-content: flex-start;
 }
 
 .lorebooksToolsComponent {
     margin-left: auto;
     padding-top: 1em;
+}
+
+.headerLoadingSpinner {
+    margin: auto;
+    color: rgb(51, 174, 231);
+    width: 1em;
+    height: 1em;
+    animation: spin 1s linear infinite;
+}
+
+.lorebooksHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+    padding: 0;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+.lorebooksHeaderTools {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .importingLorebookSpinner {
@@ -173,6 +199,14 @@
 
 .filterRow {
     padding-top: 1em;
+    color:#dfdfdf;
+    font-size: 1em;
+}
+
+.filterRow:hover {
+    cursor: pointer;
+    color:rgb(255, 255, 255);
+    transition: color 0.3s ease;
 }
 
 .addLorebookTutorial {

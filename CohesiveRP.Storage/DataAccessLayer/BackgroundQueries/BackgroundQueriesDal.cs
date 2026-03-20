@@ -1,15 +1,13 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.Json;
+﻿using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static CohesiveRP.Common.Diagnostics.LoggingManager;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
@@ -219,6 +217,29 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("d4f5ffc3-a05d-4843-9360-c9bc4b34ed57", $"Error when querying pending queries on table BackgroundQueries.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteBackgroundQueriesByChatIdAsync(string chatId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var backgroundQueryDbModels = dbContext.BackgroundQueries.Where(w => w.ChatId == chatId).ToArray();
+
+                if (backgroundQueryDbModels == null)
+                {
+                    LoggingManager.LogToFile("6f58eb8e-7c89-4e8f-9c2b-20430dc30085", $"Chat [{chatId}] did not have any tethered backgroundQueries to delete in storage.", logVerbosity: LogVerbosity.Verbose);
+                    return false;
+                }
+
+                dbContext.BackgroundQueries.RemoveRange(backgroundQueryDbModels);
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("8173a545-f6d2-43c8-8caf-6b1bcf5e497c", $"Error when querying pending queries on table Chats.", ex);
                 return false;
             }
         }

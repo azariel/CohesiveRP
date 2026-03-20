@@ -87,5 +87,34 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 return null;
             }
         }
+
+        public async Task<bool> DeleteChatAsync(string chatId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var chat = dbContext.Chats.FirstOrDefault(w => w.ChatId == chatId);
+
+                if (chat == null)
+                {
+                    LoggingManager.LogToFile("f23deb92-034e-43dc-a7c4-4e0ca1c8c5a5", $"Chat [{chatId}] to delete wasn't found in storage.");
+                    return false;
+                }
+
+                var result = dbContext.Chats.Remove(chat);
+                if (result.State != EntityState.Deleted)
+                {
+                    LoggingManager.LogToFile("cbc84e32-b1ed-4c3d-8a4a-03810a0afddc", $"Error when deleting a specific Chat. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(chat)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("8173a545-f6d2-43c8-8caf-6b1bcf5e497c", $"Error when querying pending queries on table Chats.", ex);
+                return false;
+            }
+        }
     }
 }

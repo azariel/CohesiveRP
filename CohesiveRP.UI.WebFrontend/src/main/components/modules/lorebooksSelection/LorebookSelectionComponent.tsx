@@ -106,21 +106,26 @@ const handleAddLorebookFileSelected = async (event: React.ChangeEvent<HTMLInputE
     console.log(`Lorebook uploaded successfully.`);
 
     // Add the new character to the list
-    // setLorebooksResponse((prev) => {
-    //   // If there is no previous state, create the wrapper object
-    //   if (!prev) {
-    //     return {
-    //       code: 200,
-    //       characters: [charToAdd]
-    //     } as CharactersResponseDto;
-    //   }
+    setLorebookDefinitions((prev) => {
+        const lorebookToAdd = response?.lorebook;
 
-    //   // If state exists, spread the old state and add the new character to the array
-    //   return {
-    //     ...prev,
-    //     characters: [charToAdd, ...(prev.characters || [])]
-    //   };
-    // });
+        if (!lorebookToAdd)
+          return prev;
+
+        // If there is no previous state, create the wrapper object
+        if (!prev) {
+          return {
+            code: 200,
+            lorebooks: [lorebookToAdd]
+          } as LorebooksResponseDto;
+        }
+
+        // If state exists, spread the old state and add the new character to the array
+        return {
+          ...prev,
+          lorebooks: [lorebookToAdd, ...(prev.lorebooks || [])]
+        };
+    });
   } catch (err) {
     console.error(err);
     // TODO: show err to user
@@ -137,24 +142,34 @@ const handleAddLorebookClick = () => {
   return (
     <main className={styles.lorebookSelectionComponent}>
       <div className={styles.lorebooksHeader}>
-        <div className={styles.filterRow}>
-          <FaFilter />
-        </div>
-        <div className={styles.lorebooksToolsComponent}>
-          {isImportingLorebook ? (
-            <ImSpinner2 className={ styles.importingLorebookSpinner } />
+        {isLoading ? (
+          <ImSpinner2 className={ styles.headerLoadingSpinner } />
+        ) : (
+          isNetworkDown ? (
+            <p/>
           ) : (
-            <div>
-              <MdAddBox className={styles.addNewLorebookIcon} onClick={handleAddLorebookClick} />
-              <input
-                type="file"
-                ref={newLorebookFileInputRef}
-                style={{ display: "none" }}
-                onChange={handleAddLorebookFileSelected}
-              />
-          </div>
+            <div className={styles.lorebooksHeaderTools}>
+                <div className={styles.filterRow}>
+                  <FaFilter />
+                </div>
+                <div className={styles.lorebooksToolsComponent}>
+                  {isImportingLorebook ? (
+                    <ImSpinner2 className={ styles.importingLorebookSpinner } />
+                  ) : (
+                    <div>
+                      <MdAddBox className={styles.addNewLorebookIcon} onClick={handleAddLorebookClick} />
+                      <input
+                        type="file"
+                        ref={newLorebookFileInputRef}
+                        style={{ display: "none" }}
+                        onChange={handleAddLorebookFileSelected}
+                      />
+                  </div>
+                  )}
+                </div>
+              </div>
+            )
           )}
-        </div>
       </div>
       <div className={styles.lorebooksGridContainer}>
         {isLoading ? (
@@ -183,13 +198,7 @@ const handleAddLorebookClick = () => {
             </div>
           ))
         ) : (
-          isNetworkDown ? (
-            <div className={styles.addLorebookTutorial}>
-              <label>CohesiveRP backend is unreachable</label>
-            </div>
-          ):(
-            <div />
-          )
+          <div />
         )}
       </div>
     </main>
