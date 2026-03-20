@@ -23,7 +23,7 @@ public class GetAllSelectableChatsWorkflow : IGetAllSelectableChatsWorkflow
 
         if (!string.IsNullOrWhiteSpace(characterId))
         {
-            chats = chats.Where(w => w.CharacterIds.Contains(characterId)).ToArray();
+            chats = chats.Where(w => w.CharacterIds != null && w.CharacterIds.Contains(characterId)).ToArray();
         }
 
         ChatDefinitionsResponseDto responseDto = new();

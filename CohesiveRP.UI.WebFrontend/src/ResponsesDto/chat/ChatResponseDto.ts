@@ -1,7 +1,9 @@
 import type { ServerApiResponseDto } from "../ServerApiResponseDto";
 
 interface ChatResponseDto extends ServerApiResponseDto  {
-    id: string;
+    chatId: string | null;
+    characterIds: string[] | null;
+    lorebookIds: string[] | null;
     name: string | null;
     lastActivityDateTime: Date | null;
 }

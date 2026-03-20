@@ -12,7 +12,7 @@ import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 import type { ChatResponseDto } from "../../../../ResponsesDto/chat/ChatResponseDto";
 import type { SharedContextType } from "../../../../store/SharedContextType";
-import { GetAvatarPathFromCharacterId, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromChatIdAndAvatarId } from "../../../../utils/avatarUtils";
 
 export default function ChatDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextChatType>();
@@ -52,7 +52,9 @@ export default function ChatDetailsComponent() {
           setIsNetworkDown(true);
           setChatResponse({
             code : -1,
-            id: "",
+            chatId: "",
+            characterIds: [],
+            lorebookIds: [],
             lastActivityDateTime: null,
             name: null,
           });
@@ -79,7 +81,10 @@ export default function ChatDetailsComponent() {
 
     try {
       const response = await putToServerApiAsync(`api/chats/${activeModule.chatId}`, { 
-        name
+        name,
+        chatId: activeModule.chatId,
+        characterIds: chatResponse?.characterIds,
+        lorebookIds: chatResponse?.lorebookIds,
       });
 
       const serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -146,7 +151,7 @@ export default function ChatDetailsComponent() {
                       type="file"
                       style={{ display: "none" }}
                   />
-                  <img src={`${GetAvatarPathFromChatId(chatResponse?.id ?? "")}`} alt="no image" />
+                  <img src={`${GetAvatarPathFromChatIdAndAvatarId(chatResponse?.chatId ?? "", "avatar")}`} alt="no image" />
                 </div>
               </div>
             </div>
@@ -158,7 +163,7 @@ export default function ChatDetailsComponent() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
-                <label className={styles.chatId}>{chatResponse?.id ?? ""}</label>
+                <label className={styles.chatId}>{chatResponse?.chatId ?? ""}</label>
               </div>
               <div className={styles.operationsButtonsContainer}>
                 <div className={styles.operationsButtons}>

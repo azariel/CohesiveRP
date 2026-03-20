@@ -43,6 +43,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         public string PersonaId { get; set; }
 
         [MaxLength(512)]
-        public string Name { get; internal set; }
+        public string Name { get; set; }
     }
 }

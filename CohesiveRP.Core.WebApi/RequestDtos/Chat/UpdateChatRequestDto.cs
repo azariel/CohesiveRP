@@ -8,6 +8,9 @@ namespace CohesiveRP.Core.WebApi.RequestDtos.Chat
         [JsonPropertyName("chatId")]
         public string ChatId { get; set; }
 
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
         [JsonPropertyName("characterIds")]
         public List<string> CharacterIds { get; set; }
 

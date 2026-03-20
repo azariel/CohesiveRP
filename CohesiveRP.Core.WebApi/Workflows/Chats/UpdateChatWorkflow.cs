@@ -39,32 +39,39 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             }
 
             // validate that the tethered characters exists
-            var characters = await storageService.GetCharactersAsync();
-            var characterIds = characters.Select(s => s.CharacterId).ToArray();
-            var missingCharacters = requestDto.CharacterIds.Where(a => !characterIds.Any(an => an.Equals(a, StringComparison.InvariantCultureIgnoreCase))).ToArray();
-            if (missingCharacters.Length > 0)
+            if (requestDto.CharacterIds != null && requestDto.CharacterIds.Count > 0)
             {
-                return new WebApiException
+                var characters = await storageService.GetCharactersAsync();
+                var characterIds = characters.Select(s => s.CharacterId).ToArray();
+                var missingCharacters = requestDto.CharacterIds.Where(a => !characterIds.Any(an => an.Equals(a, StringComparison.InvariantCultureIgnoreCase))).ToArray();
+                if (missingCharacters.Length > 0)
                 {
-                    HttpResultCode = System.Net.HttpStatusCode.NotFound,
-                    Message = $"Couldn't update chat with id {requestDto.ChatId}. Characters [{string.Join(",", missingCharacters)}] were not found in storage."
-                };
+                    return new WebApiException
+                    {
+                        HttpResultCode = System.Net.HttpStatusCode.NotFound,
+                        Message = $"Couldn't update chat with id {requestDto.ChatId}. Characters [{string.Join(",", missingCharacters)}] were not found in storage."
+                    };
+                }
             }
 
             // validate that the tethered lorebooks exists
-            var lorebooks = await storageService.GetLorebooksAsync();
-            var lorebookIds = lorebooks.Select(s => s.LorebookId).ToArray();
-            var missingLorebooks = requestDto.LorebookIds.Where(a => !lorebookIds.Any(an => an.Equals(a, StringComparison.InvariantCultureIgnoreCase))).ToArray();
-            if (missingLorebooks.Length > 0)
+            if (requestDto.LorebookIds != null && requestDto.LorebookIds.Count > 0)
             {
-                return new WebApiException
+                var lorebooks = await storageService.GetLorebooksAsync();
+                var lorebookIds = lorebooks.Select(s => s.LorebookId).ToArray();
+                var missingLorebooks = requestDto.LorebookIds.Where(a => !lorebookIds.Any(an => an.Equals(a, StringComparison.InvariantCultureIgnoreCase))).ToArray();
+                if (missingLorebooks.Length > 0)
                 {
-                    HttpResultCode = System.Net.HttpStatusCode.NotFound,
-                    Message = $"Couldn't update chat with id {requestDto.ChatId}. Lorebooks [{string.Join(",", missingCharacters)}] were not found in storage."
-                };
+                    return new WebApiException
+                    {
+                        HttpResultCode = System.Net.HttpStatusCode.NotFound,
+                        Message = $"Couldn't update chat with id {requestDto.ChatId}. Lorebooks [{string.Join(",", missingLorebooks)}] were not found in storage."
+                    };
+                }
             }
 
             // Update the chat
+            chat.Name = requestDto.Name;
             chat.CharacterIds = requestDto.CharacterIds;
             chat.LorebookIds = requestDto.LorebookIds;
             var updateChatResult = await storageService.UpdateChatAsync(chat);
