@@ -1,10 +1,12 @@
-﻿using CohesiveRP.Common.Exceptions;
+﻿using System.Xml.Linq;
+using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -36,9 +38,12 @@ public class UpdateCharacterWorkflow : IUpdateCharacterWorkflow
         }
 
         currentCharacter.Name = requestDto.CharacterName;
+        currentCharacter.Creator = requestDto.Creator;
         currentCharacter.CreatorNotes = requestDto.CreatorNotes;
+        currentCharacter.FirstMessage = requestDto.FirstMessage;
         currentCharacter.Description = requestDto.CharacterDescription;
-        currentCharacter.Tags = requestDto.Tags.ToList();
+        currentCharacter.Tags = requestDto.Tags?.ToList();
+        currentCharacter.AlternateGreetings = requestDto.AlternateGreetings?.ToList();
 
         bool result = await storageService.UpdateCharacterAsync(currentCharacter);
         if (!result)

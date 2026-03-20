@@ -40,6 +40,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetAllSelectableChatsWorkflow, GetAllSelectableChatsWorkflow>();
             services.AddSingleton<IGetSpecificChatWorkflow, GetSpecificChatWorkflow>();
             services.AddSingleton<IDeleteSpecificChatWorkflow, DeleteSpecificChatWorkflow>();
+            services.AddSingleton<IUpdateChatWorkflow, UpdateChatWorkflow>();
 
             // Workflows.Chat
             services.AddSingleton<IChatAddNewMessageWorkflow, AddNewMessageWorkflow>();

@@ -24,7 +24,7 @@ public class ImportAndReplacePersonaAvatarWorkflow : IImportAndReplacePersonaAva
         ArgumentNullException.ThrowIfNull(requestDto.PersonaId);
 
         // Save the image (avatar) on disk
-        string directoryPersona = Path.Combine($"../CohesiveRP.UI.WebFrontend/public", "personas", requestDto.PersonaId);
+        string directoryPersona = Path.Combine(WebConstants.PersonasAvatarFilePath, requestDto.PersonaId);
         if (!Directory.Exists(directoryPersona))
         {
             Directory.CreateDirectory(directoryPersona);
@@ -32,7 +32,7 @@ public class ImportAndReplacePersonaAvatarWorkflow : IImportAndReplacePersonaAva
 
         using Stream stream = requestDto.File.OpenReadStream();
         using Image image = await Image.LoadAsync(stream);
-        image?.Save(Path.Combine(directoryPersona, "avatar.png"));
+        image?.Save(Path.Combine(directoryPersona, WebConstants.AvatarFileName));
 
         return new BasicResponseDto
         {

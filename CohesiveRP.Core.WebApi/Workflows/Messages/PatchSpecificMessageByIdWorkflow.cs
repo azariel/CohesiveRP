@@ -68,6 +68,7 @@ public class PatchSpecificMessageByIdWorkflow : IPatchSpecificMessageByIdWorkflo
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,
                 CharacterId = message.CharacterId,
+                AvatarId = message.AvatarId,
             },
             MainQueryId = null
         };

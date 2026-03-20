@@ -239,7 +239,8 @@ export default function LorebookDetailsComponent() {
                   <p />
                 )}
               </div>
-              <div className={styles.operationsButtons}>
+            </div>
+            <div className={styles.operationsButtons}>
                 <button className={styles.deleteButton} onClick={handleDelete} disabled={isSaving}>
                 {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Delete"}
                 </button>
@@ -250,7 +251,6 @@ export default function LorebookDetailsComponent() {
               {operationError && (
                 <label className={styles.saveErrorLabel}>Failed to save/delete. Please try again.</label>
               )}
-            </div>
           </div>
         )
       )}

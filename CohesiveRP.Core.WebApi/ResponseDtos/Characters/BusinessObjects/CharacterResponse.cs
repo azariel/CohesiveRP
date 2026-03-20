@@ -4,6 +4,9 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Characters.BusinessObjects
 {
     public class CharacterResponse
     {
+        [JsonPropertyName("createdAtUtc")]
+        public DateTime? CreatedAtUtc { get; set; }
+
         [JsonPropertyName("characterId")]
         public string CharacterId { get; set; }
 

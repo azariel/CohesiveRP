@@ -107,7 +107,7 @@ export default function ChatComponent() {
 
                 <ChatMessageComponent
                   message={message}
-                  defaultChatAvatarId={activeModule.defaultChatAvatar ?? ""}
+                  chatId={activeModule?.chatId}
                   enableDeleteBtn={isLastMessage} 
                   enableSwipeBtn={isLastMessage}
                   isEditable={!message.summarized && index >= messages.length - 3}
@@ -121,7 +121,7 @@ export default function ChatComponent() {
           <p />
         )}
         <div className={styles.userInputContainer}>
-          <UserInputComponent messagesRef={messagesRef} defaultChatAvatarId={activeModule.defaultChatAvatar ?? ""} />
+          <UserInputComponent messagesRef={messagesRef} />
         </div>
       </div>
     </main>

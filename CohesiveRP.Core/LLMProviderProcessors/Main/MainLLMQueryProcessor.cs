@@ -69,6 +69,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                         ChatId = backgroundQueryDbModel.ChatId,
                         SourceType = MessageSourceType.AI,
                         CharacterId = chat.CharacterIds.FirstOrDefault(),
+                        AvatarId = null,
                         Summarized = false,// New message, so it's not summarized yet
                         MessageContent = ChatMessageParserUtils.ParseMessage(message.Content),
                         CreatedAtUtc = DateTime.UtcNow,

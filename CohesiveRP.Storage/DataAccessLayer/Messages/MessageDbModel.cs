@@ -18,5 +18,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         public bool Summarized { get; set; }
 
         public string CharacterId { get; set; }
+
+        public string AvatarId { get; set; }
     }
 }

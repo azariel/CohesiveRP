@@ -8,13 +8,16 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
         [JsonPropertyName("chatId")]
         public string ChatId { get; set; }
 
-        [JsonPropertyName("avatarCharacterId")]
-        public string CharacterId { get; set; }
-
         [JsonPropertyName("name")]
         public string ChatName { get; set; }
 
         [JsonPropertyName("lastActivityAtUtc")]
         public DateTime LastActivityAtUtc { get; set; }
+
+        [JsonPropertyName("characterIds")]
+        public List<string> CharacterIds { get; internal set; }
+
+        [JsonPropertyName("lorebookIds")]
+        public List<string> LorebookIds { get; internal set; }
     }
 }

@@ -3,6 +3,7 @@ using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.CharacterCards;
 using CohesiveRP.Core.CharacterCards.Loaders;
 using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
+using CohesiveRP.Core.DtoConverters.Abstractions;
 using CohesiveRP.Core.Lorebooks;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
@@ -17,10 +18,12 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
 {
     private IStorageService storageService;
+    private ILorebookDtoConverter lorebookDtoConverter;
 
-    public ImportNewCharacterWorkflow(IStorageService storageService)
+    public ImportNewCharacterWorkflow(IStorageService storageService, ILorebookDtoConverter lorebookDtoConverter)
     {
         this.storageService = storageService;
+        this.lorebookDtoConverter = lorebookDtoConverter;
     }
 
     public async Task<IWebApiResponseDto> ImportNewCharacterAsync(ImportNewCharacterRequestDto requestDto)
@@ -71,14 +74,6 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
             Tags = ccv3CharacterCard.Data.Tags,
             FirstMessage = ccv3CharacterCard.Data.FirstMessage,
             AlternateGreetings = ccv3CharacterCard.Data.AlternateGreetings,
-
-            /*
-             * messageExample
-               systemPrompt
-               PostHistoryInstructions
-               Personality
-               GroupOnlyGreetings: array
-             * */
         };
 
         CharacterDbModel result = await storageService.ImportNewCharacterAsync(queryModel);
@@ -93,15 +88,38 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         // Save the image (avatar) on disk
-        string directoryCharacter = Path.Combine($"../CohesiveRP.UI.WebFrontend/public", "characters", result.CharacterId);
+        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, result.CharacterId);
         if (!Directory.Exists(directoryCharacter))
         {
             Directory.CreateDirectory(directoryCharacter);
         }
 
-        image?.Save(Path.Combine(directoryCharacter, "avatar.png"));
+        image?.Save(Path.Combine(directoryCharacter, WebConstants.AvatarFileName));
 
-        // TODO: handle the embedded lorebook if any
+        // handle the embedded lorebook if any
+        if (ccv3CharacterCard.Data.CharacterBook != null)
+        {
+            LorebookDbModel lorebookDbModel = lorebookDtoConverter.Convert(ccv3CharacterCard.Data.CharacterBook);
+            LorebookDbModel resultLoreBook = await storageService.AddLorebookAsync(lorebookDbModel);
+
+            if (resultLoreBook != null)
+            {
+                try
+                {
+                    // save the image as the default lorebook avatar on disk
+                    string directorylorebook = Path.Combine(WebConstants.LorebooksAvatarFilePath, resultLoreBook.LorebookId);
+                    if (!Directory.Exists(directorylorebook))
+                    {
+                        Directory.CreateDirectory(directorylorebook);
+                    }
+
+                    image?.Save(Path.Combine(directorylorebook, WebConstants.AvatarFileName));
+                } catch (Exception)
+                {
+                    // ignore
+                }
+            }
+        }
 
         // Convert DbModel to an acceptable web model (without sensitive information)
         // TODO: could really use automapper... todo

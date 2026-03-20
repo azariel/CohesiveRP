@@ -29,14 +29,14 @@ public class GetAllSelectableChatsWorkflow : IGetAllSelectableChatsWorkflow
         ChatDefinitionsResponseDto responseDto = new();
 
         // TODO: pagination
-        var characters = await storageService.GetCharactersAsync();
         foreach (var chat in chats)
         {
             responseDto.Chats.Add(new ChatDefinition
             {
                 ChatId = chat.ChatId,
-                CharacterId = chat.CharacterIds?.FirstOrDefault() ?? "unknown",
-                ChatName = characters.FirstOrDefault(f => f.CharacterId == chat.CharacterIds?.FirstOrDefault())?.Name ?? "unknown",
+                CharacterIds = chat.CharacterIds,
+                LorebookIds = chat.LorebookIds,
+                ChatName = chat.Name,
                 LastActivityAtUtc = chat.LastActivityAtUtc,
             });
         }

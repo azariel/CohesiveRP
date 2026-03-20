@@ -32,7 +32,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             // TODO: Delete lorebooks that exists solely for this chat (not global lorebooks that are selectable by any, delete only the ones that are embedded by this chat)
             // TODO: Delete characters that exists solely for this chat (not global characters that are selectable by any, delete only the ones that are embedded by this chat)
             // TODO: Delete personas that exists solely for this chat (not global personas that are selectable by any, delete only the ones that are embedded by this chat)
-            
+
             // delete all backgroundqueries tied to this chat
             bool deleteBackgroundQueries = await storageService.DeleteBackgroundQueriesByChatIdAsync(chatId);
 
@@ -41,7 +41,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
 
             // delete summaries tied to this chat
             bool deleteSummaries = await storageService.DeleteSummaryFromChatIdAsync(chatId);
-            
+
             // delete all cold and hot messages tied to this chat
             bool deleteColdMessages = await storageService.DeleteColdMessagesAsync(chatId);
             bool deleteHotMessages = await storageService.DeleteHotMessagesAsync(chatId);
@@ -56,6 +56,11 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                     Message = $"Couldn't delete Chat with Id [{chatId}]. Chat deletion is in half-deletion state, please try again."
                 };
             }
+
+            // finally, delete the onDisk information we have
+            string onDiskDirectory = Path.Combine(WebConstants.ChatsAvatarFilePath, chatId);
+            if (Directory.Exists(onDiskDirectory))
+                Directory.Delete(onDiskDirectory, true);
 
             BasicResponseDto responseDto = new()
             {

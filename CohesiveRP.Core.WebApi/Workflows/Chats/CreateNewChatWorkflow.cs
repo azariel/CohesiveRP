@@ -33,7 +33,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             PersonaDbModel[] personas = await storageService.GetPersonasAsync();
             PersonaDbModel defaultPersona = personas?.FirstOrDefault(w => w.IsDefault);
 
-            if(defaultPersona == null)
+            if (defaultPersona == null)
             {
                 return new WebApiException
                 {
@@ -44,6 +44,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
 
             CreateChatQueryModel queryModel = new()
             {
+                Name = string.IsNullOrWhiteSpace(requestDto.CharacterId) ? "New chat" : requestDto.CharacterId,
                 SelectedChatCompletionPresets = null,
                 PersonaId = defaultPersona.PersonaId,
                 CharacterIds = [requestDto.CharacterId],
@@ -57,8 +58,24 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 return new WebApiException
                 {
                     HttpResultCode = System.Net.HttpStatusCode.InternalServerError,
-                    Message = $"Chat creation failed."
+                    Message = $"Chat creation failed in storage."
                 };
+            }
+
+            // Add the chat default Avatar (same as the character's)
+            if (newlyCreatedChat.CharacterIds != null && newlyCreatedChat.CharacterIds.Count > 0)
+            {
+                string characterAvatarFilePath = Path.Combine(WebConstants.CharactersAvatarFilePath, newlyCreatedChat.CharacterIds.First(), WebConstants.AvatarFileName);
+                if (File.Exists(characterAvatarFilePath))
+                {
+                    string chatDirectoryPath = Path.Combine(WebConstants.ChatsAvatarFilePath, newlyCreatedChat.ChatId);
+                    if (!Directory.Exists(chatDirectoryPath))
+                    {
+                        Directory.CreateDirectory(chatDirectoryPath);
+                    }
+
+                    File.Copy(characterAvatarFilePath, Path.Combine(chatDirectoryPath, WebConstants.AvatarFileName));
+                }
             }
 
             // Add first message from AI
@@ -78,11 +95,10 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 }
             }
 
-            return new ChatResponseDto
+            return new ChatCreationResponseDto
             {
                 ChatId = newlyCreatedChat.ChatId,
-                ChatName = tiedCharacters.FirstOrDefault()?.Name,
-                CharacterId = tiedCharacters.FirstOrDefault()?.CharacterId,
+                ChatName = newlyCreatedChat.Name,
                 HttpResultCode = System.Net.HttpStatusCode.OK,
             };
         }
@@ -131,6 +147,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 Summarized = false,
                 MessageContent = character.FirstMessage,
                 CharacterId = character.CharacterId,
+                AvatarId = null,
             };
             await storageService.AddMessageAsync(queryModel);
         }

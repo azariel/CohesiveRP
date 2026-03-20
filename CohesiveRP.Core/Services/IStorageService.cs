@@ -17,6 +17,7 @@ namespace CohesiveRP.Core.Services
         Task<ChatDbModel> AddChatAsync(CreateChatQueryModel queryModel);
         Task<ChatDbModel[]> GetAllChatsAsync();
         Task<ChatDbModel> GetChatAsync(string chatId);
+        Task<bool> UpdateChatAsync(ChatDbModel chat);
         Task<bool> DeleteChatAsync(string chatId);
 
         // Messages

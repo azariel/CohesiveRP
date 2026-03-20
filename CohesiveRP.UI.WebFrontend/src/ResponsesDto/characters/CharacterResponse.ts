@@ -1,11 +1,13 @@
 interface CharacterResponse {
     characterId : string,
-    createdAtUtc : string,
     name : string,
-    tags : string[],
-    description: string,
     creator: string,
     creatorNotes: string,
+    description: string,
+    tags : string[],
+    firstMessage : string,
+    alternateGreetings : string[],
+    createdAtUtc : string,
 }
 
 export type {

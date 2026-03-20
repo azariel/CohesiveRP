@@ -3,6 +3,7 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.Personas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -22,6 +23,31 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
             using var dbContext = contextFactory.CreateDbContext();
             dbContext.Database.EnsureCreated();
+
+            Cleanup();
+        }
+
+        private void Cleanup()
+        {
+            using var dbContext = contextFactory.CreateDbContext();
+            dbContext.Database.EnsureCreated();
+
+            int Personas = dbContext.Personas.Count();
+
+            if (Personas > 0)
+                return;
+
+            dbContext.Personas.Add(new PersonaDbModel
+            {
+                PersonaId = Guid.NewGuid().ToString(),
+                LastActivityAtUtc = DateTime.UtcNow,
+                CreatedAtUtc = DateTime.UtcNow,
+                IsDefault = true,
+                Name = "Default Persona",
+                Description = "",
+            });
+
+            dbContext.SaveChanges();
         }
 
         // ********************************************************************

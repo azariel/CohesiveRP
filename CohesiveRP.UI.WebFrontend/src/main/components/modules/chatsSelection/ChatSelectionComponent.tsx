@@ -15,7 +15,7 @@ import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSel
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
-import { GetAvatarPathFromCharacterId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromCharacterId, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
 import { GetChatNameFontSize } from "../../../../utils/fontSizeUtils";
 import type { SharedContextType } from "../../../../store/SharedContextType";
 
@@ -69,7 +69,6 @@ export default function ChatSelectionComponent() {
       const savedInput = localStorage.getItem(`chatInput_${chat.chatId}`) ?? "";
       navigateTo({
         chatId: chat.chatId,
-        defaultChatAvatar: chat.avatarCharacterId,
         moduleName: "chat",
         currentUserInputValue: savedInput,
       } as SharedContextChatType);
@@ -146,7 +145,7 @@ export default function ChatSelectionComponent() {
               </label>
 
               <div className={styles.chatAvatarContainer}>
-                <img src={GetAvatarPathFromCharacterId(chat.avatarCharacterId)} alt="Avatar" />
+                <img src={GetAvatarPathFromChatId(chat.chatId)} alt="Avatar" />
               </div>
 
               {/* Hover overlay */}

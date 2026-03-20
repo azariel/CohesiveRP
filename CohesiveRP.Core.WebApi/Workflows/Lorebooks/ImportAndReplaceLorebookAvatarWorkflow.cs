@@ -24,7 +24,7 @@ public class ImportAndReplaceLorebookAvatarWorkflow : IImportAndReplaceLorebookA
         ArgumentNullException.ThrowIfNull(requestDto.LorebookId);
 
         // Save the image (avatar) on disk
-        string directoryLorebook = Path.Combine($"../CohesiveRP.UI.WebFrontend/public", "lorebooks", requestDto.LorebookId);
+        string directoryLorebook = Path.Combine(WebConstants.LorebooksAvatarFilePath, requestDto.LorebookId);
         if (!Directory.Exists(directoryLorebook))
         {
             Directory.CreateDirectory(directoryLorebook);
@@ -32,7 +32,7 @@ public class ImportAndReplaceLorebookAvatarWorkflow : IImportAndReplaceLorebookA
 
         using Stream stream = requestDto.File.OpenReadStream();
         using Image image = await Image.LoadAsync(stream);
-        image?.Save(Path.Combine(directoryLorebook, "avatar.png"));
+        image?.Save(Path.Combine(directoryLorebook, WebConstants.AvatarFileName));
 
         return new BasicResponseDto
         {

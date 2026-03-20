@@ -63,6 +63,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 ChatDbModel chatDbModel = new ChatDbModel
                 {
                     ChatId = Guid.NewGuid().ToString(),
+                    Name = queryModel.Name,
                     CreatedAtUtc = DateTime.UtcNow,
                     SelectedChatCompletionPresets = queryModel.SelectedChatCompletionPresets,
                     CharacterIds = queryModel.CharacterIds,
@@ -85,6 +86,41 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             {
                 LoggingManager.LogToFile("0a39887a-ea58-4e78-b44b-afad7e5fc340", $"Error when querying Db on table Chat.", ex);
                 return null;
+            }
+        }
+
+        public async Task<bool> UpdateChatAsync(ChatDbModel dbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var chat = dbContext.Chats.FirstOrDefault(w => w.ChatId == dbModel.ChatId);
+
+                if (chat == null)
+                {
+                    LoggingManager.LogToFile("e89002b8-9b09-4ddc-b1fd-53b5cea3327f", $"Chat [{dbModel.ChatId}] to update wasn't found in storage.");
+                    return false;
+                }
+
+                // Update only the overridable fields
+                chat.SelectedChatCompletionPresets = dbModel.SelectedChatCompletionPresets;
+                chat.LorebookIds = dbModel.LorebookIds;
+                chat.CharacterIds = dbModel.CharacterIds;
+                chat.Name = dbModel.Name;
+
+                var result = dbContext.Chats.Update(chat);
+                if (result.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("5c3ae68d-9c28-44b0-9f50-d816e735ff78", $"Error when updating a Chat. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("eeecbf0f-eb8d-4191-848c-5d1de62f9fa8", $"Error when querying pending queries on table Chats.", ex);
+                return false;
             }
         }
 

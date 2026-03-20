@@ -104,6 +104,7 @@ namespace CohesiveRP.Core.Services
 
         public async Task<ChatDbModel[]> GetAllChatsAsync() => await chatsDal.GetChatsAsync();
         public async Task<ChatDbModel> GetChatAsync(string chatId) => await chatsDal.GetChatByIdAsync(chatId);
+        public async Task<bool> UpdateChatAsync(ChatDbModel dbModel) => await chatsDal.UpdateChatAsync(dbModel);
         public async Task<bool> DeleteChatAsync(string chatId) => await chatsDal.DeleteChatAsync(chatId);
 
         // Characters

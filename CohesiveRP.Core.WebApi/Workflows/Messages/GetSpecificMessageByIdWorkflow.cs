@@ -43,6 +43,7 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,
                 CharacterId = message.CharacterId,
+                AvatarId = message.AvatarId,
                 CharacterName = character.Name,
                 PersonaId = persona.PersonaId,
                 PersonaName = persona.Name,

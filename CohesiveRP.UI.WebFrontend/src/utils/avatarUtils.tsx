@@ -34,9 +34,34 @@ const GetAvatarPathFromLorebookId = (lorebookId: string): string => {
   }
 };
 
+const GetAvatarPathFromChatId = (chatId: string): string => {
+    try {
+      if(chatId === "") {
+        return `./dev/Placeholder.png`;
+      }
+      
+      return `./chats/${chatId}/avatar.png`;
+  }catch(err){
+    return "";
+  }
+};
+
+const GetAvatarPathFromChatIdAndAvatarId = (chatId: string, avatarId: string): string => {
+    try {
+      if(chatId === "") {
+        return `./dev/Placeholder.png`;
+      }
+      
+      return `./chats/${chatId}/${avatarId}.png`;
+  }catch(err){
+    return "";
+  }
+};
 
 export {
     GetAvatarPathFromCharacterId,
     GetAvatarPathFromPersonaId,
-    GetAvatarPathFromLorebookId
+    GetAvatarPathFromLorebookId,
+    GetAvatarPathFromChatId,
+    GetAvatarPathFromChatIdAndAvatarId
 };

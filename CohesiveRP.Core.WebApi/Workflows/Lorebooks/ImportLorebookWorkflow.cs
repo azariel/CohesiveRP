@@ -78,7 +78,7 @@ public class ImportLorebookWorkflow : IImportLorebookWorkflow
             try
             {
                 // save the image as the default lorebook avatar on disk
-                string directorylorebook = Path.Combine($"../cohesiverp.ui.webfrontend/public", "lorebooks", result.LorebookId);
+                string directorylorebook = Path.Combine(WebConstants.LorebooksAvatarFilePath, result.LorebookId);
                 if (!Directory.Exists(directorylorebook))
                 {
                     Directory.CreateDirectory(directorylorebook);
@@ -86,7 +86,7 @@ public class ImportLorebookWorkflow : IImportLorebookWorkflow
 
                 stream.Seek(0, SeekOrigin.Begin);
                 using Image image = await Image.LoadAsync(stream);
-                image?.Save(Path.Combine(directorylorebook, "avatar.png"));
+                image?.Save(Path.Combine(directorylorebook, WebConstants.AvatarFileName));
             } catch (Exception)
             {
                 // ignore

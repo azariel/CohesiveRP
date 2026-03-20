@@ -233,10 +233,10 @@ export default function PersonaDetailsComponent() {
                   <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
                     {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Save"}
                   </button>
+                  {operationError && (
+                    <label className={styles.saveErrorLabel}>Failed to save/delete. Please try again.</label>
+                  )}
                 </div>
-                {operationError && (
-                  <label className={styles.saveErrorLabel}>Failed to save/delete. Please try again.</label>
-                )}
               </div>
             </div>
           </div>

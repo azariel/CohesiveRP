@@ -13,5 +13,6 @@ namespace CohesiveRP.Storage.QueryModels.Message
         public MessageSourceType SourceType { get; set; }
         public bool Summarized { get; set; }
         public string CharacterId { get; set; }
+        public string AvatarId { get; set; }
     }
 }
