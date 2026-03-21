@@ -3,7 +3,6 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
-using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
@@ -33,6 +32,7 @@ namespace CohesiveRP.Core.Services
 
         // GlobalSettings
         Task<GlobalSettingsDbModel> GetGlobalSettingsAsync();
+        Task<bool> UpdateGlobalSettingsAsync(GlobalSettingsDbModel dbModel);
 
         // BackgroundQueries
         Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
@@ -40,6 +40,7 @@ namespace CohesiveRP.Core.Services
         Task<BackgroundQueryDbModel[]> GetBackgroundQueriesByChatIdAsync(string chatId);
         Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync();
         Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId);
+        Task<ChatCompletionPresetsDbModel[]> GetChatCompletionPresetAsync();
         Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag);
         Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery);
         Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId);

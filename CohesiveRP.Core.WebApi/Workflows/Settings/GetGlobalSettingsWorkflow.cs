@@ -24,6 +24,7 @@ public class GetGlobalSettingsWorkflow : IGetGlobalSettingsWorkflow
         {
             LLMProviders = globalSettings.LLMProviders,
             ChatCompletionPresetsMap = globalSettings.ChatCompletionPresetsMap,
+            Summary = globalSettings.Summary,
         };
 
         responseDto.HttpResultCode = System.Net.HttpStatusCode.OK;

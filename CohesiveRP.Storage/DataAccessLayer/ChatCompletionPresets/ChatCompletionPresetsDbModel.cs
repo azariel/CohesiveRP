@@ -23,5 +23,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         //[MaxLength(1024)]
         [JsonValueConverter]
         public GlobalPromptContextFormat Format { get; set; }
+
+        [MaxLength(256)]
+        public string Name { get; set; }
     }
 }

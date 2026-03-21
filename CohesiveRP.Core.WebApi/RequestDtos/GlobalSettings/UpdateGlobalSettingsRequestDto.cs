@@ -1,18 +1,13 @@
-﻿using System.Net;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
 using CohesiveRP.Storage.DataAccessLayer.Settings.Summary;
 
-namespace CohesiveRP.Core.WebApi.ResponseDtos.Settings
+namespace CohesiveRP.Core.WebApi.RequestDtos.Chat
 {
-    public class GlobalSettingsResponseDto : IWebApiResponseDto
+    public class UpdateGlobalSettingsRequestDto : IWebApiRequestDto
     {
-        [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
-        [JsonPropertyName("code")]
-        public HttpStatusCode HttpResultCode { get; set; }
-
         [JsonPropertyName("llmProviders")]
         public List<LLMProviderConfig> LLMProviders { get; set; } = new();
 

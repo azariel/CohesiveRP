@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
@@ -8,6 +10,7 @@ using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.TimeoutStrategies
 using CohesiveRP.Storage.DataAccessLayer.Settings.Summary;
 using CohesiveRP.Storage.QueryModels.Chat;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
@@ -79,6 +82,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         {
                             new ChatCompletionPresetsMapElement
                             {
+                                 
                                 Type = ChatCompletionPresetType.Main,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_CHAT_COMPLETION_PRESET,
                                 IsDefault = true,
@@ -154,6 +158,40 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             {
                 LoggingManager.LogToFile("218243a4-2b6f-460e-a99c-5375e5c97ad9", $"Error when querying Db on table GlobalSettings.", ex);
                 return null;
+            }
+        }
+
+        public async Task<bool> UpdateGlobalSettingsAsync(GlobalSettingsDbModel dbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var globalSettings = dbContext.GlobalSettings.FirstOrDefault();
+
+                if (globalSettings == null)
+                {
+                    LoggingManager.LogToFile("d10b2253-933f-44d2-ae34-e97b0bdd6662", $"GlobalSettings to update wasn't found in storage.");
+                    return false;
+                }
+
+                // Only handle overridable fields
+                globalSettings.LLMProviders = dbModel.LLMProviders;
+                globalSettings.ChatCompletionPresetsMap = dbModel.ChatCompletionPresetsMap;
+                globalSettings.Summary = dbModel.Summary;
+
+                var result = dbContext.GlobalSettings.Update(globalSettings);
+                if (result.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("7003830b-7053-4cb2-9a7a-0f428a169c93", $"Error when updating GlobalSettings. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("15ba9469-d33d-4cd8-969e-dd50621f518c", $"Error when querying pending queries on table GlobalSettings.", ex);
+                return false;
             }
         }
     }

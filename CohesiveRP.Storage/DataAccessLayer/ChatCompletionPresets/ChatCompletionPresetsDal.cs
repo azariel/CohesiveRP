@@ -33,6 +33,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 // Create default settings
                 dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
                 {
+                    Name = "Default-Main-Chat-Preset",
                     ChatCompletionPresetId = StorageConstants.DEFAULT_CHAT_COMPLETION_PRESET,
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
@@ -165,6 +166,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
                 {
+                    Name = "Default-Summarize-Preset",
                     ChatCompletionPresetId = StorageConstants.DEFAULT_SUMMARIZE_COMPLETION_PRESET,
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
@@ -241,6 +243,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
                 {
+                    Name = "Default-Summarize-Merger-Preset",
                     ChatCompletionPresetId = StorageConstants.DEFAULT_SUMMARIZES_MERGER_COMPLETION_PRESET,
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
@@ -293,6 +296,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
                 {
+                    Name = "Default-Scene-Tracker-Preset",
                     ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_TRACKER_COMPLETION_PRESET,
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
@@ -360,6 +364,19 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("60a3ceac-3614-4031-96e4-bc2f36aa7f27", $"Error when querying Db on table ChatCompletionPresets.", ex);
+                return null;
+            }
+        }
+
+        public async Task<ChatCompletionPresetsDbModel[]> GetChatCompletionPresetsAsync()
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                return await dbContext.ChatCompletionPresets.ToArrayAsync();
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("a9c89721-5a45-4484-9894-dd1b263c4047", $"Error when querying Db on table ChatCompletionPresets.", ex);
                 return null;
             }
         }

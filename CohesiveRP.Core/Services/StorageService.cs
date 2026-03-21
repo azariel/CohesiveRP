@@ -153,6 +153,7 @@ namespace CohesiveRP.Core.Services
 
         // Settings
         public async Task<GlobalSettingsDbModel> GetGlobalSettingsAsync() => await globalSettingsDal.GetGlobalSettingsAsync();
+        public async Task<bool> UpdateGlobalSettingsAsync(GlobalSettingsDbModel dbModel) => await globalSettingsDal.UpdateGlobalSettingsAsync(dbModel);
 
         // BackgroundQueries
         public async Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel) => await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
@@ -162,6 +163,7 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> DeleteBackgroundQueriesByChatIdAsync(string chatId) => await backgroundQueriesDal.DeleteBackgroundQueriesByChatIdAsync(chatId);
 
         // ChatCompletionPresets
+        public async Task<ChatCompletionPresetsDbModel[]> GetChatCompletionPresetAsync() => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync();
         public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId) => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync(mainChatCompletionPresetId);
 
         // LLMQueries

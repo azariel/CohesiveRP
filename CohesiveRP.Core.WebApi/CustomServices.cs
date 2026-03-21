@@ -13,6 +13,7 @@ using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.ChatCompletionPresets.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Chats;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Lorebooks.Abstractions;
@@ -20,6 +21,7 @@ using CohesiveRP.Core.WebApi.Workflows.Messages;
 using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Personas.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.SceneTrackers.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Settings;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
@@ -82,9 +84,14 @@ namespace CohesiveRP.Core.WebApi
 
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();
+            services.AddSingleton<IUpdateGlobalSettingsWorkflow, UpdateGlobalSettingsWorkflow>();
 
             // Workflows.BackgroundQueries
             services.AddSingleton<IGetBackgroundQueryWorkflow, GetBackgroundQueryWorkflow>();
+            services.AddSingleton<IGetBackgroundQueriesByChatIdWorkflow, GetBackgroundQueriesByChatIdWorkflow>();
+
+            // Workflows.ChatCompletionPresets
+            services.AddSingleton<IChatCompletionPresetsWorkflow, ChatCompletionPresetsWorkflow>();
             services.AddSingleton<IGetBackgroundQueriesByChatIdWorkflow, GetBackgroundQueriesByChatIdWorkflow>();
 
             // DtoConverters
