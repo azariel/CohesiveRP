@@ -29,7 +29,6 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 };
             }
 
-            // TODO: Delete lorebooks that exists solely for this chat (not global lorebooks that are selectable by any, delete only the ones that are embedded by this chat)
             // TODO: Delete characters that exists solely for this chat (not global characters that are selectable by any, delete only the ones that are embedded by this chat)
             // TODO: Delete personas that exists solely for this chat (not global personas that are selectable by any, delete only the ones that are embedded by this chat)
 
@@ -45,6 +44,9 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             // delete all cold and hot messages tied to this chat
             bool deleteColdMessages = await storageService.DeleteColdMessagesAsync(chatId);
             bool deleteHotMessages = await storageService.DeleteHotMessagesAsync(chatId);
+
+            // delete the lorebook instance tethered to this chat
+            bool deleteLorebookInstances = await storageService.DeleteLorebookInstanceAsync(chatId);
 
             // delete the actual chat
             bool deleteChatResult = await storageService.DeleteChatAsync(chatId);

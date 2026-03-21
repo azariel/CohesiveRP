@@ -42,9 +42,20 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 };
             }
 
+            string chatName = "New chat";
+            if(!string.IsNullOrWhiteSpace(requestDto.CharacterId))
+            { 
+                var character = await storageService.GetCharacterByIdAsync(requestDto.CharacterId);
+
+                if(character != null)
+                {
+                    chatName = character.Name;
+                }
+            }
+
             CreateChatQueryModel queryModel = new()
             {
-                Name = string.IsNullOrWhiteSpace(requestDto.CharacterId) ? "New chat" : requestDto.CharacterId,
+                Name = chatName,
                 SelectedChatCompletionPresets = null,
                 PersonaId = defaultPersona.PersonaId,
                 CharacterIds = [requestDto.CharacterId],

@@ -2,6 +2,7 @@
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
@@ -27,6 +28,7 @@ namespace CohesiveRP.Core.Services
         private ICharactersDal charactersDal;
         private IPersonasDal personasDal;
         private ILorebooksDal lorebooksDal;
+        private ILorebookInstanceDal lorebookInstancesDal;
         private IMessagesDal messagesDal;
         private IGlobalSettingsDal globalSettingsDal;
         private IChatCompletionPresetsDal chatCompletionPresetsDal;
@@ -40,6 +42,7 @@ namespace CohesiveRP.Core.Services
             ICharactersDal charactersDal,
             IPersonasDal personasDal,
             ILorebooksDal lorebooksDal,
+            ILorebookInstanceDal lorebookInstancesDal,
             IMessagesDal messagesDal,
             IGlobalSettingsDal globalSettingsDal,
             IChatCompletionPresetsDal chatCompletionPresetsDal,
@@ -52,6 +55,7 @@ namespace CohesiveRP.Core.Services
             this.charactersDal = charactersDal;
             this.personasDal = personasDal;
             this.lorebooksDal = lorebooksDal;
+            this.lorebookInstancesDal = lorebookInstancesDal;
             this.messagesDal = messagesDal;
             this.globalSettingsDal = globalSettingsDal;
             this.chatCompletionPresetsDal = chatCompletionPresetsDal;
@@ -129,6 +133,13 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> DeleteLorebookAsync(LorebookDbModel lorebookDbModel) => await lorebooksDal.DeleteLorebookAsync(lorebookDbModel);
         public async Task<LorebookDbModel> AddEmptyLorebookAsync() => await lorebooksDal.AddLorebookAsync(new AddLorebookQueryModel { Name = "New Lorebook", Entries = [] });
         public async Task<LorebookDbModel> AddLorebookAsync(LorebookDbModel dbModel) => await lorebooksDal.AddLorebookAsync(dbModel);
+
+        // Lorebook Instances
+        public async Task<LorebookInstanceDbModel[]> GetLorebookInstancesAsync() => await lorebookInstancesDal.GetLorebookInstancesAsync();
+        public async Task<LorebookInstanceDbModel[]> GetLorebookInstancesAsync(Func<LorebookInstanceDbModel, bool> func) => await lorebookInstancesDal.GetLorebookInstancesAsync(func);
+        public async Task<LorebookInstanceDbModel> AddLorebookInstanceAsync(LorebookInstanceDbModel dbModel) => await lorebookInstancesDal.AddLorebookInstanceAsync(dbModel);
+        public async Task<bool> UpdateLorebookInstanceAsync(LorebookInstanceDbModel lorebookDbModel) => await lorebookInstancesDal.UpdateLorebookInstanceAsync(lorebookDbModel);
+        public async Task<bool> DeleteLorebookInstanceAsync(string chatId) => await lorebookInstancesDal.DeleteLorebookInstanceAsync(chatId);
 
         // Messages
         public async Task<HotMessagesDbModel> GetAllHotMessagesAsync(string chatId) => await messagesDal.GetHotMessagesAsync(chatId);

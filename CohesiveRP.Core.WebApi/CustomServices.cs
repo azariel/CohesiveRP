@@ -24,6 +24,7 @@ using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
@@ -108,6 +109,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ICharactersDal, CharactersDal>();
             services.AddSingleton<IPersonasDal, PersonasDal>();
             services.AddSingleton<ILorebooksDal, LorebooksDal>();
+            services.AddSingleton<ILorebookInstanceDal, LorebookInstancesDal>();
             services.AddSingleton<IMessagesDal, MessagesDal>();
             services.AddSingleton<IGlobalSettingsDal, GlobalSettingsDal>();
             services.AddSingleton<IChatCompletionPresetsDal, ChatCompletionPresetsDal>();

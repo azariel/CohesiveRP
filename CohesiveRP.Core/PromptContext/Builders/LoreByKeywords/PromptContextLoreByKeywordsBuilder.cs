@@ -78,7 +78,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             // Handle probabilities
-            List<LorebookEntry> finalEntries = [..entriesToInclude.Where(w => w.ProbabilityPercentage >= 100)];
+            List<LorebookEntry> finalEntries = [.. entriesToInclude.Where(w => w.ProbabilityPercentage >= 100)];
 
             foreach (var entry in entriesToInclude.Where(w => w.ProbabilityPercentage < 100).ToArray())
             {
@@ -90,6 +90,18 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
                 finalEntries.Add(entry);
             }
+
+            // Sticky and Cooldown entries handling
+            var lorebookInstances = await storageService.GetLorebookInstancesAsync(g => g.ChatId == chatDbModel.ChatId);
+            var stickyOrCooldownEntries = entriesToInclude.Where(w => w.StickyForNbMessages > 0 || w.Cooldown > 0).ToArray();
+            foreach (var lorebookInstance in lorebookInstances)
+            {
+                // Handle Sticky and Cooldown persistence
+                await HandleStickyAndCooldownEntryAsync(lorebookInstance, stickyOrCooldownEntries);
+            }
+
+            // TODO: Get the sticky entries to add to the context from lorebookInstances and add it to entriesToInclude
+            // TODO: Remove the entries that were in cooldown in lorebookInstances and remove them from the list of entriesToInclude
 
             StringBuilder str = new();
             foreach (LorebookEntry entryToInclude in entriesToInclude)
@@ -110,6 +122,32 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             return ($"# Lore{Environment.NewLine}{str.Replace(Constants.USER_PLACEHOLDER, userPersonaName)}", new ShareableContextLink { LinkedBuilder = this });
+        }
+
+        private async Task HandleStickyAndCooldownEntryAsync(LorebookInstanceDbModel instanceDbModel, LorebookEntry[] entriesToStickOrCooldown)
+        {
+            // TODO: Add the entries that were triggered to the list of entriesToInclude
+            foreach (var entryToStickOrCD in entriesToStickOrCooldown)
+            {
+                var alreadyInStorageEntry = instanceDbModel.Entries.FirstOrDefault(w => w.LorebookEntryId == entryToStickOrCD.EntryId);
+
+                if(alreadyInStorageEntry != null)
+                {
+                    // Update the existing entry
+                    alreadyInStorageEntry.RemainingCooldownAmount = entryToStickOrCD.Cooldown;
+                    alreadyInStorageEntry.RemainingStickeyAmount = entryToStickOrCD.StickyForNbMessages;
+                }
+
+                // Otherwise, create the new entry
+                instanceDbModel.Entries.Add(new LorebookStateEntry
+                {
+                    LorebookEntryId = entryToStickOrCD.EntryId,
+                    RemainingCooldownAmount = entryToStickOrCD.Cooldown,
+                    RemainingStickeyAmount = entryToStickOrCD.StickyForNbMessages
+                });
+            }
+
+            await storageService.UpdateLorebookInstanceAsync(instanceDbModel);
         }
 
         /// <summary>

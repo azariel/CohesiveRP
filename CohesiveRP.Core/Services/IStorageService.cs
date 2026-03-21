@@ -3,6 +3,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
@@ -86,5 +87,12 @@ namespace CohesiveRP.Core.Services
         Task<bool> DeleteLorebookAsync(LorebookDbModel lorebookDbModel);
         Task<LorebookDbModel> AddEmptyLorebookAsync();
         Task<LorebookDbModel> AddLorebookAsync(LorebookDbModel dbModel);
+
+        // Lorebook Instances
+        Task<LorebookInstanceDbModel[]> GetLorebookInstancesAsync();
+        Task<LorebookInstanceDbModel[]> GetLorebookInstancesAsync(Func<LorebookInstanceDbModel, bool> func);
+        Task<LorebookInstanceDbModel> AddLorebookInstanceAsync(LorebookInstanceDbModel dbModel);
+        Task<bool> UpdateLorebookInstanceAsync(LorebookInstanceDbModel lorebookDbModel);
+        Task<bool> DeleteLorebookInstanceAsync(string chatId);
     }
 }

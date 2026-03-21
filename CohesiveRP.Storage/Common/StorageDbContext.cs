@@ -104,5 +104,7 @@ namespace CohesiveRP.Storage.Common
         public DbSet<SceneTrackerDbModel> SceneTrackers { get; set; }
 
         public DbSet<LorebookDbModel> Lorebooks { get; set; }
+
+        public DbSet<LorebookInstanceDbModel> LorebookInstances { get; set; }
     }
 }

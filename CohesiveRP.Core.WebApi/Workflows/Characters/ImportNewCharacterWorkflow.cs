@@ -76,9 +76,9 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
             AlternateGreetings = ccv3CharacterCard.Data.AlternateGreetings,
         };
 
-        CharacterDbModel result = await storageService.ImportNewCharacterAsync(queryModel);
+        CharacterDbModel importCharacterResult = await storageService.ImportNewCharacterAsync(queryModel);
 
-        if (result == null)
+        if (importCharacterResult == null)
         {
             return new WebApiException
             {
@@ -88,7 +88,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         // Save the image (avatar) on disk
-        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, result.CharacterId);
+        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, importCharacterResult.CharacterId);
         if (!Directory.Exists(directoryCharacter))
         {
             Directory.CreateDirectory(directoryCharacter);
@@ -122,21 +122,20 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         // Convert DbModel to an acceptable web model (without sensitive information)
-        // TODO: could really use automapper... todo
         var responseDto = new CharacterResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
             Character = new()
             {
-                CharacterId = result.CharacterId,
-                Name = result.Name,
-                Creator = result.Creator,
-                CreatorNotes = result.CreatorNotes,
-                Description = result.Description,
-                Tags = result.Tags,
-                FirstMessage = result.FirstMessage,
-                AlternateGreetings = result.AlternateGreetings,
-                LastActivityAtUtc = result.LastActivityAtUtc,
+                CharacterId = importCharacterResult.CharacterId,
+                Name = importCharacterResult.Name,
+                Creator = importCharacterResult.Creator,
+                CreatorNotes = importCharacterResult.CreatorNotes,
+                Description = importCharacterResult.Description,
+                Tags = importCharacterResult.Tags,
+                FirstMessage = importCharacterResult.FirstMessage,
+                AlternateGreetings = importCharacterResult.AlternateGreetings,
+                LastActivityAtUtc = importCharacterResult.LastActivityAtUtc,
             }
         };
 

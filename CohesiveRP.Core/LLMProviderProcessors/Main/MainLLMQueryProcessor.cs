@@ -9,6 +9,8 @@ using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Lorebooks.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.Chat;
@@ -34,7 +36,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 promptContextElementBuilderFactory,
                 storageService,
                 httpLLMApiProviderService,
-                summaryService){}
+                summaryService)
+        { }
 
         /// <summary>
         /// Process the resulting completed query. If it was a 'main', it'll add a new AI message, if it was a sceneTracker, it'll attach the tracker, if it was a summary, it'll attach the summary to an existing message, etc.
@@ -79,8 +82,11 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     backgroundQueryDbModel.LinkedId = newMessageInStorage.MessageId;
                 }
 
+                // iterate the lorebook sticky and cooldown
+                await HandleStickyAndCooldownAsync();
+
                 // Right before setting the query processor to completed state, we'll launch the background workers
-                if(contextBuilder == null)
+                if (contextBuilder == null)
                 {
                     await BuildContextAsync(backgroundQueryDbModel.LinkedId);
                 }
@@ -94,6 +100,34 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 LoggingManager.LogToFile("3323ca32-a0b4-414f-a0a7-eedea88c4099", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+            }
+        }
+
+        private async Task HandleStickyAndCooldownAsync()
+        {
+            var lorebookInstances = await storageService.GetLorebookInstancesAsync(g => g.ChatId == backgroundQueryDbModel.ChatId);
+
+            List<LorebookStateEntry> entriesToRemove = new();
+            foreach (var lorebookInstance in lorebookInstances)
+            {
+                foreach (var lorebookInstanceEntry in lorebookInstance.Entries)
+                {
+                    if (lorebookInstanceEntry.RemainingStickeyAmount > 0)
+                        lorebookInstanceEntry.RemainingStickeyAmount--;
+
+                    if (lorebookInstanceEntry.RemainingCooldownAmount > 0)
+                        lorebookInstanceEntry.RemainingCooldownAmount--;
+
+                    if (lorebookInstanceEntry.RemainingStickeyAmount <= 0 && lorebookInstanceEntry.RemainingCooldownAmount <= 0)
+                    {
+                        entriesToRemove.Add(lorebookInstanceEntry);
+                    }
+                }
+
+                // Remove the entries that are not sticky nor in cooldown
+                lorebookInstance.Entries.RemoveAll(entriesToRemove.Contains);
+
+                await storageService.UpdateLorebookInstanceAsync(lorebookInstance);
             }
         }
     }
