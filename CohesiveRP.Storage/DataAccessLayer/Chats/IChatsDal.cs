@@ -8,5 +8,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         Task<ChatDbModel[]> GetChatsAsync();
         Task<ChatDbModel> GetChatByIdAsync(string id);
         Task<ChatDbModel> CreateChatAsync(CreateChatQueryModel queryModel);
+        Task<bool> DeleteChatAsync(string chatId);
+        Task<bool> UpdateChatAsync(ChatDbModel dbModel);
     }
 }

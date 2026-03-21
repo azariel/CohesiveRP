@@ -21,10 +21,9 @@ import type { BackgroundQueriesResponseDto } from "../../../../../ResponsesDto/c
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
-  defaultChatAvatarId: string | null;
 }
 
-export default function UserInputComponent({ messagesRef, defaultChatAvatarId }: Props) {
+export default function UserInputComponent({ messagesRef }: Props) {
   const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
   const [localInput, setLocalInput] = useState(activeModule?.currentUserInputValue ?? "");
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -114,7 +113,7 @@ export default function UserInputComponent({ messagesRef, defaultChatAvatarId }:
             sourceType: 1,
             messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 1,
             summarized: false,
-            avatarId: defaultChatAvatarId,
+            avatarId: "avatar",
             characterId: null,
             characterName: "",
             personaId: null,
@@ -334,7 +333,7 @@ const adjustTextareaHeight = () => {
           sourceType: 1,
           messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
           summarized: false,
-          avatarId: defaultChatAvatarId,
+          avatarId: "avatar",
           characterId: null,
           characterName: "",
           personaId: null,
@@ -351,7 +350,7 @@ const adjustTextareaHeight = () => {
           sourceType: 1,
           messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
           summarized: false,
-          avatarId: defaultChatAvatarId,
+          avatarId: "avatar",
           characterId: null,
           characterName: "",
           personaId: null,

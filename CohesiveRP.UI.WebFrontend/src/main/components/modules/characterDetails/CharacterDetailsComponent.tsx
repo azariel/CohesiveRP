@@ -8,7 +8,7 @@ import { deleteFromServerApiAsync, getFromServerApiAsync, postToServerApiAsync, 
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
-import { GetAvatarPathFromCharacterId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromCharacterId, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
 import { ImSpinner2 } from "react-icons/im";
 import type { SelectableChatsResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatsResponseDto";
 import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatResponseDto";
@@ -32,8 +32,11 @@ export default function CharacterDetailsComponent() {
 
   // saving state
   const [characterName, setCharacterName] = useState("");
+  const [creator, setCreator] = useState("");
   const [creatorNotes, setCreatorNotes] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [firstMessage, setFirstMessage] = useState("");
+  const [alternateGreetings, setAlternateGreetings] = useState<string[]>([]);
   const [characterDescription, setCharacterDescription] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [operationError, setOperationError] = useState(false);
@@ -43,11 +46,22 @@ export default function CharacterDetailsComponent() {
     if (!el)
       return;
 
-    const onWheel = (e: WheelEvent) => {
+      const onWheel = (e: WheelEvent) => {
+      const atStart = el.scrollLeft === 0;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
+
+      const scrollingLeft = e.deltaY < 0;
+      const scrollingRight = e.deltaY > 0;
+
+      // If we're at a boundary in the direction being scrolled, don't consume the event
+      if ((scrollingLeft && atStart) || (scrollingRight && atEnd)) {
+        return; // Let it bubble up to the parent scroller
+      }
+
       e.preventDefault();
       el.scrollLeft += e.deltaY;
     };
-
+    
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, [isLoadingChatsDetails]);
@@ -78,8 +92,11 @@ export default function CharacterDetailsComponent() {
         console.log(`Characters details fetched successfully.`);
         setCharacterResponse(response);
         setCharacterName(response?.character?.name ?? "");
+        setCreator(response?.character?.creator ?? "");
         setCreatorNotes(response?.character?.creatorNotes ?? "");
         setTags(response?.character?.tags ?? []);
+        setFirstMessage(response?.character?.firstMessage ?? "");
+        setAlternateGreetings(response?.character?.alternateGreetings ?? []);
         setCharacterDescription(response?.character?.description ?? "");
       } catch (error) {
         console.error("Fetch characters details error:", error);
@@ -128,14 +145,12 @@ export default function CharacterDetailsComponent() {
 
         let selectedChat = {
           chatId: chat.chatId,
-          defaultChatAvatar: chat.avatarCharacterId,
           moduleName: "chat",
           currentUserInputValue: savedInput,
         } as SharedContextChatType;
 
         navigateTo(selectedChat);
         console.log(`Chat selected -> Module [${JSON.stringify(selectedChat)}] selected.`);
-        console.log(`defaultAvatar:${chat.avatarCharacterId}`);
       } finally{
         setIsLoadingChat(false);
       }
@@ -148,7 +163,8 @@ export default function CharacterDetailsComponent() {
     setIsLoadingChat(true);
     try {
       const payload:AddChatRequestDto = {
-        characterId: activeModule.selectedCharacterId
+        characterId: activeModule.selectedCharacterId,
+        lorebookIds: [],
       };
       
       const response:SelectableChatResponseDto | null = await postToServerApiAsync<SelectableChatResponseDto>("api/chats", payload);
@@ -187,7 +203,10 @@ export default function CharacterDetailsComponent() {
         characterId: activeModule.selectedCharacterId,
         characterDescription,
         characterName,
+        creator,
         creatorNotes,
+        firstMessage,
+        alternateGreetings,
         tags });
 
       const serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -236,7 +255,7 @@ export default function CharacterDetailsComponent() {
   };
 
   return (
-    <main className={styles.characterDetailsComponent}>
+    <div className={styles.characterDetailsComponent}>
       {isNetworkDown ? (
           <div className={styles.networkDownContainer}>
             <AiOutlineDisconnect className={styles.networkDownIcon} />
@@ -246,66 +265,88 @@ export default function CharacterDetailsComponent() {
         isLoadingCharacterDetails ? (
           <ImSpinner2 className={ styles.loadingCharacterDetailsSpinner } />
         ):(
-          <div className={styles.characterDetailsContainer}>
-            <div className={styles.characterHeaderContainer}>
-              <div className={styles.characterAvatarContainer}>
-                <img src={GetAvatarPathFromCharacterId(characterResponse?.character?.characterId ?? "")} alt="dev/Placeholder.png" />
-              </div>
-              <div className={styles.characterHeaderRightSideContainer}>
-                <textarea
-                  className={styles.characterName}
-                  value={characterName}
-                  onChange={(e) => setCharacterName(e.target.value)}
-                />
-                <label className={styles.characterId}>{characterResponse?.character?.characterId ?? ""}</label>
-                <div className={styles.characterChatsDetailsContainer}>
-                  <label className={styles.characterChatsDetailsChatsLabel}>Chats</label>
-                  {isLoadingChatsDetails ? (
-                    <ImSpinner2 className={ styles.loadingChatsDetailsSpinner } />
-                  ):(
-                    <div ref={chatsContainerRef} className={styles.chatsContainer}>
-                      <div className={styles.chatAddNewChatContainer} onClick={async () => await handleCreateNewChatClick()}>
-                        <MdAddBox className={styles.chatAddNewChatBtn} />
-                      </div>
-                      {chatsDetailsResponse?.chats?.map((chat, index) => (
-                        <div key={index} className={styles.chatItem}>
-                          <div className={styles.chatAvatarContainer} onClick={async () => await handleSpecificChatClick(chat)}>
-                            <img src={GetAvatarPathFromCharacterId(chat.avatarCharacterId)} alt="Avatar" />
-                          </div>
-                          <label className={styles.chatFootLabel}>{FormatDateTimeToMinutes(chat.lastActivityDateTime) ?? ""}</label>
+          <div className={styles.characterDetailsWrapper}>
+            <div className={styles.characterDetailsContainer}>
+              <div className={styles.characterHeaderContainer}>
+                <div className={styles.characterAvatarContainer}>
+                  <img src={GetAvatarPathFromCharacterId(characterResponse?.character?.characterId ?? "")} alt="dev/Placeholder.png" />
+                </div>
+                <div className={styles.characterHeaderRightSideContainer}>
+                  <textarea
+                    className={styles.characterName}
+                    value={characterName}
+                    onChange={(e) => setCharacterName(e.target.value)}
+                  />
+                  <label className={styles.characterId}>{characterResponse?.character?.characterId ?? ""}</label>
+                  <div className={styles.characterChatsDetailsContainer}>
+                    <label className={styles.characterChatsDetailsChatsLabel}>Chats</label>
+                    {isLoadingChatsDetails ? (
+                      <ImSpinner2 className={ styles.loadingChatsDetailsSpinner } />
+                    ):(
+                      <div ref={chatsContainerRef} className={styles.chatsContainer}>
+                        <div className={styles.chatAddNewChatContainer} onClick={async () => await handleCreateNewChatClick()}>
+                          <MdAddBox className={styles.chatAddNewChatBtn} />
                         </div>
-                      ))}
+                        {chatsDetailsResponse?.chats?.map((chat, index) => (
+                          <div key={index} className={styles.chatItem}>
+                            <div className={styles.chatAvatarContainer} onClick={async () => await handleSpecificChatClick(chat)}>
+                              <img src={GetAvatarPathFromChatId(chat.chatId)} alt="Avatar" />
+                            </div>
+                            <label className={styles.chatFootLabel}>{FormatDateTimeToMinutes(chat.lastActivityDateTime) ?? ""}</label>
+                          </div>
+                        ))}
+                    </div>
+                    )}
                   </div>
-                  )}
                 </div>
               </div>
-            </div>
-            <div className={styles.characterDetailsBody}>
-              <div className={styles.characterCreatorNotesContainer}>
-                <label className={styles.characterCreatorNotesLabel}>Creator Notes</label>
-                <textarea
-                  className={styles.characterCreatorNotes}
-                  value={creatorNotes}
-                  onChange={(e) => setCreatorNotes(e.target.value)}
-                />
-              </div>
+              <div className={styles.characterDetailsBody}>
 
-              <div className={styles.characterTagsContainer}>
-                <label className={styles.characterTagsLabel}>Tags</label>
-                <textarea
-                  className={styles.characterTags}
-                  value={tags?.join(",")}
-                  onChange={(e) => setTags(e.target.value?.split(",")?.map(t => t.trim()))}
-                />
-              </div>
+                <div className={styles.characterDescriptionContainer}>
+                  <label className={styles.characterDescriptionLabel}>Description</label>
+                  <textarea
+                    className={styles.characterDescription}
+                    value={characterDescription}
+                    onChange={(e) => setCharacterDescription(e.target.value)}
+                  />
+                </div>
 
-              <div className={styles.characterDescriptionContainer}>
-                <label className={styles.characterDescriptionLabel}>Description</label>
-                <textarea
-                  className={styles.characterDescription}
-                  value={characterDescription}
-                  onChange={(e) => setCharacterDescription(e.target.value)}
-                />
+                <div className={styles.characterTagsContainer}>
+                  <label className={styles.characterTagsLabel}>Tags</label>
+                  <textarea
+                    className={styles.characterTags}
+                    value={tags?.join(",")}
+                    onChange={(e) => setTags(e.target.value?.split(",")?.map(t => t.trim()))}
+                  />
+                </div>
+
+                <div className={styles.characterFirstMessageContainer}>
+                  <label className={styles.characterFirstMessageLabel}>First Message</label>
+                  <textarea
+                    className={styles.characterFirstMessage}
+                    value={firstMessage}
+                    onChange={(e) => setFirstMessage(e.target.value)}
+                  />
+                </div>
+
+                <div className={styles.characterCreatorContainer}>
+                  <label className={styles.characterCreatorLabel}>Creator</label>
+                  <textarea
+                    className={styles.characterCreator}
+                    value={creator}
+                    onChange={(e) => setCreator(e.target.value)}
+                  />
+                </div>
+
+                <div className={styles.characterCreatorNotesContainer}>
+                  <label className={styles.characterCreatorNotesLabel}>Creator Notes</label>
+                  <textarea
+                    className={styles.characterCreatorNotes}
+                    value={creatorNotes}
+                    onChange={(e) => setCreatorNotes(e.target.value)}
+                  />
+                </div>
+
               </div>
             </div>
             <div className={styles.operationsButtons}>
@@ -322,6 +363,6 @@ export default function CharacterDetailsComponent() {
           </div>
         )
       )}
-    </main>
+    </div>
   );
 }

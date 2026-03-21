@@ -82,6 +82,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 MessageContent = requestDto.Message.Content,
                 CreatedAtUtc = DateTime.UtcNow,
                 CharacterId = null,// Null as this is from the User
+                AvatarId = null,// TODO: generate a different avatar from time to time using comfyui?
             };
 
             message = await storageService.AddMessageAsync(messageQueryModel);
@@ -122,6 +123,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 PersonaId = chat?.PersonaId,
                 PersonaName = persona?.Name,
                 Summarized = message?.Summarized ?? false,
+                AvatarId = message?.AvatarId,
                 Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User")
             },
             MainQueryId = backgroundQuery.BackgroundQueryId,

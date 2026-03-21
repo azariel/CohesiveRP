@@ -5,6 +5,7 @@ import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsi
 /* Store */
 import { sharedContext } from '../../../store/AppSharedStoreContext';
 import type { SharedContextType } from "../../../store/SharedContextType";
+import { FaBook } from "react-icons/fa";
 
 export default function Header() {
   const { navigateTo } = sharedContext();
@@ -31,6 +32,9 @@ export default function Header() {
           </button>
           <button className={styles.iconBtn} onClick={() => handleIconClick("personas")} aria-label="Player Module"  title="Player">
             <HiIdentification />
+          </button>
+          <button className={styles.iconBtnSmaller} onClick={() => handleIconClick("lorebooks")} aria-label="LoreBooks Module"  title="Lorebooks">
+            <FaBook />
           </button>
         </div>
         <div className={styles.iconRowRight}>

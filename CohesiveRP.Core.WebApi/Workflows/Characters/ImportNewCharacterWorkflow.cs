@@ -3,6 +3,8 @@ using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.CharacterCards;
 using CohesiveRP.Core.CharacterCards.Loaders;
 using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
+using CohesiveRP.Core.DtoConverters.Abstractions;
+using CohesiveRP.Core.Lorebooks;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
@@ -16,10 +18,12 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
 {
     private IStorageService storageService;
+    private ILorebookDtoConverter lorebookDtoConverter;
 
-    public ImportNewCharacterWorkflow(IStorageService storageService)
+    public ImportNewCharacterWorkflow(IStorageService storageService, ILorebookDtoConverter lorebookDtoConverter)
     {
         this.storageService = storageService;
+        this.lorebookDtoConverter = lorebookDtoConverter;
     }
 
     public async Task<IWebApiResponseDto> ImportNewCharacterAsync(ImportNewCharacterRequestDto requestDto)
@@ -70,19 +74,11 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
             Tags = ccv3CharacterCard.Data.Tags,
             FirstMessage = ccv3CharacterCard.Data.FirstMessage,
             AlternateGreetings = ccv3CharacterCard.Data.AlternateGreetings,
-
-            /*
-             * messageExample
-               systemPrompt
-               PostHistoryInstructions
-               Personality
-               GroupOnlyGreetings: array
-             * */
         };
 
-        CharacterDbModel result = await storageService.ImportNewCharacterAsync(queryModel);
+        CharacterDbModel importCharacterResult = await storageService.ImportNewCharacterAsync(queryModel);
 
-        if (result == null)
+        if (importCharacterResult == null)
         {
             return new WebApiException
             {
@@ -92,30 +88,54 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         // Save the image (avatar) on disk
-        string directoryCharacter = Path.Combine($"../CohesiveRP.UI.WebFrontend/public", "characters", result.CharacterId);
+        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, importCharacterResult.CharacterId);
         if (!Directory.Exists(directoryCharacter))
         {
             Directory.CreateDirectory(directoryCharacter);
         }
 
-        image?.Save(Path.Combine(directoryCharacter, "avatar.png"));
+        image?.Save(Path.Combine(directoryCharacter, WebConstants.AvatarFileName));
+
+        // handle the embedded lorebook if any
+        if (ccv3CharacterCard.Data.CharacterBook != null)
+        {
+            LorebookDbModel lorebookDbModel = lorebookDtoConverter.Convert(ccv3CharacterCard.Data.CharacterBook);
+            LorebookDbModel resultLoreBook = await storageService.AddLorebookAsync(lorebookDbModel);
+
+            if (resultLoreBook != null)
+            {
+                try
+                {
+                    // save the image as the default lorebook avatar on disk
+                    string directorylorebook = Path.Combine(WebConstants.LorebooksAvatarFilePath, resultLoreBook.LorebookId);
+                    if (!Directory.Exists(directorylorebook))
+                    {
+                        Directory.CreateDirectory(directorylorebook);
+                    }
+
+                    image?.Save(Path.Combine(directorylorebook, WebConstants.AvatarFileName));
+                } catch (Exception)
+                {
+                    // ignore
+                }
+            }
+        }
 
         // Convert DbModel to an acceptable web model (without sensitive information)
-        // TODO: could really use automapper... todo
         var responseDto = new CharacterResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
             Character = new()
             {
-                CharacterId = result.CharacterId,
-                Name = result.Name,
-                Creator = result.Creator,
-                CreatorNotes = result.CreatorNotes,
-                Description = result.Description,
-                Tags = result.Tags,
-                FirstMessage = result.FirstMessage,
-                AlternateGreetings = result.AlternateGreetings,
-                LastActivityAtUtc = result.LastActivityAtUtc,
+                CharacterId = importCharacterResult.CharacterId,
+                Name = importCharacterResult.Name,
+                Creator = importCharacterResult.Creator,
+                CreatorNotes = importCharacterResult.CreatorNotes,
+                Description = importCharacterResult.Description,
+                Tags = importCharacterResult.Tags,
+                FirstMessage = importCharacterResult.FirstMessage,
+                AlternateGreetings = importCharacterResult.AlternateGreetings,
+                LastActivityAtUtc = importCharacterResult.LastActivityAtUtc,
             }
         };
 

@@ -23,7 +23,6 @@
     scrollbar-gutter: stable;
 }
 
-/* Optional: Ensure the second item doesn't shrink below its content if needed */
 .chatsEmptyContainer > *:last-child {
     min-width: 0; 
 }
@@ -115,12 +114,12 @@
 .chatCard::after {
     content: '';
     position: absolute;
-    bottom: 2.2rem;
+    bottom: 0.6rem;
     left: 10%;
     width: 80%;
     height: 2px;
     border-radius: 90px;
-    background: #61eaff; /* your accent color */
+    background: #61eaff;
     box-shadow: 0 0 10px 3px #61e7ff88;
     opacity: 0;
     transform: scaleX(0.6);
@@ -130,6 +129,7 @@
 .chatCard:hover::after {
     opacity: 1;
     transform: scaleX(1);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .chatCharNameLabel{
@@ -162,10 +162,90 @@
     padding-top: 0.5rem;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+/* ── Add these rules to ChatSelectionComponent.module.css ── */
+
+/* Overlay sits on top of the avatar image */
+.chatCardOverlay {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border-radius: 4px;
+    opacity: 0;
+    padding-top: 1.0rem;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.chatCardOverlayVisible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Shared button style */
+.chatCardActionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    padding-top: 0.2em;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    /* width: 1.2rem;
+    height: 1.2rem; */
+    /* border-radius: 3%;
+    border: 1px solid rgba(255, 255, 255, 0.18); */
+    color: #e8e8e8;
+    font-size: 1.1rem;
+    /* transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease; */
+}
+
+.chatCardActionBtn:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+    border: none;
+    background: transparent;
+}
+
+.chatCardActionBtn:after {
+}
+
+.chatCardActionBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.chatEditButton {
+    width: 1em;
+    height: 1em;
+    display: block;
+    padding-left: 0.3em;
+}
+
+.chatEditButton:hover {
+    color: rgb(255, 255, 255);
+    transition: 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.chatCardDeleteBtn {
+    width: 1em;
+    height: 1em;
+    display: block;
+    padding-right: 0.3em;
+}
+
+.chatCardDeleteBtn:hover {
+    color: rgba(244, 52, 52, 0.79);
+    transition: 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
 .isLoadingSpinner {
@@ -178,6 +258,12 @@
 /* Mobile breakpoint: mobile display or smaller screens */
 @media (max-width: 876px) {
  .chatsGridContainer {
-    grid-template-columns: repeat(auto-fill, minmax(clamp(5rem, 25dvw, 10rem), 1fr));
+     grid-template-columns: repeat(auto-fill, minmax(clamp(5rem, 25dvw, 10rem), 1fr));
+    }
 }
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

@@ -63,9 +63,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 ChatDbModel chatDbModel = new ChatDbModel
                 {
                     ChatId = Guid.NewGuid().ToString(),
+                    Name = queryModel.Name,
                     CreatedAtUtc = DateTime.UtcNow,
                     SelectedChatCompletionPresets = queryModel.SelectedChatCompletionPresets,
                     CharacterIds = queryModel.CharacterIds,
+                    LorebookIds = queryModel.LorebookIds,
                     PersonaId = queryModel.PersonaId,
                     LastActivityAtUtc = DateTime.UtcNow,
                 };
@@ -84,6 +86,70 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             {
                 LoggingManager.LogToFile("0a39887a-ea58-4e78-b44b-afad7e5fc340", $"Error when querying Db on table Chat.", ex);
                 return null;
+            }
+        }
+
+        public async Task<bool> UpdateChatAsync(ChatDbModel dbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var chat = dbContext.Chats.FirstOrDefault(w => w.ChatId == dbModel.ChatId);
+
+                if (chat == null)
+                {
+                    LoggingManager.LogToFile("e89002b8-9b09-4ddc-b1fd-53b5cea3327f", $"Chat [{dbModel.ChatId}] to update wasn't found in storage.");
+                    return false;
+                }
+
+                // Update only the overridable fields
+                chat.SelectedChatCompletionPresets = dbModel.SelectedChatCompletionPresets;
+                chat.LorebookIds = dbModel.LorebookIds;
+                chat.CharacterIds = dbModel.CharacterIds;
+                chat.Name = dbModel.Name;
+
+                var result = dbContext.Chats.Update(chat);
+                if (result.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("5c3ae68d-9c28-44b0-9f50-d816e735ff78", $"Error when updating a Chat. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("eeecbf0f-eb8d-4191-848c-5d1de62f9fa8", $"Error when querying pending queries on table Chats.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteChatAsync(string chatId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var chat = dbContext.Chats.FirstOrDefault(w => w.ChatId == chatId);
+
+                if (chat == null)
+                {
+                    LoggingManager.LogToFile("f23deb92-034e-43dc-a7c4-4e0ca1c8c5a5", $"Chat [{chatId}] to delete wasn't found in storage.");
+                    return false;
+                }
+
+                var result = dbContext.Chats.Remove(chat);
+                if (result.State != EntityState.Deleted)
+                {
+                    LoggingManager.LogToFile("cbc84e32-b1ed-4c3d-8a4a-03810a0afddc", $"Error when deleting a specific Chat. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(chat)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("8173a545-f6d2-43c8-8caf-6b1bcf5e497c", $"Error when querying pending queries on table Chats.", ex);
+                return false;
             }
         }
     }

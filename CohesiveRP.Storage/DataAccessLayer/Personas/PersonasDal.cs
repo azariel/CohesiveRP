@@ -3,6 +3,7 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.Personas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -22,6 +23,31 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
             using var dbContext = contextFactory.CreateDbContext();
             dbContext.Database.EnsureCreated();
+
+            Cleanup();
+        }
+
+        private void Cleanup()
+        {
+            using var dbContext = contextFactory.CreateDbContext();
+            dbContext.Database.EnsureCreated();
+
+            int Personas = dbContext.Personas.Count();
+
+            if (Personas > 0)
+                return;
+
+            dbContext.Personas.Add(new PersonaDbModel
+            {
+                PersonaId = Guid.NewGuid().ToString(),
+                LastActivityAtUtc = DateTime.UtcNow,
+                CreatedAtUtc = DateTime.UtcNow,
+                IsDefault = true,
+                Name = "Default Persona",
+                Description = "",
+            });
+
+            dbContext.SaveChanges();
         }
 
         // ********************************************************************
@@ -60,21 +86,29 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 using var dbContext = await contextFactory.CreateDbContextAsync();
 
                 // Convert models
-                PersonaDbModel PersonaDbModel = new PersonaDbModel
+                PersonaDbModel personaDbModel = new PersonaDbModel
                 {
                     PersonaId = Guid.NewGuid().ToString(),
                     CreatedAtUtc = DateTime.UtcNow,
                     LastActivityAtUtc = DateTime.UtcNow,
                     Name = queryModel.Name,
+                    IsDefault = false,
                     Description = queryModel.Description,
                 };
 
-                EntityEntry<PersonaDbModel> result = await dbContext.Personas.AddAsync(PersonaDbModel);
+                EntityEntry<PersonaDbModel> result = await dbContext.Personas.AddAsync(personaDbModel);
 
                 if (result.State != EntityState.Added)
                 {
                     LoggingManager.LogToFile("a3e0e0f5-822f-4e26-a1b6-85611c0b4dbe", $"Error when querying Db on table Personas. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}].");
                     return null;
+                }
+
+
+                if (dbContext.Personas.Count() <= 0)
+                {
+                    personaDbModel.IsDefault = true;
+                    await UpdatePersonaAsync(personaDbModel);
                 }
 
                 await dbContext.SaveChangesAsync();
@@ -138,7 +172,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 EntityEntry<PersonaDbModel> result = dbContext.Personas.Update(persona);
                 if (result.State != EntityState.Modified)
                 {
-                    LoggingManager.LogToFile("16b64607-90d7-4d18-be09-6f70f38509e7", $"Error when updating LastActivity on table Personas. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(personaDbModel)}].");
+                    LoggingManager.LogToFile("16b64607-90d7-4d18-be09-6f70f38509e7", $"Error when updating Persona. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(personaDbModel)}].");
                     return false;
                 }
 

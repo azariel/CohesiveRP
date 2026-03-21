@@ -35,8 +35,10 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             ChatResponseDto responseDto = new()
             {
                 ChatId = chatId,
-                CharacterId = characterId ?? "unknown",
-                ChatName = character?.Name ?? "unknown",
+                ChatName = chat.Name,
+                LastActivityAtUtc = chat.LastActivityAtUtc,
+                CharacterIds = chat.CharacterIds,
+                LorebookIds = chat.LorebookIds,
                 HttpResultCode = System.Net.HttpStatusCode.OK,
             };
 

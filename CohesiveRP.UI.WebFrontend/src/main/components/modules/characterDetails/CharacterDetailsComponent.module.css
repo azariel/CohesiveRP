@@ -20,24 +20,31 @@
     height: 100%;
     width: 100%;
     padding-left: 0.8em;
-    /* padding-top: 1em; */
     display: flex;  
     flex-direction: row;
     flex-wrap: nowrap; 
     gap: 0.5em;          
     align-items: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
 }
 
-.chatsContainer::-webkit-scrollbar { display: none; }
+.chatsContainer::-webkit-scrollbar { display: thin; }
+
+.characterDetailsWrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
 
 .characterDetailsContainer {
-    height: 100dvh;
     width: 100%;
+    max-height: 85dvh;
     padding-top: 2em;
-    padding-bottom: 2em;
+    padding-bottom: 1em;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -45,6 +52,7 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
 
     /* Firefox */
     scrollbar-width: thin;
@@ -83,7 +91,7 @@
 
 .characterHeaderContainer {
     width: 100%;
-    height: 24%;
+    height: 30%;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -203,12 +211,44 @@
   scrollbar-width: thin; /* Firefox */
 }
 
-.characterCreatorNotesContainer {
+.characterCreatorContainer {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-top: 1em;
     width: 100%;
+}
+
+.characterCreatorLabel {
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.characterCreator {
+    font-size: 1em;
+    width: 99%;
+    height: 1.7em;
+    box-sizing: border-box;
+    display: block;
+    resize: none;
+    background-color: #12121f;
+    color: #d4d4e8;
+    border: 1px solid #2e2e48;
+    border-radius: 6px;
+    padding: 0.75rem;
+    padding-top: 0rem;
+    font-family: "Georgia", serif;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    outline: none;
+}
+
+.characterCreatorNotesContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 1em;
+    width: 99%;
 }
 
 .characterCreatorNotesLabel {
@@ -219,8 +259,8 @@
 .characterCreatorNotes {
     font-size: 1em;
     width: 100%;
-    min-height: 20em;
-    max-height: 50em;
+    min-height: 10em;
+    max-height: 30em;
     box-sizing: border-box;
     display: block;
     resize: vertical;
@@ -229,6 +269,40 @@
     border: 1px solid #2e2e48;
     border-radius: 6px;
     padding: 0.75rem;
+    font-family: "Georgia", serif;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    outline: none;
+}
+
+.characterFirstMessageContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 1em;
+    width: 100%;
+}
+
+.characterFirstMessageLabel {
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.characterFirstMessage {
+    font-size: 1em;
+    width: 99%;
+    min-height: 10em;
+    max-height: 50em;
+    height: 20em;
+    box-sizing: border-box;
+    display: block;
+    resize: vertical;
+    background-color: #12121f;
+    color: #d4d4e8;
+    border: 1px solid #2e2e48;
+    border-radius: 6px;
+    padding: 0.75rem;
+    padding-top: 0rem;
     font-family: "Georgia", serif;
     line-height: 1.65;
     white-space: pre-wrap;
@@ -285,8 +359,9 @@
 .characterDescription {
     font-size: 1em;
     width: 100%;
-    min-height: 40em;
+    min-height: 10em;
     max-height: 100em;
+    height: 20em;
     box-sizing: border-box;
     display: block;
     resize: vertical;
@@ -307,6 +382,7 @@
     gap: 0.8em;
     justify-content: flex-end;
     padding: 1em 0.8em;
+    padding-top: 0.5em;
     width: 100%;
     box-sizing: border-box;
     flex-shrink: 0;
@@ -314,8 +390,6 @@
 
 .saveButton {
   align-self: flex-end;
-  margin-top: 0.5em;
-  padding: 0.35em 1.2em;
   background: transparent;
   color: rgb(51, 174, 231);
   border: 1px solid rgb(51, 174, 231);
@@ -341,8 +415,6 @@
 
 .deleteButton {
   align-self: flex-end;
-  margin-top: 0.5em;
-  padding: 0.35em 1.2em;
   background: transparent;
   color: rgb(255, 39, 39);
   border: 1px solid rgb(51, 174, 231);

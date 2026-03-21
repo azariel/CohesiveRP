@@ -29,10 +29,20 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         [JsonValueConverter]
         public List<string> CharacterIds { get; set; }
 
+        /// <summary>
+        /// The collection of lorebooks tied to this chat.
+        /// These lorebooks will be considered in the prompt builders
+        /// </summary>
+        [JsonValueConverter]
+        public List<string> LorebookIds { get; set; }
+
         public DateTime LastActivityAtUtc { get; set; }
 
         [Required]
         [MaxLength(32)]
         public string PersonaId { get; set; }
+
+        [MaxLength(512)]
+        public string Name { get; set; }
     }
 }

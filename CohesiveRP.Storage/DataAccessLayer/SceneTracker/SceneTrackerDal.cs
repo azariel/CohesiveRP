@@ -2,6 +2,7 @@
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
@@ -26,7 +27,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             dbContext.Database.EnsureCreated();
         }
 
-        public async Task<SceneTrackerDbModel> AddSceneTracker(CreateSceneTrackerQueryModel queryModel)
+        public async Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel)
         {
             try
             {
@@ -67,7 +68,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             }
         }
 
-        public async Task<SceneTrackerDbModel> GetSceneTracker(string chatId)
+        public async Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId)
         {
             try
             {
@@ -80,7 +81,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             }
         }
 
-        public async Task<SceneTrackerDbModel> CreateOrUpdateSceneTracker(CreateSceneTrackerQueryModel queryModel)
+        public async Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel)
         {
             try
             {
@@ -128,6 +129,35 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             {
                 LoggingManager.LogToFile("c1fb1516-beb5-42c0-9bd8-b64b229a86f2", $"Error when querying pending queries on table sceneTrackers.", ex);
                 return null;
+            }
+        }
+
+        public async Task<bool> DeleteSceneTrackerAsync(string chatId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var sceneTracker = dbContext.SceneTrackers.FirstOrDefault(w => w.ChatId == chatId);
+
+                if (sceneTracker == null)
+                {
+                    LoggingManager.LogToFile("9fcb3559-eb8d-4c5c-82ee-366a32a5e7c4", $"SceneTracker tethered to chat [{chatId}] to delete wasn't found in storage.");
+                    return false;
+                }
+
+                var result = dbContext.SceneTrackers.Remove(sceneTracker);
+                if (result.State != EntityState.Deleted)
+                {
+                    LoggingManager.LogToFile("4108c7eb-89ac-4e4d-88ec-49a0dfd30417", $"Error when deleting a specific sceneTracker. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(sceneTracker)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("3d57cc85-6c88-4b8f-9cef-f5ef167ed5ae", $"Error when querying queries on table SceneTrackers.", ex);
+                return false;
             }
         }
     }

@@ -11,5 +11,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         Task<bool> UpdateHotMessagesAsync(HotMessagesDbModel messages);
         Task<bool> UpdateHotMessageAsync(string chatId, MessageDbModel message);
         Task<bool> DeleteSpecificMessageAsync(string chatId, string messageId);
+        Task<bool> DeleteColdMessageAsync(string chatId);
+        Task<bool> DeleteHotMessageAsync(string chatId);
     }
 }

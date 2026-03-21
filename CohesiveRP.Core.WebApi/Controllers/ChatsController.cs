@@ -10,16 +10,22 @@ namespace CohesiveRP.Storage.WebApi.Controllers
     {
         private IGetAllSelectableChatsWorkflow getAllChatsWorkflow;
         private IGetSpecificChatWorkflow getSpecificChat;
+        private IUpdateChatWorkflow putSpecificChat;
         private ICreateNewChatWorkflow createNewChatWorkflow;
+        private IDeleteSpecificChatWorkflow deleteSpecificChat;
 
         public ChatsController(
             IGetAllSelectableChatsWorkflow getAllChatsWorkflow,
             IGetSpecificChatWorkflow getSpecificChat,
-            ICreateNewChatWorkflow createNewChatWorkflow)
+            IUpdateChatWorkflow putSpecificChat,
+            ICreateNewChatWorkflow createNewChatWorkflow,
+            IDeleteSpecificChatWorkflow deleteSpecificChat)
         {
             this.getAllChatsWorkflow = getAllChatsWorkflow;
             this.getSpecificChat = getSpecificChat;
+            this.putSpecificChat = putSpecificChat;
             this.createNewChatWorkflow = createNewChatWorkflow;
+            this.deleteSpecificChat = deleteSpecificChat;
         }
 
         [HttpGet]
@@ -39,10 +45,24 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             return new JsonResult(await getSpecificChat.GetChatById(chatId));
         }
 
+        [HttpPut]
+        [Route("{chatId}")]
+        public async Task<IActionResult> PutSpecificChatById(UpdateChatRequestDto requestDto)
+        {
+            return new JsonResult(await putSpecificChat.UpdateChatAsync(requestDto));
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateNewChat(AddNewChatRequestDto requestDto)
         {
             return new JsonResult(await createNewChatWorkflow.AddNewChatAsync(requestDto));
+        }
+
+        [HttpDelete]
+        [Route("{chatId}")]
+        public async Task<IActionResult> DeleteSpecificChatById(string chatId)
+        {
+            return new JsonResult(await deleteSpecificChat.DeleteChatById(chatId));
         }
     }
 }

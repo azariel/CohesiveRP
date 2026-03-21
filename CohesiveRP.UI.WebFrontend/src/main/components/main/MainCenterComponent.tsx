@@ -11,6 +11,9 @@ import SettingsComponent from "../modules/settings/SettingsComponent";
 import { sharedContext } from '../../../store/AppSharedStoreContext';
 import PersonasSelectionComponent from "../modules/personasSelection/PersonasSelectionComponent";
 import PersonaDetailsComponent from "../modules/personaDetails/PersonaDetailsComponent";
+import LorebookSelectionComponent from "../modules/lorebooksSelection/LorebookSelectionComponent";
+import LorebookDetailsComponent from "../modules/lorebookDetails/LorebookDetailsComponent";
+import ChatDetailsComponent from "../modules/chatDetails/chatDetailsComponent";
 
 export default function MainCenterComponent() {
   const { activeModule } = sharedContext();
@@ -21,10 +24,16 @@ export default function MainCenterComponent() {
         return <ChatSelectionComponent />;
       case "chat":
         return <ChatComponent />;
+      case "chatDetails":
+        return <ChatDetailsComponent />;
       case "characters":
         return <CharactersComponent />;
       case "personas":
         return <PersonasSelectionComponent />;
+      case "lorebooks":
+        return <LorebookSelectionComponent />;
+      case "lorebookDetails":
+        return <LorebookDetailsComponent />;
       case "characterDetails":
         return <CharacterDetailsComponent />;
       case "personaDetails":

@@ -4,6 +4,7 @@ using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Personas;
 using CohesiveRP.Core.WebApi.ResponseDtos.Personas.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Personas.Abstractions;
+using CohesiveRP.Storage.QueryModels.Personas;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -18,7 +19,13 @@ public class AddPersonaWorkflow : IAddPersonaWorkflow
 
     public async Task<IWebApiResponseDto> AddPersonaAsync(AddNewPersonaRequestDto requestDto)
     {
-        var persona = await storageService.AddEmptyPersonaAsync();
+        var queryModel = new AddPersonaQueryModel
+        {
+            Name = "New Persona",
+            Description = "Description of your new persona."
+        };
+
+        var persona = await storageService.AddPersonaAsync(queryModel);
 
         // Convert DbModel to an acceptable web model (without sensitive information)
         var responseDto = new PersonaResponseDto

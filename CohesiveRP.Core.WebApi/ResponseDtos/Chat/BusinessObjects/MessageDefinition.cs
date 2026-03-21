@@ -37,5 +37,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
 
         [JsonPropertyName("personaName")]
         public string PersonaName { get; set; }
+
+        [JsonPropertyName("avatarId")]
+        public string AvatarId { get; set; }
     }
 }

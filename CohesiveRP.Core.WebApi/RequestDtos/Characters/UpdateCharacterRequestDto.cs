@@ -19,5 +19,14 @@ namespace CohesiveRP.Core.WebApi.RequestDtos.Characters
 
         [JsonPropertyName("tags")]
         public string[] Tags { get; set; }
+
+        [JsonPropertyName("creator")]
+        public string Creator { get; set; }
+
+        [JsonPropertyName("firstMessage")]
+        public string FirstMessage { get; set; }
+
+        [JsonPropertyName("alternateGreetings")]
+        public string[] AlternateGreetings { get; set; }
     }
 }

@@ -10,5 +10,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         DateTime CreatedAtUtc { get; set; }
         bool Summarized { get; set; }
         string CharacterId { get; }
+        string AvatarId { get; }
     }
 }

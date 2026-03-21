@@ -6,13 +6,13 @@ import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
 import { FormatUtcDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
-import { GetAvatarPathFromCharacterId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
+import { GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
 
 interface Props {
   // messagesRef?: React.RefObject<HTMLDivElement | null>;
   message?: ChatMessage;
-  defaultChatAvatarId?: string;
+  chatId: string;
   enableDeleteBtn?: boolean;
   enableSwipeBtn?: boolean;
   isEditable?: boolean;
@@ -20,13 +20,13 @@ interface Props {
   onDelete?: (messageId: string) => Promise<void>;
 }
 
-export default function ChatMessageComponent({ message, defaultChatAvatarId, enableSwipeBtn = false,  enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
+export default function ChatMessageComponent({ message, chatId, enableSwipeBtn = false,  enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
   const isRevertingRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // // Focus + size once when entering edit mode
+  // Focus + size once when entering edit mode
   useEffect(() => {
     if (!isEditing || !textareaRef.current)
       return;
@@ -100,7 +100,7 @@ export default function ChatMessageComponent({ message, defaultChatAvatarId, ena
             {message?.sourceType == 0 ? (
               <img src={GetAvatarPathFromPersonaId(message?.personaId ?? "")} alt="Avatar" />
             ) : (
-              <img src={GetAvatarPathFromCharacterId(message?.avatarId ?? defaultChatAvatarId ?? "")} alt="Avatar" />
+              <img src={GetAvatarPathFromChatIdAndAvatarId(chatId, message?.avatarId ?? "avatar")} alt="Avatar" />
             )}
           </div>
           <div className={styles.messageInfoContainer}>

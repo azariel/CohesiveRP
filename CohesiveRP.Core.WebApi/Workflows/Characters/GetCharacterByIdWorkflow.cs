@@ -46,6 +46,7 @@ public class GetCharacterByIdWorkflow : IGetCharacterByIdWorkflow
                 FirstMessage = character.FirstMessage,
                 AlternateGreetings = character.AlternateGreetings,
                 LastActivityAtUtc = character.LastActivityAtUtc,
+                CreatedAtUtc = character.CreatedAtUtc,
             }
         };
 

@@ -96,7 +96,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                var character = dbContext.Characters.AsNoTracking().FirstOrDefault(w => w.CharacterId == characterDbModel.CharacterId);
+                var character = dbContext.Characters.FirstOrDefault(w => w.CharacterId == characterDbModel.CharacterId);
 
                 if (character == null)
                 {
@@ -104,10 +104,19 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return false;
                 }
 
-                EntityEntry<CharacterDbModel> result = dbContext.Characters.Update(characterDbModel);
+                // Update only the overridable fields
+                character.Description = characterDbModel.Description;
+                character.Creator = characterDbModel.Creator;
+                character.CreatorNotes = characterDbModel.CreatorNotes;
+                character.AlternateGreetings = characterDbModel.AlternateGreetings;
+                character.FirstMessage = characterDbModel.FirstMessage;
+                character.Name = characterDbModel.Name;
+                character.Tags = characterDbModel.Tags;
+
+                EntityEntry<CharacterDbModel> result = dbContext.Characters.Update(character);
                 if (result.State != EntityState.Modified)
                 {
-                    LoggingManager.LogToFile("b3cd56a6-f7b7-4bd5-be9f-a30748fec1d8", $"Error when updating LastActivity on table Characters. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(characterDbModel)}].");
+                    LoggingManager.LogToFile("b3cd56a6-f7b7-4bd5-be9f-a30748fec1d8", $"Error when updating a Character. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(characterDbModel)}].");
                     return false;
                 }
 
@@ -129,14 +138,14 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 if (character == null)
                 {
-                    LoggingManager.LogToFile("8aff54b1-92ef-4bc9-b594-6da73992c982", $"Character [{characterDbModel.CharacterId}] to update wasn't found in storage.");
+                    LoggingManager.LogToFile("8aff54b1-92ef-4bc9-b594-6da73992c982", $"Character [{characterDbModel.CharacterId}] to delete wasn't found in storage.");
                     return false;
                 }
 
                 EntityEntry<CharacterDbModel> result = dbContext.Characters.Remove(characterDbModel);
                 if (result.State != EntityState.Deleted)
                 {
-                    LoggingManager.LogToFile("9ece8490-e7c5-4f30-93e2-6794953d0afb", $"Error when deleting a Character. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(characterDbModel)}].");
+                    LoggingManager.LogToFile("9ece8490-e7c5-4f30-93e2-6794953d0afb", $"Error when deleting a specific Character. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(characterDbModel)}].");
                     return false;
                 }
 

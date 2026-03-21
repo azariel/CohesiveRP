@@ -2,6 +2,7 @@
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Users;
@@ -69,7 +70,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     currentMessages.Remove(messageToRemove);
                 }
 
-                if(nbColdMessages != null && nbColdMessages.HasValue)
+                if (nbColdMessages != null && nbColdMessages.HasValue)
                 {
                     hotMessages.NbColdMessages = nbColdMessages.Value;
                 }
@@ -215,6 +216,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     SourceType = queryModel.SourceType,
                     CreatedAtUtc = queryModel.CreatedAtUtc,
                     CharacterId = queryModel.CharacterId,
+                    AvatarId = queryModel.AvatarId,
                 };
 
                 // Check if HotMessages for this chat already exist
@@ -388,6 +390,64 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("ae78540c-8b82-4973-9439-c26dff6830cb", $"Error when querying Db on table HOT messages to delete message.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteColdMessageAsync(string chatId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                HotMessagesDbModel messagesObj = dbContext.HotMessages.FirstOrDefault(w => w.ChatId == chatId);
+
+                if (messagesObj == null)
+                {
+                    LoggingManager.LogToFile("902f1973-b0c8-43a3-a3ec-debbcf17ba86", $"Cold Messages tied to Chat [{chatId}] to delete weren't found in storage.");
+                    return false;
+                }
+
+                var result = dbContext.HotMessages.Remove(messagesObj);
+                if (result.State != EntityState.Deleted)
+                {
+                    LoggingManager.LogToFile("36701052-c788-4fa6-acf4-9f237c8de4c7", $"Error when deleting a specific Cold message object. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(messagesObj)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("1e53acbf-ea6b-4006-84a4-346182bfe93d", $"Error when querying pending queries on table Cold messages.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteHotMessageAsync(string chatId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                HotMessagesDbModel messagesObj = dbContext.HotMessages.FirstOrDefault(w => w.ChatId == chatId);
+
+                if (messagesObj == null)
+                {
+                    LoggingManager.LogToFile("9df41399-7c81-4b11-bb33-5ee50da5b5eb", $"Hot Messages tied to Chat [{chatId}] to delete weren't found in storage.");
+                    return false;
+                }
+
+                var result = dbContext.HotMessages.Remove(messagesObj);
+                if (result.State != EntityState.Deleted)
+                {
+                    LoggingManager.LogToFile("4d033e9d-9fe1-4f2b-947c-cbf49e8dcca6", $"Error when deleting a specific Hot message object. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(messagesObj)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("8def56ce-ba0a-4800-8992-aaa8848a6073", $"Error when querying pending queries on table Hot messages.", ex);
                 return false;
             }
         }
