@@ -2,9 +2,9 @@ import styles from "./ChatDetailsComponent.module.css";
 import { useRef, useEffect, useState } from "react";
 import { AiOutlineDisconnect } from "react-icons/ai";
 import { ImSpinner2 } from "react-icons/im";
-import { MdAddBox } from "react-icons/md";
+import { MdCheck, MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 
-import { deleteFromServerApiAsync, getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
+import { deleteFromServerApiAsync, getFromServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 
 /* Store */
@@ -13,6 +13,8 @@ import type { SharedContextChatType } from "../../../../store/SharedContextChatT
 import type { ChatResponseDto } from "../../../../ResponsesDto/chat/ChatResponseDto";
 import type { SharedContextType } from "../../../../store/SharedContextType";
 import { GetAvatarPathFromChatIdAndAvatarId } from "../../../../utils/avatarUtils";
+import type { Lorebook } from "../../../../ResponsesDto/lorebooks/BusinessObjects/Lorebook";
+import type { LorebooksResponseDto } from "../../../../ResponsesDto/lorebooks/LorebooksResponseDto";
 
 export default function ChatDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextChatType>();
@@ -27,50 +29,95 @@ export default function ChatDetailsComponent() {
   const [isSaving, setIsSaving] = useState(false);
   const [operationError, setOperationError] = useState(false);
 
+  // lorebook state
+  const [availableLorebooks, setAvailableLorebooks] = useState<Lorebook[]>([]);
+  const [selectedLorebookIds, setSelectedLorebookIds] = useState<string[]>([]);
+  const [isLorebookDropdownOpen, setIsLorebookDropdownOpen] = useState(false);
+  const [isLoadingLorebooks, setIsLoadingLorebooks] = useState(false);
+  const lorebookDropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (didComponentMountAlready.current)
-        return;
+      return;
     didComponentMountAlready.current = true;
 
     fetchChatDetails();
+    fetchLorebooks();
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (lorebookDropdownRef.current && !lorebookDropdownRef.current.contains(e.target as Node)) {
+        setIsLorebookDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const fetchChatDetails = async () => {
+    if (!activeModule?.chatId) {
+      console.error(`Selected chat id is not valid and thus has no details.`);
+      return;
+    }
 
-      if(!activeModule?.chatId){
-        console.error(`Selected chat id is not valid and thus has no details.`);
+    try {
+      setIsLoadingChatDetails(true);
+      const response: ChatResponseDto | null = await getFromServerApiAsync<ChatResponseDto>(`api/chats/${activeModule.chatId}`);
+
+      let serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || response.code != 200 || serverApiException?.message) {
+        console.error(`Call to fetch chat details failed. [${JSON.stringify(serverApiException)}]`);
+        setIsNetworkDown(true);
+        setChatResponse({
+          code: -1,
+          chatId: "",
+          characterIds: [],
+          lorebookIds: [],
+          lastActivityDateTime: null,
+          name: null,
+        });
         return;
       }
 
-      try {
-        setIsLoadingChatDetails(true);
-        const response: ChatResponseDto | null = await getFromServerApiAsync<ChatResponseDto>(`api/chats/${activeModule.chatId}`);
-        
-        let serverApiException = response as ServerApiExceptionResponseDto | null;
-        if (!response || response.code != 200 || serverApiException?.message) {
-          console.error(`Call to fetch chat details failed. [${JSON.stringify(serverApiException)}]`);
-          setIsNetworkDown(true);
-          setChatResponse({
-            code : -1,
-            chatId: "",
-            characterIds: [],
-            lorebookIds: [],
-            lastActivityDateTime: null,
-            name: null,
-          });
+      console.log(`Chat details fetched successfully.`);
+      setChatResponse(response);
+      setName(response?.name ?? "");
+      setSelectedLorebookIds(response?.lorebookIds ?? []);
+    } catch (error) {
+      console.error("Fetch chat error:", error);
+    } finally {
+      setIsLoadingChatDetails(false);
+    }
+  };
 
-          return;
-        }
-        
-        console.log(`Chat details fetched successfully.`);
-        setChatResponse(response);
-        setName(response?.name ?? "");
-      } catch (error) {
-        console.error("Fetch chat error:", error);
-      } finally {
-        setIsLoadingChatDetails(false);
+  const fetchLorebooks = async () => {
+    try {
+      setIsLoadingLorebooks(true);
+      const response: LorebooksResponseDto | null = await getFromServerApiAsync<LorebooksResponseDto>(`api/lorebooks`);
+
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || response.code != 200 || serverApiException?.message) {
+        console.error(`Failed to fetch available lorebooks. [${JSON.stringify(serverApiException)}]`);
+        return;
       }
-    };
+
+      setAvailableLorebooks(response.lorebooks ?? []);
+    } catch (error) {
+      console.error("Fetch available lorebooks error:", error);
+    } finally {
+      setIsLoadingLorebooks(false);
+    }
+  };
+
+  const toggleLorebookSelection = (lorebookId: string) => {
+    setSelectedLorebookIds(prev =>
+      prev.includes(lorebookId)
+        ? prev.filter(id => id !== lorebookId)
+        : [...prev, lorebookId]
+    );
+  };
 
   const handleSave = async () => {
     if (!activeModule?.chatId || isSaving)
@@ -80,11 +127,11 @@ export default function ChatDetailsComponent() {
     setOperationError(false);
 
     try {
-      const response = await putToServerApiAsync(`api/chats/${activeModule.chatId}`, { 
+      const response = await putToServerApiAsync(`api/chats/${activeModule.chatId}`, {
         name,
         chatId: activeModule.chatId,
         characterIds: chatResponse?.characterIds,
-        lorebookIds: chatResponse?.lorebookIds,
+        lorebookIds: selectedLorebookIds,
       });
 
       const serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -92,7 +139,6 @@ export default function ChatDetailsComponent() {
         console.error(`Save failed. [${JSON.stringify(serverApiException)}]`);
         setOperationError(true);
       }
-
     } catch (error) {
       console.error("Save chat details error:", error);
       setOperationError(true);
@@ -109,21 +155,19 @@ export default function ChatDetailsComponent() {
     setOperationError(false);
 
     try {
-
       const response = await deleteFromServerApiAsync(`api/chats/${activeModule.chatId}`);
 
       const serverApiException = response as ServerApiExceptionResponseDto | null;
       if (!response || serverApiException?.message) {
         console.error(`Deletion failed. [${JSON.stringify(serverApiException)}]`);
         setOperationError(true);
-      } else{
+      } else {
         let module = {
           moduleName: "chats"
         } as SharedContextType;
 
         navigateTo(module);
       }
-
     } catch (error) {
       console.error("Deletion chat error:", error);
       setOperationError(true);
@@ -132,25 +176,29 @@ export default function ChatDetailsComponent() {
     }
   };
 
+  const selectedLorebooksCount = selectedLorebookIds.length;
+  const dropdownLorebookSelectionsLabel = selectedLorebooksCount === 0
+    ? "None selected"
+    : selectedLorebooksCount === 1
+      ? (availableLorebooks.find(l => l.lorebookId === selectedLorebookIds[0])?.name ?? "1 lorebook")
+      : `${selectedLorebooksCount} lorebooks selected`;
+
   return (
     <main className={styles.chatDetailsComponent}>
       {isNetworkDown ? (
-          <div className={styles.networkDownContainer}>
-            <AiOutlineDisconnect className={styles.networkDownIcon} />
-            <label>CohesiveRP backend is unreachable</label>
-          </div>
-        ) : (
+        <div className={styles.networkDownContainer}>
+          <AiOutlineDisconnect className={styles.networkDownIcon} />
+          <label>CohesiveRP backend is unreachable</label>
+        </div>
+      ) : (
         isLoadingChatDetails ? (
-          <ImSpinner2 className={ styles.loadingChatDetailsSpinner } />
-        ):(
+          <ImSpinner2 className={styles.loadingChatDetailsSpinner} />
+        ) : (
           <div className={styles.chatDetailsContainer}>
             <div className={styles.chatHeaderContainer}>
               <div className={styles.chatAvatarContainer}>
                 <div className={styles.addNewAvatarImageContainer}>
-                  <input
-                      type="file"
-                      style={{ display: "none" }}
-                  />
+                  <input type="file" style={{ display: "none" }} />
                   <img src={`${GetAvatarPathFromChatIdAndAvatarId(chatResponse?.chatId ?? "", "avatar")}`} alt="no image" />
                 </div>
               </div>
@@ -165,10 +213,60 @@ export default function ChatDetailsComponent() {
                 />
                 <label className={styles.chatId}>{chatResponse?.chatId ?? ""}</label>
               </div>
+
+              {/* Lorebook multi-select dropdown */}
+              <div className={styles.lorebookSection}>
+                <label className={styles.lorebookLabel}>Lorebooks</label>
+                <div className={styles.lorebookDropdownWrapper} ref={lorebookDropdownRef}>
+                  <button
+                    className={styles.lorebookDropdownTrigger}
+                    onClick={() => setIsLorebookDropdownOpen(prev => !prev)}
+                    disabled={isLoadingLorebooks}
+                    type="button"
+                  >
+                    {isLoadingLorebooks ? (
+                      <ImSpinner2 className={styles.lorebookSpinner} />
+                    ) : (
+                      <span className={styles.lorebookDropdownLabel}>{dropdownLorebookSelectionsLabel}</span>
+                    )}
+                    {isLorebookDropdownOpen
+                      ? <MdKeyboardArrowUp className={styles.lorebookDropdownChevron} />
+                      : <MdKeyboardArrowDown className={styles.lorebookDropdownChevron} />
+                    }
+                  </button>
+
+                  {isLorebookDropdownOpen && (
+                    <div className={styles.lorebookDropdownMenu}>
+                      {availableLorebooks.length === 0 ? (
+                        <div className={styles.lorebookDropdownEmpty}>No lorebooks available</div>
+                      ) : (
+                        availableLorebooks.map(lorebook => {
+                          const isSelected = selectedLorebookIds.includes(lorebook.lorebookId);
+                          return (
+                            <div
+                              key={lorebook.lorebookId}
+                              className={`${styles.lorebookDropdownItem} ${isSelected ? styles.lorebookDropdownItemSelected : ""}`}
+                              onClick={() => toggleLorebookSelection(lorebook.lorebookId)}
+                            >
+                              <span className={styles.lorebookCheckMark}>
+                                {isSelected && <MdCheck className={styles.lorebookCheckIcon} />}
+                              </span>
+                              <span className={styles.lorebookItemName}>
+                                {lorebook.name ?? lorebook.lorebookId}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className={styles.operationsButtonsContainer}>
                 <div className={styles.operationsButtons}>
                   <button className={styles.deleteButton} onClick={handleDelete} disabled={isSaving}>
-                  {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Delete"}
+                    {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Delete"}
                   </button>
                   <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
                     {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Save"}

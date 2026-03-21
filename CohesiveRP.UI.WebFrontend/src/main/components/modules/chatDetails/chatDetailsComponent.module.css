@@ -162,12 +162,11 @@
   display: flex;
   align-items: center;
   gap: 0.4em;
-  /* transition: background 0.15s, color 0.15s; */
 }
 
 .saveButton:hover:not(:disabled) {
   color: #fff;
-  order: 1px solid rgb(51, 174, 231);
+  border: 1px solid rgb(51, 174, 231);
 }
 
 .saveButton:disabled {
@@ -230,6 +229,140 @@
     width: 3em;
     height: 3em;
     animation: spin 1s linear infinite;
+}
+
+/* ── Lorebook dropdown ─────────────────────────────── */
+
+.lorebookSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  margin-top: 0.75em;
+  width: 100%;
+}
+
+.lorebookLabel {
+  font-size: 0.8em;
+  color: rgb(180, 180, 180);
+  padding-left: 0.2em;
+}
+
+.lorebookDropdownWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.lorebookDropdownTrigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4em 0.6em;
+  background-color: #12121f;
+  color: #f6911d;
+  border: 1px solid #2e2e48;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-family: "Georgia", serif;
+  cursor: pointer;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.lorebookDropdownTrigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lorebookDropdownLabel {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.lorebookDropdownChevron {
+  flex-shrink: 0;
+  font-size: 1.1em;
+  color: rgb(140, 140, 160);
+  margin-left: 0.4em;
+}
+
+.lorebookDropdownMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background-color: #14141f;
+  border: 1px solid #2e2e48;
+  border-radius: 6px;
+  z-index: 100;
+  max-height: 11em;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #2e2e48 transparent;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.lorebookDropdownEmpty {
+  padding: 0.6em 0.8em;
+  font-size: 0.85em;
+  color: rgb(140, 140, 160);
+  font-family: "Georgia", serif;
+}
+
+.lorebookDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.45em 0.7em;
+  cursor: pointer;
+  font-size: 0.88em;
+  font-family: "Georgia", serif;
+  color: rgb(200, 200, 210);
+  background-color: transparent;
+  transition: background-color 0.1s;
+  user-select: none;
+}
+
+.lorebookDropdownItem:hover {
+  background-color: #1d1d30;
+}
+
+.lorebookDropdownItemSelected {
+  background-color: #1a1a2e;
+  color: #f6911d;
+}
+
+.lorebookDropdownItemSelected:hover {
+  background-color: #20203a;
+}
+
+.lorebookCheckMark {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lorebookCheckIcon {
+  color: #f6911d;
+  font-size: 1em;
+}
+
+.lorebookItemName {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.lorebookSpinner {
+  width: 0.9em;
+  height: 0.9em;
+  animation: spin 1s linear infinite;
+  color: rgb(140, 140, 160);
 }
 
 @keyframes spin {

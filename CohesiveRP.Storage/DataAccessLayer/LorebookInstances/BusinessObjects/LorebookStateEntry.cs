@@ -15,5 +15,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Lorebooks.BusinessObjects
 
         [JsonPropertyName("remainingCooldownAmount")]
         public int RemainingCooldownAmount { get; set; }
+
+        [JsonPropertyName("linkedMessageId")]
+        public string LinkedMessageId { get; set; }
     }
 }

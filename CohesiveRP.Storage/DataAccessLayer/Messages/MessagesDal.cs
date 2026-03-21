@@ -221,56 +221,53 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
 
                 // Check if HotMessages for this chat already exist
                 var hotMessages = dbContext.HotMessages.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
-                if (hotMessages != null)
+                if (hotMessages == null)
                 {
-                    LoggingManager.LogToFile("92bae546-0dbb-4d64-89e4-1fa86fb4ba55", $"Can't create hot messages associated with chatId [{queryModel.ChatId}]. HotMessages related to this chat already exists.");
+                    // Create the HotMessages row tied to this chat first
+                    var newHotMessagesObj = new HotMessagesDbModel
+                    {
+                        ChatId = queryModel.ChatId,
+                        CreatedAtUtc = DateTime.UtcNow,
+                        NbColdMessages = 0,
+                        Messages = new List<MessageDbModel> { messageDbModel },
+                    };
+
+                    EntityEntry<HotMessagesDbModel> resultAdd = dbContext.HotMessages.Add(newHotMessagesObj);
+                    if (resultAdd.State != EntityState.Added)
+                    {
+                        LoggingManager.LogToFile("b22ec4b0-0707-4521-a932-9af95430a2ae", $"Error when querying Db on table HOT messages. State was [{resultAdd.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultAdd)}].");
+                        return null;
+                    }
+
+                    await dbContext.SaveChangesAsync();
+                    return messageDbModel;
+                }
+
+                // Otherwise, Update the existing row with the new message
+                var currentMessages = hotMessages.Messages;
+                currentMessages.Add(messageDbModel);
+                hotMessages.Messages = currentMessages;
+                var resultUpdate = dbContext.HotMessages.Update(hotMessages);
+                if (resultUpdate.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("77cb56c7-238d-46e3-a110-d68dc4427a6e", $"Error when querying Db on table HOT messages. State was [{resultUpdate.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultUpdate)}].");
                     return null;
                 }
 
-                // Create the HotMessages row tied to this chat first
-                var newHotMessagesObj = new HotMessagesDbModel
+                // Update linked chat
+                var chat = dbContext.Chats.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
+                if (hotMessages != null)
                 {
-                    ChatId = queryModel.ChatId,
-                    CreatedAtUtc = DateTime.UtcNow,
-                    NbColdMessages = 0,
-                    Messages = new List<MessageDbModel> { messageDbModel },
-                };
-
-                EntityEntry<HotMessagesDbModel> resultAdd = dbContext.HotMessages.Add(newHotMessagesObj);
-                if (resultAdd.State != EntityState.Added)
-                {
-                    LoggingManager.LogToFile("b22ec4b0-0707-4521-a932-9af95430a2ae", $"Error when querying Db on table HOT messages. State was [{resultAdd.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultAdd)}].");
-                    return null;
+                    chat.LastActivityAtUtc = DateTime.UtcNow;
+                    dbContext.Chats.Update(chat);
                 }
 
                 await dbContext.SaveChangesAsync();
+
+                // Handle cold storage in an async process
+                _ = HandleColdStorageAsync(queryModel.ChatId);
+
                 return messageDbModel;
-
-                //// Otherwise, Update the existing row with the new message
-                //var currentMessages = hotMessages.Messages;
-                //currentMessages.Add(messageDbModel);
-                //hotMessages.Messages = currentMessages;
-                //var resultUpdate = dbContext.HotMessages.Update(hotMessages);
-                //if (resultUpdate.State != EntityState.Modified)
-                //{
-                //    LoggingManager.LogToFile("77cb56c7-238d-46e3-a110-d68dc4427a6e", $"Error when querying Db on table HOT messages. State was [{resultUpdate.State}]. Result: [{JsonCommonSerializer.SerializeToString(resultUpdate)}].");
-                //    return null;
-                //}
-
-                //// Update linked chat
-                //var chat = dbContext.Chats.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
-                //if (hotMessages != null)
-                //{
-                //    chat.LastActivityAtUtc = DateTime.UtcNow;
-                //    dbContext.Chats.Update(chat);
-                //}
-
-                //await dbContext.SaveChangesAsync();
-
-                //// Handle cold storage in an async process
-                //_ = HandleColdStorageAsync(queryModel.ChatId);
-
-                //return messageDbModel;
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("49529c3a-aa3e-41a9-ad12-209faa0d4047", $"Error when querying Db on table HOT messages.", ex);

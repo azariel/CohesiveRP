@@ -65,7 +65,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 using var dbContext = await contextFactory.CreateDbContextAsync();
 
                 // Force those fields
-                dbModel.LorebookId = Guid.NewGuid().ToString();
+                dbModel.LorebookInstanceId = Guid.NewGuid().ToString();
                 dbModel.CreatedAtUtc = DateTime.UtcNow;
 
                 var result = await dbContext.LorebookInstances.AddAsync(dbModel);

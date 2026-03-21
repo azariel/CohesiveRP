@@ -174,6 +174,14 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return false;
                 }
 
+                // Remove the tether to this lorebook from any existing chats
+                var chatsWithTetherToLorebookToDelete = dbContext.Chats.AsEnumerable().Where(w => w.LorebookIds.Contains(lorebook.LorebookId)).ToArray();
+                foreach (var chatToModify in chatsWithTetherToLorebookToDelete)
+                {
+                    chatToModify.LorebookIds.Remove(lorebook.LorebookId);
+                    dbContext.Chats.Update(chatToModify);
+                }
+
                 await dbContext.SaveChangesAsync();
                 return true;
             } catch (Exception ex)
