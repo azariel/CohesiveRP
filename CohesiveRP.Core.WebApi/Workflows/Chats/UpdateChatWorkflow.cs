@@ -72,6 +72,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
 
             // Update the chat
             chat.Name = requestDto.Name;
+            chat.PersonaId = requestDto.PersonaId;
             chat.CharacterIds = requestDto.CharacterIds;
             chat.LorebookIds = requestDto.LorebookIds;
             var updateChatResult = await storageService.UpdateChatAsync(chat);
@@ -91,6 +92,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 CharacterIds = chat.CharacterIds,
                 LastActivityAtUtc = chat.LastActivityAtUtc,
                 ChatName = chat.Name,
+                PersonaId = chat.PersonaId,
                 HttpResultCode = System.Net.HttpStatusCode.OK,
             };
 

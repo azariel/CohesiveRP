@@ -39,6 +39,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 LastActivityAtUtc = chat.LastActivityAtUtc,
                 CharacterIds = chat.CharacterIds,
                 LorebookIds = chat.LorebookIds,
+                PersonaId  = chat.PersonaId,
                 HttpResultCode = System.Net.HttpStatusCode.OK,
             };
 

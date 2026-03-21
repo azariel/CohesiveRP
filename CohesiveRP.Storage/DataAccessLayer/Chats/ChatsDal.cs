@@ -107,6 +107,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 chat.LorebookIds = dbModel.LorebookIds;
                 chat.CharacterIds = dbModel.CharacterIds;
                 chat.Name = dbModel.Name;
+                chat.PersonaId = dbModel.PersonaId;
 
                 var result = dbContext.Chats.Update(chat);
                 if (result.State != EntityState.Modified)

@@ -15,6 +15,8 @@ import type { SharedContextType } from "../../../../store/SharedContextType";
 import { GetAvatarPathFromChatIdAndAvatarId } from "../../../../utils/avatarUtils";
 import type { Lorebook } from "../../../../ResponsesDto/lorebooks/BusinessObjects/Lorebook";
 import type { LorebooksResponseDto } from "../../../../ResponsesDto/lorebooks/LorebooksResponseDto";
+import type { Persona } from "../../../../ResponsesDto/personas/BusinessObjects/Persona";
+import type { PersonasResponseDto } from "../../../../ResponsesDto/personas/PersonasResponseDto";
 
 export default function ChatDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextChatType>();
@@ -36,6 +38,13 @@ export default function ChatDetailsComponent() {
   const [isLoadingLorebooks, setIsLoadingLorebooks] = useState(false);
   const lorebookDropdownRef = useRef<HTMLDivElement>(null);
 
+  // persona state
+  const [availablePersonas, setAvailablePersonas] = useState<Persona[]>([]);
+  const [selectedPersonaId, setSelectedPersonaId] = useState<string>("");
+  const [isPersonaDropdownOpen, setIsPersonaDropdownOpen] = useState(false);
+  const [isLoadingPersonas, setIsLoadingPersonas] = useState(false);
+  const personaDropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (didComponentMountAlready.current)
       return;
@@ -43,14 +52,16 @@ export default function ChatDetailsComponent() {
 
     fetchChatDetails();
     fetchLorebooks();
+    fetchPersonas();
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (lorebookDropdownRef.current && !lorebookDropdownRef.current.contains(e.target as Node)) {
+      if (lorebookDropdownRef.current && !lorebookDropdownRef.current.contains(e.target as Node))
         setIsLorebookDropdownOpen(false);
-      }
+      if (personaDropdownRef.current && !personaDropdownRef.current.contains(e.target as Node))
+        setIsPersonaDropdownOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -75,6 +86,7 @@ export default function ChatDetailsComponent() {
           chatId: "",
           characterIds: [],
           lorebookIds: [],
+          personaId: "",
           lastActivityDateTime: null,
           name: null,
         });
@@ -84,6 +96,7 @@ export default function ChatDetailsComponent() {
       console.log(`Chat details fetched successfully.`);
       setChatResponse(response);
       setName(response?.name ?? "");
+      setSelectedPersonaId(response?.personaId ?? "");
       setSelectedLorebookIds(response?.lorebookIds ?? []);
     } catch (error) {
       console.error("Fetch chat error:", error);
@@ -111,12 +124,36 @@ export default function ChatDetailsComponent() {
     }
   };
 
+  const fetchPersonas = async () => {
+    try {
+      setIsLoadingPersonas(true);
+      const response: PersonasResponseDto | null = await getFromServerApiAsync<PersonasResponseDto>(`api/personas`);
+
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || response.code != 200 || serverApiException?.message) {
+        console.error(`Failed to fetch available personas. [${JSON.stringify(serverApiException)}]`);
+        return;
+      }
+
+      setAvailablePersonas(response.personas ?? []);
+    } catch (error) {
+      console.error("Fetch available personas error:", error);
+    } finally {
+      setIsLoadingPersonas(false);
+    }
+  };
+
   const toggleLorebookSelection = (lorebookId: string) => {
     setSelectedLorebookIds(prev =>
       prev.includes(lorebookId)
         ? prev.filter(id => id !== lorebookId)
         : [...prev, lorebookId]
     );
+  };
+
+  const selectPersona = (personaId: string) => {
+    setSelectedPersonaId(prev => prev === personaId ? "" : personaId);
+    setIsPersonaDropdownOpen(false);
   };
 
   const handleSave = async () => {
@@ -132,6 +169,7 @@ export default function ChatDetailsComponent() {
         chatId: activeModule.chatId,
         characterIds: chatResponse?.characterIds,
         lorebookIds: selectedLorebookIds,
+        personaId: selectedPersonaId,
       });
 
       const serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -183,6 +221,10 @@ export default function ChatDetailsComponent() {
       ? (availableLorebooks.find(l => l.lorebookId === selectedLorebookIds[0])?.name ?? "1 lorebook")
       : `${selectedLorebooksCount} lorebooks selected`;
 
+  const dropdownPersonaSelectionLabel = selectedPersonaId
+    ? (availablePersonas.find(p => p.personaId === selectedPersonaId)?.name ?? "Unknown persona")
+    : "None selected";
+
   return (
     <main className={styles.chatDetailsComponent}>
       {isNetworkDown ? (
@@ -214,13 +256,66 @@ export default function ChatDetailsComponent() {
                 <label className={styles.chatId}>{chatResponse?.chatId ?? ""}</label>
               </div>
 
+              {/* Persona single-select dropdown */}
+              <div className={styles.lorebookSection}>
+                <label className={styles.lorebookLabel}>Persona</label>
+                <div className={styles.lorebookDropdownWrapper} ref={personaDropdownRef}>
+                  <button
+                    className={styles.lorebookDropdownTrigger}
+                    onClick={() => {
+                      setIsPersonaDropdownOpen(prev => !prev);
+                      setIsLorebookDropdownOpen(false);
+                    }}
+                    disabled={isLoadingPersonas}
+                    type="button"
+                  >
+                    {isLoadingPersonas ? (
+                      <ImSpinner2 className={styles.lorebookSpinner} />
+                    ) : (
+                      <span className={styles.lorebookDropdownLabel}>{dropdownPersonaSelectionLabel}</span>
+                    )}
+                    {isPersonaDropdownOpen
+                      ? <MdKeyboardArrowUp className={styles.lorebookDropdownChevron} />
+                      : <MdKeyboardArrowDown className={styles.lorebookDropdownChevron} />
+                    }
+                  </button>
+
+                  {isPersonaDropdownOpen && (
+                    <div className={styles.lorebookDropdownMenu}>
+                      {availablePersonas.length === 0 ? (
+                        <div className={styles.lorebookDropdownEmpty}>No personas available</div>
+                      ) : (
+                        availablePersonas.map(persona => {
+                          const isSelected = selectedPersonaId === persona.personaId;
+                          return (
+                            <div
+                              key={persona.personaId}
+                              className={`${styles.lorebookDropdownItem} ${isSelected ? styles.lorebookDropdownItemSelected : ""}`}
+                              onClick={() => selectPersona(persona.personaId)}
+                            >
+                              <span className={styles.lorebookCheckMark}>
+                                {isSelected && <MdCheck className={styles.lorebookCheckIcon} />}
+                              </span>
+                              <span className={styles.lorebookItemName}>{persona.name}</span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Lorebook multi-select dropdown */}
               <div className={styles.lorebookSection}>
                 <label className={styles.lorebookLabel}>Lorebooks</label>
                 <div className={styles.lorebookDropdownWrapper} ref={lorebookDropdownRef}>
                   <button
                     className={styles.lorebookDropdownTrigger}
-                    onClick={() => setIsLorebookDropdownOpen(prev => !prev)}
+                    onClick={() => {
+                      setIsLorebookDropdownOpen(prev => !prev);
+                      setIsPersonaDropdownOpen(false);
+                    }}
                     disabled={isLoadingLorebooks}
                     type="button"
                   >
