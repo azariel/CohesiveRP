@@ -26,6 +26,7 @@ export default function ChatDetailsComponent() {
 
   // saving state
   const [name, setName] = useState("");
+  const [personaId, setPersonaId] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [operationError, setOperationError] = useState(false);
 
@@ -75,6 +76,7 @@ export default function ChatDetailsComponent() {
           chatId: "",
           characterIds: [],
           lorebookIds: [],
+          personaId: "",
           lastActivityDateTime: null,
           name: null,
         });
@@ -84,6 +86,7 @@ export default function ChatDetailsComponent() {
       console.log(`Chat details fetched successfully.`);
       setChatResponse(response);
       setName(response?.name ?? "");
+      setPersonaId(response?.personaId ?? "");
       setSelectedLorebookIds(response?.lorebookIds ?? []);
     } catch (error) {
       console.error("Fetch chat error:", error);

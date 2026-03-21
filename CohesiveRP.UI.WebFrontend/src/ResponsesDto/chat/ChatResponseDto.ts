@@ -5,6 +5,7 @@ interface ChatResponseDto extends ServerApiResponseDto  {
     characterIds: string[] | null;
     lorebookIds: string[] | null;
     name: string | null;
+    personaId: string | null;
     lastActivityDateTime: Date | null;
 }
 
