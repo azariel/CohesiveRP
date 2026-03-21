@@ -10,7 +10,14 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat
         [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
         [JsonPropertyName("code")]
         public HttpStatusCode HttpResultCode { get; set; }
-        public List<string> CharacterIds { get; internal set; }
-        public List<string> LorebookIds { get; internal set; }
+
+        [JsonPropertyName("characterIds")]
+        public List<string> CharacterIds { get; set; }
+
+        [JsonPropertyName("lorebookIds")]
+        public List<string> LorebookIds { get; set; }
+
+        [JsonPropertyName("personaId")]
+        public string PersonaId { get; set; }
     }
 }

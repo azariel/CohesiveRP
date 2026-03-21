@@ -16,5 +16,8 @@ namespace CohesiveRP.Core.WebApi.RequestDtos.Chat
 
         [JsonPropertyName("lorebookIds")]
         public List<string> LorebookIds { get; set; }
+
+        [JsonPropertyName("personaId")]
+        public string PersonaId { get; set; }
     }
 }
