@@ -14,6 +14,7 @@ import PersonaDetailsComponent from "../modules/personaDetails/PersonaDetailsCom
 import LorebookSelectionComponent from "../modules/lorebooksSelection/LorebookSelectionComponent";
 import LorebookDetailsComponent from "../modules/lorebookDetails/LorebookDetailsComponent";
 import ChatDetailsComponent from "../modules/chatDetails/chatDetailsComponent";
+import ChatCompletionPresetsComponent from "../modules/chatCompletionPresets/ChatCompletionPresetsComponent";
 
 export default function MainCenterComponent() {
   const { activeModule } = sharedContext();
@@ -38,6 +39,8 @@ export default function MainCenterComponent() {
         return <CharacterDetailsComponent />;
       case "personaDetails":
         return <PersonaDetailsComponent />;
+      case "chatCompletionPresets":
+        return <ChatCompletionPresetsComponent />;
       case "settings":
         return <SettingsComponent />;
       default:

@@ -5,13 +5,13 @@ using CohesiveRP.Core.WebApi.ResponseDtos.ChatCompletionPresets.BusinessObjects;
 
 namespace CohesiveRP.Core.WebApi.ResponseDtos.ChatCompletionPresets
 {
-    public class ChatCompletionPresetsResponseDto : IWebApiResponseDto
+    public class ChatCompletionPresetResponseDto : IWebApiResponseDto
     {
         [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
         [JsonPropertyName("code")]
         public HttpStatusCode HttpResultCode { get; set; }
 
-        [JsonPropertyName("chatCompletionPresets")]
-        public ChatCompletionAllPresets[] ChatCompletionPresetsMap { get; set; } = [];
+        [JsonPropertyName("chatCompletionPreset")]
+        public ChatCompletionPreset ChatCompletionPreset { get; set; }
     }
 }

@@ -17,10 +17,10 @@ public class ChatCompletionPresetsWorkflow : IChatCompletionPresetsWorkflow
 
     public async Task<IWebApiResponseDto> GetChatCompletionPresets()
     {
-        var chatCompletionPresets = await storageService.GetChatCompletionPresetAsync();
-        var responseDto = new ChatCompletionPresetsResponseDto
+        var chatCompletionPresets = await storageService.GetChatCompletionPresetsAsync();
+        var responseDto = new ChatCompletionPresetsListResponseDto
         {
-            ChatCompletionPresetsMap = chatCompletionPresets?.Select(s=> new ChatCompletionAllPresets
+            ChatCompletionPresetsMap = chatCompletionPresets?.Select(s=> new ChatCompletionSummaryPresets
             {
                 ChatCompletionPresetId = s.ChatCompletionPresetId,
                 Name = s.Name,

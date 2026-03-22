@@ -10,7 +10,7 @@ import type { SettingsResponseDto } from "../../../../ResponsesDto/settings/Sett
 import type { LlmProviderType, PriorityType, TagType, TimeoutStrategyType } from "../../../../ResponsesDto/settings/BusinessObjects/SettingsEnums";
 import type { TimeoutStrategy } from "../../../../ResponsesDto/settings/BusinessObjects/TimeoutStrategy";
 import type { ChatCompletionPreset } from "../../../../ResponsesDto/chatCompletionPresets/ChatCompletionPreset";
-import type { ChatCompletionPresetsResponseDto } from "../../../../ResponsesDto/chatCompletionPresets/ChatCompletionPresetsResponseDto";
+import type { ChatCompletionPresetsSettingsResponseDto } from "../../../../ResponsesDto/chatCompletionPresets/ChatCompletionPresetsSettingsResponseDto";
 import type { SummarySettings, ExtensibleSummaryConfig, OverflowSummaryConfig } from "../../../../ResponsesDto/settings/BusinessObjects/SummarySettings";
 import type { LLMProviderSettings } from "../../../../ResponsesDto/settings/BusinessObjects/LLMProviderSettings";
 import type { ChatCompletionPresetMapEntry } from "../../../../ResponsesDto/settings/BusinessObjects/ChatCompletionPresetsMap";
@@ -516,7 +516,7 @@ export default function SettingsComponent() {
   const fetchPresets = async () => {
     try {
       setIsLoadingPresets(true);
-      const response = await getFromServerApiAsync<ChatCompletionPresetsResponseDto>("api/chatCompletionPresets");
+      const response = await getFromServerApiAsync<ChatCompletionPresetsSettingsResponseDto>("api/chatCompletionPresets");
       const ex = response as ServerApiExceptionResponseDto | null;
       if (!response || response.code !== 200 || ex?.message) {
         console.error("Failed to fetch presets.", JSON.stringify(ex));

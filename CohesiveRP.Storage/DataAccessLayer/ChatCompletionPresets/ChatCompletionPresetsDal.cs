@@ -1,10 +1,13 @@
 ﻿using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
@@ -355,7 +358,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         // ********************************************************************
         //                            Public
         // ********************************************************************
-        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetsAsync(string chatCompletionPresetId)
+        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string chatCompletionPresetId)
         {
             try
             {
@@ -378,6 +381,95 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             {
                 LoggingManager.LogToFile("a9c89721-5a45-4484-9894-dd1b263c4047", $"Error when querying Db on table ChatCompletionPresets.", ex);
                 return null;
+            }
+        }
+
+        public async Task<ChatCompletionPresetsDbModel> AddChatCompletionPresetAsync(ChatCompletionPresetsDbModel dbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+
+                // Force those fields
+                dbModel.ChatCompletionPresetId = Guid.NewGuid().ToString();
+                dbModel.CreatedAtUtc = DateTime.UtcNow;
+
+                var result = await dbContext.ChatCompletionPresets.AddAsync(dbModel);
+
+                if (result.State != EntityState.Added)
+                {
+                    LoggingManager.LogToFile("eebd4b6b-c8b3-4acd-a2ed-3ed5fb87318e", $"Error when querying Db on table ChatCompletionPresets. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}].");
+                    return null;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return result.Entity;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("1452962e-da77-4b13-9cd4-c5aa8de74fb9", $"Error when querying Db on table ChatCompletionPresets.", ex);
+                return null;
+            }
+        }
+
+        public async Task<bool> UpdateChatCompletionPresetAsync(ChatCompletionPresetsDbModel dbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var chatCompletionPreset = dbContext.ChatCompletionPresets.FirstOrDefault(w => w.ChatCompletionPresetId == dbModel.ChatCompletionPresetId);
+
+                if (chatCompletionPreset == null)
+                {
+                    LoggingManager.LogToFile("f1be577a-6f5c-4ece-aad9-f04fef028488", $"ChatCompletionPreset [{dbModel.ChatCompletionPresetId}] to update wasn't found in storage.");
+                    return false;
+                }
+
+                // Only handle overridable fields
+                chatCompletionPreset.Name = dbModel.Name;
+                chatCompletionPreset.Format = dbModel.Format;
+
+                var result = dbContext.ChatCompletionPresets.Update(chatCompletionPreset);
+                if (result.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("76514bc6-0aff-407b-9455-e4719e9fb6b0", $"Error when updating ChatCompletionPreset. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("21f773d1-ac34-4794-8fdd-5589d2e149b3", $"Error when querying pending queries on table ChatCompletionPresets.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteChatCompletionPresetAsync(string chatCompletionPresetId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var chatCompletionPreset = dbContext.ChatCompletionPresets.AsNoTracking().FirstOrDefault(w => w.ChatCompletionPresetId == chatCompletionPresetId);
+
+                if (chatCompletionPreset == null)
+                {
+                    LoggingManager.LogToFile("01b4a3bc-94ba-483d-898d-32e211dc7df7", $"ChatCompletionPreset [{chatCompletionPresetId}] to delete wasn't found in storage.");
+                    return false;
+                }
+
+                var result = dbContext.ChatCompletionPresets.Remove(chatCompletionPreset);
+                if (result.State != EntityState.Deleted)
+                {
+                    LoggingManager.LogToFile("d537ffd3-1236-426b-81eb-f61bd74cb6bc", $"Error when deleting a specific ChatCompletionPreset [{chatCompletionPresetId}]. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]..");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("282d43c9-5eab-470d-a0f9-211376eb3e7a", $"Error when querying pending queries on table ChatCompletionPresets.", ex);
+                return false;
             }
         }
     }

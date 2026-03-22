@@ -4,9 +4,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjec
 {
     public class PromptContextFormatElement
     {
+        [JsonPropertyName("tag")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public PromptContextFormatTag Tag { get; set; }
 
+        [JsonPropertyName("options")]
         public PromptContextFormatElementOptions Options { get; set; }
     }
 }

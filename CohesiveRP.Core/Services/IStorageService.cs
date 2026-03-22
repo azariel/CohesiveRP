@@ -34,13 +34,18 @@ namespace CohesiveRP.Core.Services
         Task<GlobalSettingsDbModel> GetGlobalSettingsAsync();
         Task<bool> UpdateGlobalSettingsAsync(GlobalSettingsDbModel dbModel);
 
+        // CompletionPresets
+        Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string chatCompletionPresetId);
+        Task<ChatCompletionPresetsDbModel[]> GetChatCompletionPresetsAsync();
+        Task<ChatCompletionPresetsDbModel> AddChatCompletionPresetAsync(ChatCompletionPresetsDbModel dbModel);
+        Task<bool> UpdateChatCompletionPresetAsync(ChatCompletionPresetsDbModel currentChatCompletionPreset);
+        Task<bool> DeleteChatCompletionPresetAsync(string chatCompletionPresetId);
+
         // BackgroundQueries
         Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
         Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId);
         Task<BackgroundQueryDbModel[]> GetBackgroundQueriesByChatIdAsync(string chatId);
         Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync();
-        Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId);
-        Task<ChatCompletionPresetsDbModel[]> GetChatCompletionPresetAsync();
         Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag);
         Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery);
         Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId);

@@ -163,8 +163,11 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> DeleteBackgroundQueriesByChatIdAsync(string chatId) => await backgroundQueriesDal.DeleteBackgroundQueriesByChatIdAsync(chatId);
 
         // ChatCompletionPresets
-        public async Task<ChatCompletionPresetsDbModel[]> GetChatCompletionPresetAsync() => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync();
-        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId) => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync(mainChatCompletionPresetId);
+        public async Task<ChatCompletionPresetsDbModel[]> GetChatCompletionPresetsAsync() => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync();
+        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string chatCompletionPresetId) => await chatCompletionPresetsDal.GetChatCompletionPresetAsync(chatCompletionPresetId);
+        public async Task<ChatCompletionPresetsDbModel> AddChatCompletionPresetAsync(ChatCompletionPresetsDbModel dbModel) => await chatCompletionPresetsDal.AddChatCompletionPresetAsync(dbModel);
+        public async Task<bool> UpdateChatCompletionPresetAsync(ChatCompletionPresetsDbModel currentChatCompletionPreset) => await chatCompletionPresetsDal.UpdateChatCompletionPresetAsync(currentChatCompletionPreset);
+        public async Task<bool> DeleteChatCompletionPresetAsync(string chatCompletionPresetId) => await chatCompletionPresetsDal.DeleteChatCompletionPresetAsync(chatCompletionPresetId);
 
         // LLMQueries
         public async Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag) => await llmApiQueriesDal.GetQueriesOnLLMApisAsync(tag);

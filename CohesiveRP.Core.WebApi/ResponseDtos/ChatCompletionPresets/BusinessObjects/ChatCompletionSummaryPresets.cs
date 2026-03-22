@@ -2,7 +2,7 @@
 
 namespace CohesiveRP.Core.WebApi.ResponseDtos.ChatCompletionPresets.BusinessObjects
 {
-    public class ChatCompletionAllPresets
+    public class ChatCompletionSummaryPresets
     {
         [JsonPropertyName("name")]
         public string Name { get; set; }

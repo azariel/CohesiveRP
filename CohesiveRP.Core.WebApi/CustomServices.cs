@@ -93,6 +93,10 @@ namespace CohesiveRP.Core.WebApi
             // Workflows.ChatCompletionPresets
             services.AddSingleton<IChatCompletionPresetsWorkflow, ChatCompletionPresetsWorkflow>();
             services.AddSingleton<IGetBackgroundQueriesByChatIdWorkflow, GetBackgroundQueriesByChatIdWorkflow>();
+            services.AddSingleton<IGetChatCompletionPresetByIdWorkflow, GetChatCompletionPresetByIdWorkflow>();
+            services.AddSingleton<IAddChatCompletionPresetWorkflow, AddChatCompletionPresetWorkflow>();
+            services.AddSingleton<IUpdateChatCompletionPresetWorkflow, UpdateChatCompletionPresetWorkflow>();
+            services.AddSingleton<IDeleteChatCompletionPresetWorkflow, DeleteChatCompletionPresetWorkflow>();
 
             // DtoConverters
             services.AddSingleton<ILorebookDtoConverter, LorebookDtoConverter>();
