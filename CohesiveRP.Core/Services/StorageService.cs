@@ -26,6 +26,7 @@ namespace CohesiveRP.Core.Services
     {
         private IChatsDal chatsDal;
         private ICharactersDal charactersDal;
+        private ICharacterSheetsDal characterSheetsDal;
         private IPersonasDal personasDal;
         private ILorebooksDal lorebooksDal;
         private ILorebookInstanceDal lorebookInstancesDal;
@@ -40,6 +41,7 @@ namespace CohesiveRP.Core.Services
         public StorageService(
             IChatsDal chatsDal,
             ICharactersDal charactersDal,
+            ICharacterSheetsDal characterSheetsDal,
             IPersonasDal personasDal,
             ILorebooksDal lorebooksDal,
             ILorebookInstanceDal lorebookInstancesDal,
@@ -53,6 +55,7 @@ namespace CohesiveRP.Core.Services
         {
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;
+            this.characterSheetsDal = characterSheetsDal;
             this.personasDal = personasDal;
             this.lorebooksDal = lorebooksDal;
             this.lorebookInstancesDal = lorebookInstancesDal;
@@ -117,6 +120,14 @@ namespace CohesiveRP.Core.Services
         public async Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel) => await charactersDal.AddCharacterAsync(queryModel);
         public async Task<bool> UpdateCharacterAsync(CharacterDbModel characterDbModel) => await charactersDal.UpdateCharacterAsync(characterDbModel);
         public async Task<bool> DeleteCharacterAsync(CharacterDbModel characterDbModel) => await charactersDal.DeleteCharacterAsync(characterDbModel);
+
+        // Pathfinder.CharacterSheets
+        public async Task<CharacterSheetDbModel[]> GetCharacterSheetsAsync() => await characterSheetsDal.GetCharacterSheetsAsync();
+        public async Task<CharacterSheetDbModel[]> GetCharacterSheetsByFuncAsync(Func<CharacterSheetDbModel, bool> func) => await characterSheetsDal.GetCharacterSheetsByFuncAsync(func);
+        public async Task<CharacterSheetDbModel> GetCharacterSheetByIdAsync(string characterId) => await characterSheetsDal.GetCharacterSheetByCharacterIdAsync(characterId);
+        public async Task<CharacterSheetDbModel> AddCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.AddCharacterSheetAsync(dbModel);
+        public async Task<bool> UpdateCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.UpdateCharacterSheetAsync(dbModel);
+        public async Task<bool> DeleteCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.DeleteCharacterSheetAsync(dbModel);
 
         // Personas
         public async Task<PersonaDbModel[]> GetPersonasAsync() => await personasDal.GetPersonasAsync();

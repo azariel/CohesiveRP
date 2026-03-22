@@ -128,6 +128,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ILLMApiQueriesDal, LLMApiQueriesDal>();
             services.AddSingleton<ISummaryDal, SummaryDal>();
             services.AddSingleton<ISceneTrackerDal, SceneTrackerDal>();
+            services.AddSingleton<ICharacterSheetsDal, CharacterSheetsDal>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

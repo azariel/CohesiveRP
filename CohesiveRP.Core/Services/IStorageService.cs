@@ -71,12 +71,19 @@ namespace CohesiveRP.Core.Services
         Task<SceneTrackerDbModel> UpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
         Task<bool> DeleteSceneTrackerAsync(string chatId);
 
-        // Character
+        // Characters
         Task<CharacterDbModel[]> GetCharactersAsync();
         Task<CharacterDbModel> GetCharacterByIdAsync(string characterId);
         Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel);
         Task<bool> UpdateCharacterAsync(CharacterDbModel characterDbModel);
         Task<bool> DeleteCharacterAsync(CharacterDbModel characterDbModel);
+
+        // Pathfinder.CharacterSheets
+        Task<CharacterSheetDbModel[]> GetCharacterSheetsAsync();
+        Task<CharacterSheetDbModel> GetCharacterSheetByIdAsync(string characterId);
+        Task<CharacterSheetDbModel> AddCharacterSheetAsync(CharacterSheetDbModel dbModel);
+        Task<bool> UpdateCharacterSheetAsync(CharacterSheetDbModel dbModel);
+        Task<bool> DeleteCharacterSheetAsync(CharacterSheetDbModel dbModel);
 
         // Personas
         Task<PersonaDbModel[]> GetPersonasAsync();
