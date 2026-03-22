@@ -2,7 +2,6 @@
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
@@ -10,7 +9,6 @@ using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.TimeoutStrategies
 using CohesiveRP.Storage.DataAccessLayer.Settings.Summary;
 using CohesiveRP.Storage.QueryModels.Chat;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
@@ -68,7 +66,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneTracker],
+                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.SkillChecksInitiator],// TODO: move SkillChecksInitiator elsewhere, it conflicts with SceneTracker
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -103,6 +101,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             {
                                 Type = ChatCompletionPresetType.SceneTracker,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_TRACKER_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.SkillChecksInitiator,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_PATHFINDER_SKILLS_CHECKS_INITIATOR_COMPLETION_PRESET,
                                 IsDefault = true,
                             }
                         }

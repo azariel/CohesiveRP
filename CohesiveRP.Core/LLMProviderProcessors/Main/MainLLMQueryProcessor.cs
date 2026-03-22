@@ -203,6 +203,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 }
 
                 GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
+
+                // Summary
                 _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, globalSettings);
 
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;

@@ -70,6 +70,9 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
         await AddSceneTrackerBackgroundQueryAsync(chat);
 
+        // Also query the skillChecksInitiator query+
+        await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
+
         IMessageDbModel message = null;
         if (!string.IsNullOrWhiteSpace(requestDto.Message.Content))
         {
@@ -93,7 +96,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         {
             ChatId = requestDto.ChatId,
             Priority = BackgroundQueryPriority.Highest,// User is waiting!
-            DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString()],// Can't run as long as another one with one of these tag is running or pending
+            DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.skillChecksInitiator.ToString()],// Can't run as long as another one with one of these tag is running or pending
             Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'
         };
 
@@ -152,7 +155,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             await storageService.UpdateHotMessageAsync(chat.ChatId, (MessageDbModel)message);
         }
     }
-
+    
     private async Task<bool> AddSceneTrackerBackgroundQueryAsync(ChatDbModel chat)
     {
         var backgroundQueryModel = new CreateBackgroundQueryQueryModel
@@ -161,6 +164,22 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             Priority = BackgroundQueryPriority.Highest,// User is waiting!
             DependenciesTags = [],// No dependencies at all
             Tags = [BackgroundQuerySystemTags.sceneTracker.ToString()],
+        };
+
+        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+            return false;
+
+        return true;
+    }
+
+    private async Task<bool> AddSkillChecksInitiatorBackgroundQueryAsync(ChatDbModel chat)
+    {
+        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+        {
+            ChatId = chat.ChatId,
+            Priority = BackgroundQueryPriority.Highest,// User is waiting!
+            DependenciesTags = [],// No dependencies at all
+            Tags = [BackgroundQuerySystemTags.skillChecksInitiator.ToString()],
         };
 
         if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)

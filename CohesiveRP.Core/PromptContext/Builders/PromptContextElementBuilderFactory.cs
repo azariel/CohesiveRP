@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Core.PromptContext.Builders.Directive;
+using CohesiveRP.Core.PromptContext.Builders.Pathfinder;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
@@ -63,6 +64,8 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new PromptContextLastUnsummarizedMessagesBuilder(storageService, contextElement, settings, chatDbModel);
                 case PromptContextFormatTag.OverflowingSummariesToSummarize:
                     return new PromptContextSummarizeSummariesBuilder(storageService, contextElement, settings, chatDbModel, tag);
+                case PromptContextFormatTag.SkillChecksInitiator:
+                    return new SkillChecksInitiatorBuilder(storageService, contextElement, chatDbModel);
                 default:
                     throw new Exception($"Unhandled [{contextElement.Tag}].");
             }

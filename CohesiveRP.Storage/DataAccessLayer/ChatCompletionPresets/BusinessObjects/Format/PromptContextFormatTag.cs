@@ -21,5 +21,6 @@
         LastUnsummarizedMessages = 16,
         OverflowingSummariesToSummarize = 17,
         DirectCharactersDescription = 18,
+        SkillChecksInitiator = 19,
     }
 }

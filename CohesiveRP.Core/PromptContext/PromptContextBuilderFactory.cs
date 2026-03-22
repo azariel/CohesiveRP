@@ -29,6 +29,8 @@ namespace CohesiveRP.Core.PromptContext
                     return new PromptContextBuilder(ChatCompletionPresetType.SummariesMerge, promptContextElementBuilderFactory, storageService, globalSettings, contextLinkedId, generationTag);
                 case BackgroundQuerySystemTags.overflowSummary:
                     return new PromptContextBuilder(ChatCompletionPresetType.SummariesMerge, promptContextElementBuilderFactory, storageService, globalSettings, contextLinkedId, generationTag);
+                case BackgroundQuerySystemTags.skillChecksInitiator:
+                    return new PromptContextBuilder(ChatCompletionPresetType.SkillChecksInitiator, promptContextElementBuilderFactory, storageService, globalSettings, contextLinkedId, generationTag);
                 case BackgroundQuerySystemTags.custom:
                     return null;
                 default:
