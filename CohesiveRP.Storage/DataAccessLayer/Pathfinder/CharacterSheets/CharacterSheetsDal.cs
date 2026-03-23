@@ -3,7 +3,6 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
-using CohesiveRP.Storage.QueryModels.Chat;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -109,7 +108,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 character.LastActivityAtUtc = DateTime.UtcNow;
 
                 // Update only the overridable fields
-                character.CharacterSheet = dbModel.CharacterSheet;
+                character.CharacterSheets.Clear();
+                character.CharacterSheets.AddRange(dbModel.CharacterSheets);
 
                 var result = dbContext.CharacterSheets.Update(character);
                 if (result.State != EntityState.Modified)

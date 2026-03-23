@@ -27,6 +27,8 @@ namespace CohesiveRP.Core.Services
         private IChatsDal chatsDal;
         private ICharactersDal charactersDal;
         private ICharacterSheetsDal characterSheetsDal;
+        private ICharacterSheetInstancesDal characterSheetInstancesDal;
+        private IChatCharactersRollsDal chatCharactersRollsDal;
         private IPersonasDal personasDal;
         private ILorebooksDal lorebooksDal;
         private ILorebookInstanceDal lorebookInstancesDal;
@@ -42,6 +44,8 @@ namespace CohesiveRP.Core.Services
             IChatsDal chatsDal,
             ICharactersDal charactersDal,
             ICharacterSheetsDal characterSheetsDal,
+            ICharacterSheetInstancesDal characterSheetInstancesDal,
+            IChatCharactersRollsDal chatCharactersRollsDal,
             IPersonasDal personasDal,
             ILorebooksDal lorebooksDal,
             ILorebookInstanceDal lorebookInstancesDal,
@@ -56,6 +60,8 @@ namespace CohesiveRP.Core.Services
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;
             this.characterSheetsDal = characterSheetsDal;
+            this.characterSheetInstancesDal = characterSheetInstancesDal;
+            this.chatCharactersRollsDal = chatCharactersRollsDal;
             this.personasDal = personasDal;
             this.lorebooksDal = lorebooksDal;
             this.lorebookInstancesDal = lorebookInstancesDal;
@@ -128,6 +134,22 @@ namespace CohesiveRP.Core.Services
         public async Task<CharacterSheetDbModel> AddCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.AddCharacterSheetAsync(dbModel);
         public async Task<bool> UpdateCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.UpdateCharacterSheetAsync(dbModel);
         public async Task<bool> DeleteCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.DeleteCharacterSheetAsync(dbModel);
+
+        // Pathfinder.CharacterSheetInstances
+        public async Task<CharacterSheetInstancesDbModel[]> GetCharacterSheetInstancesAsync() => await characterSheetInstancesDal.GetCharacterSheetInstancesAsync();
+        public async Task<CharacterSheetInstancesDbModel[]> GetCharacterSheetsInstanceByFuncAsync(Func<CharacterSheetInstancesDbModel, bool> func) => await characterSheetInstancesDal.GetCharacterSheetInstancesByFuncAsync(func);
+        public async Task<CharacterSheetInstancesDbModel> GetCharacterSheetsInstanceByChatIdAsync(string chatId) => await characterSheetInstancesDal.GetCharacterSheetsInstanceByChatIdAsync(chatId);
+        public async Task<CharacterSheetInstancesDbModel> AddCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.AddCharacterSheetsInstanceAsync(dbModel);
+        public async Task<bool> UpdateCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.UpdateCharacterSheetsInstanceAsync(dbModel);
+        public async Task<bool> DeleteCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.DeleteCharacterSheetsInstanceAsync(dbModel);
+
+        // Pathfinder.ChatCharactersRolls
+        public async Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsAsync() => await chatCharactersRollsDal.GetChatCharactersRollsAsync();
+        public async Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsByFuncAsync(Func<ChatCharactersRollsDbModel, bool> func) => await chatCharactersRollsDal.GetChatCharactersRollsByFuncAsync(func);
+        public async Task<ChatCharactersRollsDbModel> GetChatCharactersRollsByIdAsync(string chatId) => await chatCharactersRollsDal.GetChatCharactersRollsEntryAsync(chatId);
+        public async Task<ChatCharactersRollsDbModel> AddChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel) => await chatCharactersRollsDal.AddChatCharactersRollsAsync(dbModel);
+        public async Task<bool> UpdateChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel) => await chatCharactersRollsDal.UpdateChatCharactersRollsAsync(dbModel);
+        public async Task<bool> DeleteChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel) => await chatCharactersRollsDal.DeleteChatCharactersRollsAsync(dbModel);
 
         // Personas
         public async Task<PersonaDbModel[]> GetPersonasAsync() => await personasDal.GetPersonasAsync();

@@ -1,6 +1,9 @@
-﻿using CohesiveRP.Common.Diagnostics;
+﻿using System.Xml.Linq;
+using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
+using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
+using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
@@ -8,6 +11,10 @@ using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
@@ -32,6 +39,232 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 httpLLMApiProviderService,
                 summaryService)
         { }
+
+        /* Examples:
+        * [
+            {
+            "characterName": "Linota",
+            "actionCategory": "Performance",
+            "reasoning": "Linota is attempting to project calm and control despite visible signs of agitation like trembling fingers and a betraying tail swish, masking her intense emotions under a composed facade."
+            },
+            {
+            "characterName": "Linota",
+            "actionCategory": "Charisma",
+            "reasoning": "Linota is engaging in a persuasive and challenging dialogue, setting terms and gauging Edward's understanding, using her words to negotiate the intimacy of touching her horns."
+            },
+            {
+            "characterName": "Linota",
+            "actionCategory": "Sex",
+            "reasoning": "The scene is charged with sexual tension; the discussion about touching sensitive horns, her hunger, and the implied physical intimacy afterward fall under sensuality and sexual context."
+            },
+            {
+            "characterName": "Edward",
+            "actionCategory": "Charisma",
+            "reasoning": "Edward is responding to Linota's challenge with confident persuasion, asserting his capability to handle her intensity in a flirtatious, persuasive manner."
+            }
+        ]
+        * */
+        private async Task<bool> HandlePathfinderSkillRollsAsync(string LLMrawResponse)
+        {
+            try
+            {
+                // TODO: Actually call the backend to DO the skill checks, compute them and find a way to ADD them to the MAIN backgroundQuery
+                // javais pensé à ne garder que les skill checks de chaque chars dans une row par chat, mais pour la partie injection dans le contexte, il nous faudrait le reasoning
+                // peut-être garder les 3 derniers reasonings pour chaque skill + le résultat du Dice pendant genre 20 messages. après 20 messages, on garde les 3 reasonings (puisqu'ils rollover), on clear le Dice et that's it. Quand on va rerouler un Dice pour ce skill pour ce char la prochaine fois, les reasonings vont rollover, on va avoir 2 vieux et un récent, on roll et paf, on garde pendant 20 messagees
+
+                // Start by validating the llm response. It should be a valid json
+                LLMPathfinderCharactersSkillChecksActions[] CharactersSkillChecks = null;
+
+                try
+                {
+                    CharactersSkillChecks = LLMResponseParser.ParseOnlyJsonArray<LLMPathfinderCharactersSkillChecksActions>(LLMrawResponse);
+                } catch (Exception ex)
+                {
+                    LoggingManager.LogToFile("8dae9f1a-2a6b-43b8-a2ad-c28776909dd6", $"The response from the LLM for the Pathfinder CharactersSkillChecksInitiator failed. The Json structure is incorrect. Ignoring.");
+                    return false;
+                }
+
+                if (CharactersSkillChecks == null || CharactersSkillChecks.Length <= 0)
+                {
+                    return true;
+                }
+
+                ChatCharactersRollsDbModel chatCharactersRollsDbModel = await storageService.GetChatCharactersRollsByIdAsync(backgroundQueryDbModel.ChatId);
+
+                // Get the list of characters known for this chat from characterSheetInstances
+                var chatDbModel = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
+                CharacterSheetInstancesDbModel characterSheetInstancesDbModel = await storageService.GetCharacterSheetsInstanceByChatIdAsync(backgroundQueryDbModel.ChatId);
+
+                // Order the information we got from the LLM and then process them against storage
+                foreach (IGrouping<string, LLMPathfinderCharactersSkillChecksActions> skillChecksByCharacter in CharactersSkillChecks
+                    .GroupBy(g => g.CharacterName.ToLowerInvariant().Trim())
+                    .Where(w => !string.IsNullOrWhiteSpace(w.Key))
+                    .ToArray())
+                {
+                    List<SkillCheckQuery> queries = new();
+                    foreach (LLMPathfinderCharactersSkillChecksActions element in skillChecksByCharacter)
+                    {
+                        if (!Enum.TryParse(element.ActionCategory, out PathfinderSkills actionCategory))
+                        {
+                            // Just skip
+                            continue;
+                        }
+
+                        var existingQuery = queries.FirstOrDefault(a => a.ActionCategory == actionCategory);
+                        if (existingQuery != null)
+                        {
+                            // Simply add the reasoning to the list and that's it
+                            existingQuery.Reasonings.Add(element.Reasoning);
+                            continue;
+                        }
+
+                        queries.Add(new SkillCheckQuery
+                        {
+                            ActionCategory = actionCategory,
+                            Reasonings = [element.Reasoning],
+                        });
+                    }
+
+                    // Finally, process the structured information against the backend. We want keep track of the reasonings and roll the dice when required. The final info will get persisted in storage
+                    await ProcessSkillCheckQueriesAsync(chatDbModel, chatCharactersRollsDbModel, characterSheetInstancesDbModel, skillChecksByCharacter.Key, queries);
+                }
+
+                return true;
+
+            } catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private async Task<bool> ProcessSkillCheckQueriesAsync(ChatDbModel chatDbModel, ChatCharactersRollsDbModel chatCharactersRollsDbModel, CharacterSheetInstancesDbModel characterSheetInstancesDbModel, string characterName, List<SkillCheckQuery> queries)
+        {
+            // Find the character from the available character sheet instances
+            var selectedCharacterSheetInstance = characterSheetInstancesDbModel?.CharacterSheetInstances?.FirstOrDefault(f =>
+            f.CharacterSheet.FirstName?.ToLowerInvariant().Trim() == characterName ||
+            f.CharacterSheet.LastName?.ToLowerInvariant().Trim() == characterName ||
+            $"{f.CharacterSheet.FirstName?.ToLowerInvariant().Trim()} {f.CharacterSheet.LastName?.ToLowerInvariant().Trim()}" == characterName);
+
+            if (selectedCharacterSheetInstance == null)
+            {
+                var newCharacterSheetsInstance = new CharacterSheetInstancesDbModel
+                {
+                    ChatId = chatDbModel.ChatId,
+                    CharacterSheetInstances = [
+                        new CharacterSheetInstance
+                        {
+                            CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                            CharacterId = null,// Not matching a 'character', we are dealing with an NPC (that doesn't have a characterCard, it's a in-roleplay NPC)
+                            CharacterSheet = new CharacterSheet()
+                            {
+                                FirstName = characterName,// We'll assume this since we must
+                            },// Just the default values, especially around Attributes and Skills, the rest should default to null or zero until the background query updates it
+                        },
+                    ],
+                };
+
+                var result = await storageService.AddCharacterSheetsInstanceAsync(newCharacterSheetsInstance);
+                selectedCharacterSheetInstance = result?.CharacterSheetInstances?.FirstOrDefault();
+
+                if (selectedCharacterSheetInstance == null)
+                {
+                    LoggingManager.LogToFile("18d5f61d-36b0-4034-8526-317cfb11b354", $"Couldn't Add a new characterSheetInstance in storage for new character [{characterName}].");
+                    return false;
+                }
+
+                // TODO: add a backgroundQuery to update this newly create characterSheetInstance. We want the AI to scan the story and generate values for each fields automatically
+            }
+
+            if (chatCharactersRollsDbModel == null)
+            {
+                var addNewRollDbModel = new ChatCharactersRollsDbModel
+                {
+                    ChatId = backgroundQueryDbModel.ChatId,
+                    ChatCharactersRolls = [new ChatCharacterRolls { CharacterSheetInstanceId = selectedCharacterSheetInstance.CharacterSheetInstanceId, Rolls = [] }],
+                };
+
+                var queryResult = await storageService.AddChatCharactersRollsAsync(addNewRollDbModel);
+                if (queryResult == null)
+                {
+                    LoggingManager.LogToFile("545bc836-005e-4085-bb59-600a06e4f7f4", $"Couldn't Add a new ChatCharactersRolls row for CharacterSheetInstanceId [{selectedCharacterSheetInstance.CharacterSheetInstanceId}] in storage for new character [{characterName}].");
+                    return false;
+                }
+
+                chatCharactersRollsDbModel = queryResult;
+            }
+
+            ChatCharacterRolls persistentCharacterRolls = chatCharactersRollsDbModel.ChatCharactersRolls.FirstOrDefault(a => a.CharacterSheetInstanceId == selectedCharacterSheetInstance.CharacterSheetInstanceId);
+
+            // If we dont' have an entry in the chat characters rolls row, we'll add an empty for (for this specific character sheet instance)
+            if(persistentCharacterRolls == null)
+            {
+                chatCharactersRollsDbModel.ChatCharactersRolls.Add(new ChatCharacterRolls
+                {
+                    CharacterSheetInstanceId = selectedCharacterSheetInstance.CharacterSheetInstanceId,
+                    Rolls = [],
+                });
+
+                if (!await storageService.UpdateChatCharactersRollsAsync(chatCharactersRollsDbModel))
+                {
+                    LoggingManager.LogToFile("ae823f24-ddd3-48bb-8bd6-ba3f82efed47", $"Couldn't Update chatCharactersRolls tied to chat [{chatCharactersRollsDbModel.ChatId}] in storage for new character [{characterName}].");
+                    return false;
+                }
+
+                persistentCharacterRolls = chatCharactersRollsDbModel.ChatCharactersRolls.FirstOrDefault(a => a.CharacterSheetInstanceId == selectedCharacterSheetInstance.CharacterSheetInstanceId);
+                if (persistentCharacterRolls == null)// a bit paranoia here...eh
+                {
+                    LoggingManager.LogToFile("1e1d3b42-87a1-4a0f-a9c5-603fd64c9046", $"Can't find the character sheet instance [{selectedCharacterSheetInstance.CharacterSheetInstanceId}] rolls in chat [{chatDbModel.ChatId}].");
+                    return false;
+                }
+            }
+
+            foreach (SkillCheckQuery query in queries)
+            {
+                ChatCharacterRoll roll = persistentCharacterRolls.Rolls.FirstOrDefault(f => f.ActionCategory == query.ActionCategory);
+
+                if (roll == null)
+                {
+                    // Create a new roll
+                    roll = new ChatCharacterRoll
+                    {
+                        ActionCategory = query.ActionCategory,
+                        Reasonings = query.Reasonings,
+                        Value = await GenerateNewRollForCharacterForSkillCheckAsync(selectedCharacterSheetInstance, query.ActionCategory),// Generate a new value using the character sheet (or average if no character sheet)
+                    };
+
+                    persistentCharacterRolls.Rolls.Add(roll);
+                    continue;
+                }
+
+                // Update existing roll
+                roll.Reasonings = RemoveOldestXReasonings(roll.Reasonings, query.Reasonings.Count);
+            }
+
+            // Update the rolls tied to this character in this chat
+            if (!await storageService.UpdateChatCharactersRollsAsync(chatCharactersRollsDbModel))
+            {
+                LoggingManager.LogToFile("53da30a9-3ce0-4bf4-9485-d363e67fb875", $"Couldn't Update the ChatCharactersRolls row for CharacterSheetInstanceId [{selectedCharacterSheetInstance.CharacterSheetInstanceId}] in storage for new character [{characterName}] after all rolls were rolled, added and updated locally.");
+                return false;
+            }
+
+            return true;// We'll avoid re-generating it infinitely for now. it cost too much... TODO: brainstorm on this behavior
+        }
+
+        private List<string> RemoveOldestXReasonings(List<string> reasonings, int nbReasoningsToRemove)
+        {
+            if (reasonings.Count < 5 - nbReasoningsToRemove)
+                return reasonings;// There's still space
+
+            var outValue = reasonings.Skip(nbReasoningsToRemove).ToList();
+            outValue.AddRange(reasonings);
+            return outValue;
+        }
+
+        private async Task<int> GenerateNewRollForCharacterForSkillCheckAsync(CharacterSheetInstance selectedCharacterSheetInstance, PathfinderSkills actionCategory)
+        {
+            // TODO: consider the character sheet attributes and skills in this roll
+            return new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
+        }
 
         public override async Task ProcessCompletedQueryAsync()
         {
@@ -62,8 +295,13 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     return;
                 }
 
-                // TODO: Actually call the backend to DO the skill checks, compute them and find a way to ADD them to the MAIN backgroundQuery
-
+                if (!await HandlePathfinderSkillRollsAsync(LLMmessage.Content))
+                {
+                    // Ignoring for now
+                    //backgroundQueryDbModel.Content = null;
+                    //backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                    //return;
+                }
 
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
             } catch (Exception e)

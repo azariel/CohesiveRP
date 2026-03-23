@@ -1,16 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.JsonConverters;
 using CohesiveRP.Storage.Sqlite;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Chats
 {
     /// <summary>
-    /// Represents the structure of a normalized character sheet within the storage.
+    /// Represents the structure of a normalized character sheet INSTANCE (for a specific chat) within the storage.
     /// </summary>
-    [Table("Pathfinder_CharacterSheets")]
-    public class CharacterSheetDbModel : CohesiveRPSqliteBaseTable
+    [Table("Pathfinder_CharacterSheetInstances")]
+    public class CharacterSheetInstancesDbModel : CohesiveRPSqliteBaseTable
     {
         // ********************************************************************
         //                            Properties
@@ -18,11 +18,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         [Required]
         [MaxLength(32)]
         [Key]
-        public string CharacterId { get; set; }
+        public string ChatId { get; set; }
 
         public DateTime LastActivityAtUtc { get; set; }
 
         [JsonValueConverter]
-        public List<CharacterSheet> CharacterSheets { get; set; }
+        public List<CharacterSheetInstance> CharacterSheetInstances { get; set; }
     }
 }

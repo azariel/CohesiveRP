@@ -109,6 +109,8 @@ namespace CohesiveRP.Storage.Common
 
         // Pathfinder
         public DbSet<CharacterSheetDbModel> CharacterSheets { get; set; }
+        public DbSet<CharacterSheetInstancesDbModel> CharacterSheetInstances { get; set; }
+        public DbSet<ChatCharactersRollsDbModel> ChatCharactersRolls { get; set; }
         // ---------
     }
 }

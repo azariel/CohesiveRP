@@ -155,7 +155,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             await storageService.UpdateHotMessageAsync(chat.ChatId, (MessageDbModel)message);
         }
     }
-    
+
     private async Task<bool> AddSceneTrackerBackgroundQueryAsync(ChatDbModel chat)
     {
         var backgroundQueryModel = new CreateBackgroundQueryQueryModel

@@ -129,6 +129,8 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ISummaryDal, SummaryDal>();
             services.AddSingleton<ISceneTrackerDal, SceneTrackerDal>();
             services.AddSingleton<ICharacterSheetsDal, CharacterSheetsDal>();
+            services.AddSingleton<ICharacterSheetInstancesDal, CharacterSheetInstancesDal>();
+            services.AddSingleton<IChatCharactersRollsDal, ChatCharactersRollsDal>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

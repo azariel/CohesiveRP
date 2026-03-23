@@ -85,6 +85,20 @@ namespace CohesiveRP.Core.Services
         Task<bool> UpdateCharacterSheetAsync(CharacterSheetDbModel dbModel);
         Task<bool> DeleteCharacterSheetAsync(CharacterSheetDbModel dbModel);
 
+        // Pathfinder.CharacterSheetInstances
+        Task<CharacterSheetInstancesDbModel[]> GetCharacterSheetInstancesAsync();
+        Task<CharacterSheetInstancesDbModel> GetCharacterSheetsInstanceByChatIdAsync(string chatId);
+        Task<CharacterSheetInstancesDbModel> AddCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
+        Task<bool> UpdateCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
+        Task<bool> DeleteCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
+
+        // Pathfinder.ChatCharactersRolls
+        Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsAsync();
+        Task<ChatCharactersRollsDbModel> GetChatCharactersRollsByIdAsync(string chatId);
+        Task<ChatCharactersRollsDbModel> AddChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
+        Task<bool> UpdateChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
+        Task<bool> DeleteChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
+
         // Personas
         Task<PersonaDbModel[]> GetPersonasAsync();
         Task<PersonaDbModel> GetPersonaByIdAsync(string personaId);

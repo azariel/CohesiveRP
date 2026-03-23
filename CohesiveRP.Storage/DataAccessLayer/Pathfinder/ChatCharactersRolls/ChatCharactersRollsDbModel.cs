@@ -7,10 +7,10 @@ using CohesiveRP.Storage.Sqlite;
 namespace CohesiveRP.Storage.DataAccessLayer.Chats
 {
     /// <summary>
-    /// Represents the structure of a normalized character sheet within the storage.
+    /// Represents the structure of a normalized character rolls within a chat within the storage.
     /// </summary>
-    [Table("Pathfinder_CharacterSheets")]
-    public class CharacterSheetDbModel : CohesiveRPSqliteBaseTable
+    [Table("Pathfinder_ChatCharactersRolls")]
+    public class ChatCharactersRollsDbModel : CohesiveRPSqliteBaseTable
     {
         // ********************************************************************
         //                            Properties
@@ -18,11 +18,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         [Required]
         [MaxLength(32)]
         [Key]
-        public string CharacterId { get; set; }
+        public string ChatId { get; set; }
 
         public DateTime LastActivityAtUtc { get; set; }
 
         [JsonValueConverter]
-        public List<CharacterSheet> CharacterSheets { get; set; }
+        public List<ChatCharacterRolls> ChatCharactersRolls { get; set; }
     }
 }
