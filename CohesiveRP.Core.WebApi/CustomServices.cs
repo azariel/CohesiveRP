@@ -11,6 +11,7 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.ChatCompletionPresets.Abstractions;
@@ -59,6 +60,9 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetCharacterByIdWorkflow, GetCharacterByIdWorkflow>();
             services.AddSingleton<IUpdateCharacterWorkflow, UpdateCharacterWorkflow>();
             services.AddSingleton<IDeleteCharacterWorkflow, DeleteCharacterWorkflow>();
+            services.AddSingleton<IGetCharacterSheetWorkflow, GetCharacterSheetWorkflow>();
+            services.AddSingleton<IUpdateCharacterSheetWorkflow, UpdateCharacterSheetWorkflow>();
+            services.AddSingleton<IAddCharacterSheetWorkflow, AddCharacterSheetWorkflow>();
 
             // Workflows.Personas
             services.AddSingleton<IGetAllPersonasWorkflow, GetAllPersonasWorkflow>();

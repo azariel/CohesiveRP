@@ -130,7 +130,8 @@ namespace CohesiveRP.Core.Services
         // Pathfinder.CharacterSheets
         public async Task<CharacterSheetDbModel[]> GetCharacterSheetsAsync() => await characterSheetsDal.GetCharacterSheetsAsync();
         public async Task<CharacterSheetDbModel[]> GetCharacterSheetsByFuncAsync(Func<CharacterSheetDbModel, bool> func) => await characterSheetsDal.GetCharacterSheetsByFuncAsync(func);
-        public async Task<CharacterSheetDbModel> GetCharacterSheetByIdAsync(string characterId) => await characterSheetsDal.GetCharacterSheetByCharacterIdAsync(characterId);
+        //public async Task<CharacterSheetDbModel> GetCharacterSheetByFuncAsync(Func<CharacterSheetDbModel, bool> func) => throw new NotImplementedException();
+        public async Task<CharacterSheetDbModel> GetCharacterSheetByCharacterIdAsync(string characterId) => await characterSheetsDal.GetCharacterSheetByCharacterIdAsync(characterId);
         public async Task<CharacterSheetDbModel> AddCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.AddCharacterSheetAsync(dbModel);
         public async Task<bool> UpdateCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.UpdateCharacterSheetAsync(dbModel);
         public async Task<bool> DeleteCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.DeleteCharacterSheetAsync(dbModel);

@@ -1,0 +1,251 @@
+/* ─────────────────────────────────────────────────
+   CharacterSheetComponent.module.css
+   Matches the dark #12121f theme of CharacterDetails
+───────────────────────────────────────────────── */
+
+.sheetWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4em;
+  padding-bottom: 2em;
+}
+
+/* ── Sections ── */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #2e2e48;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sectionTitle {
+  margin: 0;
+  padding: 0.45em 0.8em;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f6911d;
+  background-color: #1a1a2e;
+  border-bottom: 1px solid #2e2e48;
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+  padding: 0.9em 0.8em;
+  background-color: #12121f;
+}
+
+/* ── Layout helpers ── */
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8em;
+}
+
+.threeCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.8em;
+}
+
+/* ── Field ── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+}
+
+.fieldLabel {
+  font-size: 0.75em;
+  font-weight: 500;
+  color: #9090b8;
+  letter-spacing: 0.04em;
+}
+
+/* ── Inputs ── */
+
+.sheetInput {
+  font-size: 0.9em;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #0e0e1c;
+  color: #d4d4e8;
+  border: 1px solid #2e2e48;
+  border-radius: 5px;
+  padding: 0.4em 0.6em;
+  font-family: "Georgia", serif;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.sheetInput:focus {
+  border-color: #5a5a90;
+}
+
+.sheetTextarea {
+  font-size: 0.9em;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #0e0e1c;
+  color: #d4d4e8;
+  border: 1px solid #2e2e48;
+  border-radius: 5px;
+  padding: 0.5em 0.6em;
+  font-family: "Georgia", serif;
+  line-height: 1.55;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.sheetTextarea:focus {
+  border-color: #5a5a90;
+}
+
+.sheetSelect {
+  font-size: 0.9em;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #0e0e1c;
+  color: #d4d4e8;
+  border: 1px solid #2e2e48;
+  border-radius: 5px;
+  padding: 0.4em 0.6em;
+  font-family: "Georgia", serif;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.sheetSelect:focus {
+  border-color: #5a5a90;
+}
+
+/* ── Pathfinder stat grid ── */
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8em, 1fr));
+  gap: 0.7em;
+}
+
+.statCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+  background-color: #0e0e1c;
+  border: 1px solid #2e2e48;
+  border-radius: 6px;
+  padding: 0.5em 0.4em;
+}
+
+.statLabel {
+  font-size: 0.7em;
+  color: #9090b8;
+  text-align: center;
+  letter-spacing: 0.03em;
+}
+
+.statInput {
+  font-size: 1.1em;
+  font-weight: 600;
+  width: 3.5em;
+  text-align: center;
+  background-color: transparent;
+  color: #f6911d;
+  border: none;
+  border-bottom: 1px solid #3e3e60;
+  outline: none;
+  font-family: "Georgia", serif;
+  padding: 0.1em 0;
+}
+
+.statInput:focus {
+  border-bottom-color: #f6911d;
+}
+
+/* ── Save bar ── */
+
+.saveBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.8em;
+  padding: 0.2em 0 0.5em;
+}
+
+.saveButton {
+  background: transparent;
+  color: rgb(51, 174, 231);
+  border: 1px solid rgb(51, 174, 231);
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: inherit;
+  padding: 0.3em 0.9em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.saveButton:hover:not(:disabled) {
+  color: #fff;
+  background-color: rgba(51, 174, 231, 0.15);
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.saveSpinner {
+  width: 1em;
+  height: 1em;
+  animation: spin 1s linear infinite;
+}
+
+.saveErrorLabel {
+  font-size: 0.8em;
+  color: rgb(255, 100, 100);
+}
+
+.saveSuccessLabel {
+  font-size: 0.8em;
+  color: rgb(100, 220, 130);
+}
+
+/* ── Loading / error states ── */
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3em 0;
+}
+
+.spinner {
+  color: rgb(51, 174, 231);
+  width: 2.5em;
+  height: 2.5em;
+  animation: spin 1s linear infinite;
+}
+
+.errorContainer {
+  padding: 2em;
+  color: rgb(255, 100, 100);
+  font-size: 0.9em;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

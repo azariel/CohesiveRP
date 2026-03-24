@@ -73,6 +73,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 // Override system fields
                 dbModel.CreatedAtUtc = DateTime.UtcNow;
                 dbModel.LastActivityAtUtc = DateTime.UtcNow;
+                dbModel.CharacterSheetId = Guid.NewGuid().ToString();
 
                 EntityEntry<CharacterSheetDbModel> result = await dbContext.CharacterSheets.AddAsync(dbModel);
 
@@ -96,11 +97,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                var character = dbContext.CharacterSheets.FirstOrDefault(w => w.CharacterId == dbModel.CharacterId);
+                var character = dbContext.CharacterSheets.FirstOrDefault(w => w.CharacterSheetId == dbModel.CharacterSheetId);
 
                 if (character == null)
                 {
-                    LoggingManager.LogToFile("b42f354f-1c43-4aeb-9ad8-4224894f3633", $"CharacterSheet tethered to characterId [{dbModel.CharacterId}] to update wasn't found in storage.");
+                    LoggingManager.LogToFile("b42f354f-1c43-4aeb-9ad8-4224894f3633", $"CharacterSheet tethered to characterId [{dbModel.CharacterSheetId}] to update wasn't found in storage.");
                     return false;
                 }
 
@@ -108,8 +109,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 character.LastActivityAtUtc = DateTime.UtcNow;
 
                 // Update only the overridable fields
-                character.CharacterSheets.Clear();
-                character.CharacterSheets.AddRange(dbModel.CharacterSheets);
+                character.CharacterSheet = dbModel.CharacterSheet;
 
                 var result = dbContext.CharacterSheets.Update(character);
                 if (result.State != EntityState.Modified)
@@ -132,11 +132,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                var character = dbContext.CharacterSheets.AsNoTracking().FirstOrDefault(w => w.CharacterId == dbModel.CharacterId);
+                var character = dbContext.CharacterSheets.AsNoTracking().FirstOrDefault(w => w.CharacterSheetId == dbModel.CharacterSheetId);
 
                 if (character == null)
                 {
-                    LoggingManager.LogToFile("7b264625-86f3-4c45-9015-ad715bf99f31", $"CharacterSheet tethered to characterId [{dbModel.CharacterId}] to delete wasn't found in storage.");
+                    LoggingManager.LogToFile("7b264625-86f3-4c45-9015-ad715bf99f31", $"CharacterSheet tethered to characterId [{dbModel.CharacterSheetId}] to delete wasn't found in storage.");
                     return false;
                 }
 

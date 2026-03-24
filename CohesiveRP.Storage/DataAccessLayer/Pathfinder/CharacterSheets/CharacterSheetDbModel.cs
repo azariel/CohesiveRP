@@ -18,11 +18,17 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         [Required]
         [MaxLength(32)]
         [Key]
+        public string CharacterSheetId { get; set; }
+
+        [MaxLength(32)]
         public string CharacterId { get; set; }
+
+        [MaxLength(32)]
+        public string PersonaId { get; set; }
 
         public DateTime LastActivityAtUtc { get; set; }
 
         [JsonValueConverter]
-        public List<CharacterSheet> CharacterSheets { get; set; }
+        public CharacterSheet CharacterSheet { get; set; }
     }
 }

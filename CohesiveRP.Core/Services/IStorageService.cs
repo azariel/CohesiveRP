@@ -80,7 +80,9 @@ namespace CohesiveRP.Core.Services
 
         // Pathfinder.CharacterSheets
         Task<CharacterSheetDbModel[]> GetCharacterSheetsAsync();
-        Task<CharacterSheetDbModel> GetCharacterSheetByIdAsync(string characterId);
+        Task<CharacterSheetDbModel[]> GetCharacterSheetsByFuncAsync(Func<CharacterSheetDbModel, bool> func);
+        //Task<CharacterSheetDbModel> GetCharacterSheetByFuncAsync(Func<CharacterSheetDbModel, bool> func);
+        Task<CharacterSheetDbModel> GetCharacterSheetByCharacterIdAsync(string characterId);
         Task<CharacterSheetDbModel> AddCharacterSheetAsync(CharacterSheetDbModel dbModel);
         Task<bool> UpdateCharacterSheetAsync(CharacterSheetDbModel dbModel);
         Task<bool> DeleteCharacterSheetAsync(CharacterSheetDbModel dbModel);

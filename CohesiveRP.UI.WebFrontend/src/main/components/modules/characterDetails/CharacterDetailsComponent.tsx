@@ -17,6 +17,10 @@ import { MdAddBox } from "react-icons/md";
 import { FormatDateTimeToMinutes } from "../../../../utils/DateUtils";
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 import type { SharedContextType } from "../../../../store/SharedContextType";
+import CharacterSheetComponent from "./characterSheets/CharacterSheetComponent";
+
+
+type DetailsTab = "info" | "sheet";
 
 export default function CharacterDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextCharacterType>();
@@ -41,6 +45,9 @@ export default function CharacterDetailsComponent() {
   const [isSaving, setIsSaving] = useState(false);
   const [operationError, setOperationError] = useState(false);
 
+  // tab state
+  const [activeTab, setActiveTab] = useState<DetailsTab>("info");
+
   useEffect(() => {
     const el = chatsContainerRef.current;
     if (!el)
@@ -53,9 +60,8 @@ export default function CharacterDetailsComponent() {
       const scrollingLeft = e.deltaY < 0;
       const scrollingRight = e.deltaY > 0;
 
-      // If we're at a boundary in the direction being scrolled, don't consume the event
       if ((scrollingLeft && atStart) || (scrollingRight && atEnd)) {
-        return; // Let it bubble up to the parent scroller
+        return;
       }
 
       e.preventDefault();
@@ -169,15 +175,14 @@ export default function CharacterDetailsComponent() {
       
       const response:SelectableChatResponseDto | null = await postToServerApiAsync<SelectableChatResponseDto>("api/chats", payload);
 
-      // add the newly created chat to state
       if(response) {
         setChatsDetailsResponse(previousCollection => {
           if (!previousCollection) {
             return { chats: [response]} as SelectableChatsResponseDto;
           }
           return {
-            ...previousCollection,// copy other fields
-            chats: [...(previousCollection.chats || []), response],// add newly created chat on top of others
+            ...previousCollection,
+            chats: [...(previousCollection.chats || []), response],
           };
         });
 
@@ -300,65 +305,98 @@ export default function CharacterDetailsComponent() {
                   </div>
                 </div>
               </div>
+
+              {/* ── Tab bar ── */}
+              <div className={styles.tabBar}>
+                <button
+                  className={`${styles.tabButton} ${activeTab === "info" ? styles.tabButtonActive : ""}`}
+                  onClick={() => setActiveTab("info")}
+                >
+                  Info
+                </button>
+                <button
+                  className={`${styles.tabButton} ${activeTab === "sheet" ? styles.tabButtonActive : ""}`}
+                  onClick={() => setActiveTab("sheet")}
+                >
+                  Character Sheet
+                </button>
+              </div>
+
+              {/* ── Tab content ── */}
               <div className={styles.characterDetailsBody}>
 
-                <div className={styles.characterDescriptionContainer}>
-                  <label className={styles.characterDescriptionLabel}>Description</label>
-                  <textarea
-                    className={styles.characterDescription}
-                    value={characterDescription}
-                    onChange={(e) => setCharacterDescription(e.target.value)}
-                  />
-                </div>
+                {activeTab === "info" && (
+                  <>
+                    <div className={styles.characterDescriptionContainer}>
+                      <label className={styles.characterDescriptionLabel}>Description</label>
+                      <textarea
+                        className={styles.characterDescription}
+                        value={characterDescription}
+                        onChange={(e) => setCharacterDescription(e.target.value)}
+                      />
+                    </div>
 
-                <div className={styles.characterTagsContainer}>
-                  <label className={styles.characterTagsLabel}>Tags</label>
-                  <textarea
-                    className={styles.characterTags}
-                    value={tags?.join(",")}
-                    onChange={(e) => setTags(e.target.value?.split(",")?.map(t => t.trim()))}
-                  />
-                </div>
+                    <div className={styles.characterTagsContainer}>
+                      <label className={styles.characterTagsLabel}>Tags</label>
+                      <textarea
+                        className={styles.characterTags}
+                        value={tags?.join(",")}
+                        onChange={(e) => setTags(e.target.value?.split(",")?.map(t => t.trim()))}
+                      />
+                    </div>
 
-                <div className={styles.characterFirstMessageContainer}>
-                  <label className={styles.characterFirstMessageLabel}>First Message</label>
-                  <textarea
-                    className={styles.characterFirstMessage}
-                    value={firstMessage}
-                    onChange={(e) => setFirstMessage(e.target.value)}
-                  />
-                </div>
+                    <div className={styles.characterFirstMessageContainer}>
+                      <label className={styles.characterFirstMessageLabel}>First Message</label>
+                      <textarea
+                        className={styles.characterFirstMessage}
+                        value={firstMessage}
+                        onChange={(e) => setFirstMessage(e.target.value)}
+                      />
+                    </div>
 
-                <div className={styles.characterCreatorContainer}>
-                  <label className={styles.characterCreatorLabel}>Creator</label>
-                  <textarea
-                    className={styles.characterCreator}
-                    value={creator}
-                    onChange={(e) => setCreator(e.target.value)}
-                  />
-                </div>
+                    <div className={styles.characterCreatorContainer}>
+                      <label className={styles.characterCreatorLabel}>Creator</label>
+                      <textarea
+                        className={styles.characterCreator}
+                        value={creator}
+                        onChange={(e) => setCreator(e.target.value)}
+                      />
+                    </div>
 
-                <div className={styles.characterCreatorNotesContainer}>
-                  <label className={styles.characterCreatorNotesLabel}>Creator Notes</label>
-                  <textarea
-                    className={styles.characterCreatorNotes}
-                    value={creatorNotes}
-                    onChange={(e) => setCreatorNotes(e.target.value)}
+                    <div className={styles.characterCreatorNotesContainer}>
+                      <label className={styles.characterCreatorNotesLabel}>Creator Notes</label>
+                      <textarea
+                        className={styles.characterCreatorNotes}
+                        value={creatorNotes}
+                        onChange={(e) => setCreatorNotes(e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {activeTab === "sheet" && (
+                  <CharacterSheetComponent characterId={activeModule.selectedCharacterId} personaId={null}
                   />
-                </div>
+                )}
 
               </div>
             </div>
-            <div className={styles.operationsButtons}>
-              <button className={styles.deleteButton} onClick={handleDelete} disabled={isSaving}>
-              {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Delete"}
-              </button>
-              <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
-                {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Save"}
-              </button>
-            </div>
-            {operationError && (
-              <label className={styles.saveErrorLabel}>Failed to save/delete. Please try again.</label>
+
+            {/* Save / Delete only shown on the info tab */}
+            {activeTab === "info" && (
+              <>
+                <div className={styles.operationsButtons}>
+                  <button className={styles.deleteButton} onClick={handleDelete} disabled={isSaving}>
+                    {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Delete"}
+                  </button>
+                  <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Save"}
+                  </button>
+                </div>
+                {operationError && (
+                  <label className={styles.saveErrorLabel}>Failed to save/delete. Please try again.</label>
+                )}
+              </>
             )}
           </div>
         )

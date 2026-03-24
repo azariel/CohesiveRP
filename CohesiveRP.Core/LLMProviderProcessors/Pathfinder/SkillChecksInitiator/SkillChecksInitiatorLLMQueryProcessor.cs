@@ -108,6 +108,12 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     characterSheetInstancesDbModel = await storageService.AddCharacterSheetsInstanceAsync(newCharacterSheetsInstance);
                 }
 
+                if (!await CreateMissingCharacterSheetInstancesMatchingACharacterAsync(chatDbModel, characterSheetInstancesDbModel))
+                {
+                    return false;
+                }
+
+                // TODO: SEND A NOTIFICATION TO THE PLAYER TO KNOW IF WE ADD IT OR NOT
                 // Handle characterSheetsInstances
                 foreach (string characterName in CharactersSkillChecks.AllCharactersByName)
                 {
@@ -195,6 +201,65 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 }
 
                 // TODO: add a backgroundQuery to update this newly create characterSheetInstance. We want the AI to scan the story and generate values for each fields automatically
+            }
+
+            return true;
+        }
+
+        private async Task<bool> CreateMissingCharacterSheetInstancesMatchingACharacterAsync(ChatDbModel chatDbModel, CharacterSheetInstancesDbModel characterSheetInstancesDbModel)
+        {
+            if (characterSheetInstancesDbModel?.CharacterSheetInstances == null)
+            {
+                return false;
+            }
+
+            // TODO: move this into when we ADD or REMOVE a character(s) to a specific chat instead! It takes more performance by putting it here since we're evaluating it every time
+            // Get the characters currently linked to the chat
+            var charactersSheetsInChat = await storageService.GetCharacterSheetsAsync();// TODO: func give the array of characters
+            charactersSheetsInChat = charactersSheetsInChat.Where(w => chatDbModel.CharacterIds.Any(a => a == w.CharacterId) || chatDbModel.PersonaId == w.PersonaId).ToArray();
+
+            List<CharacterSheetInstance> instancesToAdd = new();
+            foreach (var tetheredCharacterWithACharacterSheet in charactersSheetsInChat.Where(w => w.PersonaId == null))
+            {
+                var existingCharacterSheetInstance = characterSheetInstancesDbModel.CharacterSheetInstances.FirstOrDefault(f => f.CharacterId == tetheredCharacterWithACharacterSheet.CharacterId);
+                if (existingCharacterSheetInstance != null)
+                    continue;
+
+                // Create a characterSheetInstance in this chat using the CharacterSheet blueprint
+                instancesToAdd.Add(new CharacterSheetInstance
+                {
+                    CharacterId = tetheredCharacterWithACharacterSheet.CharacterId,
+                    CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                    CharacterSheet = tetheredCharacterWithACharacterSheet.CharacterSheet,
+                });
+            }
+
+            // Also handle the persona one if required
+
+            var personaCharacterSheet = charactersSheetsInChat.FirstOrDefault(f => f.PersonaId == chatDbModel.PersonaId);
+            if (personaCharacterSheet != null)
+            {
+                var persona = await storageService.GetPersonaByIdAsync(chatDbModel.PersonaId);
+                if (persona != null)
+                {
+                    var existingCharacterSheetInstance = characterSheetInstancesDbModel.CharacterSheetInstances.FirstOrDefault(f => f.PersonaId == persona.PersonaId);
+
+                    if (existingCharacterSheetInstance == null)
+                    {
+                        instancesToAdd.Add(new CharacterSheetInstance
+                        {
+                            PersonaId = persona.PersonaId,
+                            CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                            CharacterSheet = personaCharacterSheet.CharacterSheet,
+                        });
+                    }
+                }
+            }
+
+            if (instancesToAdd.Count > 0)
+            {
+                characterSheetInstancesDbModel.CharacterSheetInstances.AddRange(instancesToAdd);
+                return await storageService.UpdateCharacterSheetsInstanceAsync(characterSheetInstancesDbModel);
             }
 
             return true;
@@ -383,16 +448,79 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             return outValue;
         }
 
-        private async Task<int> GenerateNewRollForCharacterForSkillCheckAsync(CharacterSheetInstance selectedCharacterSheetInstance, PathfinderSkills actionCategory)
+        private async Task<int> GetModifierFromSkillAsync(CharacterSheetInstance selectedCharacterSheetInstance, PathfinderSkills skill)
         {
-            // TODO: consider the character sheet skills in this roll
-            return new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
+            int value = selectedCharacterSheetInstance?.CharacterSheet?.PathfinderSkillsValues?.FirstOrDefault(f => f.SkillType == skill)?.Value ?? 10;
+
+            // TODO: find a more elegant way of handling this? Is this correctly balanced?
+            if (value >= 21) return 6;
+            else if (value >= 20) return 5;
+            else if (value >= 18) return 4;
+            else if (value >= 16) return 3;
+            else if (value >= 14) return 2;
+            else if (value >= 12) return 1;
+            else if (value >= 10) return 0;
+            else if (value >= 9) return -1;
+            else if (value >= 8) return -2;
+            else if (value >= 7) return -3;
+            else if (value >= 6) return -4;
+            else if (value >= 5) return -5;
+            else if (value >= 3) return -6;
+            else if (value >= 2) return -7;
+            else if (value >= 0) return -8;
+
+            return 0;
+        }
+
+        private async Task<int> GetModifierFromAttributeAsync(CharacterSheetInstance selectedCharacterSheetInstance, PathfinderAttributes attribute)
+        {
+            int value = selectedCharacterSheetInstance?.CharacterSheet?.PathfinderAttributesValues?.FirstOrDefault(f => f.AttributeType == attribute)?.Value ?? 10;
+
+            if (value >= 21) return 7;
+            else if (value >= 20) return 6;
+            else if (value >= 18) return 5;
+            else if (value >= 16) return 4;
+            else if (value >= 14) return 3;
+            else if (value >= 12) return 2;
+            else if (value >= 10) return 1;
+            else if (value >= 9) return 0;
+            else if (value >= 8) return -1;
+            else if (value >= 7) return -2;
+            else if (value >= 6) return -3;
+            else if (value >= 5) return -4;
+            else if (value >= 3) return -5;
+            else if (value >= 2) return -6;
+            else if (value >= 0) return -7;
+
+            return 0;
+        }
+
+        private async Task<int> GenerateNewRollForCharacterForSkillCheckAsync(CharacterSheetInstance selectedCharacterSheetInstance, PathfinderSkills skill)
+        {
+            var modifier = await GetModifierFromSkillAsync(selectedCharacterSheetInstance, skill);
+            int randomRoll = new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
+
+            if(randomRoll >= 20)
+                return 20;
+
+            if(randomRoll <= 1)
+                return 1;
+
+            return Math.Min(19, Math.Max(2, randomRoll + modifier));
         }
 
         private async Task<int> GenerateNewRollForCharacterForAttributeCheckAsync(CharacterSheetInstance selectedCharacterSheetInstance, PathfinderAttributes attribute)
         {
-            // TODO: consider the character sheet attributes in this roll
-            return new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
+            var modifier = await GetModifierFromAttributeAsync(selectedCharacterSheetInstance, attribute);
+            int randomRoll = new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
+
+            if(randomRoll >= 20)
+                return 20;
+
+            if(randomRoll <= 1)
+                return 1;
+
+            return Math.Min(19, Math.Max(2, randomRoll + modifier));
         }
 
         public override async Task ProcessCompletedQueryAsync()

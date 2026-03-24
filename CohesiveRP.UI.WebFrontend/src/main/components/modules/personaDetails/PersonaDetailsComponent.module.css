@@ -171,15 +171,53 @@
 .detailsContainer {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
+/* ── Tab bar ── */
+.tabBar {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    width: 100%;
+    border-bottom: 1px solid #2e2e48;
+    flex-shrink: 0;
+    margin-top: 0.6em;
+}
+
+.tabButton {
+    background: transparent;
+    color: #6868a0;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.45em 1.1em;
+    font-size: 0.82em;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: color 0.15s, border-color 0.15s;
+    margin-bottom: -1px; /* overlap the container border-bottom */
+}
+
+.tabButton:hover {
+    color: #d4d4e8;
+}
+
+.tabButtonActive {
+    color: #f6911d;
+    border-bottom: 2px solid #f6911d;
+}
+
+/* ── Details tab panel ── */
 .personaDescriptionContainer {
     width: 100%;
     display: flex;
     align-self: flex-start;
     flex-direction: column;
     align-items: flex-start;
-    margin-top: 1em;/* TODO: replace with parent gap */
+    margin-top: 1em;
 }
 
 .personaDescriptionLabel {
@@ -206,6 +244,20 @@
     outline: none;
 }
 
+/* ── Character Sheet tab panel ── */
+.characterSheetTabPanel {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+    padding-top: 0.5em;
+}
+
+/* ── Shared operation buttons ── */
 .saveButton {
   align-self: flex-end;
   margin-top: 0.5em;

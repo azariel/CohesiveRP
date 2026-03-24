@@ -438,6 +438,52 @@
   cursor: not-allowed;
 }
 
+.tabBar {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  width: 100%;
+  margin-top: 1.2em;
+  border-bottom: 1px solid #2e2e48;
+  flex-shrink: 0;
+}
+
+.tabButton {
+  background: transparent;
+  color: #6868a0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.45em 1.1em;
+  font-size: 0.82em;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px; /* overlap the container border */
+}
+
+.tabButton:hover {
+  color: #d4d4e8;
+}
+
+.tabButtonActive {
+  color: #f6911d;
+  border-bottom: 2px solid #f6911d;
+}
+
+/* Give the body a little breathing room when it hosts the sheet */
+.characterDetailsBody {
+  width: 100%;
+  padding-top: 1em;
+}
+
+.saveErrorLabel {
+  padding: 0 0.8em 0.5em;
+  font-size: 0.8em;
+  color: rgb(255, 100, 100);
+  align-self: flex-end;
+}
+
 .loadingCharacterDetailsSpinner {
     margin: auto;
     color: rgb(51, 174, 231);
