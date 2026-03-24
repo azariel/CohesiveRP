@@ -4,6 +4,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.
 {
     public class SkillCheckQuery
     {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         [JsonPropertyName("actionCategory")]
         public PathfinderSkills ActionCategory { get; set; }
 

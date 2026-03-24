@@ -27,7 +27,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (string.Empty, new ShareableContextLink{ LinkedBuilder = this });
             }
 
-            return ($"# Current Objective (story progression objective){Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", currentObjectiveContent)}", new ShareableContextLink{ LinkedBuilder = this });
+            return ($"<current_objective>{Environment.NewLine}Story progression objective.{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", currentObjectiveContent)}{Environment.NewLine}</current_objective>", new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

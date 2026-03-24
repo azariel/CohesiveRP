@@ -1,6 +1,6 @@
 import styles from "./MainHeaderComponent.module.css";
 import { LuBlocks } from "react-icons/lu";
-import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification } from "react-icons/hi2";
+import { HiMiniUsers, HiChatBubbleLeftEllipsis, HiCog6Tooth, HiIdentification } from "react-icons/hi2";
 import { SiDungeonsanddragons } from "react-icons/si";
 
 /* Store */

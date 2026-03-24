@@ -53,7 +53,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             // Filter for a chunk ordered by createdAt
             messagesToProcess = messagesToProcess.Reverse().ToArray();
 
-            string output = $"# Messages to summarize{Environment.NewLine}Focus your attention on the {MessageSourceType.User} messages, try to keep as much details as possible. You must also consider {MessageSourceType.AI} messages in your summarization, but you must retains as much details from {MessageSourceType.User} as possible whilst keeping the summary short.{Environment.NewLine}{promptContextFormatElement.Options?.Format}";
+            string output = $"<messages_to_summarize>{Environment.NewLine}Focus your attention on the {MessageSourceType.User} messages, try to keep as much details as possible. You must also consider {MessageSourceType.AI} messages in your summarization, but you must retains as much details from {MessageSourceType.User} as possible whilst keeping the summary short.{Environment.NewLine}{promptContextFormatElement.Options?.Format}";
 
             string value = string.Empty;
             foreach (IMessageDbModel message in messagesToProcess)
@@ -62,6 +62,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             output = output.Replace("{{item_description}}", value);
+            output += $"{Environment.NewLine}</messages_to_summarize>";
             return (output, new ShareableContextLink
             {
                 LinkedBuilder = this,

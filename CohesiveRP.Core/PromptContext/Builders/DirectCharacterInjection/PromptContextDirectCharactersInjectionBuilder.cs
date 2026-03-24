@@ -39,11 +39,13 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                         .Replace("{{character_name}}", character.Name)
                         .Replace("{{character_description}}", character.Description)
                         .Replace(Constants.CHARACTER_PLACEHOLDER, character?.Name ?? "the character")
-                        .Replace(Constants.USER_PLACEHOLDER, persona?.Name ?? "User");
+                        .Replace(Constants.USER_PLACEHOLDER, persona?.Name ?? "User")
+                        .Trim()
+                        .TrimEnd(Environment.NewLine.ToCharArray());
                 }
             }
             
-            return ($"# Characters {Environment.NewLine}{str}", new ShareableContextLink { LinkedBuilder = this });
+            return ($"<characters>{Environment.NewLine}{str}{Environment.NewLine}</characters>{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
         }
     }
 }

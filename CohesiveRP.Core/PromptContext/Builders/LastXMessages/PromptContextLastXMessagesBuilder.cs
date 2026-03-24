@@ -57,7 +57,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            string output = $"# Last messages between you and the User{Environment.NewLine}";
+            string output = $"<last_messages>{Environment.NewLine}Last messages between you and the User{Environment.NewLine}";
 
             foreach (IMessageDbModel message in selectedMessages)
             {
@@ -65,6 +65,8 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 output += value;
             }
 
+            output = output.Trim().TrimEnd(Environment.NewLine.ToCharArray());
+            output += $"{Environment.NewLine}</last_messages>{Environment.NewLine}{Environment.NewLine}";
             return (output,
                     new ShareableContextLink
                     {

@@ -53,7 +53,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            return ($"# Last message by {linkedPersona.Name}{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content)}",
+            return ($"<last_message_by_{linkedPersona.Name}>{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content)}{Environment.NewLine}</last_message_by_{linkedPersona.Name}>",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

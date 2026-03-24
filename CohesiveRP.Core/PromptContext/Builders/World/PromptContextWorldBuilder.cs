@@ -20,7 +20,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
-            string worldTitle = $"Terra";//TODO: fetch from Db
+            string worldTitle = $"";//TODO: fetch from Db
             string worldContent = $"Infer the world from the roleplay context.";//TODO: fetch from Db
 
             PersonaDbModel defaultPersona = await storageService.GetPersonaByIdAsync(chatDbModel?.PersonaId);
@@ -31,10 +31,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 worldContent = $"Infer the relevant characters from the roleplay context.{Environment.NewLine}{Environment.NewLine}";
             }
 
-            return ($"# World{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+            return ($"<world>{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{item_description}}", worldContent)
                 .Replace("{{item_header}}", worldTitle)
-                .Replace(Constants.USER_PLACEHOLDER, userPersonaName)}",
+                .Replace(Constants.USER_PLACEHOLDER, userPersonaName)}{Environment.NewLine}</world>{Environment.NewLine}{Environment.NewLine}",
                 new ShareableContextLink{ LinkedBuilder = this });
         }
     }

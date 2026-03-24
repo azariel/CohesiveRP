@@ -27,8 +27,8 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (null, new ShareableContextLink { LinkedBuilder = this, });
             }
 
-            return ($"# Scene Tracker (details on current scene){Environment.NewLine}{promptContextFormatElement?.Options?.Format?
-                .Replace("{{item_description}}", lastSceneTracker.Content)}",
+            return ($"<scene_tracker>{Environment.NewLine}Details on current scene{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+                .Replace("{{item_description}}", lastSceneTracker.Content)}{Environment.NewLine}</scene_tracker>{Environment.NewLine}{Environment.NewLine}",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

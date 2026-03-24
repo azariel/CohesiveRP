@@ -39,8 +39,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             // Inject that short term summary
-            string output = $"# Previous facts, events, speech and actions (Medium-Term){Environment.NewLine}";
-
+            string output = $"<summary_medium_term>{Environment.NewLine}Previous facts, events, speech and actions (Medium-Term){Environment.NewLine}";
             foreach (ISummaryEntryDbModel summaryElement in summaryDbModel.MediumTermSummaries)
             {
                 // TODO: add a notion of time?
@@ -48,7 +47,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 output += value;
             }
 
-            output += Environment.NewLine;
+            output += $"{Environment.NewLine}</summary_medium_term>{Environment.NewLine}";
             return (output,
                     new ShareableContextLink
                     {

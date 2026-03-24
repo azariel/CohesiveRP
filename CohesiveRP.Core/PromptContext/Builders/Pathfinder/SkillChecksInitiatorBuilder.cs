@@ -39,9 +39,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
 
             MessageDbModel[] LastXMessagesforRequest = [..hotMessages.Take(nbMessagesRequest)];
             string lastMessage = string.Join($"{Environment.NewLine}", LastXMessagesforRequest.OrderBy(o => o.CreatedAtUtc).Select(s => $"<message>{s.Content}</message>"));
-            return ($"# Story Scene{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+            return ($"<story_scene>{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{messages_for_context_on_scene}}", contextOnScene)
-                .Replace("{{scene_to_categorize}}", lastMessage)}",
+                .Replace("{{scene_to_categorize}}", lastMessage)}{Environment.NewLine}</story_scene>",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

@@ -62,9 +62,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 // TODO: if it's stale, what should we do? cut it? may lead to inconsistencies... hm
             //}
 
-            return ($"# Scene Tracker (details on current scene){Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+            return ($"<scene_tracker>{Environment.NewLine}Details on the current scene in the story{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{messages_after_last_scene_tracker}}", sceneTrackerMessagesContent)
-                .Replace("{{last_scene_tracker}}", lastSceneTracker?.Content ?? "Empty. Generate a new scene tracker.")}",
+                .Replace("{{last_scene_tracker}}", lastSceneTracker?.Content ?? "Empty. Generate a new scene tracker.")}{Environment.NewLine}</scene_tracker>{Environment.NewLine}{Environment.NewLine}",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

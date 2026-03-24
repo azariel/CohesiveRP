@@ -16,6 +16,7 @@ using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.Busi
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 {
@@ -73,18 +74,18 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 // peut-être garder les 3 derniers reasonings pour chaque skill + le résultat du Dice pendant genre 20 messages. après 20 messages, on garde les 3 reasonings (puisqu'ils rollover), on clear le Dice et that's it. Quand on va rerouler un Dice pour ce skill pour ce char la prochaine fois, les reasonings vont rollover, on va avoir 2 vieux et un récent, on roll et paf, on garde pendant 20 messagees
 
                 // Start by validating the llm response. It should be a valid json
-                LLMPathfinderCharactersSkillChecksActions[] CharactersSkillChecks = null;
+                LLMPathfinderCharactersSkillChecksScene CharactersSkillChecks = null;
 
                 try
                 {
-                    CharactersSkillChecks = LLMResponseParser.ParseOnlyJsonArray<LLMPathfinderCharactersSkillChecksActions>(LLMrawResponse);
+                    CharactersSkillChecks = LLMResponseParser.ParseOnlyJson<LLMPathfinderCharactersSkillChecksScene>(LLMrawResponse);
                 } catch (Exception ex)
                 {
                     LoggingManager.LogToFile("8dae9f1a-2a6b-43b8-a2ad-c28776909dd6", $"The response from the LLM for the Pathfinder CharactersSkillChecksInitiator failed. The Json structure is incorrect. Ignoring.");
                     return false;
                 }
 
-                if (CharactersSkillChecks == null || CharactersSkillChecks.Length <= 0)
+                if (CharactersSkillChecks?.Actions == null || CharactersSkillChecks.Actions.Length <= 0)
                 {
                     return true;
                 }
@@ -95,8 +96,29 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 var chatDbModel = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
                 CharacterSheetInstancesDbModel characterSheetInstancesDbModel = await storageService.GetCharacterSheetsInstanceByChatIdAsync(backgroundQueryDbModel.ChatId);
 
+                if (characterSheetInstancesDbModel == null)
+                {
+                    // Create a basic one tied to this chat
+                    var newCharacterSheetsInstance = new CharacterSheetInstancesDbModel
+                    {
+                        ChatId = chatDbModel.ChatId,
+                        CharacterSheetInstances = [],
+                    };
+
+                    characterSheetInstancesDbModel = await storageService.AddCharacterSheetsInstanceAsync(newCharacterSheetsInstance);
+                }
+
+                // Handle characterSheetsInstances
+                foreach (string characterName in CharactersSkillChecks.AllCharactersByName)
+                {
+                    if (!await CreateMissingCharacterSheetInstancesAsync(chatDbModel, characterSheetInstancesDbModel, characterName))
+                    {
+                        return false;
+                    }
+                }
+
                 // Order the information we got from the LLM and then process them against storage
-                foreach (IGrouping<string, LLMPathfinderCharactersSkillChecksActions> skillChecksByCharacter in CharactersSkillChecks
+                foreach (IGrouping<string, LLMPathfinderCharactersSkillChecksActions> skillChecksByCharacter in CharactersSkillChecks.Actions
                     .GroupBy(g => g.CharacterName.ToLowerInvariant().Trim())
                     .Where(w => !string.IsNullOrWhiteSpace(w.Key))
                     .ToArray())
@@ -126,7 +148,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     }
 
                     // Finally, process the structured information against the backend. We want keep track of the reasonings and roll the dice when required. The final info will get persisted in storage
-                    await ProcessSkillCheckQueriesAsync(chatDbModel, chatCharactersRollsDbModel, characterSheetInstancesDbModel, skillChecksByCharacter.Key, queries);
+                    return await ProcessSkillCheckQueriesAsync(chatDbModel, chatCharactersRollsDbModel, characterSheetInstancesDbModel, skillChecksByCharacter.Key, queries, CharactersSkillChecks.AllCharactersByName);
                 }
 
                 return true;
@@ -137,42 +159,54 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             }
         }
 
-        private async Task<bool> ProcessSkillCheckQueriesAsync(ChatDbModel chatDbModel, ChatCharactersRollsDbModel chatCharactersRollsDbModel, CharacterSheetInstancesDbModel characterSheetInstancesDbModel, string characterName, List<SkillCheckQuery> queries)
+        private CharacterSheetInstance FindCharacterSheetInstanceFromCharacterName(List<CharacterSheetInstance> characterSheetInstances, string characterName)
         {
-            // Find the character from the available character sheet instances
-            var selectedCharacterSheetInstance = characterSheetInstancesDbModel?.CharacterSheetInstances?.FirstOrDefault(f =>
-            f.CharacterSheet.FirstName?.ToLowerInvariant().Trim() == characterName ||
-            f.CharacterSheet.LastName?.ToLowerInvariant().Trim() == characterName ||
-            $"{f.CharacterSheet.FirstName?.ToLowerInvariant().Trim()} {f.CharacterSheet.LastName?.ToLowerInvariant().Trim()}" == characterName);
+            string characterNameLower = characterName.ToLowerInvariant().Trim();
+            var selectedCharacterSheetInstance = characterSheetInstances?.FirstOrDefault(f =>
+            f.CharacterSheet.FirstName?.ToLowerInvariant().Trim() == characterNameLower ||
+            f.CharacterSheet.LastName?.ToLowerInvariant().Trim() == characterNameLower ||
+            $"{f.CharacterSheet.FirstName?.ToLowerInvariant().Trim()} {f.CharacterSheet.LastName?.ToLowerInvariant().Trim()}" == characterNameLower);
 
+            return selectedCharacterSheetInstance;
+        }
+
+        private async Task<bool> CreateMissingCharacterSheetInstancesAsync(ChatDbModel chatDbModel, CharacterSheetInstancesDbModel characterSheetInstancesDbModel, string characterName)
+        {
+            var selectedCharacterSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstancesDbModel.CharacterSheetInstances, characterName);
             if (selectedCharacterSheetInstance == null)
             {
-                var newCharacterSheetsInstance = new CharacterSheetInstancesDbModel
+                var newCharacterInstance = new CharacterSheetInstance
                 {
-                    ChatId = chatDbModel.ChatId,
-                    CharacterSheetInstances = [
-                        new CharacterSheetInstance
-                        {
-                            CharacterSheetInstanceId = Guid.NewGuid().ToString(),
-                            CharacterId = null,// Not matching a 'character', we are dealing with an NPC (that doesn't have a characterCard, it's a in-roleplay NPC)
-                            CharacterSheet = new CharacterSheet()
-                            {
-                                FirstName = characterName,// We'll assume this since we must
-                            },// Just the default values, especially around Attributes and Skills, the rest should default to null or zero until the background query updates it
-                        },
-                    ],
+                    CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                    CharacterId = null,// Not matching a 'character', we are dealing with an NPC (that doesn't have a characterCard, it's a in-roleplay NPC)
+                    CharacterSheet = new CharacterSheet()
+                    {
+                        FirstName = characterName,// We'll assume this since we must
+                    },// Just the default values, especially around Attributes and Skills, the rest should default to null or zero until the background query updates it
                 };
 
-                var result = await storageService.AddCharacterSheetsInstanceAsync(newCharacterSheetsInstance);
-                selectedCharacterSheetInstance = result?.CharacterSheetInstances?.FirstOrDefault();
+                characterSheetInstancesDbModel.CharacterSheetInstances.Add(newCharacterInstance);
 
-                if (selectedCharacterSheetInstance == null)
+                var result = await storageService.UpdateCharacterSheetsInstanceAsync(characterSheetInstancesDbModel);
+                if (!result)
                 {
-                    LoggingManager.LogToFile("18d5f61d-36b0-4034-8526-317cfb11b354", $"Couldn't Add a new characterSheetInstance in storage for new character [{characterName}].");
+                    LoggingManager.LogToFile("18d5f61d-36b0-4034-8526-317cfb11b354", $"Couldn't Update the characterSheetInstance tied to chat [{chatDbModel.ChatId}] in storage to add new character [{characterName}].");
                     return false;
                 }
 
                 // TODO: add a backgroundQuery to update this newly create characterSheetInstance. We want the AI to scan the story and generate values for each fields automatically
+            }
+
+            return true;
+        }
+
+        private async Task<bool> ProcessSkillCheckQueriesAsync(ChatDbModel chatDbModel, ChatCharactersRollsDbModel chatCharactersRollsDbModel, CharacterSheetInstancesDbModel characterSheetInstancesDbModel, string characterName, List<SkillCheckQuery> queries, string[] charactersInScene)
+        {
+            // Find the character from the available character sheet instances
+            var selectedCharacterSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstancesDbModel?.CharacterSheetInstances, characterName);
+            if (selectedCharacterSheetInstance == null)
+            {
+                return false;
             }
 
             if (chatCharactersRollsDbModel == null)
@@ -196,7 +230,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             ChatCharacterRolls persistentCharacterRolls = chatCharactersRollsDbModel.ChatCharactersRolls.FirstOrDefault(a => a.CharacterSheetInstanceId == selectedCharacterSheetInstance.CharacterSheetInstanceId);
 
             // If we dont' have an entry in the chat characters rolls row, we'll add an empty for (for this specific character sheet instance)
-            if(persistentCharacterRolls == null)
+            if (persistentCharacterRolls == null)
             {
                 chatCharactersRollsDbModel.ChatCharactersRolls.Add(new ChatCharacterRolls
                 {
@@ -218,6 +252,12 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 }
             }
 
+            var characterSheetInstancesInScene = charactersInScene?.Select(s => FindCharacterSheetInstanceFromCharacterName(characterSheetInstancesDbModel?.CharacterSheetInstances, s))?.ToArray();
+            if (characterSheetInstancesInScene != null)
+            {
+                characterSheetInstancesInScene = characterSheetInstancesInScene.Where(w => w?.CharacterSheetInstanceId != null).ToArray();
+            }
+
             foreach (SkillCheckQuery query in queries)
             {
                 ChatCharacterRoll roll = persistentCharacterRolls.Rolls.FirstOrDefault(f => f.ActionCategory == query.ActionCategory);
@@ -229,15 +269,42 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     {
                         ActionCategory = query.ActionCategory,
                         Reasonings = query.Reasonings,
+                        NbRemainingInjectionTurns = 1,
+                        NbRemainingRollFreeze = 2,
+                        CharactersInScene = FilterCharactersInScene(characterSheetInstancesInScene, selectedCharacterSheetInstance.CharacterSheetInstanceId),
                         Value = await GenerateNewRollForCharacterForSkillCheckAsync(selectedCharacterSheetInstance, query.ActionCategory),// Generate a new value using the character sheet (or average if no character sheet)
                     };
+
+                    // Generate counter rolls for characters in scene if required
+                    await GenerateCounterRollsForCharactersInSceneAsync(roll, characterSheetInstancesInScene);
 
                     persistentCharacterRolls.Rolls.Add(roll);
                     continue;
                 }
 
                 // Update existing roll
-                roll.Reasonings = RemoveOldestXReasonings(roll.Reasonings, query.Reasonings.Count);
+                if (roll.NbRemainingInjectionTurns > 0)
+                {
+                    // Roll older reasoning, inject new one(s)
+                    roll.Reasonings = RemoveOldestXReasonings(roll.Reasonings, query.Reasonings.Count);
+                    roll.Reasonings.AddRange(query.Reasonings);
+                } else
+                {
+                    roll.Reasonings.Clear();
+                    roll.Reasonings.AddRange(query.Reasonings);
+                    roll.NbRemainingInjectionTurns = 1;
+                }
+
+                if (roll.NbRemainingRollFreeze <= 0)
+                {
+                    // That roll is now deemed too old and must be rolled again
+                    roll.Value = await GenerateNewRollForCharacterForSkillCheckAsync(selectedCharacterSheetInstance, query.ActionCategory);
+                }
+
+                roll.CharactersInScene = FilterCharactersInScene(characterSheetInstancesInScene, selectedCharacterSheetInstance.CharacterSheetInstanceId);
+
+                // Generate counter rolls for characters in scene if required
+                await GenerateCounterRollsForCharactersInSceneAsync(roll, characterSheetInstancesInScene);
             }
 
             // Update the rolls tied to this character in this chat
@@ -250,10 +317,66 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             return true;// We'll avoid re-generating it infinitely for now. it cost too much... TODO: brainstorm on this behavior
         }
 
+        private async Task GenerateCounterRollsForCharactersInSceneAsync(ChatCharacterRoll roll, CharacterSheetInstance[] characterSheetInstancesInScene)
+        {
+            foreach (CharacterInScene otherCharacterInScene in roll.CharactersInScene)
+            {
+                var characterSheetInstance = characterSheetInstancesInScene.FirstOrDefault(f => f.CharacterSheetInstanceId == otherCharacterInScene.CharacterSheetInstanceId);
+                if (characterSheetInstance == null)
+                    continue;
+
+                switch (roll.ActionCategory)
+                {
+                    case PathfinderSkills.Deception:
+                    {
+                        // If the roll is a deception roll, the other characters have a Discernment Attribute check to make
+                        var otherCharacterRoll = new CharacterInSceneCounterRoll
+                        {
+                            Attribute = PathfinderAttributes.Discernment,
+                            Value = await GenerateNewRollForCharacterForAttributeCheckAsync(characterSheetInstance, PathfinderAttributes.Discernment),
+                        };
+                        otherCharacterInScene.CharacterInSceneCounterRoll = otherCharacterRoll;
+                        break;
+                    }
+
+                    case PathfinderSkills.Charisma:
+                    case PathfinderSkills.Intimidation:
+                    {
+                        var otherCharacterRoll = new CharacterInSceneCounterRoll
+                        {
+                            Attribute = PathfinderAttributes.Willpower,
+                            Value = await GenerateNewRollForCharacterForAttributeCheckAsync(characterSheetInstance, PathfinderAttributes.Willpower),
+                        };
+                        otherCharacterInScene.CharacterInSceneCounterRoll = otherCharacterRoll;
+                        break;
+                    }
+
+                    case PathfinderSkills.Thievery:
+                    case PathfinderSkills.Stealth:
+                    {
+                        var otherCharacterRoll = new CharacterInSceneCounterRoll
+                        {
+                            Attribute = PathfinderAttributes.Perception,
+                            Value = await GenerateNewRollForCharacterForAttributeCheckAsync(characterSheetInstance, PathfinderAttributes.Perception),
+                        };
+                        otherCharacterInScene.CharacterInSceneCounterRoll = otherCharacterRoll;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private CharacterInScene[] FilterCharactersInScene(CharacterSheetInstance[] input, string characterToIgnore)
+        {
+            return input?.Select(s => new CharacterInScene { CharacterSheetInstanceId = s.CharacterSheetInstanceId }).Where(w => w.CharacterSheetInstanceId != characterToIgnore).ToArray() ?? [];
+        }
+
         private List<string> RemoveOldestXReasonings(List<string> reasonings, int nbReasoningsToRemove)
         {
             if (reasonings.Count < 5 - nbReasoningsToRemove)
+            {
                 return reasonings;// There's still space
+            }
 
             var outValue = reasonings.Skip(nbReasoningsToRemove).ToList();
             outValue.AddRange(reasonings);
@@ -262,7 +385,13 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
         private async Task<int> GenerateNewRollForCharacterForSkillCheckAsync(CharacterSheetInstance selectedCharacterSheetInstance, PathfinderSkills actionCategory)
         {
-            // TODO: consider the character sheet attributes and skills in this roll
+            // TODO: consider the character sheet skills in this roll
+            return new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
+        }
+
+        private async Task<int> GenerateNewRollForCharacterForAttributeCheckAsync(CharacterSheetInstance selectedCharacterSheetInstance, PathfinderAttributes attribute)
+        {
+            // TODO: consider the character sheet attributes in this roll
             return new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
         }
 
