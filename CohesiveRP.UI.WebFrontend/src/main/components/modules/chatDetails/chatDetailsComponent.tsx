@@ -17,6 +17,8 @@ import type { Lorebook } from "../../../../ResponsesDto/lorebooks/BusinessObject
 import type { LorebooksResponseDto } from "../../../../ResponsesDto/lorebooks/LorebooksResponseDto";
 import type { Persona } from "../../../../ResponsesDto/personas/BusinessObjects/Persona";
 import type { PersonasResponseDto } from "../../../../ResponsesDto/personas/PersonasResponseDto";
+import type { CharactersResponseDto } from "../../../../ResponsesDto/characters/CharactersResponseDto";
+import type { CharacterResponse } from "../../../../ResponsesDto/characters/CharacterResponse";
 
 export default function ChatDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextChatType>();
@@ -30,6 +32,13 @@ export default function ChatDetailsComponent() {
   const [name, setName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [operationError, setOperationError] = useState(false);
+
+  // character state
+  const [availableCharacters, setAvailableCharacters] = useState<CharacterResponse[]>([]);
+  const [selectedCharacterIds, setSelectedCharacterIds] = useState<string[]>([]);
+  const [isCharacterDropdownOpen, setIsCharacterDropdownOpen] = useState(false);
+  const [isLoadingCharacters, setIsLoadingCharacters] = useState(false);
+  const characterDropdownRef = useRef<HTMLDivElement>(null);
 
   // lorebook state
   const [availableLorebooks, setAvailableLorebooks] = useState<Lorebook[]>([]);
@@ -51,6 +60,7 @@ export default function ChatDetailsComponent() {
     didComponentMountAlready.current = true;
 
     fetchChatDetails();
+    fetchCharacters();
     fetchLorebooks();
     fetchPersonas();
   }, []);
@@ -58,6 +68,8 @@ export default function ChatDetailsComponent() {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      if (characterDropdownRef.current && !characterDropdownRef.current.contains(e.target as Node))
+        setIsCharacterDropdownOpen(false);
       if (lorebookDropdownRef.current && !lorebookDropdownRef.current.contains(e.target as Node))
         setIsLorebookDropdownOpen(false);
       if (personaDropdownRef.current && !personaDropdownRef.current.contains(e.target as Node))
@@ -98,10 +110,30 @@ export default function ChatDetailsComponent() {
       setName(response?.name ?? "");
       setSelectedPersonaId(response?.personaId ?? "");
       setSelectedLorebookIds(response?.lorebookIds ?? []);
+      setSelectedCharacterIds(response?.characterIds ?? []);
     } catch (error) {
       console.error("Fetch chat error:", error);
     } finally {
       setIsLoadingChatDetails(false);
+    }
+  };
+
+  const fetchCharacters = async () => {
+    try {
+      setIsLoadingCharacters(true);
+      const response: CharactersResponseDto | null = await getFromServerApiAsync<CharactersResponseDto>(`api/characters`);
+
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || response.code != 200 || serverApiException?.message) {
+        console.error(`Failed to fetch available characters. [${JSON.stringify(serverApiException)}]`);
+        return;
+      }
+
+      setAvailableCharacters(response.characters ?? []);
+    } catch (error) {
+      console.error("Fetch available characters error:", error);
+    } finally {
+      setIsLoadingCharacters(false);
     }
   };
 
@@ -143,6 +175,14 @@ export default function ChatDetailsComponent() {
     }
   };
 
+  const toggleCharacterSelection = (characterId: string) => {
+    setSelectedCharacterIds(prev =>
+      prev.includes(characterId)
+        ? prev.filter(id => id !== characterId)
+        : [...prev, characterId]
+    );
+  };
+
   const toggleLorebookSelection = (lorebookId: string) => {
     setSelectedLorebookIds(prev =>
       prev.includes(lorebookId)
@@ -167,7 +207,7 @@ export default function ChatDetailsComponent() {
       const response = await putToServerApiAsync(`api/chats/${activeModule.chatId}`, {
         name,
         chatId: activeModule.chatId,
-        characterIds: chatResponse?.characterIds,
+        characterIds: selectedCharacterIds,
         lorebookIds: selectedLorebookIds,
         personaId: selectedPersonaId,
       });
@@ -213,6 +253,13 @@ export default function ChatDetailsComponent() {
       setIsSaving(false);
     }
   };
+
+  const selectedCharactersCount = selectedCharacterIds.length;
+  const dropdownCharacterSelectionsLabel = selectedCharactersCount === 0
+    ? "None selected"
+    : selectedCharactersCount === 1
+      ? (availableCharacters.find(c => c.characterId === selectedCharacterIds[0])?.name ?? "1 character")
+      : `${selectedCharactersCount} characters selected`;
 
   const selectedLorebooksCount = selectedLorebookIds.length;
   const dropdownLorebookSelectionsLabel = selectedLorebooksCount === 0
@@ -265,6 +312,7 @@ export default function ChatDetailsComponent() {
                     onClick={() => {
                       setIsPersonaDropdownOpen(prev => !prev);
                       setIsLorebookDropdownOpen(false);
+                      setIsCharacterDropdownOpen(false);
                     }}
                     disabled={isLoadingPersonas}
                     type="button"
@@ -306,6 +354,59 @@ export default function ChatDetailsComponent() {
                 </div>
               </div>
 
+              {/* Character multi-select dropdown */}
+              <div className={styles.lorebookSection}>
+                <label className={styles.lorebookLabel}>Characters</label>
+                <div className={styles.lorebookDropdownWrapper} ref={characterDropdownRef}>
+                  <button
+                    className={styles.lorebookDropdownTrigger}
+                    onClick={() => {
+                      setIsCharacterDropdownOpen(prev => !prev);
+                      setIsLorebookDropdownOpen(false);
+                      setIsPersonaDropdownOpen(false);
+                    }}
+                    disabled={isLoadingCharacters}
+                    type="button"
+                  >
+                    {isLoadingCharacters ? (
+                      <ImSpinner2 className={styles.lorebookSpinner} />
+                    ) : (
+                      <span className={styles.lorebookDropdownLabel}>{dropdownCharacterSelectionsLabel}</span>
+                    )}
+                    {isCharacterDropdownOpen
+                      ? <MdKeyboardArrowUp className={styles.lorebookDropdownChevron} />
+                      : <MdKeyboardArrowDown className={styles.lorebookDropdownChevron} />
+                    }
+                  </button>
+
+                  {isCharacterDropdownOpen && (
+                    <div className={styles.lorebookDropdownMenu}>
+                      {availableCharacters.length === 0 ? (
+                        <div className={styles.lorebookDropdownEmpty}>No characters available</div>
+                      ) : (
+                        availableCharacters.map(character => {
+                          const isSelected = selectedCharacterIds.includes(character.characterId);
+                          return (
+                            <div
+                              key={character.characterId}
+                              className={`${styles.lorebookDropdownItem} ${isSelected ? styles.lorebookDropdownItemSelected : ""}`}
+                              onClick={() => toggleCharacterSelection(character.characterId)}
+                            >
+                              <span className={styles.lorebookCheckMark}>
+                                {isSelected && <MdCheck className={styles.lorebookCheckIcon} />}
+                              </span>
+                              <span className={styles.lorebookItemName}>
+                                {character.name ?? character.characterId}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Lorebook multi-select dropdown */}
               <div className={styles.lorebookSection}>
                 <label className={styles.lorebookLabel}>Lorebooks</label>
@@ -315,6 +416,7 @@ export default function ChatDetailsComponent() {
                     onClick={() => {
                       setIsLorebookDropdownOpen(prev => !prev);
                       setIsPersonaDropdownOpen(false);
+                      setIsCharacterDropdownOpen(false);
                     }}
                     disabled={isLoadingLorebooks}
                     type="button"

@@ -21,6 +21,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         public string ChatId { get; set; }
 
         public DateTime LastActivityAtUtc { get; set; }
+     
+        [JsonValueConverter]
+        public List<string> CharacterNamesInScene { get; set; }
 
         [JsonValueConverter]
         public List<ChatCharacterRolls> ChatCharactersRolls { get; set; }

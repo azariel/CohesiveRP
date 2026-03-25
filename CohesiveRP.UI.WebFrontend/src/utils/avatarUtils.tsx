@@ -1,7 +1,7 @@
 const GetAvatarPathFromCharacterId = (characterId: string): string => {
     try {
       if(characterId === "") {
-        return `./dev/Placeholder.png`;
+        return `./assets/empty-avatar.svg`;
       }
       
       return `./characters/${characterId}/avatar.png`;
@@ -13,7 +13,7 @@ const GetAvatarPathFromCharacterId = (characterId: string): string => {
 const GetAvatarPathFromPersonaId = (personaId: string): string => {
     try {
       if(personaId === "") {
-        return `./dev/Placeholder.png`;
+        return `./assets/empty-avatar.svg`;
       }
       
       return `./personas/${personaId}/avatar.png`;
@@ -25,7 +25,7 @@ const GetAvatarPathFromPersonaId = (personaId: string): string => {
 const GetAvatarPathFromLorebookId = (lorebookId: string): string => {
     try {
       if(lorebookId === "") {
-        return `./dev/Placeholder.png`;
+        return `./assets/empty-avatar.svg`;
       }
       
       return `./lorebooks/${lorebookId}/avatar.png`;
@@ -37,7 +37,7 @@ const GetAvatarPathFromLorebookId = (lorebookId: string): string => {
 const GetAvatarPathFromChatId = (chatId: string): string => {
     try {
       if(chatId === "") {
-        return `./dev/Placeholder.png`;
+        return `./assets/empty-avatar.svg`;
       }
       
       return `./chats/${chatId}/avatar.png`;
@@ -49,7 +49,7 @@ const GetAvatarPathFromChatId = (chatId: string): string => {
 const GetAvatarPathFromChatIdAndAvatarId = (chatId: string, avatarId: string): string => {
     try {
       if(chatId === "") {
-        return `./dev/Placeholder.png`;
+        return `./assets/empty-avatar.svg`;
       }
       
       return `./chats/${chatId}/${avatarId}.png`;

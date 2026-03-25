@@ -2,7 +2,6 @@
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
-using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 
