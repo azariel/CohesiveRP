@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using CohesiveRP.Common.Diagnostics;
+﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
@@ -14,9 +13,7 @@ using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
-using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 {
@@ -92,8 +89,18 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
                 ChatCharactersRollsDbModel chatCharactersRollsDbModel = await storageService.GetChatCharactersRollsByIdAsync(backgroundQueryDbModel.ChatId);
 
+                // Update the characters in scene in the SceneTracker
+                await UpdateCharactersInSceneAsync(chatCharactersRollsDbModel, CharactersSkillChecks?.AllCharactersByName);
+
                 // Get the list of characters known for this chat from characterSheetInstances
                 var chatDbModel = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
+
+                if (chatDbModel == null)
+                {
+                    LoggingManager.LogToFile("41d7828a-2bd4-4c7b-b9f2-e7c2e7e9f14f", $"The chat tied to the Id [{backgroundQueryDbModel.ChatId}] couldn't be found.");
+                    return false;
+                }
+
                 CharacterSheetInstancesDbModel characterSheetInstancesDbModel = await storageService.GetCharacterSheetsInstanceByChatIdAsync(backgroundQueryDbModel.ChatId);
 
                 if (characterSheetInstancesDbModel == null)
@@ -115,13 +122,13 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
                 // TODO: SEND A NOTIFICATION TO THE PLAYER TO KNOW IF WE ADD IT OR NOT
                 // Handle characterSheetsInstances
-                foreach (string characterName in CharactersSkillChecks.AllCharactersByName)
-                {
-                    if (!await CreateMissingCharacterSheetInstancesAsync(chatDbModel, characterSheetInstancesDbModel, characterName))
-                    {
-                        return false;
-                    }
-                }
+                //foreach (string characterName in CharactersSkillChecks.AllCharactersByName)
+                //{
+                //    if (!await CreateMissingCharacterSheetInstancesAsync(chatDbModel, characterSheetInstancesDbModel, characterName))
+                //    {
+                //        return false;
+                //    }
+                //}
 
                 // Order the information we got from the LLM and then process them against storage
                 foreach (IGrouping<string, LLMPathfinderCharactersSkillChecksActions> skillChecksByCharacter in CharactersSkillChecks.Actions
@@ -163,6 +170,17 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             {
                 return false;
             }
+        }
+
+        private async Task UpdateCharactersInSceneAsync(ChatCharactersRollsDbModel chatCharactersRollsDbModel, string[] allCharactersByName)
+        {
+            if(chatCharactersRollsDbModel == null || allCharactersByName == null || allCharactersByName.Length <= 0)
+            {
+                return;
+            }
+
+            chatCharactersRollsDbModel.CharacterNamesInScene = allCharactersByName.ToList();
+            await storageService.UpdateChatCharactersRollsAsync(chatCharactersRollsDbModel);
         }
 
         private CharacterSheetInstance FindCharacterSheetInstanceFromCharacterName(List<CharacterSheetInstance> characterSheetInstances, string characterName)
@@ -208,7 +226,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
         private async Task<bool> CreateMissingCharacterSheetInstancesMatchingACharacterAsync(ChatDbModel chatDbModel, CharacterSheetInstancesDbModel characterSheetInstancesDbModel)
         {
-            if (characterSheetInstancesDbModel?.CharacterSheetInstances == null)
+            if (chatDbModel == null || characterSheetInstancesDbModel?.CharacterSheetInstances == null)
             {
                 return false;
             }
@@ -219,38 +237,80 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             charactersSheetsInChat = charactersSheetsInChat.Where(w => chatDbModel.CharacterIds.Any(a => a == w.CharacterId) || chatDbModel.PersonaId == w.PersonaId).ToArray();
 
             List<CharacterSheetInstance> instancesToAdd = new();
-            foreach (var tetheredCharacterWithACharacterSheet in charactersSheetsInChat.Where(w => w.PersonaId == null))
+            foreach (string characterIdLinkedToTheChat in chatDbModel.CharacterIds)
             {
-                var existingCharacterSheetInstance = characterSheetInstancesDbModel.CharacterSheetInstances.FirstOrDefault(f => f.CharacterId == tetheredCharacterWithACharacterSheet.CharacterId);
-                if (existingCharacterSheetInstance != null)
-                    continue;
-
-                // Create a characterSheetInstance in this chat using the CharacterSheet blueprint
-                instancesToAdd.Add(new CharacterSheetInstance
+                // Make sure that we have a CharacterSheetInstance for this character
+                if (characterSheetInstancesDbModel.CharacterSheetInstances.Any(a => a.CharacterId == characterIdLinkedToTheChat))
                 {
-                    CharacterId = tetheredCharacterWithACharacterSheet.CharacterId,
-                    CharacterSheetInstanceId = Guid.NewGuid().ToString(),
-                    CharacterSheet = tetheredCharacterWithACharacterSheet.CharacterSheet,
-                });
+                    continue;
+                }
+
+                // Get the blueprint if any
+                var characterSheetObj = charactersSheetsInChat.FirstOrDefault(w => w.CharacterId == characterIdLinkedToTheChat);
+
+                // Create a new characterSheetInstance
+                if (characterSheetObj != null)
+                {
+                    // We have a characterSheet (blueprint), use that to spawn an instance out of it for our chat
+                    instancesToAdd.Add(new CharacterSheetInstance
+                    {
+                        CharacterId = characterIdLinkedToTheChat,
+                        CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                        CharacterSheet = characterSheetObj.CharacterSheet,
+                    });
+                } else
+                {
+                    // We DON'T have a blueprint, create an average characterSheet for this character
+                    // TODO: queue a backgroundQuery to update this characterSheetInstance by scanning the persona information + chat ?
+                    var character = await storageService.GetCharacterByIdAsync(characterIdLinkedToTheChat);
+
+                    if (!string.IsNullOrWhiteSpace(character?.Name))
+                    {
+                        instancesToAdd.Add(new CharacterSheetInstance
+                        {
+                            CharacterId = characterIdLinkedToTheChat,
+                            CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                            CharacterSheet = new CharacterSheet()
+                            {
+                                FirstName = character.Name,
+                            },
+                        });
+                    }
+                }
             }
 
             // Also handle the persona one if required
-
             var personaCharacterSheet = charactersSheetsInChat.FirstOrDefault(f => f.PersonaId == chatDbModel.PersonaId);
-            if (personaCharacterSheet != null)
-            {
-                var persona = await storageService.GetPersonaByIdAsync(chatDbModel.PersonaId);
-                if (persona != null)
-                {
-                    var existingCharacterSheetInstance = characterSheetInstancesDbModel.CharacterSheetInstances.FirstOrDefault(f => f.PersonaId == persona.PersonaId);
+            var persona = await storageService.GetPersonaByIdAsync(chatDbModel.PersonaId);
 
-                    if (existingCharacterSheetInstance == null)
+            if (persona != null)
+            {
+                var existingCharacterSheetInstance = characterSheetInstancesDbModel.CharacterSheetInstances.FirstOrDefault(f => f.PersonaId == persona.PersonaId);
+
+                if (existingCharacterSheetInstance == null)
+                {
+                    // We don't have a characterSheetInstance in storage, we need one
+                    if (personaCharacterSheet?.CharacterSheet != null)
                     {
+                        // We have a characterSheet (blueprint), use that to spawn an instance out of it for our chat
                         instancesToAdd.Add(new CharacterSheetInstance
                         {
                             PersonaId = persona.PersonaId,
                             CharacterSheetInstanceId = Guid.NewGuid().ToString(),
                             CharacterSheet = personaCharacterSheet.CharacterSheet,
+                        });
+                    } else
+                    {
+                        // We DON'T have a blueprint, create an average characterSheet for this persona
+                        // TODO: queue a backgroundQuery to update this characterSheetInstance by scanning the persona information + chat ?
+                        instancesToAdd.Add(new CharacterSheetInstance
+                        {
+                            PersonaId = persona.PersonaId,
+                            CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                            CharacterSheet = new CharacterSheet()
+                            {
+                                FirstName = persona.Name,
+                            },
                         });
                     }
                 }
@@ -500,10 +560,10 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             var modifier = await GetModifierFromSkillAsync(selectedCharacterSheetInstance, skill);
             int randomRoll = new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
 
-            if(randomRoll >= 20)
+            if (randomRoll >= 20)
                 return 20;
 
-            if(randomRoll <= 1)
+            if (randomRoll <= 1)
                 return 1;
 
             return Math.Min(19, Math.Max(2, randomRoll + modifier));
@@ -514,10 +574,10 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             var modifier = await GetModifierFromAttributeAsync(selectedCharacterSheetInstance, attribute);
             int randomRoll = new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
 
-            if(randomRoll >= 20)
+            if (randomRoll >= 20)
                 return 20;
 
-            if(randomRoll <= 1)
+            if (randomRoll <= 1)
                 return 1;
 
             return Math.Min(19, Math.Max(2, randomRoll + modifier));

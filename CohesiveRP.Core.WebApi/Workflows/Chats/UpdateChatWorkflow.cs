@@ -54,6 +54,16 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 }
             }
 
+            // A chat may not be tethered to NO character at all
+            if (requestDto.CharacterIds == null || requestDto.CharacterIds.Count <= 0)
+            {
+                return new WebApiException
+                {
+                    HttpResultCode = System.Net.HttpStatusCode.BadRequest,
+                    Message = $"Couldn't update chat with id {requestDto.ChatId}. At least one character must be tethered to this chat. The request tried to set the linked characters array to empty, which is invalid."
+                };
+            }
+
             // validate that the tethered lorebooks exists
             if (requestDto.LorebookIds != null && requestDto.LorebookIds.Count > 0)
             {

@@ -79,6 +79,12 @@ export default function UserInputComponent({ messagesRef }: Props) {
 
     const abortController = new AbortController();
     const fetchBackgroundQueries = async () => {
+
+      if(!activeModule?.chatId) {
+        console.error(`Couldn't query background queries since there is no tracked chatId.`);
+        return;
+      }
+
       const response = await getFromServerApiAsync<BackgroundQueriesResponseDto>(`api/backgroundQueries?chatId=${activeModule?.chatId}`, abortController.signal);
 
       if (abortController.signal.aborted)
@@ -184,7 +190,12 @@ const adjustTextareaHeight = () => {
 
     const pollInterval = setInterval(async () => {
       try {
-        let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${activeModule?.mainQueryId}`);
+        if(!activeModule?.mainQueryId) {
+          console.error(`The front end didn't have any tracked background query. The backend whereabouts are unknown.`);
+          return;
+        }
+
+        let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${activeModule.mainQueryId}`);
 
         let serverApiException = response as ServerApiExceptionResponseDto | null;
         if(!response || response.code != 200 || serverApiException?.message) {
@@ -212,6 +223,16 @@ const adjustTextareaHeight = () => {
         }
 
         if (response?.status !== "Pending" && response?.status !== "InProgress") {
+          if(!response?.chatId) {
+            console.error(`The background query to generate AI response was done, but there is no tracked ChatId.`);
+            return;
+          }
+
+          if(!response.linkedId) {
+            console.error(`The background query to generate AI response was done, but the underlying generated message is null.`);
+            return;
+          }
+
           realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedId}`);
 
           let serverApiException = realMessageFromStorage as ServerApiExceptionResponseDto | null;

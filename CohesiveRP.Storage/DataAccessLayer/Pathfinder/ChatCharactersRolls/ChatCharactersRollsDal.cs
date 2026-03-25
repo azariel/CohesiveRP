@@ -3,9 +3,7 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
-using CohesiveRP.Storage.QueryModels.Chat;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
@@ -110,6 +108,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 // Update only the overridable fields
                 rolls.ChatCharactersRolls = dbModel.ChatCharactersRolls;
+                rolls.CharacterNamesInScene = dbModel.CharacterNamesInScene;
 
                 var result = dbContext.ChatCharactersRolls.Update(rolls);
                 if (result.State != EntityState.Modified)

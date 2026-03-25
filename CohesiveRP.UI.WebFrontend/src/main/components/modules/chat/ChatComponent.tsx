@@ -92,8 +92,6 @@ export default function ChatComponent() {
     }
   };
 
-  //const isSendingMessage = !!activeModule?.mainQueryId; // blocked while AI is replying
-
   return (
     <main className={styles.chatComponent}>
       <div className={styles.messagesContainer} ref={messagesRef}>
@@ -120,9 +118,13 @@ export default function ChatComponent() {
         ) : (
           <p />
         )}
+        {activeModule?.chatId ? (
         <div className={styles.userInputContainer}>
           <UserInputComponent messagesRef={messagesRef} />
         </div>
+        ):(
+          <p>Chat not found.</p>
+        )}
       </div>
     </main>
   );
