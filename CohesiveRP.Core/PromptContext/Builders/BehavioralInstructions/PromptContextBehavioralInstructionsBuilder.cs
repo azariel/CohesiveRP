@@ -23,9 +23,8 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             PersonaDbModel defaultPersona = await storageService.GetPersonaByIdAsync(chatDbModel?.PersonaId);
             string userPersonaName = defaultPersona.Name;
 
-            return ($"# Your Behavioral Instruction{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
-                //.Replace("{{item_description}}", behaviorInstructionsContent)
-                .Replace(Constants.USER_PLACEHOLDER, userPersonaName)}", new ShareableContextLink{ LinkedBuilder = this });
+            return ($"<behavioral_instruction>{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+                .Replace(Constants.USER_PLACEHOLDER, userPersonaName)}{Environment.NewLine}</behavioral_instruction>", new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

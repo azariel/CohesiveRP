@@ -3,7 +3,6 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
-using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
@@ -33,13 +32,20 @@ namespace CohesiveRP.Core.Services
 
         // GlobalSettings
         Task<GlobalSettingsDbModel> GetGlobalSettingsAsync();
+        Task<bool> UpdateGlobalSettingsAsync(GlobalSettingsDbModel dbModel);
+
+        // CompletionPresets
+        Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string chatCompletionPresetId);
+        Task<ChatCompletionPresetsDbModel[]> GetChatCompletionPresetsAsync();
+        Task<ChatCompletionPresetsDbModel> AddChatCompletionPresetAsync(ChatCompletionPresetsDbModel dbModel);
+        Task<bool> UpdateChatCompletionPresetAsync(ChatCompletionPresetsDbModel currentChatCompletionPreset);
+        Task<bool> DeleteChatCompletionPresetAsync(string chatCompletionPresetId);
 
         // BackgroundQueries
         Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel);
         Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId);
         Task<BackgroundQueryDbModel[]> GetBackgroundQueriesByChatIdAsync(string chatId);
         Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync();
-        Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId);
         Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag);
         Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery);
         Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId);
@@ -65,12 +71,35 @@ namespace CohesiveRP.Core.Services
         Task<SceneTrackerDbModel> UpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
         Task<bool> DeleteSceneTrackerAsync(string chatId);
 
-        // Character
+        // Characters
         Task<CharacterDbModel[]> GetCharactersAsync();
         Task<CharacterDbModel> GetCharacterByIdAsync(string characterId);
         Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel);
         Task<bool> UpdateCharacterAsync(CharacterDbModel characterDbModel);
         Task<bool> DeleteCharacterAsync(CharacterDbModel characterDbModel);
+
+        // Pathfinder.CharacterSheets
+        Task<CharacterSheetDbModel[]> GetCharacterSheetsAsync();
+        Task<CharacterSheetDbModel[]> GetCharacterSheetsByFuncAsync(Func<CharacterSheetDbModel, bool> func);
+        //Task<CharacterSheetDbModel> GetCharacterSheetByFuncAsync(Func<CharacterSheetDbModel, bool> func);
+        Task<CharacterSheetDbModel> GetCharacterSheetByCharacterIdAsync(string characterId);
+        Task<CharacterSheetDbModel> AddCharacterSheetAsync(CharacterSheetDbModel dbModel);
+        Task<bool> UpdateCharacterSheetAsync(CharacterSheetDbModel dbModel);
+        Task<bool> DeleteCharacterSheetAsync(CharacterSheetDbModel dbModel);
+
+        // Pathfinder.CharacterSheetInstances
+        Task<CharacterSheetInstancesDbModel[]> GetCharacterSheetInstancesAsync();
+        Task<CharacterSheetInstancesDbModel> GetCharacterSheetsInstanceByChatIdAsync(string chatId);
+        Task<CharacterSheetInstancesDbModel> AddCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
+        Task<bool> UpdateCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
+        Task<bool> DeleteCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
+
+        // Pathfinder.ChatCharactersRolls
+        Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsAsync();
+        Task<ChatCharactersRollsDbModel> GetChatCharactersRollsByIdAsync(string chatId);
+        Task<ChatCharactersRollsDbModel> AddChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
+        Task<bool> UpdateChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
+        Task<bool> DeleteChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
 
         // Personas
         Task<PersonaDbModel[]> GetPersonasAsync();

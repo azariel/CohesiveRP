@@ -11,8 +11,10 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.ChatCompletionPresets.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Chats;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Lorebooks.Abstractions;
@@ -20,6 +22,7 @@ using CohesiveRP.Core.WebApi.Workflows.Messages;
 using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Personas.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.SceneTrackers.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Settings;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
@@ -57,6 +60,9 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetCharacterByIdWorkflow, GetCharacterByIdWorkflow>();
             services.AddSingleton<IUpdateCharacterWorkflow, UpdateCharacterWorkflow>();
             services.AddSingleton<IDeleteCharacterWorkflow, DeleteCharacterWorkflow>();
+            services.AddSingleton<IGetCharacterSheetWorkflow, GetCharacterSheetWorkflow>();
+            services.AddSingleton<IUpdateCharacterSheetWorkflow, UpdateCharacterSheetWorkflow>();
+            services.AddSingleton<IAddCharacterSheetWorkflow, AddCharacterSheetWorkflow>();
 
             // Workflows.Personas
             services.AddSingleton<IGetAllPersonasWorkflow, GetAllPersonasWorkflow>();
@@ -82,10 +88,19 @@ namespace CohesiveRP.Core.WebApi
 
             // Workflows.Settings
             services.AddSingleton<IGetGlobalSettingsWorkflow, GetGlobalSettingsWorkflow>();
+            services.AddSingleton<IUpdateGlobalSettingsWorkflow, UpdateGlobalSettingsWorkflow>();
 
             // Workflows.BackgroundQueries
             services.AddSingleton<IGetBackgroundQueryWorkflow, GetBackgroundQueryWorkflow>();
             services.AddSingleton<IGetBackgroundQueriesByChatIdWorkflow, GetBackgroundQueriesByChatIdWorkflow>();
+
+            // Workflows.ChatCompletionPresets
+            services.AddSingleton<IChatCompletionPresetsWorkflow, ChatCompletionPresetsWorkflow>();
+            services.AddSingleton<IGetBackgroundQueriesByChatIdWorkflow, GetBackgroundQueriesByChatIdWorkflow>();
+            services.AddSingleton<IGetChatCompletionPresetByIdWorkflow, GetChatCompletionPresetByIdWorkflow>();
+            services.AddSingleton<IAddChatCompletionPresetWorkflow, AddChatCompletionPresetWorkflow>();
+            services.AddSingleton<IUpdateChatCompletionPresetWorkflow, UpdateChatCompletionPresetWorkflow>();
+            services.AddSingleton<IDeleteChatCompletionPresetWorkflow, DeleteChatCompletionPresetWorkflow>();
 
             // DtoConverters
             services.AddSingleton<ILorebookDtoConverter, LorebookDtoConverter>();
@@ -117,6 +132,9 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ILLMApiQueriesDal, LLMApiQueriesDal>();
             services.AddSingleton<ISummaryDal, SummaryDal>();
             services.AddSingleton<ISceneTrackerDal, SceneTrackerDal>();
+            services.AddSingleton<ICharacterSheetsDal, CharacterSheetsDal>();
+            services.AddSingleton<ICharacterSheetInstancesDal, CharacterSheetInstancesDal>();
+            services.AddSingleton<IChatCharactersRollsDal, ChatCharactersRollsDal>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

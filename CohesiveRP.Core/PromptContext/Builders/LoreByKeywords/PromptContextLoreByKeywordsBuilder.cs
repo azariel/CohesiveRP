@@ -278,10 +278,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             if (string.IsNullOrWhiteSpace(str.ToString()))
             {
-                str.Append($"Infer the lore from the roleplay context.{Environment.NewLine}{Environment.NewLine}");
+                str.Append($"Infer the lore from the roleplay context.");
             }
 
-            return ($"# Lore{Environment.NewLine}{str.Replace(Constants.USER_PLACEHOLDER, userPersonaName)}",
+            return ($"<lore>{Environment.NewLine}{str.Replace(Constants.USER_PLACEHOLDER, userPersonaName)}{Environment.NewLine}</lore>{Environment.NewLine}{Environment.NewLine}",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

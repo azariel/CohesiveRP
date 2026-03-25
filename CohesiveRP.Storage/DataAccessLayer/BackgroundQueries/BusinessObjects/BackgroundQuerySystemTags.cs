@@ -10,5 +10,6 @@
         longSummary = 5,
         extraSummary = 6,
         overflowSummary = 7,
+        skillChecksInitiator = 8,
     }
 }

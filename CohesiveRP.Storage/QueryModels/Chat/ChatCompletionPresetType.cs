@@ -6,5 +6,6 @@
         Summarize = 1,
         SummariesMerge = 2,
         SceneTracker = 3,
+        SkillChecksInitiator = 4,
     }
 }

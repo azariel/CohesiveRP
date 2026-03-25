@@ -35,12 +35,12 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             if (value != null)
             {
-                str.Append(value);
+                str.Append(value.Trim().TrimEnd(Environment.NewLine.ToCharArray()));
             }
 
             // TODO: add characters
 
-            return ($"# Relevant Characters{Environment.NewLine}{str}", new ShareableContextLink { LinkedBuilder = this });
+            return ($"<relevant_characters>{Environment.NewLine}{str}{Environment.NewLine}</relevant_characters>{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
         }
 }
 }

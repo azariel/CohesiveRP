@@ -12,6 +12,7 @@ namespace CohesiveRP.Common.Exceptions
         // ********************************************************************
         //                            Properties
         // ********************************************************************
+        [JsonConverter(typeof(JsonNumberEnumConverter<HttpStatusCode>))]
         [JsonPropertyName("code")]
         public HttpStatusCode HttpResultCode { get; set; }
 

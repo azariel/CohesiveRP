@@ -69,6 +69,32 @@
     outline: 2px solid currentColor;
   }
 
+.iconBtnCompletionPresets {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #484848;
+  font-size: clamp(0.5rem, 2.7vw, 1.3rem);
+}
+
+.iconBtnCompletionPresets svg {
+  fill: transparent;
+}
+
+.iconBtnPathfinder {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #484848;
+  font-size: clamp(0.5rem, 2.7vw, 1.3rem);
+}
+
 .separator {
   width: 100%;
   height: 1px;
@@ -103,6 +129,16 @@
   .iconBtnSmaller:focus-visible svg {
     fill: #c9c9c9;
     transition: fill 0.2s ease;
+  }
+  .iconBtnCompletionPresets:hover svg,
+  .iconBtnCompletionPresets:focus-visible svg {
+    color: #c9c9c9;
+    transition: color 0.2s ease;
+  }
+  .iconBtnPathfinder:hover svg,
+  .iconBtnPathfinder:focus-visible svg {
+    color: #c9c9c9;
+    transition: color 0.2s ease;
   }
 }
 

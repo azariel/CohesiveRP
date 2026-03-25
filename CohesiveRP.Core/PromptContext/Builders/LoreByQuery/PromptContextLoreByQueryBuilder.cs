@@ -46,10 +46,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             if (loreByQueryContent.Count <= 0)
             {
-                str.Append($"Infer the lore from the roleplay context.{Environment.NewLine}{Environment.NewLine}");
+                str.Append($"Infer the lore from the roleplay context.");
             }
 
-            return ($"# Lore (relevant in recent story context){Environment.NewLine}{str}", new ShareableContextLink{ LinkedBuilder = this });
+            return ($"<lore>{Environment.NewLine}Relevant lore in recent story context{Environment.NewLine}{str}{Environment.NewLine}</lore>{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

@@ -106,5 +106,11 @@ namespace CohesiveRP.Storage.Common
         public DbSet<LorebookDbModel> Lorebooks { get; set; }
 
         public DbSet<LorebookInstanceDbModel> LorebookInstances { get; set; }
+
+        // Pathfinder
+        public DbSet<CharacterSheetDbModel> CharacterSheets { get; set; }
+        public DbSet<CharacterSheetInstancesDbModel> CharacterSheetInstances { get; set; }
+        public DbSet<ChatCharactersRollsDbModel> ChatCharactersRolls { get; set; }
+        // ---------
     }
 }

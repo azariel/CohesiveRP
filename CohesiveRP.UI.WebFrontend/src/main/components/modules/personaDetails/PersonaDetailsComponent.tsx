@@ -13,6 +13,11 @@ import type { SharedContextPersonaType } from "../../../../store/SharedContextPe
 import type { PersonaResponseDto } from "../../../../ResponsesDto/personas/PersonaResponseDto";
 import { GetAvatarPathFromPersonaId } from "../../../../utils/avatarUtils";
 import type { SharedContextType } from "../../../../store/SharedContextType";
+import CharacterSheetComponent from "../characterDetails/characterSheets/CharacterSheetComponent";
+
+/* Sub-components */
+
+type ActiveTab = "details" | "characterSheet";
 
 export default function PersonaDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextPersonaType>();
@@ -31,6 +36,9 @@ export default function PersonaDetailsComponent() {
   const isDefault = useRef(false);
   const [isSaving, setIsSaving] = useState(false);
   const [operationError, setOperationError] = useState(false);
+
+  // tab state
+  const [activeTab, setActiveTab] = useState<ActiveTab>("details");
 
   useEffect(() => {
     if (didComponentMountAlready.current)
@@ -215,29 +223,55 @@ export default function PersonaDetailsComponent() {
                 <label className={styles.personaId}>{personaResponse?.persona?.personaId ?? ""}</label>
               </div>
             </div>
+
             <div className={styles.detailsContainer}>
-              <div className={styles.personaDescriptionContainer}>
-                <label className={styles.personaDescriptionLabel}>Description</label>
-                <textarea
-                  className={styles.personaDescription}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-                <div className={styles.operationsButtons}>
-                  <button className={styles.deleteButton} onClick={handleDelete} disabled={isSaving}>
-                  {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Delete"}
-                  </button>
-                  <button className={styles.saveButton} onClick={handleMakeDefault} disabled={isSaving || isDefault.current}>
-                    {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Make Default"}
-                  </button>
-                  <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Save"}
-                  </button>
-                  {operationError && (
-                    <label className={styles.saveErrorLabel}>Failed to save/delete. Please try again.</label>
-                  )}
-                </div>
+              {/* ── Tab bar ── */}
+              <div className={styles.tabBar}>
+                <button
+                  className={`${styles.tabButton} ${activeTab === "details" ? styles.tabButtonActive : ""}`}
+                  onClick={() => setActiveTab("details")}
+                >
+                  Details
+                </button>
+                <button
+                  className={`${styles.tabButton} ${activeTab === "characterSheet" ? styles.tabButtonActive : ""}`}
+                  onClick={() => setActiveTab("characterSheet")}
+                >
+                  Character Sheet
+                </button>
               </div>
+
+              {/* ── Tab panels ── */}
+              {activeTab === "details" && (
+                <div className={styles.personaDescriptionContainer}>
+                  <label className={styles.personaDescriptionLabel}>Description</label>
+                  <textarea
+                    className={styles.personaDescription}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                  <div className={styles.operationsButtons}>
+                    <button className={styles.deleteButton} onClick={handleDelete} disabled={isSaving}>
+                    {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Delete"}
+                    </button>
+                    <button className={styles.saveButton} onClick={handleMakeDefault} disabled={isSaving || isDefault.current}>
+                      {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Make Default"}
+                    </button>
+                    <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
+                      {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Save"}
+                    </button>
+                    {operationError && (
+                      <label className={styles.saveErrorLabel}>Failed to save/delete. Please try again.</label>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "characterSheet" && personaResponse?.persona?.personaId && (
+                <div className={styles.characterSheetTabPanel}>
+                  <CharacterSheetComponent personaId={personaResponse.persona.personaId} characterId={null} />
+                </div>
+              )}
             </div>
           </div>
         )

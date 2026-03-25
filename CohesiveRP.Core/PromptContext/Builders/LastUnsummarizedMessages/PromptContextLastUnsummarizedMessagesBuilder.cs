@@ -42,7 +42,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.Where(w => !w.Summarized).OrderBy(o => o.CreatedAtUtc).ToList();
 
-            string output = $"# Last messages between you and the User{Environment.NewLine}";
+            string output = $"<last_messages>{Environment.NewLine}";
 
             foreach (IMessageDbModel message in hotMessagesDbModel.Messages)
             {
@@ -50,6 +50,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 output += value;
             }
 
+            output += $"{Environment.NewLine}</last_messages>{Environment.NewLine}{Environment.NewLine}";
             return (output, new ShareableContextLink
             {
                 LinkedBuilder = this,

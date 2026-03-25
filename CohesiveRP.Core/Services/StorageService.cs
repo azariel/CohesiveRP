@@ -26,6 +26,9 @@ namespace CohesiveRP.Core.Services
     {
         private IChatsDal chatsDal;
         private ICharactersDal charactersDal;
+        private ICharacterSheetsDal characterSheetsDal;
+        private ICharacterSheetInstancesDal characterSheetInstancesDal;
+        private IChatCharactersRollsDal chatCharactersRollsDal;
         private IPersonasDal personasDal;
         private ILorebooksDal lorebooksDal;
         private ILorebookInstanceDal lorebookInstancesDal;
@@ -40,6 +43,9 @@ namespace CohesiveRP.Core.Services
         public StorageService(
             IChatsDal chatsDal,
             ICharactersDal charactersDal,
+            ICharacterSheetsDal characterSheetsDal,
+            ICharacterSheetInstancesDal characterSheetInstancesDal,
+            IChatCharactersRollsDal chatCharactersRollsDal,
             IPersonasDal personasDal,
             ILorebooksDal lorebooksDal,
             ILorebookInstanceDal lorebookInstancesDal,
@@ -53,6 +59,9 @@ namespace CohesiveRP.Core.Services
         {
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;
+            this.characterSheetsDal = characterSheetsDal;
+            this.characterSheetInstancesDal = characterSheetInstancesDal;
+            this.chatCharactersRollsDal = chatCharactersRollsDal;
             this.personasDal = personasDal;
             this.lorebooksDal = lorebooksDal;
             this.lorebookInstancesDal = lorebookInstancesDal;
@@ -118,6 +127,31 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> UpdateCharacterAsync(CharacterDbModel characterDbModel) => await charactersDal.UpdateCharacterAsync(characterDbModel);
         public async Task<bool> DeleteCharacterAsync(CharacterDbModel characterDbModel) => await charactersDal.DeleteCharacterAsync(characterDbModel);
 
+        // Pathfinder.CharacterSheets
+        public async Task<CharacterSheetDbModel[]> GetCharacterSheetsAsync() => await characterSheetsDal.GetCharacterSheetsAsync();
+        public async Task<CharacterSheetDbModel[]> GetCharacterSheetsByFuncAsync(Func<CharacterSheetDbModel, bool> func) => await characterSheetsDal.GetCharacterSheetsByFuncAsync(func);
+        //public async Task<CharacterSheetDbModel> GetCharacterSheetByFuncAsync(Func<CharacterSheetDbModel, bool> func) => throw new NotImplementedException();
+        public async Task<CharacterSheetDbModel> GetCharacterSheetByCharacterIdAsync(string characterId) => await characterSheetsDal.GetCharacterSheetByCharacterIdAsync(characterId);
+        public async Task<CharacterSheetDbModel> AddCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.AddCharacterSheetAsync(dbModel);
+        public async Task<bool> UpdateCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.UpdateCharacterSheetAsync(dbModel);
+        public async Task<bool> DeleteCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.DeleteCharacterSheetAsync(dbModel);
+
+        // Pathfinder.CharacterSheetInstances
+        public async Task<CharacterSheetInstancesDbModel[]> GetCharacterSheetInstancesAsync() => await characterSheetInstancesDal.GetCharacterSheetInstancesAsync();
+        public async Task<CharacterSheetInstancesDbModel[]> GetCharacterSheetsInstanceByFuncAsync(Func<CharacterSheetInstancesDbModel, bool> func) => await characterSheetInstancesDal.GetCharacterSheetInstancesByFuncAsync(func);
+        public async Task<CharacterSheetInstancesDbModel> GetCharacterSheetsInstanceByChatIdAsync(string chatId) => await characterSheetInstancesDal.GetCharacterSheetsInstanceByChatIdAsync(chatId);
+        public async Task<CharacterSheetInstancesDbModel> AddCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.AddCharacterSheetsInstanceAsync(dbModel);
+        public async Task<bool> UpdateCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.UpdateCharacterSheetsInstanceAsync(dbModel);
+        public async Task<bool> DeleteCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.DeleteCharacterSheetsInstanceAsync(dbModel);
+
+        // Pathfinder.ChatCharactersRolls
+        public async Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsAsync() => await chatCharactersRollsDal.GetChatCharactersRollsAsync();
+        public async Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsByFuncAsync(Func<ChatCharactersRollsDbModel, bool> func) => await chatCharactersRollsDal.GetChatCharactersRollsByFuncAsync(func);
+        public async Task<ChatCharactersRollsDbModel> GetChatCharactersRollsByIdAsync(string chatId) => await chatCharactersRollsDal.GetChatCharactersRollsEntryAsync(chatId);
+        public async Task<ChatCharactersRollsDbModel> AddChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel) => await chatCharactersRollsDal.AddChatCharactersRollsAsync(dbModel);
+        public async Task<bool> UpdateChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel) => await chatCharactersRollsDal.UpdateChatCharactersRollsAsync(dbModel);
+        public async Task<bool> DeleteChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel) => await chatCharactersRollsDal.DeleteChatCharactersRollsAsync(dbModel);
+
         // Personas
         public async Task<PersonaDbModel[]> GetPersonasAsync() => await personasDal.GetPersonasAsync();
         public async Task<PersonaDbModel> GetPersonaByIdAsync(string personaId) => await personasDal.GetPersonaByIdAsync(personaId);
@@ -153,6 +187,7 @@ namespace CohesiveRP.Core.Services
 
         // Settings
         public async Task<GlobalSettingsDbModel> GetGlobalSettingsAsync() => await globalSettingsDal.GetGlobalSettingsAsync();
+        public async Task<bool> UpdateGlobalSettingsAsync(GlobalSettingsDbModel dbModel) => await globalSettingsDal.UpdateGlobalSettingsAsync(dbModel);
 
         // BackgroundQueries
         public async Task<BackgroundQueryDbModel> AddBackgroundQueryAsync(CreateBackgroundQueryQueryModel queryModel) => await backgroundQueriesDal.CreateBackgroundQueryAsync(queryModel);
@@ -162,7 +197,11 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> DeleteBackgroundQueriesByChatIdAsync(string chatId) => await backgroundQueriesDal.DeleteBackgroundQueriesByChatIdAsync(chatId);
 
         // ChatCompletionPresets
-        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string mainChatCompletionPresetId) => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync(mainChatCompletionPresetId);
+        public async Task<ChatCompletionPresetsDbModel[]> GetChatCompletionPresetsAsync() => await chatCompletionPresetsDal.GetChatCompletionPresetsAsync();
+        public async Task<ChatCompletionPresetsDbModel> GetChatCompletionPresetAsync(string chatCompletionPresetId) => await chatCompletionPresetsDal.GetChatCompletionPresetAsync(chatCompletionPresetId);
+        public async Task<ChatCompletionPresetsDbModel> AddChatCompletionPresetAsync(ChatCompletionPresetsDbModel dbModel) => await chatCompletionPresetsDal.AddChatCompletionPresetAsync(dbModel);
+        public async Task<bool> UpdateChatCompletionPresetAsync(ChatCompletionPresetsDbModel currentChatCompletionPreset) => await chatCompletionPresetsDal.UpdateChatCompletionPresetAsync(currentChatCompletionPreset);
+        public async Task<bool> DeleteChatCompletionPresetAsync(string chatCompletionPresetId) => await chatCompletionPresetsDal.DeleteChatCompletionPresetAsync(chatCompletionPresetId);
 
         // LLMQueries
         public async Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag) => await llmApiQueriesDal.GetQueriesOnLLMApisAsync(tag);

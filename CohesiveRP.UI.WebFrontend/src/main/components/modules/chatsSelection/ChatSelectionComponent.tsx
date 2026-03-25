@@ -4,7 +4,6 @@ import { FaFilter  } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
 import { AiOutlineDisconnect } from "react-icons/ai";
 import { MdAddBox, MdEdit, MdDelete } from "react-icons/md";
-import { CiSquareRemove } from "react-icons/ci";
 
 // Backend webapi
 import { getFromServerApiAsync, deleteFromServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
@@ -15,9 +14,9 @@ import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSel
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
-import { GetAvatarPathFromCharacterId, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
 import { GetChatNameFontSize } from "../../../../utils/fontSizeUtils";
 import type { SharedContextType } from "../../../../store/SharedContextType";
+import { GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
 
 export default function ChatSelectionComponent() {
   const { navigateTo } = sharedContext();
