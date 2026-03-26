@@ -1,11 +1,11 @@
 import styles from "./CharacterSheetComponent.module.css";
 import { useState, useEffect, useRef } from "react";
 import { ImSpinner2 } from "react-icons/im";
-import { getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
-import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
-import type { CharacterSheetResponseDto } from "../../../../../ResponsesDto/characters/characterSheets/CharacterSheetResponseDto";
-import type { ServerApiResponseDto } from "../../../../../ResponsesDto/ServerApiResponseDto";
-import type { CharacterSheetRequestDto } from "../../../../../RequestDto/characters/characterSheets/CharacterSheetRequestDto";
+import { getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
+import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+import type { CharacterSheetResponseDto } from "../../../../ResponsesDto/characters/characterSheets/CharacterSheetResponseDto";
+import type { ServerApiResponseDto } from "../../../../ResponsesDto/ServerApiResponseDto";
+import type { CharacterSheetRequestDto } from "../../../../RequestDto/characters/characterSheets/CharacterSheetRequestDto";
 
 /* ─────────────────────────── Constants ─────────────────────── */
 
@@ -159,9 +159,11 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [regenerateError, setRegenerateError] = useState(false);
 
   const [characterSheetId, setCharacterSheetId] = useState<string | null>("");
 
@@ -226,6 +228,63 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
   const [attrMap, setAttrMap] = useState<Record<string, number>>(defaultAttrMap());
   const [skillMap, setSkillMap] = useState<Record<string, number>>(defaultSkillMap());
 
+  /* ─── shared sheet hydration ─── */
+  const hydrateSheet = (s: CharacterSheetResponseDto) => {
+    setCharacterSheetId(s.characterSheetId ?? null);
+    setFirstName(s.characterSheet?.firstName ?? "");
+    setLastName(s.characterSheet?.lastName ?? "");
+    setBirthdayDate(toDateInputValue(s.characterSheet?.birthdayDate));
+    setGender(s.characterSheet?.gender ?? "");
+    setAgeGroup(s.characterSheet?.ageGroup ?? "");
+    setRace(s.characterSheet?.race ?? "");
+    setHeight(s.characterSheet?.height ?? "");
+    setBodyType(s.characterSheet?.bodyType ?? "");
+    setHairColor(s.characterSheet?.hairColor ?? "");
+    setHairStyle(s.characterSheet?.hairStyle ?? "");
+    setEyeColor(s.characterSheet?.eyeColor ?? "");
+    setEarShape(s.characterSheet?.earShape ?? "");
+    setSkinColor(s.characterSheet?.skinColor ?? "");
+    setGenitals(s.characterSheet?.genitals ?? "");
+    setBreastsSize(s.characterSheet?.breastsSize ?? "");
+    setSexuality(s.characterSheet?.sexuality ?? "");
+    setAttractiveness(s.characterSheet?.attractiveness ?? "");
+    setSpeechPattern(s.characterSheet?.speechPattern ?? "");
+    setSpeechImpairment(s.characterSheet?.speechImpairment ?? "");
+    setMannerisms(s.characterSheet?.mannerisms ?? "");
+    setSocialAnxiety(s.characterSheet?.socialAnxiety ?? "");
+    setClothesPreference(s.characterSheet?.clothesPreference ?? "");
+    setProfession(s.characterSheet?.profession ?? "");
+    setReputation(s.characterSheet?.reputation ?? "");
+    setRelationships(s.characterSheet?.relationships ?? []);
+    setBehavior(s.characterSheet?.behavior ?? "");
+    setPersonalityTraits(s.characterSheet?.personalityTraits ?? []);
+    setLikes(s.characterSheet?.likes ?? []);
+    setDislikes(s.characterSheet?.dislikes ?? []);
+    setFears(s.characterSheet?.fears ?? []);
+    setSecrets(s.characterSheet?.secrets ?? []);
+    setPreferredCombatStyle(s.characterSheet?.preferredCombatStyle ?? "");
+    setWeaponsProficiency(s.characterSheet?.weaponsProficiency ?? "");
+    setCombatAffinityAttack(s.characterSheet?.combatAffinityAttack ?? "");
+    setCombatAffinityDefense(s.characterSheet?.combatAffinityDefense ?? "");
+    setSkills(s.characterSheet?.skills ?? []);
+    setWeaknesses(s.characterSheet?.weaknesses ?? []);
+    setGoalsForNextYear(s.characterSheet?.goalsForNextYear ?? []);
+    setLongTermGoals(s.characterSheet?.longTermGoals ?? []);
+    setKinks(s.characterSheet?.kinks ?? []);
+    setSecretKinks(s.characterSheet?.secretKinks ?? []);
+
+    if (s.characterSheet?.pathfinderAttributes?.length) {
+      const map = { ...defaultAttrMap() };
+      s.characterSheet.pathfinderAttributes.forEach((a) => { map[a.attributeType] = a.value; });
+      setAttrMap(map);
+    }
+    if (s.characterSheet?.pathfinderSkills?.length) {
+      const map = { ...defaultSkillMap() };
+      s.characterSheet.pathfinderSkills.forEach((a) => { map[a.skillType] = a.value; });
+      setSkillMap(map);
+    }
+  };
+
   /* ─── fetch ─── */
   useEffect(() => {
     if (didMount.current) return;
@@ -233,81 +292,25 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
 
     const fetchSheet = async () => {
       try {
-        let response:CharacterSheetResponseDto | null;
-        
-        if(characterId)
-        {
+        let response: CharacterSheetResponseDto | null;
+
+        console.log(`characterId:${characterId} personaId:${personaId}`);
+        if (characterId) {
           response = await getFromServerApiAsync<CharacterSheetResponseDto>(`api/characters/${characterId}/characterSheet`);
-        } else
-        {
+        } else {
           response = await getFromServerApiAsync<CharacterSheetResponseDto>(`api/characters/personaCharacterSheet/${personaId}`);
         }
 
         const ex = response as ServerApiExceptionResponseDto | null;
         if (!response || ex?.message) {
-
-          if(ex?.code !== 404) {
+          if (ex?.code !== 404) {
             console.error("Failed to load character sheet:", ex);
             setLoadError(true);
             return;
           }
         }
 
-        const s = response as CharacterSheetResponseDto;
-
-        setCharacterSheetId(s.characterSheetId ?? null);
-        setFirstName(s.characterSheet?.firstName ?? "");
-        setLastName(s.characterSheet?.lastName ?? "");
-        setBirthdayDate(toDateInputValue(s.characterSheet?.birthdayDate));
-        setGender(s.characterSheet?.gender ?? "");
-        setAgeGroup(s.characterSheet?.ageGroup ?? "");
-        setRace(s.characterSheet?.race ?? "");
-        setHeight(s.characterSheet?.height ?? "");
-        setBodyType(s.characterSheet?.bodyType ?? "");
-        setHairColor(s.characterSheet?.hairColor ?? "");
-        setHairStyle(s.characterSheet?.hairStyle ?? "");
-        setEyeColor(s.characterSheet?.eyeColor ?? "");
-        setEarShape(s.characterSheet?.earShape ?? "");
-        setSkinColor(s.characterSheet?.skinColor ?? "");
-        setGenitals(s.characterSheet?.genitals ?? "");
-        setBreastsSize(s.characterSheet?.breastsSize ?? "");
-        setSexuality(s.characterSheet?.sexuality ?? "");
-        setAttractiveness(s.characterSheet?.attractiveness ?? "");
-        setSpeechPattern(s.characterSheet?.speechPattern ?? "");
-        setSpeechImpairment(s.characterSheet?.speechImpairment ?? "");
-        setMannerisms(s.characterSheet?.mannerisms ?? "");
-        setSocialAnxiety(s.characterSheet?.socialAnxiety ?? "");
-        setClothesPreference(s.characterSheet?.clothesPreference ?? "");
-        setProfession(s.characterSheet?.profession ?? "");
-        setReputation(s.characterSheet?.reputation ?? "");
-        setRelationships(s.characterSheet?.relationships ?? []);
-        setBehavior(s.characterSheet?.behavior ?? "");
-        setPersonalityTraits(s.characterSheet?.personalityTraits ?? []);
-        setLikes(s.characterSheet?.likes ?? []);
-        setDislikes(s.characterSheet?.dislikes ?? []);
-        setFears(s.characterSheet?.fears ?? []);
-        setSecrets(s.characterSheet?.secrets ?? []);
-        setPreferredCombatStyle(s.characterSheet?.preferredCombatStyle ?? "");
-        setWeaponsProficiency(s.characterSheet?.weaponsProficiency ?? "");
-        setCombatAffinityAttack(s.characterSheet?.combatAffinityAttack ?? "");
-        setCombatAffinityDefense(s.characterSheet?.combatAffinityDefense ?? "");
-        setSkills(s.characterSheet?.skills ?? []);
-        setWeaknesses(s.characterSheet?.weaknesses ?? []);
-        setGoalsForNextYear(s.characterSheet?.goalsForNextYear ?? []);
-        setLongTermGoals(s.characterSheet?.longTermGoals ?? []);
-        setKinks(s.characterSheet?.kinks ?? []);
-        setSecretKinks(s.characterSheet?.secretKinks ?? []);
-
-        if (s.characterSheet?.pathfinderAttributes?.length) {
-          const map = { ...defaultAttrMap() };
-          s.characterSheet?.pathfinderAttributes.forEach((a) => { map[a.attributeType] = a.value; });
-          setAttrMap(map);
-        }
-        if (s.characterSheet?.pathfinderSkills?.length) {
-          const map = { ...defaultSkillMap() };
-          s.characterSheet?.pathfinderSkills.forEach((a) => { map[a.skillType] = a.value; });
-          setSkillMap(map);
-        }
+        hydrateSheet(response as CharacterSheetResponseDto);
       } catch (err) {
         console.error("Fetch character sheet error:", err);
         setLoadError(true);
@@ -318,6 +321,56 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
 
     fetchSheet();
   }, [characterId]);
+
+  /* ─── regenerate ─── */
+  const handleRegenerate = async () => {
+    if (isRegenerating || (!characterId && !personaId))
+      return;
+
+    setIsRegenerating(true);
+    setRegenerateError(false);
+
+    try {
+      if(!characterSheetId) {
+        // Save the characterSheet as-is and THEN regenerate it
+        await handleSave();
+      }
+
+      if(!characterSheetId) {
+        console.error(`Couldn't regenerate the CharacterSheet, the operation failed as the CharacterSheetId is null.`);
+        return;
+      }
+
+      const payload = {
+        characterId,
+        personaId,
+        characterSheetId,
+      };
+
+      console.log(`Regenerating CharacterSheet.`);
+
+      let response = null;
+      if (characterId) {
+        response = await postToServerApiAsync<CharacterSheetResponseDto>(`api/characters/${characterId}/characterSheet/${characterSheetId}/regenerate`, payload);
+      } else {
+        response = await postToServerApiAsync<CharacterSheetResponseDto>(`api/characters/personaCharacterSheet/${personaId}/regenerate`, payload);
+      }
+
+      const ex = response as ServerApiExceptionResponseDto | null;
+      if (!response || ex?.message) {
+        console.error("Regenerate character sheet failed:", ex);
+        setRegenerateError(true);
+        return;
+      }
+
+      hydrateSheet(response as CharacterSheetResponseDto);
+    } catch (err) {
+      console.error("Regenerate character sheet error:", err);
+      setRegenerateError(true);
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
 
   /* ─── save ─── */
   const handleSave = async () => {
@@ -384,13 +437,16 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         }
       };
 
-      let response:ServerApiResponseDto | null;
-      if(characterSheetId){
+      let response: ServerApiResponseDto | null;
+      if (characterSheetId && characterId) {
         response = await putToServerApiAsync(`api/characters/${characterId}/characterSheet/${characterSheetId}`, payload);
-      } else {
+      } else if(characterId) {
         response = await postToServerApiAsync(`api/characters/${characterId}/characterSheet`, payload);
+      } else if(characterSheetId && personaId) {
+        response = await postToServerApiAsync(`api/characters/${personaId}/characterSheet/${characterSheetId}`, payload);
+      } else {
+        response = await postToServerApiAsync(`api/characters/${personaId}/characterSheet`, payload);
       }
-      
 
       const ex = response as ServerApiExceptionResponseDto | null;
       if (!response || ex?.message) {
@@ -429,6 +485,21 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
 
   return (
     <div className={styles.sheetWrapper}>
+
+      {/* ── Regenerate bar ── */}
+      <div className={styles.regenerateBar}>
+        {regenerateError && (
+          <label className={styles.saveErrorLabel}>Regeneration failed. Please try again.</label>
+        )}
+        <button
+          className={styles.regenerateButton}
+          onClick={handleRegenerate}
+          disabled={isRegenerating}
+          title="Override the whole CharacterSheet with values from querying the LLM"
+        >
+          {isRegenerating ? <ImSpinner2 className={styles.saveSpinner} /> : "Regenerate Sheet"}
+        </button>
+      </div>
 
       {/* ── Identity ── */}
       <Section title="Identity">

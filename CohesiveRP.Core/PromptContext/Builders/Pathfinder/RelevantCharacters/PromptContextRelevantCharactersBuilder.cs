@@ -10,7 +10,7 @@ using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.Busi
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheets.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 
-namespace CohesiveRP.Core.PromptContext.Builders.Directive
+namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
 {
     public class PromptContextRelevantCharactersBuilder : IPromptContextElementBuilder
     {

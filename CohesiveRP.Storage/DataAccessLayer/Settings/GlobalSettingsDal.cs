@@ -51,7 +51,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Main],
+                            Tags = [ChatCompletionPresetType.Main, ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -108,7 +108,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Type = ChatCompletionPresetType.SkillChecksInitiator,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_PATHFINDER_SKILLS_CHECKS_INITIATOR_COMPLETION_PRESET,
                                 IsDefault = true,
-                            }
+                            },
                         }
                     },
                     Summary = new SummarySettings()

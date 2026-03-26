@@ -7,5 +7,6 @@
         SummariesMerge = 2,
         SceneTracker = 3,
         SkillChecksInitiator = 4,
+        SPECIAL_CharacterSheetGeneration = 5,
     }
 }

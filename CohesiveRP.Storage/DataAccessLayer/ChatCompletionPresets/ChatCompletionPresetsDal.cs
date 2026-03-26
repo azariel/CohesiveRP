@@ -416,6 +416,53 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     }
                 });
 
+                // Poke the AI to know if a character needs to do a skill check
+                //dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
+                //{
+                //    Name = "Default-Pathfinder-CharacterSheetRegeneration-Preset",
+                //    ChatCompletionPresetId = StorageConstants.DEFAULT_PATHFINDER_CHARACTER_SHEET_REGENERATION_COMPLETION_PRESET,
+                //    CreatedAtUtc = DateTime.UtcNow,
+                //    Format = new GlobalPromptContextFormat()
+                //    {
+                //        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                //        {
+                //            new PromptContextFormatElement
+                //            {
+                //                Tag = PromptContextFormatTag.Directive,
+                //                Options = new PromptContextFormatElementOptions
+                //                {
+                //                    Format = "",
+                //                }
+                //            },
+                            
+                //            new PromptContextFormatElement
+                //            {
+                //                Tag = PromptContextFormatTag.CharacterSheetWithoutChat,
+                //                Options = new PromptContextFormatElementOptions
+                //                {
+                //                    Format = "Information about {{character_name}}\r\n{{character_description}}",
+                //                }
+                //            },
+                //            new PromptContextFormatElement
+                //            {
+                //                Tag = PromptContextFormatTag.SceneTracker,
+                //                Options = new PromptContextFormatElementOptions
+                //                {
+                //                    Format = "{{item_description}}",
+                //                }
+                //            },
+                //            new PromptContextFormatElement
+                //            {
+                //                Tag = PromptContextFormatTag.BehavioralInstructions,
+                //                Options = new PromptContextFormatElementOptions
+                //                {
+                //                    Format = "Your response must ONLY contain the resulting JSON.\r\nThink and focus on your task so you can get logical and realistic elements that can be backed by proof from the story context.",
+                //                }
+                //            }
+                //        }
+                //    }
+                //});
+
                 dbContext.SaveChanges();
                 return;
             }

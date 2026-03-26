@@ -17,7 +17,7 @@ import { MdAddBox } from "react-icons/md";
 import { FormatDateTimeToMinutes } from "../../../../utils/DateUtils";
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 import type { SharedContextType } from "../../../../store/SharedContextType";
-import CharacterSheetComponent from "./characterSheets/CharacterSheetComponent";
+import CharacterSheetComponent from "../characterSheets/CharacterSheetComponent";
 
 
 type DetailsTab = "info" | "sheet";

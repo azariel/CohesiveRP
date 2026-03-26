@@ -97,5 +97,10 @@ namespace CohesiveRP.Core.LLMProviderManager
 
             return null;
         }
+
+        //public ILLMQueryProcessor GenerateRegenerateCharacterSheetProcessor()
+        //{
+        //     return new RegenerateCharacterSheetQueryProcessor(ChatCompletionPresetType.RegenerateCharacterSheet, null, null, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
+        //}
     }
 }

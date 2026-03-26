@@ -1,5 +1,6 @@
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Storage.WebApi.Controllers
@@ -16,6 +17,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         private IGetCharacterSheetWorkflow getCharacterSheetWorkflow;
         private IAddCharacterSheetWorkflow addCharacterSheetWorkflow;
         private IUpdateCharacterSheetWorkflow updateCharacterSheetWorkflow;
+        private IRegenerateCharacterSheetWorkflow regenerateCharacterSheetWorkflow;
 
         public CharactersController(
             IGetAllCharactersWorkflow getAllCharactersWorkflow,
@@ -25,7 +27,8 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             IImportNewCharacterWorkflow importNewCharacterWorkflow,
             IGetCharacterSheetWorkflow getCharacterSheetWorkflow,
             IAddCharacterSheetWorkflow addCharacterSheetWorkflow,
-            IUpdateCharacterSheetWorkflow updateCharacterSheetWorkflow)
+            IUpdateCharacterSheetWorkflow updateCharacterSheetWorkflow,
+            IRegenerateCharacterSheetWorkflow regenerateCharacterSheetWorkflow)
         {
             this.getAllCharactersWorkflow = getAllCharactersWorkflow;
             this.getCharacterByIdWorkflow = getCharacterByIdWorkflow;
@@ -35,6 +38,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             this.getCharacterSheetWorkflow = getCharacterSheetWorkflow;
             this.addCharacterSheetWorkflow = addCharacterSheetWorkflow;
             this.updateCharacterSheetWorkflow = updateCharacterSheetWorkflow;
+            this.regenerateCharacterSheetWorkflow = regenerateCharacterSheetWorkflow;
         }
 
         [HttpGet]
@@ -74,6 +78,8 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             return new JsonResult(await importNewCharacterWorkflow.ImportNewCharacterAsync(requestDto));
         }
 
+        // ---------- Character Sheet ----------
+
         [HttpGet]
         [Route("{characterId}/charactersheet")]
         public async Task<IActionResult> GetCharacterSheetByCharacterId(string characterId)
@@ -93,6 +99,20 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> CreateCharacterSheet(AddCharacterSheetRequestDto requestDto)
         {
             return new JsonResult(await addCharacterSheetWorkflow.AddCharacterSheetAsync(requestDto));
+        }
+
+        [HttpPost]
+        [Route("{characterId}/charactersheet/{characterSheetId}/regenerate")]
+        public async Task<IActionResult> RegenerateCharacterSheet(RegenerateCharacterSheetRequestDto requestDto)
+        {
+            return new JsonResult(await regenerateCharacterSheetWorkflow.RegenerateCharacterSheetAsync(requestDto));
+        }
+
+        [HttpPost]
+        [Route("personaCharacterSheet/{personaId}/regenerate")]
+        public async Task<IActionResult> RegeneratePersonaCharacterSheet(RegenerateCharacterSheetRequestDto requestDto)
+        {
+            return new JsonResult(await regenerateCharacterSheetWorkflow.RegenerateCharacterSheetAsync(requestDto));
         }
 
         [HttpPut]
