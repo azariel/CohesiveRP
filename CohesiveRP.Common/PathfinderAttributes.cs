@@ -10,5 +10,6 @@
         Intelligence = 5,
         Discernment = 6,// Counter attribute to the Deception skill. Discernment is the ability to clearly judge what is true, real, or valuable. When a character is being lied to
         Perception = 7,// Counter attribute to the Stealth skill
+        MagicalPower = 8,
     }
 }

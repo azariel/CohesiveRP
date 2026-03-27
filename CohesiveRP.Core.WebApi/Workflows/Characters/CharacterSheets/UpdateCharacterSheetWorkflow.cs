@@ -2,7 +2,6 @@
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
-using CohesiveRP.Core.WebApi.ResponseDtos.Characters.CharacterSheets;
 using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 
@@ -64,9 +63,14 @@ public class UpdateCharacterSheetWorkflow : IUpdateCharacterSheetWorkflow
             };
         }
 
-        var responseDto = new CharacterSheetResponseDto
+        var responseDto = new GetCharacterSheetResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
+            CharacterId = dbModel.CharacterId,
+            PersonaId = dbModel.PersonaId,
+            LastActivityAtUtc = dbModel.LastActivityAtUtc,
+            CharacterSheetId = dbModel.CharacterSheetId,
+            CharacterSheet = dbModel.CharacterSheet,
         };
 
         return responseDto;

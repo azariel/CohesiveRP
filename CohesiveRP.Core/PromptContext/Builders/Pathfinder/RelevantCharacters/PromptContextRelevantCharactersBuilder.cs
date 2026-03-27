@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks.Dataflow;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
@@ -59,7 +60,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
 
         private void AppendCharacterSheetToPromptContext(StringBuilder str, CharacterSheet characterSheet)
         {
-            if(str == null || characterSheet == null)
+            if (str == null || characterSheet == null)
             {
                 return;
             }
@@ -73,7 +74,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                     string tagName = property.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? property.Name;
 
                     // Those particular properties will be handled manually for more control
-                    if(tagName == "pathfinderAttributes" || tagName == "pathfinderSkills")
+                    if (tagName == "pathfinderAttributes" || tagName == "pathfinderSkills")
                         continue;
 
                     object value = property.GetValue(characterSheet);
@@ -129,7 +130,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             }
 
             StringBuilder str = new();
-            foreach (CharacterSheetInstance characterSheetInstance in charactersToInclude)
+            foreach (CharacterSheetInstance characterSheetInstance in charactersToInclude.Take(2))// TODO: make the limit configurable
             {
                 str.AppendLine($"  <{characterSheetInstance.CharacterSheet.FirstName}>");
                 AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
@@ -143,12 +144,43 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                     f.CharacterSheet != null &&
                     !string.IsNullOrWhiteSpace(f.CharacterSheet.FirstName));
 
-                str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName}>");
-                AppendCharacterSheetToPromptContext(str, personaCharacterSheet.CharacterSheet);
-                str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName}>");
+                if (personaCharacterSheet != null)
+                {
+                    str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName}>");
+                    AppendCharacterSheetToPromptContext(str, personaCharacterSheet.CharacterSheet);
+                    str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName}>");
+                }
             }
 
-            return ($"<relevant_characters>{Environment.NewLine}{str.ToString().Trim().TrimEnd(Environment.NewLine.ToCharArray())}{Environment.NewLine}</relevant_characters>{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
+            List<string> knownCharacters = new();
+            var allCharacters = await storageService.GetCharactersAsync();
+            foreach (string characterId in chatDbModel.CharacterIds)
+            {
+                CharacterSheetInstance characterSheet = characterSheetInstances.CharacterSheetInstances.FirstOrDefault(w => characterId == w.CharacterId && w.CharacterSheet != null && !string.IsNullOrWhiteSpace(w.CharacterSheet.FirstName));
+
+                string characterName = "";
+
+                if (characterSheet != null)
+                {
+                    characterName = $"{characterSheet?.CharacterSheet?.FirstName} {characterSheet?.CharacterSheet?.LastName}".Trim();
+                } else
+                {
+                    characterName = allCharacters.FirstOrDefault(f => f.CharacterId == characterId)?.Name?.Trim();
+                }
+
+                if (!string.IsNullOrWhiteSpace(characterName))
+                {
+                    knownCharacters.Add(characterName);
+                }
+            }
+
+            string finalKnownCharacters = "";
+            if (knownCharacters.Count > 0)
+            {
+                finalKnownCharacters = $"<known_characters_in_story_context>{string.Join(",", knownCharacters)}</known_characters_in_story_context>";
+            }
+
+            return ($"<relevant_characters>{Environment.NewLine}{str.ToString().Trim().TrimEnd(Environment.NewLine.ToCharArray())}{Environment.NewLine}</relevant_characters>{Environment.NewLine}Please note that secretKinks are kinks or fetishes that the character is ashamed or embarassed about and will avoid openly talk about, but that character will react positively when exposed to situations implementing their kinks and secret kinks or fetishes.{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
         }
     }
 }

@@ -173,6 +173,82 @@
   border-bottom-color: #f6911d;
 }
 
+/* ── Top actions bar (JSON + Regenerate) ── */
+
+.topActionsBar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.jsonActionsContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+  align-items: center;
+}
+
+.jsonActionButton {
+  background: transparent;
+  color: #6868a0;
+  border: 1px solid #2e2e48;
+  border-radius: 4px;
+  padding: 0.25em 0.75em;
+  font-size: 0.75em;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.jsonActionButton:hover:not(:disabled) {
+  color: #d4d4e8;
+  border-color: #6868a0;
+}
+
+.jsonActionButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+/* ── Regenerate bar ── */
+
+.regenerateBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.8em;
+}
+
+.regenerateButton {
+  background: transparent;
+  color: #9060c8;
+  border: 1px solid #9060c8;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: inherit;
+  padding: 0.3em 0.9em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.regenerateButton:hover:not(:disabled) {
+  color: #fff;
+  background-color: rgba(144, 96, 200, 0.15);
+}
+
+.regenerateButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ── Save bar ── */
 
 .saveBar {

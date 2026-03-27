@@ -1,7 +1,7 @@
 import styles from "./MainHeaderComponent.module.css";
 import { LuBlocks } from "react-icons/lu";
 import { HiMiniUsers, HiChatBubbleLeftEllipsis, HiCog6Tooth, HiIdentification } from "react-icons/hi2";
-import { SiDungeonsanddragons } from "react-icons/si";
+// import { SiDungeonsanddragons } from "react-icons/si";
 
 /* Store */
 import { sharedContext } from '../../../store/AppSharedStoreContext';
@@ -51,9 +51,9 @@ export default function Header() {
           <button className={styles.iconBtn} onClick={() => handleIconClick("adjustments")} aria-label="Adjustments Module" title="Adjustments">
             <HiAdjustmentsHorizontal />
           </button> */}
-          <button className={styles.iconBtnPathfinder} onClick={() => handleIconClick("pathfinder")} aria-label="Pathfinder" title="Pathfinder">
+          {/* <button className={styles.iconBtnPathfinder} onClick={() => handleIconClick("pathfinder")} aria-label="Pathfinder" title="Pathfinder">
             <SiDungeonsanddragons />
-          </button>
+          </button> */}
           <button className={styles.iconBtnCompletionPresets} onClick={() => handleIconClick("chatCompletionPresets")} aria-label="CompletionPresets" title="Completion Presets">
             <LuBlocks />
           </button>

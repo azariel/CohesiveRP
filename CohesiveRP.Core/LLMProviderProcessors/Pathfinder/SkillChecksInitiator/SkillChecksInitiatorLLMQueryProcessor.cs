@@ -537,20 +537,20 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             int value = selectedCharacterSheetInstance?.CharacterSheet?.PathfinderAttributesValues?.FirstOrDefault(f => f.AttributeType == attribute)?.Value ?? 10;
 
             if (value >= 21) return 7;
-            else if (value >= 20) return 6;
-            else if (value >= 18) return 5;
-            else if (value >= 16) return 4;
-            else if (value >= 14) return 3;
-            else if (value >= 12) return 2;
-            else if (value >= 10) return 1;
-            else if (value >= 9) return 0;
-            else if (value >= 8) return -1;
-            else if (value >= 7) return -2;
-            else if (value >= 6) return -3;
-            else if (value >= 5) return -4;
-            else if (value >= 3) return -5;
-            else if (value >= 2) return -6;
-            else if (value >= 0) return -7;
+            else if (value >= 20) return 5;
+            else if (value >= 18) return 4;
+            else if (value >= 16) return 3;
+            else if (value >= 14) return 2;
+            else if (value >= 12) return 1;
+            else if (value >= 10) return 0;
+            else if (value >= 9) return -1;
+            else if (value >= 8) return -2;
+            else if (value >= 7) return -3;
+            else if (value >= 6) return -4;
+            else if (value >= 5) return -5;
+            else if (value >= 3) return -6;
+            else if (value >= 2) return -7;
+            else if (value >= 0) return -8;
 
             return 0;
         }

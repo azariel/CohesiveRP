@@ -51,7 +51,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Main, ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
+                            Tags = [ChatCompletionPresetType.Main],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -67,6 +67,21 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
                             Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.SkillChecksInitiator],// TODO: move SkillChecksInitiator elsewhere, it conflicts with SceneTracker
+                            TimeoutStrategy = new TimeoutStrategy
+                            {
+                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                                Retries = 1,
+                            }
+                        },
+                        new LLMProviderConfig
+                        {
+                            ProviderConfigId = Guid.NewGuid().ToString(),
+                            Name = "IntenseRP-V2-DS-Think",
+                            Model = "deepseek-reasoner",
+                            ApiUrl = "http://127.0.0.1:7779/v1/chat/completions",
+                            Type = LLMProviderType.OpenAICustom,
+                            ConcurrencyLimit = 1,
+                            Tags = [ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,

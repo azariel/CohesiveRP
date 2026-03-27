@@ -31,7 +31,7 @@ public class AddCharacterSheetWorkflow : IAddCharacterSheetWorkflow
         CharacterSheetDbModel existingCharacterSheet = null;
         if (string.IsNullOrWhiteSpace(requestDto.CharacterId))
         {
-            var elements = await storageService.GetCharacterSheetsByFuncAsync(f=>f.PersonaId == requestDto.PersonaId);
+            var elements = await storageService.GetCharacterSheetsByFuncAsync(f => f.PersonaId == requestDto.PersonaId);
             existingCharacterSheet = elements?.FirstOrDefault();
         } else
         {
@@ -65,9 +65,12 @@ public class AddCharacterSheetWorkflow : IAddCharacterSheetWorkflow
             };
         }
 
-        var responseDto = new CharacterSheetResponseDto
+        var responseDto = new GetCharacterSheetResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
+            CharacterId = result.CharacterId,
+            PersonaId = result.PersonaId,
+            CharacterSheetId = result.CharacterSheetId,
             CharacterSheet = result.CharacterSheet,
         };
 

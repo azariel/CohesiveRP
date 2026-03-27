@@ -10,6 +10,7 @@ using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
+using CohesiveRP.Core.WebApi.Workflows.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
 using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets.Abstractions;
@@ -65,6 +66,8 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IUpdateCharacterSheetWorkflow, UpdateCharacterSheetWorkflow>();
             services.AddSingleton<IAddCharacterSheetWorkflow, AddCharacterSheetWorkflow>();
             services.AddSingleton<IRegenerateCharacterSheetWorkflow, RegenerateCharacterSheetWorkflow>();
+            services.AddSingleton<IExportCharacterCardWorkflow, ExportCharacterCardWorkflow>();
+            services.AddSingleton<IImportCharacterCardWorkflow, ImportCharacterCardWorkflow>();
 
             // Workflows.Personas
             services.AddSingleton<IGetAllPersonasWorkflow, GetAllPersonasWorkflow>();
