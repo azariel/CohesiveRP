@@ -395,7 +395,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                         ActionCategory = query.ActionCategory,
                         Reasonings = query.Reasonings,
                         NbRemainingInjectionTurns = 1,
-                        NbRemainingRollFreeze = 2,
+                        NbRemainingRollFreeze = 4,
                         CharactersInScene = FilterCharactersInScene(characterSheetInstancesInScene, selectedCharacterSheetInstance.CharacterSheetInstanceId),
                         Value = await GenerateNewRollForCharacterForSkillCheckAsync(selectedCharacterSheetInstance, query.ActionCategory),// Generate a new value using the character sheet (or average if no character sheet)
                     };
@@ -558,6 +558,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
         private async Task<int> GenerateNewRollForCharacterForSkillCheckAsync(CharacterSheetInstance selectedCharacterSheetInstance, PathfinderSkills skill)
         {
             var modifier = await GetModifierFromSkillAsync(selectedCharacterSheetInstance, skill);
+            await Task.Delay(15);// Random rolls fix to avoid exact same random value
             int randomRoll = new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
 
             if (randomRoll >= 20)
@@ -572,6 +573,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
         private async Task<int> GenerateNewRollForCharacterForAttributeCheckAsync(CharacterSheetInstance selectedCharacterSheetInstance, PathfinderAttributes attribute)
         {
             var modifier = await GetModifierFromAttributeAsync(selectedCharacterSheetInstance, attribute);
+            await Task.Delay(15);// Random rolls fix to avoid exact same random value
             int randomRoll = new Random(DateTime.Now.Millisecond).Next(1, 21);// [1-20]
 
             if (randomRoll >= 20)

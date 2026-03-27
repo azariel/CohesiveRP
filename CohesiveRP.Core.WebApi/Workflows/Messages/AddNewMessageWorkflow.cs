@@ -64,11 +64,15 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         var characters = await storageService.GetCharactersAsync();
 
         // if it's the first player message in the chat, aseptise the previous messages
-        await AseptisePreviousMessageIfRequiredAsync(chat, persona, characters);
+        HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
+        await AseptisePreviousMessageIfRequiredAsync(chat, persona, characters, hotMessagesDbModel);
 
         // Add a background query to generate the sceneTracker first and foremost
         // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
-        await AddSceneTrackerBackgroundQueryAsync(chat);
+        if (hotMessagesDbModel != null && hotMessagesDbModel.Messages.Count > 4)
+        {
+            await AddSceneTrackerBackgroundQueryAsync(chat);
+        }
 
         // Also query the skillChecksInitiator query+
         await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
@@ -135,10 +139,8 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         return responseDto;
     }
 
-    private async Task AseptisePreviousMessageIfRequiredAsync(ChatDbModel chat, PersonaDbModel persona, CharacterDbModel[] characters)
+    private async Task AseptisePreviousMessageIfRequiredAsync(ChatDbModel chat, PersonaDbModel persona, CharacterDbModel[] characters, HotMessagesDbModel hotMessagesDbModel)
     {
-        HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
-
         if (hotMessagesDbModel?.Messages == null || hotMessagesDbModel.Messages.Count <= 0)
         {
             return;

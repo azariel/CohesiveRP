@@ -46,11 +46,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 var missingCharacters = requestDto.CharacterIds.Where(a => !characterIds.Any(an => an.Equals(a, StringComparison.InvariantCultureIgnoreCase))).ToArray();
                 if (missingCharacters.Length > 0)
                 {
-                    return new WebApiException
-                    {
-                        HttpResultCode = System.Net.HttpStatusCode.NotFound,
-                        Message = $"Couldn't update chat with id {requestDto.ChatId}. Characters [{string.Join(",", missingCharacters)}] were not found in storage."
-                    };
+                    requestDto.CharacterIds = requestDto.CharacterIds.Except(missingCharacters).ToList();
                 }
             }
 

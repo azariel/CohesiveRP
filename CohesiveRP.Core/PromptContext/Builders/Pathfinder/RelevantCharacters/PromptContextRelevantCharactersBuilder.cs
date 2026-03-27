@@ -106,6 +106,20 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             str.AppendLine($"    </Skills>");
         }
 
+        private bool AreNameEquivalent(string nameToEvaluate, string firstName, string lastName)
+        {
+            if (string.IsNullOrWhiteSpace(nameToEvaluate))
+            {
+                return false;
+            }
+
+            string inputName = nameToEvaluate.ToLowerInvariant().Trim();
+            string inputFirstName = firstName?.ToLowerInvariant().Trim();
+            string inputLastName = lastName?.ToLowerInvariant().Trim();
+
+            return inputName == inputFirstName || inputName == inputLastName || inputName == $"{inputFirstName} {inputLastName}";
+        }
+
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
             if (chatDbModel?.CharacterIds == null || chatDbModel.CharacterIds.Count <= 0)
@@ -129,14 +143,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            StringBuilder str = new();
-            foreach (CharacterSheetInstance characterSheetInstance in charactersToInclude.Take(2))// TODO: make the limit configurable
-            {
-                str.AppendLine($"  <{characterSheetInstance.CharacterSheet.FirstName}>");
-                AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
-                str.AppendLine($"  </{characterSheetInstance.CharacterSheet.FirstName}>");
-            }
+            // refine the characters to include to only include those IN the scene
+            var characterRolls = await storageService.GetChatCharactersRollsByIdAsync(chatDbModel.ChatId);
 
+            StringBuilder str = new();
             if (!string.IsNullOrWhiteSpace(chatDbModel.PersonaId))
             {
                 var personaCharacterSheet = characterSheetInstances.CharacterSheetInstances.FirstOrDefault(f =>
@@ -149,6 +159,17 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                     str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName}>");
                     AppendCharacterSheetToPromptContext(str, personaCharacterSheet.CharacterSheet);
                     str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName}>");
+                }
+            }
+
+            if (characterRolls.CharacterNamesInScene != null && characterRolls.CharacterNamesInScene.Count > 0)
+            {
+                charactersToInclude = charactersToInclude.Where(w => characterRolls.CharacterNamesInScene.Any(a => AreNameEquivalent(a, w.CharacterSheet.FirstName, w.CharacterSheet.LastName))).ToArray();
+                foreach (CharacterSheetInstance characterSheetInstance in charactersToInclude.Take(2))// TODO: make the limit configurable
+                {
+                    str.AppendLine($"  <{characterSheetInstance.CharacterSheet.FirstName}>");
+                    AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
+                    str.AppendLine($"  </{characterSheetInstance.CharacterSheet.FirstName}>");
                 }
             }
 

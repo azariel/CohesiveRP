@@ -333,58 +333,6 @@ export default function CharacterDetailsComponent() {
     }
   };
 
-  const handleExportJson = () => {
-    if (!characterResponse?.character) return;
-
-    const exportPayload = {
-      characterId: characterResponse.character.characterId,
-      name: characterName,
-      description: characterDescription,
-      creator,
-      creatorNotes,
-      tags,
-      firstMessage,
-      alternateGreetings,
-    };
-
-    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${characterName || "character"}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const parsed = JSON.parse(event.target?.result as string);
-
-        setCharacterName(parsed.name ?? "");
-        setCreator(parsed.creator ?? "");
-        setCreatorNotes(parsed.creatorNotes ?? "");
-        setTags(parsed.tags ?? []);
-        setFirstMessage(parsed.firstMessage ?? "");
-        setAlternateGreetings(parsed.alternateGreetings ?? []);
-        setCharacterDescription(parsed.description ?? "");
-
-        // Reset the input so the same file can be re-imported if needed
-        e.target.value = "";
-
-        await handleSave();
-      } catch (err) {
-        console.error("Failed to parse imported JSON:", err);
-        setOperationError(true);
-      }
-    };
-    reader.readAsText(file);
-  };
-
   return (
     <div className={styles.characterDetailsComponent}>
       {isNetworkDown ? (
@@ -455,29 +403,6 @@ export default function CharacterDetailsComponent() {
                   <>
                     {/* ── JSON export / import ── */}
                     <div className={styles.jsonActionsContainer}>
-                      <button
-                        className={styles.jsonActionButton}
-                        onClick={handleExportJson}
-                        disabled={isSaving}
-                        title="Export character as JSON"
-                      >
-                        Export JSON
-                      </button>
-                      <button
-                        className={styles.jsonActionButton}
-                        onClick={() => importFileRef.current?.click()}
-                        disabled={isSaving}
-                        title="Import character from JSON and save"
-                      >
-                        Import JSON
-                      </button>
-                      <input
-                        ref={importFileRef}
-                        type="file"
-                        accept="application/json,.json"
-                        className={styles.hiddenFileInput}
-                        onChange={handleImportJson}
-                      />
                       <button
                         className={styles.jsonActionButton}
                         onClick={handleExportCharacterCard}
