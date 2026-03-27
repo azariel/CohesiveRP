@@ -199,7 +199,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 // Right before setting the query processor to completed state, we'll launch the background workers
                 if (contextBuilder == null)
                 {
-                    await BuildContextAsync(backgroundQueryDbModel.LinkedId);
+                    await BuildContextAsync(backgroundQueryDbModel);
                 }
 
                 GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();

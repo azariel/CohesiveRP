@@ -2,7 +2,7 @@
 using CohesiveRP.Common.Workflows;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 
-namespace CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions
+namespace CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets.Abstractions
 {
     public interface IAddCharacterSheetWorkflow : IWorkflow
     {

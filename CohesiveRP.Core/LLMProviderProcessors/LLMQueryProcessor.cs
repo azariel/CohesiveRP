@@ -16,7 +16,7 @@ namespace CohesiveRP.Core.LLMProviderManager
     public abstract class LLMQueryProcessor : ILLMQueryProcessor
     {
         protected ChatCompletionPresetType completionPresetType;
-        protected BackgroundQuerySystemTags tag;
+        protected BackgroundQuerySystemTags? tag;
         protected BackgroundQueryDbModel backgroundQueryDbModel;
         protected IPromptContextBuilderFactory contextBuilderFactory;
         protected IPromptContextElementBuilderFactory promptContextElementBuilderFactory;
@@ -28,7 +28,7 @@ namespace CohesiveRP.Core.LLMProviderManager
 
         public LLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
-            BackgroundQuerySystemTags tag,
+            BackgroundQuerySystemTags? tag,
             BackgroundQueryDbModel backgroundQueryDbModel,
             IPromptContextBuilderFactory contextBuilderFactory,
             IPromptContextElementBuilderFactory promptContextElementBuilderFactory,
@@ -45,7 +45,7 @@ namespace CohesiveRP.Core.LLMProviderManager
             this.httpLLMApiProviderService = httpLLMApiProviderService;
             this.summaryService = summaryService;
 
-            this.promptContext = BuildContextAsync(backgroundQueryDbModel.LinkedId).Result;
+            this.promptContext = BuildContextAsync(backgroundQueryDbModel).Result;
             if (promptContext == null)
             {
                 LoggingManager.LogToFile("1a5f7d13-c2ef-46ad-a2dc-726510342f4c", $"Couldn't build promptContext because not one was configured for [{completionPresetType}].");
@@ -56,7 +56,7 @@ namespace CohesiveRP.Core.LLMProviderManager
 
         public virtual async Task<BackgroundQueryDbModel> GetBackgroundQueryDbModelAsync() => backgroundQueryDbModel;
 
-        protected virtual async Task ProcessQueryAsync()
+        public virtual async Task ProcessQueryAsync()
         {
             if (backgroundQueryDbModel.Status != BackgroundQueryStatus.InProgress || promptContext == null)
             {
@@ -76,24 +76,6 @@ namespace CohesiveRP.Core.LLMProviderManager
                 }
 
                 IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(completionPresetType.ToString(), availableLLMApiProviders, promptContext);
-                //IHttpLLMApiQueryResponseDto response = new OpenAIChatCompletionResponseDto()
-                //{
-                //    HttpResultCode = System.Net.HttpStatusCode.OK,
-                //    Messages = new List<OpenAIMessage>()
-                //    {
-                //        new OpenAIMessage()
-                //        {
-                //            Message = new Services.LLMApiProvider.OpenAI.BusinessObjects.Request.OpenAIChatCompletionMessage
-                //            {
-                //                Role = Services.LLMApiProvider.OpenAI.BusinessObjects.Request.OpenAIChatCompletionRole.assistant,
-                //                Content = "e144df85-8280-4b4a-b3f1-d6b41ce930e0",
-                //            },
-                //            FinishReason = "",
-                //            Index = 0,
-                //        }
-                //    }.ToArray()
-                //};
-                //await Task.Delay(180000);
 
                 if (response == null)
                 {
@@ -113,10 +95,10 @@ namespace CohesiveRP.Core.LLMProviderManager
             }
         }
 
-        protected virtual async Task<IPromptContext> BuildContextAsync(string backgroundQueryLinkedId)
+        protected virtual async Task<IPromptContext> BuildContextAsync(BackgroundQueryDbModel backgroundQuery)
         {
             // Generate a context builder appropriate for our MainQuery
-            this.contextBuilder = await contextBuilderFactory.GenerateAsync(tag, promptContextElementBuilderFactory, storageService, backgroundQueryLinkedId);
+            this.contextBuilder = await contextBuilderFactory.GenerateAsync(tag ?? BackgroundQuerySystemTags.custom, promptContextElementBuilderFactory, storageService, backgroundQuery);
             return await contextBuilder.BuildAsync(backgroundQueryDbModel.ChatId);
         }
 

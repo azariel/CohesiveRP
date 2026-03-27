@@ -17,23 +17,23 @@ namespace CohesiveRP.Core.PromptContext.Summary
         private IStorageService storageService;
         private ChatCompletionPresetType presetType;
         private GlobalSettingsDbModel settings;
-        private string contextLinkedId;
+        private BackgroundQueryDbModel backgroundQuery;
         public BackgroundQuerySystemTags tag;
         private ChatCompletionPresetsDbModel presetTypeChatCompletionPreset;
 
         public ChatCompletionPresetsDbModel GetChatCompletionPreset() => presetTypeChatCompletionPreset;
 
-        public PromptContextBuilder(ChatCompletionPresetType presetType, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService, GlobalSettingsDbModel settings, string contextLinkedId, BackgroundQuerySystemTags tag)
+        public PromptContextBuilder(ChatCompletionPresetType presetType, IPromptContextElementBuilderFactory promptContextElementBuilderFactory, IStorageService storageService, GlobalSettingsDbModel settings, BackgroundQueryDbModel backgroundQuery, BackgroundQuerySystemTags tag)
         {
             this.promptContextElementBuilderFactory = promptContextElementBuilderFactory;
             this.storageService = storageService;
             this.presetType = presetType;
             this.settings = settings;
-            this.contextLinkedId = contextLinkedId;
+            this.backgroundQuery = backgroundQuery;
             this.tag = tag;
         }
 
-        public async Task<IPromptContext> BuildAsync(string chatId)
+        public virtual async Task<IPromptContext> BuildAsync(string chatId)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace CohesiveRP.Core.PromptContext.Summary
                 StringBuilder str = new();
                 foreach (var contextElement in presetTypeChatCompletionPreset.Format.OrderedElementsWithinTheGlobalPromptContext)
                 {
-                    var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement, settings, chat, contextLinkedId, tag);
+                    var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement, settings, chat, backgroundQuery, tag);
 
                     if (builder == null)
                     {

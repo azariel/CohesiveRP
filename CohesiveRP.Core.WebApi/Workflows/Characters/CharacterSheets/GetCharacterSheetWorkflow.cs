@@ -2,7 +2,7 @@
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
-using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 
@@ -32,6 +32,7 @@ public class GetCharacterSheetWorkflow : IGetCharacterSheetWorkflow
 
         return new GetCharacterSheetResponseDto
         {
+            CharacterSheetId = characterSheet.CharacterSheetId,
             CharacterId = characterSheet.CharacterId,
             PersonaId = characterSheet.PersonaId,
             LastActivityAtUtc = characterSheet.LastActivityAtUtc,
@@ -100,6 +101,7 @@ public class GetCharacterSheetWorkflow : IGetCharacterSheetWorkflow
 
         return new GetCharacterSheetResponseDto
         {
+            CharacterSheetId = characterSheet.CharacterSheetId,
             CharacterId = characterSheet.CharacterId,
             PersonaId = characterSheet.PersonaId,
             LastActivityAtUtc = characterSheet.LastActivityAtUtc,

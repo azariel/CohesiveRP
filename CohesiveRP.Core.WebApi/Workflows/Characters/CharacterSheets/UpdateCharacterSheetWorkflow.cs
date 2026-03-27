@@ -2,8 +2,7 @@
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
-using CohesiveRP.Core.WebApi.ResponseDtos.Characters.CharacterSheets;
-using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
@@ -19,7 +18,7 @@ public class UpdateCharacterSheetWorkflow : IUpdateCharacterSheetWorkflow
 
     public async Task<IWebApiResponseDto> UpdateCharacterSheetAsync(UpdateCharacterSheetRequestDto requestDto)
     {
-        if(requestDto?.CharacterSheet == null || string.IsNullOrWhiteSpace(requestDto.CharacterSheetId) || (string.IsNullOrWhiteSpace(requestDto.CharacterId) && string.IsNullOrWhiteSpace(requestDto.PersonaId)))
+        if (requestDto?.CharacterSheet == null || string.IsNullOrWhiteSpace(requestDto.CharacterSheetId) || (string.IsNullOrWhiteSpace(requestDto.CharacterId) && string.IsNullOrWhiteSpace(requestDto.PersonaId)))
         {
             return new WebApiException
             {
@@ -31,13 +30,13 @@ public class UpdateCharacterSheetWorkflow : IUpdateCharacterSheetWorkflow
         CharacterSheetDbModel existingCharacterSheet = null;
         if (string.IsNullOrWhiteSpace(requestDto.CharacterId))
         {
-            var elements = await storageService.GetCharacterSheetsByFuncAsync(f=>f.PersonaId == requestDto.PersonaId);
+            var elements = await storageService.GetCharacterSheetsByFuncAsync(f => f.PersonaId == requestDto.PersonaId);
             existingCharacterSheet = elements?.FirstOrDefault();
         } else
         {
             existingCharacterSheet = await storageService.GetCharacterSheetByCharacterIdAsync(requestDto.CharacterId);
         }
-        if(existingCharacterSheet == null)
+        if (existingCharacterSheet == null)
         {
             return new WebApiException
             {
@@ -55,7 +54,7 @@ public class UpdateCharacterSheetWorkflow : IUpdateCharacterSheetWorkflow
         };
 
         bool result = await storageService.UpdateCharacterSheetAsync(dbModel);
-        if(!result)
+        if (!result)
         {
             return new WebApiException
             {
@@ -64,9 +63,14 @@ public class UpdateCharacterSheetWorkflow : IUpdateCharacterSheetWorkflow
             };
         }
 
-        var responseDto = new CharacterSheetResponseDto
+        var responseDto = new GetCharacterSheetResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
+            CharacterId = dbModel.CharacterId,
+            PersonaId = dbModel.PersonaId,
+            LastActivityAtUtc = dbModel.LastActivityAtUtc,
+            CharacterSheetId = dbModel.CharacterSheetId,
+            CharacterSheet = dbModel.CharacterSheet,
         };
 
         return responseDto;

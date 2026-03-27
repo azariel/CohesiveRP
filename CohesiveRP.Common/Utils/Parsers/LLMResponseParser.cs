@@ -10,7 +10,7 @@ namespace CohesiveRP.Common.Utils.Parsers
             try
             {
                 // Use a regex to find the array and remove everything that is inconsequential
-                var match = Regex.Match(LLMrawResponse, @"\{.*\}", RegexOptions.Singleline);
+                var match = Regex.Match(LLMrawResponse, @"\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}", RegexOptions.Singleline);
                 string result = match.Value;
 
                 return JsonCommonSerializer.DeserializeFromString<T>(result);
@@ -25,7 +25,7 @@ namespace CohesiveRP.Common.Utils.Parsers
             try
             {
                 // Use a regex to find the array and remove everything that is inconsequential
-                var match = Regex.Match(LLMrawResponse, @"\[.*\]", RegexOptions.Singleline);
+                var match = Regex.Match(LLMrawResponse, @"\[(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\]", RegexOptions.Singleline);
                 string result = match.Value;
 
                 return JsonCommonSerializer.DeserializeFromString<T[]>(result);

@@ -32,6 +32,27 @@ export async function getFromServerApiAsync<T extends ServerApiResponseDto>(url:
     return null;
 }
 
+export async function getBlobFromServerApiAsync(url: string, signal?: AbortSignal): Promise<Blob | null> {
+  try {
+    const response = await fetch(`${ServerApiUrlPrefix}${url}`, {
+      method: "GET",
+      signal
+    });
+
+    if (!response.ok) {
+      console.error(`GET (blob) HttpRequest to CohesiveRP backend Webapi failed. Status=[${response.status}].`);
+      return null;
+    }
+
+    console.log(`GET (blob) [${url}] HttpRequest to CohesiveRP backend Webapi was successful.`);
+    return await response.blob();
+  } catch (err) {
+    console.error(`Unhandled error on getBlobFromServerApiAsync function in HttpRequestHelper. err=[${err}].`);
+  }
+
+  return null;
+}
+
 export async function postToServerApiAsync<T extends ServerApiResponseDto>(url:string, payload: any, signal?: AbortSignal): Promise<T | null> {
     try {
       const isFormData = payload instanceof FormData;

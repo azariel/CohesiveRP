@@ -4,7 +4,7 @@ import { AiOutlineDisconnect } from "react-icons/ai";
 
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
-import { deleteFromServerApiAsync, getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
+import { deleteFromServerApiAsync, getBlobFromServerApiAsync, getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
@@ -17,7 +17,7 @@ import { MdAddBox } from "react-icons/md";
 import { FormatDateTimeToMinutes } from "../../../../utils/DateUtils";
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 import type { SharedContextType } from "../../../../store/SharedContextType";
-import CharacterSheetComponent from "./characterSheets/CharacterSheetComponent";
+import CharacterSheetComponent from "../characterSheets/CharacterSheetComponent";
 
 
 type DetailsTab = "info" | "sheet";
@@ -27,6 +27,8 @@ export default function CharacterDetailsComponent() {
   const { navigateTo } = sharedContext();
   const didComponentMountAlready = useRef(false);
   const chatsContainerRef = useRef<HTMLDivElement>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
+  const importCharacterCardRef = useRef<HTMLInputElement>(null);
   const [isNetworkDown, setIsNetworkDown] = useState(false);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [isLoadingCharacterDetails, setIsLoadingCharacterDetails] = useState(true);
@@ -42,6 +44,7 @@ export default function CharacterDetailsComponent() {
   const [firstMessage, setFirstMessage] = useState("");
   const [alternateGreetings, setAlternateGreetings] = useState<string[]>([]);
   const [characterDescription, setCharacterDescription] = useState("");
+  const [sheetKey, setSheetKey] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [operationError, setOperationError] = useState(false);
 
@@ -228,6 +231,77 @@ export default function CharacterDetailsComponent() {
     }
   };
 
+  const handleExportCharacterCard = async () => {
+    if (!activeModule?.selectedCharacterId || isSaving) return;
+
+    try {
+      const blob = await getBlobFromServerApiAsync(`api/characters/${activeModule.selectedCharacterId}/exportCharacterCard`);
+
+      if (!blob || blob.size === 0) {
+        console.error("CharacterCard export failed: empty or null blob.");
+        setOperationError(true);
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${characterName || "character"}.png`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("CharacterCard export error:", error);
+      setOperationError(true);
+    }
+  };
+
+  const handleImportCharacterCard = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file)
+      return;
+
+    setIsSaving(true);
+    setOperationError(false);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response: CharacterResponseDto | null = await postToServerApiAsync<CharacterResponseDto>(
+        `api/characters/${activeModule.selectedCharacterId}/importCharacterCard`,
+        formData
+      );
+
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || response.code !== 200 || serverApiException?.message) {
+        console.error(`CharacterCard import failed. [${JSON.stringify(serverApiException)}]`);
+        setOperationError(true);
+        return;
+      }
+
+      // Refresh all character fields from the response
+      const c = response.character;
+      setCharacterResponse(response);
+      setCharacterName(c?.name ?? "");
+      setCreator(c?.creator ?? "");
+      setCreatorNotes(c?.creatorNotes ?? "");
+      setTags(c?.tags ?? []);
+      setFirstMessage(c?.firstMessage ?? "");
+      setAlternateGreetings(c?.alternateGreetings ?? []);
+      setCharacterDescription(c?.description ?? "");
+
+      // Force the CharacterSheetComponent to remount and re-fetch
+      setSheetKey(k => k + 1);
+
+    } catch (err) {
+      console.error("CharacterCard import error:", err);
+      setOperationError(true);
+    } finally {
+      setIsSaving(false);
+      e.target.value = "";
+    }
+  };
+
   const handleDelete = async () => {
     if (!activeModule?.selectedCharacterId || isSaving)
       return;
@@ -257,6 +331,58 @@ export default function CharacterDetailsComponent() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleExportJson = () => {
+    if (!characterResponse?.character) return;
+
+    const exportPayload = {
+      characterId: characterResponse.character.characterId,
+      name: characterName,
+      description: characterDescription,
+      creator,
+      creatorNotes,
+      tags,
+      firstMessage,
+      alternateGreetings,
+    };
+
+    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${characterName || "character"}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+
+        setCharacterName(parsed.name ?? "");
+        setCreator(parsed.creator ?? "");
+        setCreatorNotes(parsed.creatorNotes ?? "");
+        setTags(parsed.tags ?? []);
+        setFirstMessage(parsed.firstMessage ?? "");
+        setAlternateGreetings(parsed.alternateGreetings ?? []);
+        setCharacterDescription(parsed.description ?? "");
+
+        // Reset the input so the same file can be re-imported if needed
+        e.target.value = "";
+
+        await handleSave();
+      } catch (err) {
+        console.error("Failed to parse imported JSON:", err);
+        setOperationError(true);
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -327,6 +453,56 @@ export default function CharacterDetailsComponent() {
 
                 {activeTab === "info" && (
                   <>
+                    {/* ── JSON export / import ── */}
+                    <div className={styles.jsonActionsContainer}>
+                      <button
+                        className={styles.jsonActionButton}
+                        onClick={handleExportJson}
+                        disabled={isSaving}
+                        title="Export character as JSON"
+                      >
+                        Export JSON
+                      </button>
+                      <button
+                        className={styles.jsonActionButton}
+                        onClick={() => importFileRef.current?.click()}
+                        disabled={isSaving}
+                        title="Import character from JSON and save"
+                      >
+                        Import JSON
+                      </button>
+                      <input
+                        ref={importFileRef}
+                        type="file"
+                        accept="application/json,.json"
+                        className={styles.hiddenFileInput}
+                        onChange={handleImportJson}
+                      />
+                      <button
+                        className={styles.jsonActionButton}
+                        onClick={handleExportCharacterCard}
+                        disabled={isSaving}
+                        title="Export CharacterCard"
+                      >
+                        Export CharacterCard
+                      </button>
+                      <button
+                        className={styles.jsonActionButton}
+                        onClick={() => importCharacterCardRef.current?.click()}
+                        disabled={isSaving}
+                        title="Import CharacterCard (PNG)"
+                      >
+                        Import CharacterCard
+                      </button>
+                      <input
+                        ref={importCharacterCardRef}
+                        type="file"
+                        accept="image/png,.png"
+                        className={styles.hiddenFileInput}
+                        onChange={handleImportCharacterCard}
+                      />
+                    </div>
+
                     <div className={styles.characterDescriptionContainer}>
                       <label className={styles.characterDescriptionLabel}>Description</label>
                       <textarea
@@ -375,7 +551,10 @@ export default function CharacterDetailsComponent() {
                 )}
 
                 {activeTab === "sheet" && (
-                  <CharacterSheetComponent characterId={activeModule.selectedCharacterId} personaId={null}
+                  <CharacterSheetComponent 
+                  key={sheetKey}
+                  characterId={activeModule.selectedCharacterId}
+                  personaId={null}
                   />
                 )}
 

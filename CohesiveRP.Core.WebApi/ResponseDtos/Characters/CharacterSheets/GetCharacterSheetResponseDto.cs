@@ -22,5 +22,8 @@ namespace CohesiveRP.Core.WebApi.RequestDtos.Characters
 
         [JsonPropertyName("lastActivityAtUtc")]
         public DateTime LastActivityAtUtc { get; set; }
+
+        [JsonPropertyName("characterSheetId")]
+        public string CharacterSheetId { get; set; }
     }
 }

@@ -1,5 +1,8 @@
+using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
+using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Storage.WebApi.Controllers
@@ -16,6 +19,9 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         private IGetCharacterSheetWorkflow getCharacterSheetWorkflow;
         private IAddCharacterSheetWorkflow addCharacterSheetWorkflow;
         private IUpdateCharacterSheetWorkflow updateCharacterSheetWorkflow;
+        private IRegenerateCharacterSheetWorkflow regenerateCharacterSheetWorkflow;
+        private IExportCharacterCardWorkflow exportCharacterCardWorkflow;
+        private IImportCharacterCardWorkflow importCharacterCardWorkflow;
 
         public CharactersController(
             IGetAllCharactersWorkflow getAllCharactersWorkflow,
@@ -25,7 +31,10 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             IImportNewCharacterWorkflow importNewCharacterWorkflow,
             IGetCharacterSheetWorkflow getCharacterSheetWorkflow,
             IAddCharacterSheetWorkflow addCharacterSheetWorkflow,
-            IUpdateCharacterSheetWorkflow updateCharacterSheetWorkflow)
+            IUpdateCharacterSheetWorkflow updateCharacterSheetWorkflow,
+            IRegenerateCharacterSheetWorkflow regenerateCharacterSheetWorkflow,
+            IExportCharacterCardWorkflow exportCharacterCardWorkflow,
+            IImportCharacterCardWorkflow importCharacterCardWorkflow)
         {
             this.getAllCharactersWorkflow = getAllCharactersWorkflow;
             this.getCharacterByIdWorkflow = getCharacterByIdWorkflow;
@@ -35,6 +44,9 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             this.getCharacterSheetWorkflow = getCharacterSheetWorkflow;
             this.addCharacterSheetWorkflow = addCharacterSheetWorkflow;
             this.updateCharacterSheetWorkflow = updateCharacterSheetWorkflow;
+            this.regenerateCharacterSheetWorkflow = regenerateCharacterSheetWorkflow;
+            this.exportCharacterCardWorkflow = exportCharacterCardWorkflow;
+            this.importCharacterCardWorkflow = importCharacterCardWorkflow;
         }
 
         [HttpGet]
@@ -74,6 +86,8 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             return new JsonResult(await importNewCharacterWorkflow.ImportNewCharacterAsync(requestDto));
         }
 
+        // ---------- Character Sheet ----------
+
         [HttpGet]
         [Route("{characterId}/charactersheet")]
         public async Task<IActionResult> GetCharacterSheetByCharacterId(string characterId)
@@ -95,11 +109,50 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             return new JsonResult(await addCharacterSheetWorkflow.AddCharacterSheetAsync(requestDto));
         }
 
+        [HttpPost]
+        [Route("{characterId}/charactersheet/{characterSheetId}/regenerate")]
+        public async Task<IActionResult> RegenerateCharacterSheet(RegenerateCharacterSheetRequestDto requestDto)
+        {
+            return new JsonResult(await regenerateCharacterSheetWorkflow.RegenerateCharacterSheetAsync(requestDto));
+        }
+
+        [HttpPost]
+        [Route("personaCharacterSheet/{personaId}/regenerate")]
+        public async Task<IActionResult> RegeneratePersonaCharacterSheet(RegenerateCharacterSheetRequestDto requestDto)
+        {
+            return new JsonResult(await regenerateCharacterSheetWorkflow.RegenerateCharacterSheetAsync(requestDto));
+        }
+
         [HttpPut]
         [Route("{characterId}/charactersheet/{characterSheetId}")]
         public async Task<IActionResult> UpdateCharacterSheet(UpdateCharacterSheetRequestDto requestDto)
         {
             return new JsonResult(await updateCharacterSheetWorkflow.UpdateCharacterSheetAsync(requestDto));
+        }
+
+        [HttpGet]
+        [Route("{characterId}/exportCharacterCard")]
+        public async Task<IActionResult> ExportCharacterCard(string characterId)
+        {
+            var result = await exportCharacterCardWorkflow.ExportCharacterCard(characterId);
+            if (result is WebApiException exception)
+            {
+                return StatusCode((int)exception.HttpResultCode, exception.Message);
+            }
+
+            if (result is ExportCRPV1ResponseDto dto)
+            {
+                return File(dto.Image, "image/png", $"{characterId}.png");
+            }
+
+            return StatusCode(500, "Unexpected error during export.");
+        }
+
+        [HttpPost]
+        [Route("{characterId}/importCharacterCard")]
+        public async Task<IActionResult> ImportCharacterCard([FromRoute] string characterId, [FromForm] ImportNewCharacterRequestDto requestDto)
+        {
+            return new JsonResult(await importCharacterCardWorkflow.ImportCharacterAsync(characterId, requestDto));
         }
     }
 }
