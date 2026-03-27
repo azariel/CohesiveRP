@@ -1,7 +1,7 @@
 interface CharacterSheet {
   firstName?: string;
   lastName?: string;
-  birthdayDate?: string | null;
+  birthday?: string | null;
   gender?: string | null;
   ageGroup?: string | null;
   race?: string;

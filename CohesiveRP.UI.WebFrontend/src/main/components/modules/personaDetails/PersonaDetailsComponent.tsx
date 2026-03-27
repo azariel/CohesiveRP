@@ -13,7 +13,7 @@ import type { SharedContextPersonaType } from "../../../../store/SharedContextPe
 import type { PersonaResponseDto } from "../../../../ResponsesDto/personas/PersonaResponseDto";
 import { GetAvatarPathFromPersonaId } from "../../../../utils/avatarUtils";
 import type { SharedContextType } from "../../../../store/SharedContextType";
-import CharacterSheetComponent from "../characterDetails/characterSheets/CharacterSheetComponent";
+import CharacterSheetComponent from "../characterSheets/CharacterSheetComponent";
 
 /* Sub-components */
 

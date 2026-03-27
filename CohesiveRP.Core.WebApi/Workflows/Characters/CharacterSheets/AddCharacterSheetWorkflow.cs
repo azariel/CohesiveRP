@@ -3,7 +3,7 @@ using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters.CharacterSheets;
-using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
@@ -31,7 +31,7 @@ public class AddCharacterSheetWorkflow : IAddCharacterSheetWorkflow
         CharacterSheetDbModel existingCharacterSheet = null;
         if (string.IsNullOrWhiteSpace(requestDto.CharacterId))
         {
-            var elements = await storageService.GetCharacterSheetsByFuncAsync(f=>f.PersonaId == requestDto.PersonaId);
+            var elements = await storageService.GetCharacterSheetsByFuncAsync(f => f.PersonaId == requestDto.PersonaId);
             existingCharacterSheet = elements?.FirstOrDefault();
         } else
         {
@@ -65,9 +65,12 @@ public class AddCharacterSheetWorkflow : IAddCharacterSheetWorkflow
             };
         }
 
-        var responseDto = new CharacterSheetResponseDto
+        var responseDto = new GetCharacterSheetResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
+            CharacterId = result.CharacterId,
+            PersonaId = result.PersonaId,
+            CharacterSheetId = result.CharacterSheetId,
             CharacterSheet = result.CharacterSheet,
         };
 

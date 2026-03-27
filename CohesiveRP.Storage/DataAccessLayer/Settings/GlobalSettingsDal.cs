@@ -72,6 +72,21 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
                                 Retries = 1,
                             }
+                        },
+                        new LLMProviderConfig
+                        {
+                            ProviderConfigId = Guid.NewGuid().ToString(),
+                            Name = "IntenseRP-V2-DS-Think",
+                            Model = "deepseek-reasoner",
+                            ApiUrl = "http://127.0.0.1:7779/v1/chat/completions",
+                            Type = LLMProviderType.OpenAICustom,
+                            ConcurrencyLimit = 1,
+                            Tags = [ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
+                            TimeoutStrategy = new TimeoutStrategy
+                            {
+                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                                Retries = 1,
+                            }
                         }
                     },
                     ChatCompletionPresetsMap = new ChatCompletionPresetsMap()
@@ -108,7 +123,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Type = ChatCompletionPresetType.SkillChecksInitiator,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_PATHFINDER_SKILLS_CHECKS_INITIATOR_COMPLETION_PRESET,
                                 IsDefault = true,
-                            }
+                            },
                         }
                     },
                     Summary = new SummarySettings()

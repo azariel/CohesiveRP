@@ -1,6 +1,8 @@
 ﻿using CohesiveRP.Core.PromptContext.Builders.Directive;
 using CohesiveRP.Core.PromptContext.Builders.Pathfinder;
+using CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -17,7 +19,7 @@ namespace CohesiveRP.Core.PromptContext.Builders
             this.storageService = storageService;
         }
 
-        public async Task<IPromptContextElementBuilder> GenerateBuilderAsync(PromptContextFormatElement contextElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, string contextLinkedId, BackgroundQuerySystemTags tag)
+        public async Task<IPromptContextElementBuilder> GenerateBuilderAsync(PromptContextFormatElement contextElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, BackgroundQueryDbModel backgroundQuery, BackgroundQuerySystemTags tag)
         {
             if (contextElement?.Tag == null)
             {
@@ -59,7 +61,7 @@ namespace CohesiveRP.Core.PromptContext.Builders
                 case PromptContextFormatTag.BehavioralInstructions:
                     return new PromptContextBehavioralInstructionsBuilder(storageService, contextElement, chatDbModel);
                 case PromptContextFormatTag.LastXMessagesToSummarize:
-                    return new PromptContextLastXMessagesToSummarizeBuilder(storageService, contextElement, settings, chatDbModel, contextLinkedId);
+                    return new PromptContextLastXMessagesToSummarizeBuilder(storageService, contextElement, settings, chatDbModel, backgroundQuery.LinkedId);
                 case PromptContextFormatTag.LastUnsummarizedMessages:
                     return new PromptContextLastUnsummarizedMessagesBuilder(storageService, contextElement, settings, chatDbModel);
                 case PromptContextFormatTag.OverflowingSummariesToSummarize:

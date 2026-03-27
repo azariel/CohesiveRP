@@ -4,8 +4,8 @@ using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions
 {
-    public interface IUpdateCharacterSheetWorkflow : IWorkflow
+    public interface IImportCharacterCardWorkflow : IWorkflow
     {
-        Task<IWebApiResponseDto> UpdateCharacterSheetAsync(UpdateCharacterSheetRequestDto requestDto);
+        Task<IWebApiResponseDto> ImportCharacterAsync(string characterId, ImportNewCharacterRequestDto requestDto);
     }
 }
