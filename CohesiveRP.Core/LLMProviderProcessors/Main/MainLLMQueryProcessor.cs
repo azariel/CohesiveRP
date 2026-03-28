@@ -1,13 +1,11 @@
 ﻿using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Common.Diagnostics;
-using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Directive;
 using CohesiveRP.Core.PromptContext.Builders.LoreByKeywords.BusinessObjects;
 using CohesiveRP.Core.Services;
-using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
@@ -15,6 +13,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Lorebooks.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
 
@@ -141,30 +140,28 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
         /// <summary>
         /// Process the resulting completed query. If it was a 'main', it'll add a new AI message, if it was a sceneTracker, it'll attach the tracker, if it was a summary, it'll attach the summary to an existing message, etc.
         /// </summary>
-        public override async Task ProcessCompletedQueryAsync()
+        public override async Task<bool> ProcessCompletedQueryAsync()
         {
-            if (backgroundQueryDbModel == null || backgroundQueryDbModel.Status != BackgroundQueryStatus.ProcessingFinalInstruction)
+            if (!await base.ProcessCompletedQueryAsync())
             {
-                LoggingManager.LogToFile("12498826-8f44-4f5f-ac9f-51f7de6e08fa", $"Ignoring background query [{backgroundQueryDbModel?.BackgroundQueryId}]. Status was [{backgroundQueryDbModel?.Status}].");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(backgroundQueryDbModel.Content))
-            {
-                LoggingManager.LogToFile("a44dbd75-61fb-46fc-98df-dcea7eaa83c6", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content was null or empty. Task will be set to Pending status for re-generation.");
                 backgroundQueryDbModel.Content = null;
-                backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
-                return;
+                backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                return false;
             }
 
             // Deserialize the generic content into a list of messages
             try
             {
-                LLMApiResponseMessage[] messages = JsonCommonSerializer.DeserializeFromString<LLMApiResponseMessage[]>(backgroundQueryDbModel.Content);
-
                 var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
                 foreach (var message in messages)
                 {
+                    if (string.IsNullOrWhiteSpace(message.Content))
+                    {
+                        backgroundQueryDbModel.Content = null;
+                        backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                        return false;
+                    }
+
                     // Add the AI reply message to the end of the chat
                     CreateMessageQueryModel messageQueryModel = new()
                     {
@@ -182,8 +179,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     {
                         LoggingManager.LogToFile("15b7b071-b3bb-4d36-9321-4353dd747797", $"Error. The message creation in storage failed. Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Task will be set to Pending status for re-generation.");
                         backgroundQueryDbModel.Content = null;
-                        backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
-                        return;
+                        backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                        return false; ;
                     }
 
                     backgroundQueryDbModel.LinkedId = newMessageInStorage.MessageId;
@@ -204,16 +201,37 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
                 GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
 
+                // Scene Analyzer
+                await QueueSceneAnalyzeAsync(chat);
+
                 // Summary
                 _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, globalSettings);
 
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
+                return true;
             } catch (Exception e)
             {
                 LoggingManager.LogToFile("3323ca32-a0b4-414f-a0a7-eedea88c4099", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
-                backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                return false;
             }
+        }
+
+        private async Task<bool> QueueSceneAnalyzeAsync(ChatDbModel chat)
+        {
+            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+            {
+                ChatId = chat.ChatId,
+                Priority = BackgroundQueryPriority.Highest,// User is waiting!
+                DependenciesTags = [],// No dependencies at all
+                Tags = [BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+            };
+
+            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+                return false;
+
+            return true;
         }
     }
 }

@@ -68,8 +68,14 @@ namespace CohesiveRP.Core.Services
         // SceneTracker
         Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId);
         Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
-        Task<SceneTrackerDbModel> UpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
+        Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
         Task<bool> DeleteSceneTrackerAsync(string chatId);
+
+        // SceneAnalyzer
+        Task<SceneAnalyzerDbModel> GetSceneAnalyzerAsync(string chatId);
+        Task<SceneAnalyzerDbModel> AddSceneAnalyzerAsync(SceneAnalyzerDbModel dbModel);
+        Task<SceneAnalyzerDbModel> CreateOrUpdateSceneAnalyzerAsync(SceneAnalyzerDbModel dbModel);
+        Task<bool> DeleteSceneAnalyzerAsync(string chatId);
 
         // Characters
         Task<CharacterDbModel[]> GetCharactersAsync();

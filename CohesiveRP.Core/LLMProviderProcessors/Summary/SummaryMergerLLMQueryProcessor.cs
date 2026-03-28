@@ -41,27 +41,18 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
         /// <summary>
         /// Process the resulting completed query. If it was a 'main', it'll add a new AI message, if it was a sceneTracker, it'll attach the tracker, if it was a summary, it'll attach the summary to an existing message, etc.
         /// </summary>
-        public override async Task ProcessCompletedQueryAsync()
+        public override async Task<bool> ProcessCompletedQueryAsync()
         {
-            if (backgroundQueryDbModel == null || backgroundQueryDbModel.Status != BackgroundQueryStatus.ProcessingFinalInstruction)
+            if (!await base.ProcessCompletedQueryAsync())
             {
-                LoggingManager.LogToFile("16a9d632-d4e7-439a-b6a1-52173ea370f1", $"Ignoring background query [{backgroundQueryDbModel?.BackgroundQueryId}]. Status was [{backgroundQueryDbModel?.Status}].");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(backgroundQueryDbModel.Content))
-            {
-                LoggingManager.LogToFile("4c2f3f74-e0b3-49a4-8b20-296e91724787", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content was null or empty. Task will be set to Pending status for re-generation.");
                 backgroundQueryDbModel.Content = null;
-                backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
-                return;
+                backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                return false;
             }
 
             // Deserialize the generic content into a list of messages
             try
             {
-                LLMApiResponseMessage[] messages = JsonCommonSerializer.DeserializeFromString<LLMApiResponseMessage[]>(backgroundQueryDbModel.Content);
-
                 if (messages.Length != 1)
                 {
                     LoggingManager.LogToFile("215dc539-06ba-4b1b-9850-b3d49a8b44c4", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content embedding [{messages.Length}] messages generated from the inference server. One message was expected (no more, no less). Task will be set to Pending status for re-generation.");
@@ -70,14 +61,16 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 }
 
                 if (!await ExecuteCompletingProcess())
-                    return;
+                    return false;
 
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
+                return true;
             } catch (Exception e)
             {
                 LoggingManager.LogToFile("e6db3317-7952-4ba9-900c-39d97ec510d3", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                return false;
             }
         }
 

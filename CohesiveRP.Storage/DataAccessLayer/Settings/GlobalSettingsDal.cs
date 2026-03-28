@@ -43,21 +43,21 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     // TODO: replace this dev option
                     LLMProviders = new List<LLMProviderConfig>()
                     {
-                        new LLMProviderConfig
-                        {
-                            ProviderConfigId = Guid.NewGuid().ToString(),
-                            Name = "IntenseRP-V2-GLM",
-                            Model = "glm-reasoner",
-                            ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
-                            Type = LLMProviderType.OpenAICustom,
-                            ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Main],
-                            TimeoutStrategy = new TimeoutStrategy
-                            {
-                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
-                                Retries = 3,
-                            }
-                        },
+                        //new LLMProviderConfig
+                        //{
+                        //    ProviderConfigId = Guid.NewGuid().ToString(),
+                        //    Name = "IntenseRP-V2-GLM",
+                        //    Model = "glm-reasoner",
+                        //    ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
+                        //    Type = LLMProviderType.OpenAICustom,
+                        //    ConcurrencyLimit = 1,
+                        //    Tags = [ChatCompletionPresetType.Main],
+                        //    TimeoutStrategy = new TimeoutStrategy
+                        //    {
+                        //        Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                        //        Retries = 3,
+                        //    }
+                        //},
                         new LLMProviderConfig
                         {
                             ProviderConfigId = Guid.NewGuid().ToString(),
@@ -66,7 +66,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.SkillChecksInitiator],// TODO: move SkillChecksInitiator elsewhere, it conflicts with SceneTracker
+                            Tags = [ChatCompletionPresetType.SceneAnalyze, ChatCompletionPresetType.SkillChecksInitiator],// TODO: move SkillChecksInitiator elsewhere, it 'conflicts' with SceneTracker
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -87,7 +87,22 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
                                 Retries = 1,
                             }
-                        }
+                        },
+                        new LLMProviderConfig
+                        {
+                            ProviderConfigId = Guid.NewGuid().ToString(),
+                            Name = "IntenseRP-V2-KIMI",
+                            Model = "kimi-chat",
+                            ApiUrl = "http://127.0.0.1:7780/v1/chat/completions",
+                            Type = LLMProviderType.OpenAICustom,
+                            ConcurrencyLimit = 1,
+                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.Main],
+                            TimeoutStrategy = new TimeoutStrategy
+                            {
+                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                                Retries = 3,
+                            }
+                        },
                     },
                     ChatCompletionPresetsMap = new ChatCompletionPresetsMap()
                     {
@@ -122,6 +137,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             {
                                 Type = ChatCompletionPresetType.SkillChecksInitiator,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_PATHFINDER_SKILLS_CHECKS_INITIATOR_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.SceneAnalyze,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_ANALYZE_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                         }

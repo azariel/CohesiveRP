@@ -1,5 +1,6 @@
 ﻿using CohesiveRP.Core.LLMProviderManager.Main;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator;
+using CohesiveRP.Core.LLMProviderProcessors.SceneAnalyzer;
 using CohesiveRP.Core.LLMProviderProcessors.SceneTracker;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
@@ -41,6 +42,9 @@ namespace CohesiveRP.Core.LLMProviderManager
             if (tags.Contains(BackgroundQuerySystemTags.sceneTracker.ToString()))
                 return BackgroundQuerySystemTags.sceneTracker;
 
+            if (tags.Contains(BackgroundQuerySystemTags.sceneAnalyze.ToString()))
+                return BackgroundQuerySystemTags.sceneAnalyze;
+
             if (tags.Contains(BackgroundQuerySystemTags.shortSummary.ToString()))
                 return BackgroundQuerySystemTags.shortSummary;
 
@@ -77,6 +81,8 @@ namespace CohesiveRP.Core.LLMProviderManager
                     return new MainLLMQueryProcessor(ChatCompletionPresetType.Main, BackgroundQuerySystemTags.main, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.sceneTracker:
                     return new SceneTrackerLLMQueryProcessor(ChatCompletionPresetType.SceneTracker, BackgroundQuerySystemTags.sceneTracker, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
+                case BackgroundQuerySystemTags.sceneAnalyze:
+                    return new SceneAnalyzerLLMQueryProcessor(ChatCompletionPresetType.SceneAnalyze, BackgroundQuerySystemTags.sceneAnalyze, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.shortSummary:
                     return new ShortSummaryLLMQueryProcessor(ChatCompletionPresetType.Summarize, BackgroundQuerySystemTags.shortSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.mediumSummary:

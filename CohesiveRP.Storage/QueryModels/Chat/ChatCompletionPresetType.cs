@@ -8,5 +8,6 @@
         SceneTracker = 3,
         SkillChecksInitiator = 4,
         SPECIAL_CharacterSheetGeneration = 5,
+        SceneAnalyze = 6,
     }
 }

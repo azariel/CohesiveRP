@@ -75,22 +75,23 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
                 try
                 {
-                    CharactersSkillChecks = LLMResponseParser.ParseOnlyJson<LLMPathfinderCharactersSkillChecksScene>(LLMrawResponse);
+                    CharactersSkillChecks = LLMResponseParser.ParseFromApiMessageContent<LLMPathfinderCharactersSkillChecksScene>(LLMrawResponse);
                 } catch (Exception ex)
                 {
                     LoggingManager.LogToFile("8dae9f1a-2a6b-43b8-a2ad-c28776909dd6", $"The response from the LLM for the Pathfinder CharactersSkillChecksInitiator failed. The Json structure is incorrect. Ignoring.");
                     return false;
                 }
 
-                if (CharactersSkillChecks?.Actions == null || CharactersSkillChecks.Actions.Length <= 0)
-                {
-                    return true;
-                }
-
                 ChatCharactersRollsDbModel chatCharactersRollsDbModel = await storageService.GetChatCharactersRollsByIdAsync(backgroundQueryDbModel.ChatId);
 
                 // Update the characters in scene in the SceneTracker
-                await UpdateCharactersInSceneAsync(chatCharactersRollsDbModel, CharactersSkillChecks?.AllCharactersByName);
+                chatCharactersRollsDbModel = await CreateOrUpdateCharactersInSceneAsync(chatCharactersRollsDbModel, CharactersSkillChecks?.AllCharactersByName, backgroundQueryDbModel.ChatId);
+
+                if(chatCharactersRollsDbModel == null)
+                { 
+                    LoggingManager.LogToFile("27331e02-10a1-4101-83c0-307fbaf1d99e", $"The CharactersRolls tied to this chat was empty.");
+                    return false;
+                }
 
                 // Get the list of characters known for this chat from characterSheetInstances
                 var chatDbModel = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
@@ -129,6 +130,11 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 //        return false;
                 //    }
                 //}
+
+                if (CharactersSkillChecks?.Actions == null || CharactersSkillChecks.Actions.Length <= 0)
+                {
+                    return true;
+                }
 
                 // Order the information we got from the LLM and then process them against storage
                 foreach (IGrouping<string, LLMPathfinderCharactersSkillChecksActions> skillChecksByCharacter in CharactersSkillChecks.Actions
@@ -172,15 +178,33 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             }
         }
 
-        private async Task UpdateCharactersInSceneAsync(ChatCharactersRollsDbModel chatCharactersRollsDbModel, string[] allCharactersByName)
+        private async Task<ChatCharactersRollsDbModel> CreateOrUpdateCharactersInSceneAsync(ChatCharactersRollsDbModel chatCharactersRollsDbModel, string[] allCharactersByName, string chatId)
         {
-            if(chatCharactersRollsDbModel == null || allCharactersByName == null || allCharactersByName.Length <= 0)
+            if(allCharactersByName == null || allCharactersByName.Length <= 0)
+                return chatCharactersRollsDbModel;
+
+            if (chatCharactersRollsDbModel == null)
             {
-                return;
+                chatCharactersRollsDbModel = new ChatCharactersRollsDbModel
+                {
+                    ChatId = chatId,
+                    CharacterNamesInScene = allCharactersByName.ToList(),
+                    ChatCharactersRolls = [],
+                };
+
+                chatCharactersRollsDbModel = await storageService.AddChatCharactersRollsAsync(chatCharactersRollsDbModel);
+                if (chatCharactersRollsDbModel == null)
+                {
+                    LoggingManager.LogToFile("460d25ff-8c75-48c2-96da-f84447213b22", $"Couldn't Add a new ChatCharactersRolls in storage.");
+                    return chatCharactersRollsDbModel;
+                }
+
+                return chatCharactersRollsDbModel;
             }
 
             chatCharactersRollsDbModel.CharacterNamesInScene = allCharactersByName.ToList();
             await storageService.UpdateChatCharactersRollsAsync(chatCharactersRollsDbModel);
+            return chatCharactersRollsDbModel;
         }
 
         private CharacterSheetInstance FindCharacterSheetInstanceFromCharacterName(List<CharacterSheetInstance> characterSheetInstances, string characterName)
@@ -352,16 +376,18 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 chatCharactersRollsDbModel = queryResult;
             }
 
-            ChatCharacterRolls persistentCharacterRolls = chatCharactersRollsDbModel.ChatCharactersRolls.FirstOrDefault(a => a.CharacterSheetInstanceId == selectedCharacterSheetInstance.CharacterSheetInstanceId);
+            ChatCharacterRolls persistentCharacterRolls = chatCharactersRollsDbModel.ChatCharactersRolls?.FirstOrDefault(a => a.CharacterSheetInstanceId == selectedCharacterSheetInstance.CharacterSheetInstanceId);
 
             // If we dont' have an entry in the chat characters rolls row, we'll add an empty for (for this specific character sheet instance)
             if (persistentCharacterRolls == null)
             {
-                chatCharactersRollsDbModel.ChatCharactersRolls.Add(new ChatCharacterRolls
-                {
-                    CharacterSheetInstanceId = selectedCharacterSheetInstance.CharacterSheetInstanceId,
-                    Rolls = [],
-                });
+                chatCharactersRollsDbModel.ChatCharactersRolls = new List<ChatCharacterRolls>(){
+                    new ChatCharacterRolls
+                    {
+                        CharacterSheetInstanceId = selectedCharacterSheetInstance.CharacterSheetInstanceId,
+                        Rolls = [],
+                    }
+                };
 
                 if (!await storageService.UpdateChatCharactersRollsAsync(chatCharactersRollsDbModel))
                 {
@@ -585,35 +611,19 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             return Math.Min(19, Math.Max(2, randomRoll + modifier));
         }
 
-        public override async Task ProcessCompletedQueryAsync()
+        public override async Task<bool> ProcessCompletedQueryAsync()
         {
-            if (backgroundQueryDbModel == null || backgroundQueryDbModel.Status != BackgroundQueryStatus.ProcessingFinalInstruction)
+            if (!await base.ProcessCompletedQueryAsync())
             {
-                LoggingManager.LogToFile("60a3768c-20d8-400f-924b-1a8f90a9ddd5", $"Ignoring background query [{backgroundQueryDbModel?.BackgroundQueryId}]. Status was [{backgroundQueryDbModel?.Status}].");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(backgroundQueryDbModel.Content))
-            {
-                LoggingManager.LogToFile("e1dbc0cd-7c79-4d07-b2c0-70243fca5297", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content was null or empty. Task will be set to Pending status for re-generation.");
                 backgroundQueryDbModel.Content = null;
-                backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
-                return;
+                backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                return false;
             }
 
             // Deserialize the generic content into a valid SkillsChecksInitiator
             try
             {
-                LLMApiResponseMessage LLMmessage = JsonCommonSerializer.DeserializeFromString<LLMApiResponseMessage[]>(backgroundQueryDbModel.Content).LastOrDefault();
-
-                if (LLMmessage == null)
-                {
-                    LoggingManager.LogToFile("eecfd8f9-23cc-487c-9d98-3a86eacbd4cf", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content no messages generated from the inference server. One message was expected (no more, no less). Task will be set to Pending status for re-generation.");
-                    backgroundQueryDbModel.Content = null;
-                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
-                    return;
-                }
-
+                LLMApiResponseMessage LLMmessage = messages.LastOrDefault();
                 if (!await HandlePathfinderSkillRollsAsync(LLMmessage.Content))
                 {
                     // Ignoring for now
@@ -623,11 +633,13 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 }
 
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
+                return true;
             } catch (Exception e)
             {
                 LoggingManager.LogToFile("025c0b1d-cfef-4a20-bab7-8bde505060be", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                return false;
             }
         }
     }

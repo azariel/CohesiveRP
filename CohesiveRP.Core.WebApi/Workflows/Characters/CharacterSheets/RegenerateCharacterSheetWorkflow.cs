@@ -113,7 +113,7 @@ public class RegenerateCharacterSheetWorkflow : IRegenerateCharacterSheetWorkflo
         CharacterSheet responseJson = null;
         try
         {
-            responseJson = LLMResponseParser.ParseOnlyJson<CharacterSheet>(response.Messages.First().Content);
+            responseJson = LLMResponseParser.ParseFromApiMessageContent<CharacterSheet>(response.Messages.First().Content);
         } catch (Exception e)
         {
             return new WebApiException

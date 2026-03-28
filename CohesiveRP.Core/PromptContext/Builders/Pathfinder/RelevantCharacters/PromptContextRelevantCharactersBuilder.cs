@@ -2,7 +2,6 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks.Dataflow;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
@@ -133,6 +132,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
+            var options = promptContextFormatElement?.Options as PromptContextFormatElementRelevantCharactersOptions;
             CharacterSheetInstance[] charactersToInclude = characterSheetInstances.CharacterSheetInstances.Where(w =>
             chatDbModel.CharacterIds.Any(a => w.CharacterId == a) &&
             w.CharacterSheet != null &&
@@ -156,13 +156,13 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
 
                 if (personaCharacterSheet != null)
                 {
-                    str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName}>");
+                    str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName} (player)>");
                     AppendCharacterSheetToPromptContext(str, personaCharacterSheet.CharacterSheet);
-                    str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName}>");
+                    str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName} (player)>");
                 }
             }
 
-            if (characterRolls.CharacterNamesInScene != null && characterRolls.CharacterNamesInScene.Count > 0)
+            if (characterRolls?.CharacterNamesInScene != null && characterRolls.CharacterNamesInScene.Count > 0)
             {
                 charactersToInclude = charactersToInclude.Where(w => characterRolls.CharacterNamesInScene.Any(a => AreNameEquivalent(a, w.CharacterSheet.FirstName, w.CharacterSheet.LastName))).ToArray();
 
@@ -208,7 +208,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             }
 
             string finalKnownCharacters = "";
-            if (knownCharacters.Count > 0)
+            if (knownCharacters.Count > 0 && (options == null || options.IncludeKnownCharacters))
             {
                 finalKnownCharacters = $"<known_characters_in_story_context>{string.Join(",", knownCharacters)}</known_characters_in_story_context>";
             }

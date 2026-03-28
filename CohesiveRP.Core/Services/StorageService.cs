@@ -5,6 +5,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.DataAccessLayer.SceneAnalyzer;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
@@ -39,6 +40,7 @@ namespace CohesiveRP.Core.Services
         private ILLMApiQueriesDal llmApiQueriesDal;
         private ISummaryDal summaryDal;
         private ISceneTrackerDal sceneTrackerDal;
+        private ISceneAnalyzerDal sceneAnalyzerDal;
 
         public StorageService(
             IChatsDal chatsDal,
@@ -55,7 +57,8 @@ namespace CohesiveRP.Core.Services
             IBackgroundQueriesDal backgroundQueriesDal,
             ILLMApiQueriesDal llmApiQueriesDal,
             ISummaryDal summaryDal,
-            ISceneTrackerDal sceneTrackerDal)
+            ISceneTrackerDal sceneTrackerDal,
+            ISceneAnalyzerDal sceneAnalyzerDal)
         {
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;
@@ -72,6 +75,7 @@ namespace CohesiveRP.Core.Services
             this.llmApiQueriesDal = llmApiQueriesDal;
             this.summaryDal = summaryDal;
             this.sceneTrackerDal = sceneTrackerDal;
+            this.sceneAnalyzerDal = sceneAnalyzerDal;
         }
 
         // Chats
@@ -225,7 +229,13 @@ namespace CohesiveRP.Core.Services
         // SceneTracker
         public async Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId) => await sceneTrackerDal.GetSceneTrackerAsync(chatId);
         public async Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.AddSceneTrackerAsync(queryModel);
-        public async Task<SceneTrackerDbModel> UpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.CreateOrUpdateSceneTrackerAsync(queryModel);
+        public async Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.CreateOrUpdateSceneTrackerAsync(queryModel);
         public async Task<bool> DeleteSceneTrackerAsync(string chatId) => await sceneTrackerDal.DeleteSceneTrackerAsync(chatId);
+
+        // SceneAnalyzer
+        public async Task<SceneAnalyzerDbModel> GetSceneAnalyzerAsync(string chatId) => await sceneAnalyzerDal.GetSceneAnalyzerAsync(chatId);
+        public async Task<SceneAnalyzerDbModel> AddSceneAnalyzerAsync(SceneAnalyzerDbModel dbModel) => await sceneAnalyzerDal.AddSceneAnalyzerAsync(dbModel);
+        public async Task<SceneAnalyzerDbModel> CreateOrUpdateSceneAnalyzerAsync(SceneAnalyzerDbModel dbModel) => await sceneAnalyzerDal.CreateOrUpdateSceneAnalyzerAsync(dbModel);
+        public async Task<bool> DeleteSceneAnalyzerAsync(string chatId) => await sceneAnalyzerDal.DeleteSceneAnalyzerAsync(chatId);
     }
 }
