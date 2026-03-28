@@ -35,6 +35,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             {
                 ChatId = chatId,
                 ChatName = chat.Name,
+                AvatarFilePath = chat.AvatarFilePath,
                 LastActivityAtUtc = chat.LastActivityAtUtc,
                 CharacterIds = chat.CharacterIds,
                 LorebookIds = chat.LorebookIds,

@@ -58,10 +58,25 @@ const GetAvatarPathFromChatIdAndAvatarId = (chatId: string, avatarId: string): s
   }
 };
 
+const GetAvatarPathFromAvatarFilePath = (avatarFilePath: string): string => {
+    try {
+      if (avatarFilePath === "") {
+        return `./assets/empty-avatar.svg`;
+      }
+
+      const normalized = avatarFilePath.replace(/\\/g, "/").replace(/^\//, "");
+      console.log(`EDIUS normalized avatarFilePath: ./${normalized}`);
+      return `./${normalized}`;
+    } catch (err) {
+      return "";
+    }
+};
+
 export {
     GetAvatarPathFromCharacterId,
     GetAvatarPathFromPersonaId,
     GetAvatarPathFromLorebookId,
     GetAvatarPathFromChatId,
-    GetAvatarPathFromChatIdAndAvatarId
+    GetAvatarPathFromChatIdAndAvatarId,
+    GetAvatarPathFromAvatarFilePath
 };

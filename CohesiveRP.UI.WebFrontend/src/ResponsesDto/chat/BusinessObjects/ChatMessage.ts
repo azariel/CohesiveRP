@@ -9,7 +9,7 @@ interface ChatMessage {
     characterName: string | null;
     personaId: string | null;
     personaName: string | null;
-    avatarId: string | null;// if a specific message has an avatar override
+    avatarFilePath: string | null;// if a specific message has an avatar override
 }
 
 export type {

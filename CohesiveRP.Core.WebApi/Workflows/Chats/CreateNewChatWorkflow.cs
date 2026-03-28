@@ -110,6 +110,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             {
                 ChatId = newlyCreatedChat.ChatId,
                 ChatName = newlyCreatedChat.Name,
+                AvatarFilePath = newlyCreatedChat.AvatarFilePath,
                 HttpResultCode = System.Net.HttpStatusCode.OK,
             };
         }
@@ -158,7 +159,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 Summarized = false,
                 MessageContent = character.FirstMessage,
                 CharacterId = character.CharacterId,
-                AvatarId = null,
+                AvatarFilePath = null,
             };
             await storageService.AddMessageAsync(queryModel);
         }

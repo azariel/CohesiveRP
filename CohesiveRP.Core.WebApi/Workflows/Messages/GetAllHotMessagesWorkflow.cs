@@ -47,7 +47,7 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
                 Summarized = messagesDbModel.Messages[i].Summarized,
                 CreatedAtUtc = messagesDbModel.Messages[i].CreatedAtUtc,
                 CharacterId = messagesDbModel.Messages[i].CharacterId,
-                AvatarId = messagesDbModel.Messages[i].AvatarId,
+                AvatarFilePath = messagesDbModel.Messages[i].AvatarFilePath,
                 CharacterName = characterName,
                 PersonaId = chat.PersonaId,
                 PersonaName = persona?.Name ?? "User",

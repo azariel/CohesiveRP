@@ -18,5 +18,8 @@ namespace CohesiveRP.Storage.QueryModels.Chat
 
         [JsonPropertyName("name")]
         public string Name { get; set; }
+
+        [JsonPropertyName("avatarFilePath")]
+        public string AvatarFilePath { get; set; }
     }
 }

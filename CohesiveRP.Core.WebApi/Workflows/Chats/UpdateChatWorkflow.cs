@@ -81,6 +81,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             chat.PersonaId = requestDto.PersonaId;
             chat.CharacterIds = requestDto.CharacterIds;
             chat.LorebookIds = requestDto.LorebookIds;
+            chat.AvatarFilePath = requestDto.AvatarFilePath;
             var updateChatResult = await storageService.UpdateChatAsync(chat);
             if (!updateChatResult)
             {
@@ -98,6 +99,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 CharacterIds = chat.CharacterIds,
                 LastActivityAtUtc = chat.LastActivityAtUtc,
                 ChatName = chat.Name,
+                AvatarFilePath = chat.AvatarFilePath,
                 PersonaId = chat.PersonaId,
                 HttpResultCode = System.Net.HttpStatusCode.OK,
             };

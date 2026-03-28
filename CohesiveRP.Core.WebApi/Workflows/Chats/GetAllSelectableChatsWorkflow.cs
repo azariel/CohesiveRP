@@ -37,6 +37,7 @@ public class GetAllSelectableChatsWorkflow : IGetAllSelectableChatsWorkflow
                 CharacterIds = chat.CharacterIds,
                 LorebookIds = chat.LorebookIds,
                 ChatName = chat.Name,
+                AvatarFilePath = chat.AvatarFilePath,
                 LastActivityAtUtc = chat.LastActivityAtUtc,
             });
         }

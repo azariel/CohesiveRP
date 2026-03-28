@@ -11,23 +11,27 @@
         Crying,
         Curious,
         Disgusted,
-        //Determined,
+        //Disappointed,
+        //Disapproval,
         Excited,
         Embarassed,// or Flustered
         Happy,
         Laughing,
         Jealous,
         Nervous,
-        Playful,
+        Playful,// amused
         Proud,
         Relieved,
         Sad,
-        Scared,
+        Scared,//Fear
         Serious,
         Shy,
         Smug,// Or Arrogant
         Surprised,
         Tired,// Sleepy
         Worried,
+        // Grief
+        // Admiration
+        // Gratitude
     }
 }

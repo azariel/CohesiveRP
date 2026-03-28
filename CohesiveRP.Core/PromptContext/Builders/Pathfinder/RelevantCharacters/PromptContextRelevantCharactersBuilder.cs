@@ -179,9 +179,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
 
                 foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(2))// TODO: make the limit configurable
                 {
-                    str.AppendLine($"  <{characterSheetInstance.CharacterSheet.FirstName}>");
+                    str.AppendLine($"  <{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName)}>");
                     AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
-                    str.AppendLine($"  </{characterSheetInstance.CharacterSheet.FirstName}>");
+                    str.AppendLine($"  </{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName)}>");
                 }
             }
 
@@ -195,7 +195,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
 
                 if (characterSheet != null)
                 {
-                    characterName = $"{characterSheet?.CharacterSheet?.FirstName} {characterSheet?.CharacterSheet?.LastName}".Trim();
+                    characterName = GetCharacterFullName(characterSheet?.CharacterSheet?.FirstName, characterSheet?.CharacterSheet?.LastName);
                 } else
                 {
                     characterName = allCharacters.FirstOrDefault(f => f.CharacterId == characterId)?.Name?.Trim();
@@ -215,5 +215,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
 
             return ($"<relevant_characters>{Environment.NewLine}{str.ToString().Trim().TrimEnd(Environment.NewLine.ToCharArray())}{Environment.NewLine}</relevant_characters>{Environment.NewLine}Please note that secretKinks are kinks or fetishes that the character is ashamed or embarassed about and will avoid openly talk about, but that character will react positively when exposed to situations implementing their kinks and secret kinks or fetishes.{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
         }
+
+        private static string GetCharacterFullName(string firstName, string lastName) => $"{firstName} {lastName}".Trim();
     }
 }

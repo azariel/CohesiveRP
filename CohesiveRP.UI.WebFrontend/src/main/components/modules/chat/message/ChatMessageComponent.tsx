@@ -6,7 +6,7 @@ import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
 import { FormatUtcDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
-import { GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
+import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
 
 interface Props {
@@ -100,7 +100,7 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
             {message?.sourceType == 0 ? (
               <img src={GetAvatarPathFromPersonaId(message?.personaId ?? "")} alt="Avatar" />
             ) : (
-              <img src={GetAvatarPathFromChatIdAndAvatarId(chatId, message?.avatarId ?? "avatar")} alt="Avatar" />
+              <img src={message?.avatarFilePath && message.avatarFilePath !== "avatar" ? GetAvatarPathFromAvatarFilePath(message.avatarFilePath) : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar")} alt="Avatar" />
             )}
           </div>
           <div className={styles.messageInfoContainer}>

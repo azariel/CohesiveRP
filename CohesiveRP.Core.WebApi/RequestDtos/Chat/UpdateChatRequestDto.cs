@@ -19,5 +19,8 @@ namespace CohesiveRP.Core.WebApi.RequestDtos.Chat
 
         [JsonPropertyName("personaId")]
         public string PersonaId { get; set; }
+
+        [JsonPropertyName("avatarFilePath")]
+        public string AvatarFilePath { get; set; }
     }
 }

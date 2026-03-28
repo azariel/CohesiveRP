@@ -19,6 +19,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
 
         public string CharacterId { get; set; }
 
-        public string AvatarId { get; set; }
+        public string AvatarFilePath { get; set; }
     }
 }

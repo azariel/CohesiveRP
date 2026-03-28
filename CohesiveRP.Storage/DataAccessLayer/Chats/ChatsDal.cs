@@ -69,6 +69,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CharacterIds = queryModel.CharacterIds,
                     LorebookIds = queryModel.LorebookIds,
                     PersonaId = queryModel.PersonaId,
+                    AvatarFilePath = queryModel.AvatarFilePath,
                     LastActivityAtUtc = DateTime.UtcNow,
                 };
 
@@ -107,6 +108,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 chat.LorebookIds = dbModel.LorebookIds;
                 chat.CharacterIds = dbModel.CharacterIds;
                 chat.Name = dbModel.Name;
+                chat.AvatarFilePath = dbModel.AvatarFilePath;
                 chat.PersonaId = dbModel.PersonaId;
 
                 var result = dbContext.Chats.Update(chat);
