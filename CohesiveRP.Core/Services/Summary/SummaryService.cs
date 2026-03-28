@@ -22,7 +22,6 @@ namespace CohesiveRP.Core.Services.Summary
         {
             // If there's already a background query that is currently processing a summary, delay
             var pendingRequests = await storageService.GetPendingOrProcessingBackgroundQueryAsync();
-
             if (pendingRequests == null)
             {
                 LoggingManager.LogToFile("2e9ba10a-e856-4e42-b44a-f290b4c5bdaa", $"Couldn't fetch backgroundQueries.");
@@ -106,7 +105,7 @@ namespace CohesiveRP.Core.Services.Summary
                 LinkedId = hotMessagesCopy.Last().MessageId,
                 DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString()],
                 Tags = [BackgroundQuerySystemTags.shortSummary.ToString()],
-                Priority = BackgroundQueryPriority.Standard,
+                Priority = BackgroundQueryPriority.Low,
             };
 
             await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
@@ -134,7 +133,7 @@ namespace CohesiveRP.Core.Services.Summary
                 ChatId = chatId,
                 DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString()],
                 Tags = [BackgroundQuerySystemTags.mediumSummary.ToString()],
-                Priority = BackgroundQueryPriority.Standard,
+                Priority = BackgroundQueryPriority.VeryLow,
             };
 
             await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
@@ -162,7 +161,7 @@ namespace CohesiveRP.Core.Services.Summary
                 ChatId = chatId,
                 DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.mediumSummary.ToString()],
                 Tags = [BackgroundQuerySystemTags.longSummary.ToString()],
-                Priority = BackgroundQueryPriority.Standard,
+                Priority = BackgroundQueryPriority.VeryLow,
             };
 
             await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
@@ -190,7 +189,7 @@ namespace CohesiveRP.Core.Services.Summary
                 ChatId = chatId,
                 DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.mediumSummary.ToString(), BackgroundQuerySystemTags.longSummary.ToString()],
                 Tags = [BackgroundQuerySystemTags.extraSummary.ToString()],
-                Priority = BackgroundQueryPriority.Standard,
+                Priority = BackgroundQueryPriority.VeryLow,
             };
 
             await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);
@@ -219,7 +218,7 @@ namespace CohesiveRP.Core.Services.Summary
                 ChatId = chatId,
                 DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.mediumSummary.ToString(), BackgroundQuerySystemTags.longSummary.ToString(), BackgroundQuerySystemTags.extraSummary.ToString()],
                 Tags = [BackgroundQuerySystemTags.overflowSummary.ToString()],
-                Priority = BackgroundQueryPriority.Standard,
+                Priority = BackgroundQueryPriority.VeryLow,
             };
 
             await storageService.AddBackgroundQueryAsync(backgroundQueryDbModel);

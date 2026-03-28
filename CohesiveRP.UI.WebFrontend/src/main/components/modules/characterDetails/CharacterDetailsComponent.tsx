@@ -27,7 +27,6 @@ export default function CharacterDetailsComponent() {
   const { navigateTo } = sharedContext();
   const didComponentMountAlready = useRef(false);
   const chatsContainerRef = useRef<HTMLDivElement>(null);
-  const importFileRef = useRef<HTMLInputElement>(null);
   const importCharacterCardRef = useRef<HTMLInputElement>(null);
   const [isNetworkDown, setIsNetworkDown] = useState(false);
   const [isLoadingChat, setIsLoadingChat] = useState(false);

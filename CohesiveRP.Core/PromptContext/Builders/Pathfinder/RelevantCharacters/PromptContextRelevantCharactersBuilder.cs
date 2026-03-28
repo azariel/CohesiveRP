@@ -165,7 +165,19 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             if (characterRolls.CharacterNamesInScene != null && characterRolls.CharacterNamesInScene.Count > 0)
             {
                 charactersToInclude = charactersToInclude.Where(w => characterRolls.CharacterNamesInScene.Any(a => AreNameEquivalent(a, w.CharacterSheet.FirstName, w.CharacterSheet.LastName))).ToArray();
-                foreach (CharacterSheetInstance characterSheetInstance in charactersToInclude.Take(2))// TODO: make the limit configurable
+
+                List<CharacterSheetInstance> orderedInstances = new();
+                foreach (var characterNameInScene in characterRolls.CharacterNamesInScene)
+                {
+                    var selection = charactersToInclude.FirstOrDefault(f => AreNameEquivalent(characterNameInScene, f.CharacterSheet.FirstName, f.CharacterSheet.LastName));
+
+                    if(selection != null)
+                    {
+                        orderedInstances.Add(selection);
+                    }
+                }
+
+                foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(2))// TODO: make the limit configurable
                 {
                     str.AppendLine($"  <{characterSheetInstance.CharacterSheet.FirstName}>");
                     AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);

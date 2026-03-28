@@ -235,14 +235,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             },
                             new PromptContextFormatElement
                             {
-                                Tag = PromptContextFormatTag.SceneTracker,
-                                Options = new PromptContextFormatElementOptions
-                                {
-                                    Format = "To help you in your summarization task, here is some information about the current roleplay scene. You may use this information to help you, but you still should only summarize the messages_to_summarize.\r\n<scene_information>{{item_description}}</scene_information>",
-                                }
-                            },
-                            new PromptContextFormatElement
-                            {
                                 Tag = PromptContextFormatTag.BehavioralInstructions,
                                 Options = new PromptContextFormatElementOptions
                                 {
@@ -346,7 +338,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 Tag = PromptContextFormatTag.SceneTrackerInstructions,
                                 Options = new PromptContextFormatElementOptions
                                 {
-                                    Format = "<messages_after_last_scene_tracker>\r\n{{messages_after_last_scene_tracker}}</messages_after_last_scene_tracker>\r\n\r\nKeep your scene tracker coherent with the one generated previously a few messages ago (keep the base such as clothes, mood, etc and build a new immersive and coherent scene tracker from all the information)\r\n<last_scene_tracker>\r\n{{last_scene_tracker}}\r\n</last_scene_tracker>",
+                                    Format = "<messages_after_last_scene_tracker>\r\n{{messages_after_last_scene_tracker}}</messages_after_last_scene_tracker>\r\n\r\nKeep your scene tracker coherent with the one generated previously a few messages ago (keep the base such as clothes, etc and build a new immersive and coherent scene tracker from all the information)\r\n<last_scene_tracker>\r\n{{last_scene_tracker}}\r\n</last_scene_tracker>",
                                 }
                             },
                             new PromptContextFormatElement

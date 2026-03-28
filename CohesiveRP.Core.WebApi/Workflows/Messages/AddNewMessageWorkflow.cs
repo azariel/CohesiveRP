@@ -2,6 +2,7 @@
 using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
@@ -10,6 +11,7 @@ using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Message;
 
@@ -18,10 +20,12 @@ namespace CohesiveRP.Core.WebApi.Workflows.Messages;
 public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
 {
     private IStorageService storageService;
+    private ISummaryService summaryService;
 
-    public AddNewMessageWorkflow(IStorageService storageService)
+    public AddNewMessageWorkflow(IStorageService storageService, ISummaryService summaryService)
     {
         this.storageService = storageService;
+        this.summaryService = summaryService;
     }
 
     public async Task<IWebApiResponseDto> AddNewMessageAsync(AddNewMessageRequestDto requestDto)
@@ -119,6 +123,10 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 } catch (Exception) { } // nothing, just skip
             }
         }
+
+        // Also queue up a summarization background query to process any pending ones with low/very low priority
+        GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
+        _ = summaryService.EvaluateSummaryAsync(chat.ChatId, globalSettings);
 
         // Convert DbModel to an acceptable web model (without sensitive information)
         var responseDto = new MessageResponseDto
