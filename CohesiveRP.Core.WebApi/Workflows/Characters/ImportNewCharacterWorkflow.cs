@@ -130,7 +130,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         // Save the image (avatar) on disk
-        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, importCharacterResult.CharacterId);
+        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, importCharacterResult.Name.ToLowerInvariant());
         if (!Directory.Exists(directoryCharacter))
         {
             Directory.CreateDirectory(directoryCharacter);

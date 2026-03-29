@@ -80,7 +80,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneAnalyzer
             }
 
             // Check if the character has an assets folder in this chat
-            string characterFolderPath = Path.Combine(WebConstants.CharactersAvatarFilePath, targetCharacterSheet.CharacterId);
+            var characterDbModel = await storageService.GetCharacterByIdAsync(targetCharacterSheet.CharacterId);
+            string characterFolderPath = Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name.ToLowerInvariant());
             if (!Directory.Exists(WebConstants.CharactersAvatarFilePath))
             {
                 return null;
@@ -105,7 +106,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneAnalyzer
             if (targetCharacter != null)
             {
                 string currentOutfitFolderPath = Path.Combine(characterFolderPath, targetCharacter.StateOfDress);
-                if (!Directory.Exists(WebConstants.CharactersAvatarFilePath))
+                if (!Directory.Exists(currentOutfitFolderPath))
                 {
                     return finalAvatarSelectionFilePath.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
                 }

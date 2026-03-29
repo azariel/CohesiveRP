@@ -10,7 +10,7 @@ import { getFromServerApiAsync, postToServerApiAsync } from "../../../../utils/h
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { CharactersResponseDto } from "../../../../ResponsesDto/characters/CharactersResponseDto";
-import { GetAvatarPathFromCharacterId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromCharacterName } from "../../../../utils/avatarUtils";
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
 import { ImSpinner2 } from "react-icons/im";
 
@@ -157,7 +157,7 @@ export default function CharactersSelectionComponent() {
             {charactersResponse?.characters?.map(character => (
               <div key={character.characterId} className={styles.characterContainer} onClick={() => handleSpecificCharacterClick(character.characterId)}>
                 <div className={styles.characterAvatarContainer}>
-                  <img src={GetAvatarPathFromCharacterId(character.characterId)} alt="dev/Placeholder.png" />
+                  <img src={GetAvatarPathFromCharacterName(character.name)} alt="dev/Placeholder.png" />
                 </div>
                 <div className={styles.characterInfoPanel}>
                   <label className={styles.characterCharNameLabel}>{character.name}</label>

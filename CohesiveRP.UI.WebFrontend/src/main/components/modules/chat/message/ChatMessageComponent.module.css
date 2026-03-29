@@ -204,6 +204,19 @@
   max-height: 400px;
 }
 
+.sceneAnalyzeSpinner {
+    color: rgb(22, 139, 207);
+    width: 1.2em;
+    height: 1.2em;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Mobile breakpoint: mobile display or smaller screens */
 @media (max-width: 876px) {
     .messageAvatarContainer {

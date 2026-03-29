@@ -8,7 +8,7 @@ import { deleteFromServerApiAsync, getBlobFromServerApiAsync, getFromServerApiAs
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
-import { GetAvatarPathFromCharacterId, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromCharacterName, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
 import { ImSpinner2 } from "react-icons/im";
 import type { SelectableChatsResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatsResponseDto";
 import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatResponseDto";
@@ -347,7 +347,7 @@ export default function CharacterDetailsComponent() {
             <div className={styles.characterDetailsContainer}>
               <div className={styles.characterHeaderContainer}>
                 <div className={styles.characterAvatarContainer}>
-                  <img src={GetAvatarPathFromCharacterId(characterResponse?.character?.characterId ?? "")} alt="dev/Placeholder.png" />
+                  <img src={GetAvatarPathFromCharacterName(characterResponse?.character?.name ?? "")} alt="dev/Placeholder.png" />
                 </div>
                 <div className={styles.characterHeaderRightSideContainer}>
                   <textarea

@@ -1,10 +1,10 @@
-const GetAvatarPathFromCharacterId = (characterId: string): string => {
+const GetAvatarPathFromCharacterName = (characterName: string): string => {
     try {
-      if(characterId === "") {
+      if(characterName === "") {
         return `./assets/empty-avatar.svg`;
       }
       
-      return `./characters/${characterId}/avatar.png`;
+      return `./characters/${characterName}/avatar.png`;
   }catch(err){
     return "";
   }
@@ -65,7 +65,6 @@ const GetAvatarPathFromAvatarFilePath = (avatarFilePath: string): string => {
       }
 
       const normalized = avatarFilePath.replace(/\\/g, "/").replace(/^\//, "");
-      console.log(`EDIUS normalized avatarFilePath: ./${normalized}`);
       return `./${normalized}`;
     } catch (err) {
       return "";
@@ -73,7 +72,7 @@ const GetAvatarPathFromAvatarFilePath = (avatarFilePath: string): string => {
 };
 
 export {
-    GetAvatarPathFromCharacterId,
+    GetAvatarPathFromCharacterName,
     GetAvatarPathFromPersonaId,
     GetAvatarPathFromLorebookId,
     GetAvatarPathFromChatId,

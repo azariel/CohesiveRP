@@ -76,7 +76,8 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             // Add the chat default Avatar (same as the character's)
             if (newlyCreatedChat.CharacterIds != null && newlyCreatedChat.CharacterIds.Count > 0)
             {
-                string characterAvatarFilePath = Path.Combine(WebConstants.CharactersAvatarFilePath, newlyCreatedChat.CharacterIds.First(), WebConstants.AvatarFileName);
+                var characterDbModel = await storageService.GetCharacterByIdAsync(newlyCreatedChat.CharacterIds.First().ToLowerInvariant());
+                string characterAvatarFilePath = Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name, WebConstants.AvatarFileName);
                 if (File.Exists(characterAvatarFilePath))
                 {
                     string chatDirectoryPath = Path.Combine(WebConstants.ChatsAvatarFilePath, newlyCreatedChat.ChatId);

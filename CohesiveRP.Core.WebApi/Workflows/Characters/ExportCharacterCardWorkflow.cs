@@ -45,7 +45,7 @@ public class ExportCharacterCardWorkflow : IExportCharacterCardWorkflow
 
         var characterSheet = await storageService.GetCharacterSheetByCharacterIdAsync(characterId);
 
-        string directoryCharacterAvatar = Path.Combine(WebConstants.CharactersAvatarFilePath, characterId);
+        string directoryCharacterAvatar = Path.Combine(WebConstants.CharactersAvatarFilePath, character.Name.ToLowerInvariant());
         string fileName = Path.Combine(directoryCharacterAvatar, WebConstants.AvatarFileName);
         if (!File.Exists(fileName))
         {
