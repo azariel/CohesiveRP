@@ -1,4 +1,4 @@
-﻿namespace CohesiveRP.Storage.DataAccessLayer.SceneAnalyzer.BusinessObjects.CharacterAnalyze
+﻿namespace CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects
 {
     public enum ClothingStateOfDress
     {

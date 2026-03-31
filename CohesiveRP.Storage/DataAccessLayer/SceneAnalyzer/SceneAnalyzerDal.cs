@@ -36,10 +36,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     SceneAnalyzerId = Guid.NewGuid().ToString(),
                     CreatedAtUtc = DateTime.UtcNow,
                     ChatId = queryModel.ChatId,
-                    CharactersAnalyze = queryModel.CharactersAnalyze,
                     LinkedMessageId = queryModel.LinkedMessageId,
-                    PlayerAnalyze = queryModel.PlayerAnalyze,
-                    SceneCategory = queryModel.SceneCategory,
                 };
 
                 // Check if SceneAnalyzers for this chat already exist
@@ -96,10 +93,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         SceneAnalyzerId = Guid.NewGuid().ToString(),
                         CreatedAtUtc = DateTime.UtcNow,
                         ChatId = queryModel.ChatId,
-                        SceneCategory = queryModel.SceneCategory,
-                        PlayerAnalyze = queryModel.PlayerAnalyze,
                         LinkedMessageId = queryModel.LinkedMessageId,
-                        CharactersAnalyze = queryModel.CharactersAnalyze,
                     };
 
                     EntityEntry<SceneAnalyzerDbModel> resultAdd = dbContext.SceneAnalyzers.Add(sceneAnalyzerObj);
@@ -114,10 +108,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 }
 
                 // Those are the accepted fields to update
-                sceneAnalyzer.SceneCategory = queryModel.SceneCategory;
-                sceneAnalyzer.PlayerAnalyze = queryModel.PlayerAnalyze;
                 sceneAnalyzer.LinkedMessageId = queryModel.LinkedMessageId;
-                sceneAnalyzer.CharactersAnalyze = queryModel.CharactersAnalyze;
 
                 EntityEntry<SceneAnalyzerDbModel> result = dbContext.SceneAnalyzers.Update(sceneAnalyzer);
                 if (result.State != EntityState.Modified)

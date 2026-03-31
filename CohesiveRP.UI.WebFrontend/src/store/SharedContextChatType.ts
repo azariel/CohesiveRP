@@ -4,6 +4,7 @@ import type { SharedContextType } from "./SharedContextType";
 interface SharedContextChatType extends SharedContextType {
   isSceneTrackerOpened: boolean | null;
   chatId: string;
+  lastPlayerMessageId: string;
   currentUserInputValue: string;
   nbColdMessages: number | null,
   mainQueryId: string | null;// The id of the background query running to generate the ai reply

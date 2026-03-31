@@ -9,11 +9,6 @@ import { FormatUtcDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
 import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
-import { getFromServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
-import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
-import type { BackgroundQueryResponseDto } from "../../../../../ResponsesDto/chat/BackgroundQueryResponseDto";
-import type { BackgroundQueriesResponseDto } from "../../../../../ResponsesDto/chat/BackgroundQueriesResponseDto";
-import type { ChatMessageResponseDto } from "../../../../../ResponsesDto/chat/ChatMessageResponseDto";
 
 interface Props {
   message?: ChatMessage;
@@ -30,123 +25,6 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
   const [editContent, setEditContent] = useState(message?.content ?? "");
   const isRevertingRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Local copy of the message — updated after sceneAnalyze completes to reflect new avatar/content
-  const [localMessage, setLocalMessage] = useState<ChatMessage | undefined>(message);
-
-  // Keep localMessage in sync if parent re-renders with a new message (e.g. after an edit save)
-  useEffect(() => {
-    setLocalMessage(message);
-  }, [message]);
-
-  // --- sceneAnalyze polling state ---
-  const [sceneAnalyzeQueryId, setSceneAnalyzeQueryId] = useState<string | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const sceneAnalyzeNetworkErrorRef = useRef(0);
-
-  // On mount: check if a sceneAnalyze background query is already in-flight for this chat
-  useEffect(() => {
-    if (!chatId)
-      return;
-
-    const abortController = new AbortController();
-
-    const fetchSceneAnalyzeQuery = async () => {
-      const response = await getFromServerApiAsync<BackgroundQueriesResponseDto>(
-        `api/backgroundQueries?chatId=${chatId}`,
-        abortController.signal
-      );
-
-      if (abortController.signal.aborted)
-        return;
-
-      const serverApiException = response as ServerApiExceptionResponseDto | null;
-      if (!response || response.code !== 200 || serverApiException?.message) {
-        console.error(`[ChatMessageComponent] Fetching sceneAnalyze background queries failed. Code:[${response?.code}], Message:[${serverApiException?.message}]`);
-        return;
-      }
-
-      if (!response.queries || response.queries.length <= 0)
-        return;
-
-      const sceneAnalyzeQuery = response.queries.find(query =>
-        query.tags.some(tag => tag === "sceneAnalyze")
-      );
-
-      if (sceneAnalyzeQuery) {
-        console.log("[ChatMessageComponent] Found in-flight sceneAnalyze query. Starting to poll for results...");
-        setIsAnalyzing(true);
-        setSceneAnalyzeQueryId(sceneAnalyzeQuery.backgroundQueryId);
-      }
-    };
-
-    fetchSceneAnalyzeQuery();
-    return () => abortController.abort();
-  }, [chatId]);
-
-  // Poll while a sceneAnalyze query is tracked
-  useEffect(() => {
-    if (!sceneAnalyzeQueryId)
-      return;
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await getFromServerApiAsync<BackgroundQueryResponseDto>(
-          `api/backgroundQueries/${sceneAnalyzeQueryId}`
-        );
-
-        const serverApiException = response as ServerApiExceptionResponseDto | null;
-        if (!response || response.code !== 200 || serverApiException?.message) {
-          console.error(`[ChatMessageComponent] Polling sceneAnalyze query failed. Code:[${response?.code}], Message:[${serverApiException?.message}]`);
-
-          if (sceneAnalyzeNetworkErrorRef.current >= 4) {
-            clearInterval(pollInterval);
-            setIsAnalyzing(false);
-            setSceneAnalyzeQueryId(null);
-            return;
-          }
-
-          sceneAnalyzeNetworkErrorRef.current += 1;
-          return;
-        }
-
-        // Still running — stream partial content into localMessage if present
-        if (response.status === "InProgress" || response.status === "Pending") {
-          if (response.content) {
-            setLocalMessage((prev) => prev ? { ...prev, content: response.content! } : prev);
-          }
-          return;
-        }
-
-        // Query is done — re-fetch the message by its own ID to get the refreshed avatar + content
-        if (chatId && message?.messageId) {
-          const refreshed = await getFromServerApiAsync<ChatMessageResponseDto>(
-            `api/chat/${chatId}/messages/${message.messageId}`
-          );
-
-          const refreshedException = refreshed as ServerApiExceptionResponseDto | null;
-          if (!refreshed || refreshedException?.message) {
-            console.error(`[ChatMessageComponent] Re-fetching message after sceneAnalyze failed. [${JSON.stringify(refreshedException)}]`);
-          } else if (refreshed.messageObj) {
-            setLocalMessage(refreshed.messageObj);
-          }
-        }
-
-        console.log("[ChatMessageComponent] sceneAnalyze generation complete.");
-        sceneAnalyzeNetworkErrorRef.current = 0;
-        clearInterval(pollInterval);
-        setIsAnalyzing(false);
-        setSceneAnalyzeQueryId(null);
-
-      } catch (err) {
-        console.error("[ChatMessageComponent] Polling sceneAnalyze error:", err);
-        clearInterval(pollInterval);
-        setIsAnalyzing(false);
-      }
-    }, 3000);
-
-    return () => clearInterval(pollInterval);
-  }, [sceneAnalyzeQueryId]);
 
   // Focus + size once when entering edit mode
   useEffect(() => {
@@ -171,22 +49,22 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
     if (!isEditable)
       return;
 
-    setEditContent(localMessage?.content ?? "");
+    setEditContent(message?.content ?? "");
     setIsEditing(true);
   };
 
   const handleRevert = () => {
     isRevertingRef.current = true;
-    setEditContent(localMessage?.content ?? "");
+    setEditContent(message?.content ?? "");
     setIsEditing(false);
     isRevertingRef.current = false;
   };
 
   const handleDelete = async () => {
-    if (!localMessage?.messageId || !onDelete)
+    if (!message?.messageId || !onDelete)
       return;
 
-    await onDelete(localMessage.messageId);
+    await onDelete(message.messageId);
   };
 
   const handleBlur = async () => {
@@ -198,41 +76,40 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
     setIsEditing(false);
     const trimmed = editContent.trim();
 
-    if (!trimmed || trimmed === localMessage?.content || !localMessage?.messageId || !onSave)
+    if (!trimmed || trimmed === message?.content || !message?.messageId || !onSave)
       return;
 
-    await onSave(localMessage.messageId, trimmed);
+    await onSave(message.messageId, trimmed);
   };
 
-  const displayedContent = localMessage?.content ?? "[empty]";
+  const displayedContent = message?.content ?? "[empty]";
 
   return (
     <main className={styles.chatMessageComponent}>
       <div className={styles.container}>
         <div className={styles.leftMessageContainer}>
           <div className={styles.messageAvatarContainer}>
-            {localMessage?.sourceType == 0 ? (
-              <img src={GetAvatarPathFromPersonaId(localMessage?.personaId ?? "")} alt="Avatar" />
+            {message?.sourceType == 0 ? (
+              <img src={GetAvatarPathFromPersonaId(message?.personaId ?? "")} alt="Avatar" />
             ) : (
-              <img src={localMessage?.avatarFilePath && localMessage.avatarFilePath !== "avatar" ? GetAvatarPathFromAvatarFilePath(localMessage.avatarFilePath) : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar")} alt="Avatar" />
+              <img src={message?.avatarFilePath && message.avatarFilePath !== "avatar" ? GetAvatarPathFromAvatarFilePath(message.avatarFilePath) : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar")} alt="Avatar" />
             )}
           </div>
           <div className={styles.messageInfoContainer}>
-            <div title="messageId">{!localMessage?.messageIndex ? "-" : "# " + localMessage.messageIndex}</div>
+            <div title="messageId">{!message?.messageIndex ? "-" : "# " + message.messageIndex}</div>
           </div>
         </div>
         <div className={styles.messageContent}>
           <div className={styles.messageHeaderContent}>
             <div className={styles.messageHeaderContentName}>
-              {localMessage?.sourceType == 0 ? <label>{localMessage?.personaName ?? "User"}</label> : <label>{localMessage?.characterName ?? "User"}</label>}
+              {message?.sourceType == 0 ? <label>{message?.personaName ?? "User"}</label> : <label>{message?.characterName ?? "Character"}</label>}
             </div>
             <div className={styles.messageHeaderContentModel}>
               model-name (?m??s)
-              {isAnalyzing && <ImSpinner2 className={styles.sceneAnalyzeSpinner} title="Scene analyzing..." />}
             </div>
             <div className={styles.messageHeaderContentCreatedAt}>
-              {localMessage?.summarized ? (<MdOutlineSummarize className={styles.messageHeaderSummarizeIcon} title="Summarized" />) : ""}
-              {localMessage?.createdAtUtc ? FormatUtcDate(localMessage.createdAtUtc) : ""}
+              {message?.summarized ? (<MdOutlineSummarize className={styles.messageHeaderSummarizeIcon} title="Summarized" />) : ""}
+              {message?.createdAtUtc ? FormatUtcDate(message.createdAtUtc) : ""}
             </div>
           </div>
           <div className={styles.messageContentSeparator} />
@@ -270,6 +147,8 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
               <HiCircleStack />
               <HiAdjustmentsHorizontal />
               <HiCog6Tooth />
+              {/* Roll 1-20 incl */}
+              {/* <label>{Math.floor(Math.random() * 20) + 1}</label> */}
             </div>
 
             <div className={styles.messageContentFooterRightSideIcons}>

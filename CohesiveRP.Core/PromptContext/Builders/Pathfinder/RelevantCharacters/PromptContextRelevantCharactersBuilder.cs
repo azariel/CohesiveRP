@@ -53,7 +53,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             return JsonSerializer.Serialize(arr, new JsonSerializerOptions
             {
                 Converters = { new JsonStringEnumConverter() },
-                WriteIndented = false
+                WriteIndented = true
             });
         }
 
@@ -73,7 +73,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                     string tagName = property.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? property.Name;
 
                     // Those particular properties will be handled manually for more control
-                    if (tagName == "pathfinderAttributes" || tagName == "pathfinderSkills")
+                    if (tagName == "pathfinderAttributes" ||
+                        tagName == "pathfinderSkills" ||
+                        tagName == "kinks" ||
+                        tagName == "secretKinks")
                         continue;
 
                     object value = property.GetValue(characterSheet);
@@ -82,27 +85,62 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                     if (string.IsNullOrWhiteSpace(formattedValue))
                         continue;
 
-                    str.AppendLine($"  <{tagName}>{formattedValue}</{tagName}>");
+                    str.AppendLine($"    <{tagName}>{formattedValue}</{tagName}>");
                 } catch (Exception)
                 {
                     // ignore
                 }
             }
 
+            // Handle kinks in a way that is more segregated from other information
+            str.AppendLine($"    <kinks>");
+            foreach (var kinkValue in characterSheet.Kinks)
+            {
+                // If standard (key:value), handle it differently
+                string[] splitValue = kinkValue.Split(':');
+                if (splitValue.Length == 2)
+                {
+                    str.AppendLine($"      <{splitValue[0]}>{splitValue[1]}</{splitValue[0]}>");
+                } else
+                {
+                    // Non-standard format, just add it as is
+                    str.AppendLine($"      - {kinkValue}");
+                }
+            }
+
+            str.AppendLine($"    </kinks>");
+
+            str.AppendLine($"    <secretKinks>");
+            foreach (var kinkValue in characterSheet.SecretKinks)
+            {
+                // If standard (key:value), handle it differently
+                string[] splitValue = kinkValue.Split(':');
+                if (splitValue.Length == 2)
+                {
+                    str.AppendLine($"      <{splitValue[0]}>{splitValue[1]}</{splitValue[0]}>");
+                } else
+                {
+                    // Non-standard format, just add it as is
+                    str.AppendLine($"      - {kinkValue}");
+                }
+            }
+
+            str.AppendLine($"    </secretKinks>");
+
             // Handle the Pathfinder special properties
-            str.AppendLine($"    <Attributes>");
+            str.AppendLine($"    <attributes>");
             foreach (PathfinderAttribute attribute in characterSheet.PathfinderAttributesValues)
             {
                 str.AppendLine($"      <{attribute.AttributeType}>{attribute.Value}</{attribute.AttributeType}>");
             }
 
-            str.AppendLine($"    </Attributes>");
-            str.AppendLine($"    <Skills>");
+            str.AppendLine($"    </attributes>");
+            str.AppendLine($"    <skills>");
             foreach (PathfinderSkillAttributes skill in characterSheet.PathfinderSkillsValues)
             {
                 str.AppendLine($"      <{skill.SkillType}>{skill.Value}</{skill.SkillType}>");
             }
-            str.AppendLine($"    </Skills>");
+            str.AppendLine($"    </skills>");
         }
 
         private bool AreNameEquivalent(string nameToEvaluate, string firstName, string lastName)
@@ -156,9 +194,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
 
                 if (personaCharacterSheet != null)
                 {
-                    str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName} (player)>");
+                    str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName}_(player)>");
                     AppendCharacterSheetToPromptContext(str, personaCharacterSheet.CharacterSheet);
-                    str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName} (player)>");
+                    str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName}_(player)>");
                 }
             }
 
@@ -171,7 +209,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 {
                     var selection = charactersToInclude.FirstOrDefault(f => AreNameEquivalent(characterNameInScene, f.CharacterSheet.FirstName, f.CharacterSheet.LastName));
 
-                    if(selection != null)
+                    if (selection != null)
                     {
                         orderedInstances.Add(selection);
                     }
@@ -179,9 +217,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
 
                 foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(2))// TODO: make the limit configurable
                 {
-                    str.AppendLine($"  <{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName)}>");
+                    str.AppendLine($"  <{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
                     AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
-                    str.AppendLine($"  </{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName)}>");
+                    str.AppendLine($"  </{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
                 }
             }
 
@@ -216,6 +254,6 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             return ($"<relevant_characters>{Environment.NewLine}{str.ToString().Trim().TrimEnd(Environment.NewLine.ToCharArray())}{Environment.NewLine}</relevant_characters>{Environment.NewLine}Please note that secretKinks are kinks or fetishes that the character is ashamed or embarassed about and will avoid openly talk about, but that character will react positively when exposed to situations implementing their kinks and secret kinks or fetishes.{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
         }
 
-        private static string GetCharacterFullName(string firstName, string lastName) => $"{firstName} {lastName}".Trim();
+        private static string GetCharacterFullName(string firstName, string lastName, string separator = " ") => $"{firstName}{separator}{lastName}".Trim();
     }
 }

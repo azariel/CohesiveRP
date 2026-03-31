@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Common.Exceptions;
+﻿using CohesiveRP.Common.BusinessObjects;
+using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
@@ -89,7 +90,8 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             {
                 ChatId = requestDto.ChatId,
                 Summarized = false,// adding a brand new message, so ofc it's not summarized yet
-                SourceType = Common.BusinessObjects.MessageSourceType.User,
+                SourceType = MessageSourceType.User,
+                InRoleplayDateTime = null,// At this point, the player just generated its message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
                 MessageContent = requestDto.Message.Content,
                 CreatedAtUtc = DateTime.UtcNow,
                 CharacterId = null,// Null as this is from the User
@@ -137,6 +139,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 MessageId = message?.MessageId,
                 PersonaId = chat?.PersonaId,
                 PersonaName = persona?.Name,
+                InRoleplayDateTime = message?.InRoleplayDateTime,
                 Summarized = message?.Summarized ?? false,
                 AvatarFilePath = message?.AvatarFilePath,
                 Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User")

@@ -58,7 +58,6 @@ namespace CohesiveRP.Common.Utils.Parsers
                 return ParseOnlyJson<T>(target.Content);
             } catch (Exception e)
             {
-                LoggingManager.LogToFile("98342204-d77b-4b9c-96d2-9be7978b80bb", $"Couldn't deserialize LLM Api message [{e.Message}].");
                 // ignore
             }
 

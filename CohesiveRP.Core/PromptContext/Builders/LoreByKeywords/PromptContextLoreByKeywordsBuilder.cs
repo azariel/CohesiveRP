@@ -272,6 +272,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
                 if (value != null)
                 {
+                    value += Environment.NewLine;
                     str.Append(value);
                 }
             }

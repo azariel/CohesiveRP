@@ -1,13 +1,11 @@
 ﻿using System.Text;
 using CohesiveRP.Common.BusinessObjects;
-using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
-using CohesiveRP.Storage.DataAccessLayer.SceneAnalyzer.BusinessObjects.CharacterAnalyze;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
@@ -81,88 +79,90 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         private static void GenerateSceneAnalysisInjection(SceneAnalyzerDbModel sceneAnalysis, StringBuilder sceneAnalysisInjection)
         {
-            // Themes
-            if (!string.IsNullOrWhiteSpace(sceneAnalysis?.SceneCategory?.MainThemes))
-            {
-                StringBuilder strSceneCategorization = new();
-                strSceneCategorization.AppendLine($"<scene_themes>");
-                strSceneCategorization.AppendLine($"<main_topics>");
-                strSceneCategorization.AppendLine(sceneAnalysis.SceneCategory.MainThemes);
-                strSceneCategorization.AppendLine($"</main_topics>");
+            //// Themes
+            //if (!string.IsNullOrWhiteSpace(sceneAnalysis?.SceneCategory?.MainThemes))
+            //{
+            //    StringBuilder strSceneCategorization = new();
+            //    strSceneCategorization.AppendLine($"<scene_themes>");
+            //    strSceneCategorization.AppendLine($"<main_topics>");
+            //    strSceneCategorization.AppendLine(sceneAnalysis.SceneCategory.MainThemes);
+            //    strSceneCategorization.AppendLine($"</main_topics>");
 
-                if (!string.IsNullOrWhiteSpace(sceneAnalysis.SceneCategory.NestedThemes))
-                {
-                    strSceneCategorization.AppendLine($"<secondary_topics>");
-                    strSceneCategorization.AppendLine(sceneAnalysis.SceneCategory.NestedThemes);
-                    strSceneCategorization.AppendLine($"</secondary_topics>");
-                }
+            //    if (!string.IsNullOrWhiteSpace(sceneAnalysis.SceneCategory.NestedThemes))
+            //    {
+            //        strSceneCategorization.AppendLine($"<secondary_topics>");
+            //        strSceneCategorization.AppendLine(sceneAnalysis.SceneCategory.NestedThemes);
+            //        strSceneCategorization.AppendLine($"</secondary_topics>");
+            //    }
 
-                strSceneCategorization.AppendLine($"</scene_themes>");
-                sceneAnalysisInjection.AppendLine(strSceneCategorization.ToString());
-            }
+            //    strSceneCategorization.AppendLine($"</scene_themes>");
+            //    sceneAnalysisInjection.AppendLine(strSceneCategorization.ToString());
+            //}
 
-            // Characters (last thought, next possible actions)
-            if (sceneAnalysis?.CharactersAnalyze != null && sceneAnalysis.CharactersAnalyze.Length > 0)
-            {
-                StringBuilder strSceneCharacters = new();
-                var characters = sceneAnalysis.CharactersAnalyze.Where(w => !string.IsNullOrWhiteSpace(w.Name)).ToArray();
+            //// Characters (last thought, next possible actions)
+            //if (sceneAnalysis?.CharactersAnalyze != null && sceneAnalysis.CharactersAnalyze.Length > 0)
+            //{
+            //    StringBuilder strSceneCharacters = new();
+            //    var characters = sceneAnalysis.CharactersAnalyze.Where(w => !string.IsNullOrWhiteSpace(w.Name)).ToArray();
 
-                if (characters.Length > 0)
-                {
-                    strSceneCharacters.AppendLine($"<characters>");
-                    foreach (CharactersAnalyze character in characters)
-                    {
-                        strSceneCharacters.AppendLine($"<{character.Name}>");
-                        if (!string.IsNullOrWhiteSpace(character.InnerThoughtsOrMonologue))
-                            strSceneCharacters.AppendLine($"<lastThought>{character.InnerThoughtsOrMonologue}</lastThought>");
+            //    if (characters.Length > 0)
+            //    {
+            //        strSceneCharacters.AppendLine($"<characters>");
+            //        foreach (CharactersAnalyze character in characters)
+            //        {
+            //            string name = character.Name.Replace(" ", "_");
+            //            strSceneCharacters.AppendLine($"<{name}>");
+            //            if (!string.IsNullOrWhiteSpace(character.InnerThoughtsOrMonologue))
+            //                strSceneCharacters.AppendLine($"<lastThought>{character.InnerThoughtsOrMonologue}</lastThought>");
 
-                        if (!string.IsNullOrWhiteSpace(character.Mood))
-                            strSceneCharacters.AppendLine($"<mood>{character.Mood}</mood>");
+            //            if (!string.IsNullOrWhiteSpace(character.Mood))
+            //                strSceneCharacters.AppendLine($"<mood>{character.Mood}</mood>");
 
-                        if (!string.IsNullOrWhiteSpace(character.FacialExpression))
-                            strSceneCharacters.AppendLine($"<facialExpression>{character.FacialExpression}</facialExpression>");
+            //            if (!string.IsNullOrWhiteSpace(character.FacialExpression))
+            //                strSceneCharacters.AppendLine($"<facialExpression>{character.FacialExpression}</facialExpression>");
 
-                        if (!string.IsNullOrWhiteSpace(character.BodyPosition))
-                            strSceneCharacters.AppendLine($"<bodyPosition>{character.BodyPosition}</bodyPosition>");
+            //            if (!string.IsNullOrWhiteSpace(character.BodyPosition))
+            //                strSceneCharacters.AppendLine($"<bodyPosition>{character.BodyPosition}</bodyPosition>");
 
-                        if (!string.IsNullOrWhiteSpace(character.SemenOnBodyLocation))
-                            strSceneCharacters.AppendLine($"<semenOnBodyLocation>{character.SemenOnBodyLocation}</semenOnBodyLocation>");
+            //            if (!string.IsNullOrWhiteSpace(character.SemenOnBodyLocation))
+            //                strSceneCharacters.AppendLine($"<semenOnBodyLocation>{character.SemenOnBodyLocation}</semenOnBodyLocation>");
 
-                        strSceneCharacters.AppendLine($"</{character.Name}>");
-                    }
+            //            strSceneCharacters.AppendLine($"</{name}>");
+            //        }
 
-                    strSceneCharacters.AppendLine($"</characters>");
-                    sceneAnalysisInjection.AppendLine(strSceneCharacters.ToString());
-                }
-            }
+            //        strSceneCharacters.AppendLine($"</characters>");
+            //        sceneAnalysisInjection.AppendLine(strSceneCharacters.ToString());
+            //    }
+            //}
 
-            // Player
-            if (!string.IsNullOrWhiteSpace(sceneAnalysis?.PlayerAnalyze?.Name))
-            {
-                StringBuilder strScenePlayer = new();
-                strScenePlayer.AppendLine($"<player ({sceneAnalysis.PlayerAnalyze.Name})>");
+            //// Player
+            //if (!string.IsNullOrWhiteSpace(sceneAnalysis?.PlayerAnalyze?.Name))
+            //{
+            //    string name = sceneAnalysis.PlayerAnalyze.Name.Replace(" ", "_");
+            //    StringBuilder strScenePlayer = new();
+            //    strScenePlayer.AppendLine($"<player_({name})>");
 
-                //if (!string.IsNullOrWhiteSpace(sceneAnalysis.PlayerAnalyze.FacialExpression))
-                //    strScenePlayer.AppendLine($"<facialExpression>{sceneAnalysis.PlayerAnalyze.FacialExpression}</facialExpression>");
+            //    //if (!string.IsNullOrWhiteSpace(sceneAnalysis.PlayerAnalyze.FacialExpression))
+            //    //    strScenePlayer.AppendLine($"<facialExpression>{sceneAnalysis.PlayerAnalyze.FacialExpression}</facialExpression>");
 
-                if (!string.IsNullOrWhiteSpace(sceneAnalysis.PlayerAnalyze.Mood))
-                    strScenePlayer.AppendLine($"<mood>{sceneAnalysis.PlayerAnalyze.Mood}</mood>");
+            //    if (!string.IsNullOrWhiteSpace(sceneAnalysis.PlayerAnalyze.Mood))
+            //        strScenePlayer.AppendLine($"<mood>{sceneAnalysis.PlayerAnalyze.Mood}</mood>");
 
-                if (!string.IsNullOrWhiteSpace(sceneAnalysis.PlayerAnalyze.SemenOnBodyLocation))
-                    strScenePlayer.AppendLine($"<semenOnBodyLocation>{sceneAnalysis.PlayerAnalyze.SemenOnBodyLocation}</semenOnBodyLocation>");
+            //    if (!string.IsNullOrWhiteSpace(sceneAnalysis.PlayerAnalyze.SemenOnBodyLocation))
+            //        strScenePlayer.AppendLine($"<semenOnBodyLocation>{sceneAnalysis.PlayerAnalyze.SemenOnBodyLocation}</semenOnBodyLocation>");
 
-                //if (!string.IsNullOrWhiteSpace(sceneAnalysis.PlayerAnalyze.EyesDirection?.LookingAtCharacterName))
-                //{
-                //    strScenePlayer.AppendLine($"<lookingAt>{sceneAnalysis.PlayerAnalyze.EyesDirection.LookingAtCharacterName}</lookingAt>");
-                //    strScenePlayer.AppendLine($"<lookingAtBodyPart>{sceneAnalysis.PlayerAnalyze.EyesDirection.BodyPartBeingLookedAt}</lookingAtBodyPart>");
-                //}
+            //    //if (!string.IsNullOrWhiteSpace(sceneAnalysis.PlayerAnalyze.EyesDirection?.LookingAtCharacterName))
+            //    //{
+            //    //    strScenePlayer.AppendLine($"<lookingAt>{sceneAnalysis.PlayerAnalyze.EyesDirection.LookingAtCharacterName}</lookingAt>");
+            //    //    strScenePlayer.AppendLine($"<lookingAtBodyPart>{sceneAnalysis.PlayerAnalyze.EyesDirection.BodyPartBeingLookedAt}</lookingAtBodyPart>");
+            //    //}
 
-                //if (!string.IsNullOrWhiteSpace(sceneAnalysis.PlayerAnalyze.BodyPosition))
-                //    strScenePlayer.AppendLine($"<bodyPosition>{sceneAnalysis.PlayerAnalyze.BodyPosition}</bodyPosition>");
+            //    //if (!string.IsNullOrWhiteSpace(sceneAnalysis.PlayerAnalyze.BodyPosition))
+            //    //    strScenePlayer.AppendLine($"<bodyPosition>{sceneAnalysis.PlayerAnalyze.BodyPosition}</bodyPosition>");
 
-                strScenePlayer.AppendLine($"</player ({sceneAnalysis.PlayerAnalyze.Name})>");
-                sceneAnalysisInjection.AppendLine(strScenePlayer.ToString());
-            }
+            //    strScenePlayer.AppendLine($"</player_({name})>");
+            //    sceneAnalysisInjection.AppendLine(strScenePlayer.ToString());
+            //}
         }
     }
 }

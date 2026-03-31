@@ -46,12 +46,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         //new LLMProviderConfig
                         //{
                         //    ProviderConfigId = Guid.NewGuid().ToString(),
-                        //    Name = "IntenseRP-V2-GLM",
-                        //    Model = "glm-reasoner",
+                        //    Name = "IntenseRP-V2-GLM-Chat",
+                        //    Model = "glm-chat",
                         //    ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                         //    Type = LLMProviderType.OpenAICustom,
                         //    ConcurrencyLimit = 1,
-                        //    Tags = [ChatCompletionPresetType.Main],
+                        //    Tags = [],
                         //    TimeoutStrategy = new TimeoutStrategy
                         //    {
                         //        Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -61,48 +61,78 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         new LLMProviderConfig
                         {
                             ProviderConfigId = Guid.NewGuid().ToString(),
-                            Name = "IntenseRP-V2-DS",
-                            Model = "deepseek-chat",
-                            ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
+                            Name = "IntenseRP-V2-GLM-Think",
+                            Model = "glm-reasoner",
+                            ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.SceneAnalyze, ChatCompletionPresetType.SkillChecksInitiator],// TODO: move SkillChecksInitiator elsewhere, it 'conflicts' with SceneTracker
-                            TimeoutStrategy = new TimeoutStrategy
-                            {
-                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
-                                Retries = 1,
-                            }
-                        },
-                        new LLMProviderConfig
-                        {
-                            ProviderConfigId = Guid.NewGuid().ToString(),
-                            Name = "IntenseRP-V2-DS-Think",
-                            Model = "deepseek-reasoner",
-                            ApiUrl = "http://127.0.0.1:7779/v1/chat/completions",
-                            Type = LLMProviderType.OpenAICustom,
-                            ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
-                            TimeoutStrategy = new TimeoutStrategy
-                            {
-                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
-                                Retries = 1,
-                            }
-                        },
-                        new LLMProviderConfig
-                        {
-                            ProviderConfigId = Guid.NewGuid().ToString(),
-                            Name = "IntenseRP-V2-KIMI",
-                            Model = "kimi-chat",
-                            ApiUrl = "http://127.0.0.1:7780/v1/chat/completions",
-                            Type = LLMProviderType.OpenAICustom,
-                            ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.Main],
+                            Tags = [ChatCompletionPresetType.Main],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
                                 Retries = 3,
                             }
                         },
+                        new LLMProviderConfig
+                        {
+                            ProviderConfigId = Guid.NewGuid().ToString(),
+                            Name = "IntenseRP-V2-DS-Chat",
+                            Model = "deepseek-chat",
+                            ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
+                            Type = LLMProviderType.OpenAICustom,
+                            ConcurrencyLimit = 1,
+                            Tags = [ChatCompletionPresetType.SkillChecksInitiator, ChatCompletionPresetType.SceneTracker],
+                            TimeoutStrategy = new TimeoutStrategy
+                            {
+                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                                Retries = 1,
+                            }
+                        },
+                        //new LLMProviderConfig
+                        //{
+                        //    ProviderConfigId = Guid.NewGuid().ToString(),
+                        //    Name = "IntenseRP-V2-DS-Think",
+                        //    Model = "deepseek-reasoner",
+                        //    ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
+                        //    Type = LLMProviderType.OpenAICustom,
+                        //    ConcurrencyLimit = 1,
+                        //    Tags = [ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
+                        //    TimeoutStrategy = new TimeoutStrategy
+                        //    {
+                        //        Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                        //        Retries = 1,
+                        //    }
+                        //},
+                        new LLMProviderConfig
+                        {
+                            ProviderConfigId = Guid.NewGuid().ToString(),
+                            Name = "IntenseRP-V2-KIMI-Chat",
+                            Model = "moonshot-chat",
+                            ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
+                            Type = LLMProviderType.OpenAICustom,
+                            ConcurrencyLimit = 1,
+                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneAnalyze],
+                            TimeoutStrategy = new TimeoutStrategy
+                            {
+                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                                Retries = 3,
+                            }
+                        },
+                        //new LLMProviderConfig
+                        //{
+                        //    ProviderConfigId = Guid.NewGuid().ToString(),
+                        //    Name = "IntenseRP-V2-KIMI-Think",
+                        //    Model = "moonshot-reasoner",
+                        //    ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
+                        //    Type = LLMProviderType.OpenAICustom,
+                        //    ConcurrencyLimit = 1,
+                        //    Tags = [],
+                        //    TimeoutStrategy = new TimeoutStrategy
+                        //    {
+                        //        Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                        //        Retries = 3,
+                        //    }
+                        //},
                     },
                     ChatCompletionPresetsMap = new ChatCompletionPresetsMap()
                     {

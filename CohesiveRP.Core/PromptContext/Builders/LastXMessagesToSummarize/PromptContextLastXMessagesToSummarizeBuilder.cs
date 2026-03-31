@@ -53,16 +53,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             // Filter for a chunk ordered by createdAt
             messagesToProcess = messagesToProcess.Reverse().ToArray();
 
-            string output = $"<messages_to_summarize>{Environment.NewLine}Focus your attention on the {MessageSourceType.User} messages, try to keep as much details as possible. You must also consider {MessageSourceType.AI} messages in your summarization, but you must retains as much details from {MessageSourceType.User} as possible whilst keeping the summary short.{Environment.NewLine}{promptContextFormatElement.Options?.Format}";
+            string output = $"<instructions>{Environment.NewLine}Focus your attention on the {MessageSourceType.User} messages, try to keep as much details as possible. You must also consider {MessageSourceType.AI} messages in your summarization, but you must retains as much details from {MessageSourceType.User} as possible whilst keeping the summary short.{Environment.NewLine}</instructions>{Environment.NewLine}{Environment.NewLine}{promptContextFormatElement.Options?.Format}";
 
             string value = string.Empty;
             foreach (IMessageDbModel message in messagesToProcess)
             {
-                value += $"{message.SourceType}:{Environment.NewLine}<message>{message.Content}</message>{Environment.NewLine}{Environment.NewLine}";
+                value += $"{message.SourceType}:{Environment.NewLine}<message>{(message.InRoleplayDateTime == null ? string.Empty : $"{message.InRoleplayDateTime:dd-MM-yyyy HH:mm}: ")} {message.Content}</message>{Environment.NewLine}{Environment.NewLine}";
             }
 
             output = output.Replace("{{item_description}}", value);
-            output += $"{Environment.NewLine}</messages_to_summarize>";
+            output += $"{Environment.NewLine}</instructions>";
             return (output, new ShareableContextLink
             {
                 LinkedBuilder = this,

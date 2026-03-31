@@ -6,12 +6,15 @@ using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Directive;
 using CohesiveRP.Core.PromptContext.Builders.LoreByKeywords.BusinessObjects;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Lorebooks.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
@@ -39,6 +42,190 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 httpLLMApiProviderService,
                 summaryService)
         {
+        }
+
+        private async Task<string> GetCharacterAvatarFromSceneAnalysisFilePathAsync(ChatDbModel chatDbModel, SceneTrackerDbModel dbModel)
+        {
+            //string finalAvatarSelectionFilePath = $"{Path.Combine(WebConstants.ChatsAvatarFilePath, chatDbModel.ChatId.ToLowerInvariant())}";
+            string finalAvatarSelectionFilePath = null;
+
+            var sceneTracker = LLMResponseParser.ParseFromApiMessageContent<VisualSceneTracker>(dbModel.Content);
+            if (string.IsNullOrWhiteSpace(sceneTracker?.PlayerAnalysis?.EyesDirection?.LookingAtCharacterName))
+            {
+                return finalAvatarSelectionFilePath;
+            }
+
+            if (chatDbModel?.CharacterIds == null || chatDbModel.CharacterIds.Count <= 0)
+            {
+                return finalAvatarSelectionFilePath;
+            }
+
+            var characterSheetInstances = await storageService.GetCharacterSheetsInstanceByChatIdAsync(chatDbModel.ChatId);
+            if (characterSheetInstances?.CharacterSheetInstances == null || characterSheetInstances.CharacterSheetInstances.Count <= 0)
+            {
+                return finalAvatarSelectionFilePath;
+            }
+
+            CharacterSheetInstance[] charactersToConsider = characterSheetInstances.CharacterSheetInstances.Where(w =>
+            chatDbModel.CharacterIds.Any(a => w.CharacterId == a) &&
+            w.CharacterSheet != null &&
+            !string.IsNullOrWhiteSpace(w.CharacterSheet.FirstName)).ToArray();
+
+            if (charactersToConsider.Length <= 0)
+            {
+                return finalAvatarSelectionFilePath;
+            }
+
+            string targetCharacterName = sceneTracker.PlayerAnalysis.EyesDirection.LookingAtCharacterName.ToLowerInvariant().Trim();
+            CharacterSheetInstance targetCharacterSheet = charactersToConsider.FirstOrDefault(w =>
+                targetCharacterName.Equals(w.CharacterSheet.FirstName, StringComparison.InvariantCultureIgnoreCase) ||
+                targetCharacterName.Equals(w.CharacterSheet.LastName, StringComparison.InvariantCultureIgnoreCase) ||
+                targetCharacterName == $"{w.CharacterSheet.FirstName.ToLowerInvariant()} {w.CharacterSheet.LastName?.ToLowerInvariant()}");
+
+            if (targetCharacterSheet == null)
+            {
+                return finalAvatarSelectionFilePath;
+            }
+
+            // Check if the character has an assets folder in this chat
+            var characterDbModel = await storageService.GetCharacterByIdAsync(targetCharacterSheet.CharacterId);
+            string characterFolderPath = Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name.ToLowerInvariant());
+            if (!Directory.Exists(WebConstants.CharactersAvatarFilePath))
+            {
+                return finalAvatarSelectionFilePath;
+            }
+
+            // Alright, we got an assets folder for this character
+            // Let's check if there's an avatar there so that we can default to it
+            string avatarFilePath = Path.Combine(characterFolderPath, WebConstants.AvatarFileName);
+            if (File.Exists(avatarFilePath))
+            {
+                finalAvatarSelectionFilePath = avatarFilePath;
+            }
+
+            // Start by validating that we have a folder for the outfit the lookedAt character is currently wearing
+            var targetCharacter = sceneTracker.CharactersAnalysis.FirstOrDefault(f =>
+            f.Name.Equals(targetCharacterSheet.CharacterSheet.FirstName, StringComparison.InvariantCultureIgnoreCase) ||
+            f.Name.Equals(targetCharacterSheet.CharacterSheet.LastName, StringComparison.InvariantCultureIgnoreCase) ||
+            f.Name.Equals($"{targetCharacterSheet.CharacterSheet.FirstName} {targetCharacterSheet.CharacterSheet.LastName}", StringComparison.InvariantCultureIgnoreCase));
+
+            if (targetCharacter != null)
+            {
+                string currentOutfitFolderPath = Path.Combine(characterFolderPath, targetCharacter.ClothingStateOfDress);
+                if (!Directory.Exists(currentOutfitFolderPath))
+                {
+                    return finalAvatarSelectionFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
+                }
+
+                // Ok, the folder with the right outfit exists. Let's check if there's an avatar matching the right expression there so that we can prioritize it over the default one
+                // TODO: use 'neutral' folder and default to avatar.png if not found
+                string avatarWithNeutralExpressionFilePath = Path.Combine(currentOutfitFolderPath, WebConstants.AvatarFileName);
+                if (File.Exists(avatarWithNeutralExpressionFilePath))
+                {
+                    finalAvatarSelectionFilePath = avatarWithNeutralExpressionFilePath;
+                }
+
+                // TODO: check semen folder here as it's more important that the facial expression
+                // TODO: check for body position
+
+                // Lastly, if there's an avatar matching the current facial expression, let's prioritize it over the neutral one
+                string avatarWithCurrentExpressionFilePath = Path.Combine(currentOutfitFolderPath, targetCharacter.FacialExpression?.ToLowerInvariant());
+                if (Directory.Exists(avatarWithCurrentExpressionFilePath))
+                {
+                    // Get a random file within that folder, if any
+                    string[] availableAvatarsWithTheRightExpressionAndClothes = Directory.GetFiles(avatarWithCurrentExpressionFilePath, "*.*", SearchOption.AllDirectories);
+
+                    if (availableAvatarsWithTheRightExpressionAndClothes != null && availableAvatarsWithTheRightExpressionAndClothes.Length > 0)
+                    {
+                        string choosenFile = availableAvatarsWithTheRightExpressionAndClothes[new Random(DateTime.Now.Millisecond).Next(0, availableAvatarsWithTheRightExpressionAndClothes.Length - 1)];
+                        finalAvatarSelectionFilePath = choosenFile;
+                    }
+                }
+            }
+
+            return finalAvatarSelectionFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
+        }
+
+        private async Task<string> GetPersonaAvatarFromSceneAnalysisFilePathAsync(ChatDbModel chatDbModel, SceneTrackerDbModel dbModel)
+        {
+            string finalAvatarSelectionFilePath = null;
+
+            var sceneTracker = LLMResponseParser.ParseFromApiMessageContent<VisualSceneTracker>(dbModel.Content);
+            if (string.IsNullOrWhiteSpace(sceneTracker?.PlayerAnalysis?.Name))
+            {
+                return finalAvatarSelectionFilePath;
+            }
+
+            if (string.IsNullOrWhiteSpace(chatDbModel?.PersonaId))
+            {
+                return finalAvatarSelectionFilePath;
+            }
+
+            var personaDbModel = await storageService.GetPersonaByIdAsync(chatDbModel.PersonaId);
+            string personaFolderPath = Path.Combine(WebConstants.PersonasAvatarFilePath, personaDbModel.Name.ToLowerInvariant());
+            if (!Directory.Exists(WebConstants.PersonasAvatarFilePath))
+            {
+                return finalAvatarSelectionFilePath;
+            }
+
+            // Alright, we got an assets folder for this persona
+            // Let's check if there's an avatar there so that we can default to it
+            string avatarFilePath = Path.Combine(personaFolderPath, WebConstants.AvatarFileName);
+            if (File.Exists(avatarFilePath))
+            {
+                finalAvatarSelectionFilePath = avatarFilePath;
+            }
+
+            string currentOutfitFolderPath = Path.Combine(personaFolderPath, sceneTracker.PlayerAnalysis.ClothingStateOfDress);
+            if (!Directory.Exists(currentOutfitFolderPath))
+            {
+                return finalAvatarSelectionFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
+            }
+
+            // Ok, the folder with the right outfit exists. Let's check if there's an avatar matching the right expression there so that we can prioritize it over the default one
+            // TODO: use 'neutral' folder and default to avatar.png if not found
+            string avatarWithNeutralExpressionFilePath = Path.Combine(currentOutfitFolderPath, WebConstants.AvatarFileName);
+            if (File.Exists(avatarWithNeutralExpressionFilePath))
+            {
+                finalAvatarSelectionFilePath = avatarWithNeutralExpressionFilePath;
+            }
+
+            // TODO: check semen folder here as it's more important that the facial expression
+            // TODO: check for body position
+
+            // Lastly, if there's an avatar matching the current facial expression, let's prioritize it over the neutral one
+            string avatarWithCurrentExpressionFilePath = Path.Combine(currentOutfitFolderPath, sceneTracker.PlayerAnalysis.FacialExpression?.ToLowerInvariant());
+            if (Directory.Exists(avatarWithCurrentExpressionFilePath))
+            {
+                // Get a random file within that folder, if any
+                string[] availableAvatarsWithTheRightExpressionAndClothes = Directory.GetFiles(avatarWithCurrentExpressionFilePath, "*.*", SearchOption.AllDirectories);
+
+                if (availableAvatarsWithTheRightExpressionAndClothes != null && availableAvatarsWithTheRightExpressionAndClothes.Length > 0)
+                {
+                    string choosenFile = availableAvatarsWithTheRightExpressionAndClothes[new Random(DateTime.Now.Millisecond).Next(0, availableAvatarsWithTheRightExpressionAndClothes.Length - 1)];
+                    finalAvatarSelectionFilePath = choosenFile;
+                }
+            }
+
+            return finalAvatarSelectionFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
+        }
+
+        private async Task SetMessageAvatarAsync(ChatDbModel chat, string messageId, string avatarFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(avatarFilePath) || chat == null || string.IsNullOrWhiteSpace(messageId))
+            {
+                return;
+            }
+
+            MessageDbModel message = await storageService.GetSpecificMessageAsync(chat.ChatId, messageId) as MessageDbModel;
+
+            if (message == null)
+                return;
+
+            message.AvatarFilePath = avatarFilePath;
+
+            //chat.AvatarFilePath = avatarFilePath;
+            await storageService.UpdateHotMessageAsync(chat.ChatId, message);
         }
 
         private async Task HandleLorebookInstancesCreationIfRequired(ChatDbModel chat, LorebookInstanceDbModel[] lorebookInstances)
@@ -153,38 +340,39 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             try
             {
                 var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
-                foreach (var message in messages)
+
+                LLMApiResponseMessage message = messages.LastOrDefault();
+
+                if (string.IsNullOrWhiteSpace(message.Content))
                 {
-                    if (string.IsNullOrWhiteSpace(message.Content))
-                    {
-                        backgroundQueryDbModel.Content = null;
-                        backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
-                        return false;
-                    }
-
-                    // Add the AI reply message to the end of the chat
-                    CreateMessageQueryModel messageQueryModel = new()
-                    {
-                        ChatId = backgroundQueryDbModel.ChatId,
-                        SourceType = MessageSourceType.AI,
-                        CharacterId = chat.CharacterIds.FirstOrDefault(),
-                        AvatarFilePath = null,
-                        Summarized = false,// New message, so it's not summarized yet
-                        MessageContent = ChatMessageParserUtils.ParseMessage(message.Content),
-                        CreatedAtUtc = DateTime.UtcNow,
-                    };
-
-                    IMessageDbModel newMessageInStorage = await storageService.AddMessageAsync(messageQueryModel);
-                    if (newMessageInStorage == null)
-                    {
-                        LoggingManager.LogToFile("15b7b071-b3bb-4d36-9321-4353dd747797", $"Error. The message creation in storage failed. Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Task will be set to Pending status for re-generation.");
-                        backgroundQueryDbModel.Content = null;
-                        backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
-                        return false; ;
-                    }
-
-                    backgroundQueryDbModel.LinkedId = newMessageInStorage.MessageId;
+                    backgroundQueryDbModel.Content = null;
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                    return false;
                 }
+
+                // Add the AI reply message to the end of the chat
+                CreateMessageQueryModel messageQueryModel = new()
+                {
+                    ChatId = backgroundQueryDbModel.ChatId,
+                    SourceType = MessageSourceType.AI,
+                    CharacterId = chat.CharacterIds.FirstOrDefault(),
+                    AvatarFilePath = null,
+                    Summarized = false,// New message, so it's not summarized yet
+                    InRoleplayDateTime = null,// At this point, we just generated the message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
+                    MessageContent = ChatMessageParserUtils.ParseMessage(message.Content),
+                    CreatedAtUtc = DateTime.UtcNow,
+                };
+
+                IMessageDbModel newMessageInStorage = await storageService.AddMessageAsync(messageQueryModel);
+                if (newMessageInStorage == null)
+                {
+                    LoggingManager.LogToFile("15b7b071-b3bb-4d36-9321-4353dd747797", $"Error. The message creation in storage failed. Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Task will be set to Pending status for re-generation.");
+                    backgroundQueryDbModel.Content = null;
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                    return false; ;
+                }
+
+                backgroundQueryDbModel.LinkedId = newMessageInStorage.MessageId;
 
                 // Iterate the lorebook sticky and cooldown
                 var shareableContextLink = promptContext.ShareableContextLinks.FirstOrDefault(f => f.LinkedBuilder is PromptContextLoreByKeywordsBuilder)?.Value as TrackedLoreEntitesShareableContext;
@@ -200,9 +388,21 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 }
 
                 GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
+                var hotMessages = await storageService.GetAllHotMessagesAsync(chat.ChatId);
+                var allMessages = hotMessages.Messages.OrderByDescending(o => o.CreatedAtUtc).ToArray();
+                var lastPlayerMessage = allMessages.FirstOrDefault(f => f.SourceType == MessageSourceType.User);
 
                 // Scene Analyzer
-                await QueueSceneAnalyzeAsync(chat);
+                //await QueueSceneAnalyzeAsync(chat);
+
+                // Prebuild the images to show in the UI according to context
+                var sceneTracker = await storageService.GetSceneTrackerAsync(backgroundQueryDbModel.ChatId);
+
+                var characterAvatarFilePath = await GetCharacterAvatarFromSceneAnalysisFilePathAsync(chat, sceneTracker);
+                await SetMessageAvatarAsync(chat, newMessageInStorage.MessageId, characterAvatarFilePath);
+
+                var personaAvatarFilePath = await GetPersonaAvatarFromSceneAnalysisFilePathAsync(chat, sceneTracker);
+                await SetMessageAvatarAsync(chat, lastPlayerMessage?.MessageId, personaAvatarFilePath);
 
                 // Summary
                 _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, globalSettings);

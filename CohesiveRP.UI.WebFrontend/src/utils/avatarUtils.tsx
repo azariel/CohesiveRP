@@ -4,7 +4,7 @@ const GetAvatarPathFromCharacterName = (characterName: string): string => {
         return `./assets/empty-avatar.svg`;
       }
       
-      return `./characters/${characterName}/avatar.png`;
+      return `./characters/${characterName.toLowerCase()}/avatar.png`;
   }catch(err){
     return "";
   }
@@ -64,7 +64,7 @@ const GetAvatarPathFromAvatarFilePath = (avatarFilePath: string): string => {
         return `./assets/empty-avatar.svg`;
       }
 
-      const normalized = avatarFilePath.replace(/\\/g, "/").replace(/^\//, "");
+      const normalized = avatarFilePath.toLowerCase().replace(/\\/g, "/").replace(/^\//, "");
       return `./${normalized}`;
     } catch (err) {
       return "";

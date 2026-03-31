@@ -46,10 +46,11 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             foreach (IMessageDbModel message in hotMessagesDbModel.Messages)
             {
-                string value = $"{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{message.SourceType}:{Environment.NewLine}<message>{message.Content}</message>")}";
+                string value = $"{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{message.SourceType}:{Environment.NewLine}<message>{message.Content}</message>{Environment.NewLine}")}";
                 output += value;
             }
 
+            output = output.TrimEnd(Environment.NewLine.ToCharArray());
             output += $"{Environment.NewLine}</last_messages>{Environment.NewLine}{Environment.NewLine}";
             return (output, new ShareableContextLink
             {

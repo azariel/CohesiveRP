@@ -43,7 +43,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             foreach (ISummaryEntryDbModel summaryElement in summaryDbModel.ShortTermSummaries)
             {
                 // TODO: add a notion of time?
-                string value = $"{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{summaryElement.Content}")}";
+                string value = $"{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{summaryElement.Content}")}{Environment.NewLine}";
                 output += value;
             }
 

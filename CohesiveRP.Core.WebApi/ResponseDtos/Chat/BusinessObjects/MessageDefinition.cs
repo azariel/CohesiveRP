@@ -40,5 +40,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
 
         [JsonPropertyName("avatarFilePath")]
         public string AvatarFilePath { get; set; }
+
+        [JsonPropertyName("inRoleplayDateTime")]
+        public DateTime? InRoleplayDateTime { get; set; }
     }
 }

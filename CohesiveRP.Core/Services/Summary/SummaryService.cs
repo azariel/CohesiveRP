@@ -33,41 +33,26 @@ namespace CohesiveRP.Core.Services.Summary
             if (pendingRequests.Where(w => w.Tags.Contains(BackgroundQuerySystemTags.shortSummary.ToString())).ToArray().Length <= 0)
             {
                 await EvaluateShortTermSummaryAsync(chatId, settings, hotMessagesDbModel.Messages.ToArray());
-            } else
-            {
-                LoggingManager.LogToFile("07b58dae-333d-4235-b02b-143bcf963e69", $"A short-term summary background query is already processing. Delaying.");
             }
 
             if (pendingRequests.Where(w => w.Tags.Contains(BackgroundQuerySystemTags.mediumSummary.ToString())).ToArray().Length <= 0)
             {
                 await EvaluateMediumTermSummaryAsync(chatId, settings, summaryDbModel);
-            } else
-            {
-                LoggingManager.LogToFile("d34e289e-a510-4534-a28f-39a5b1132b52", $"A medium-term summary background query is already processing. Delaying.");
             }
 
             if (pendingRequests.Where(w => w.Tags.Contains(BackgroundQuerySystemTags.longSummary.ToString())).ToArray().Length <= 0)
             {
                 await EvaluateLongTermSummaryAsync(chatId, settings, summaryDbModel);
-            } else
-            {
-                LoggingManager.LogToFile("6e8bb8a0-6a16-48bc-adff-0d7b141e85d3", $"A long-term summary background query is already processing. Delaying.");
             }
 
             if (pendingRequests.Where(w => w.Tags.Contains(BackgroundQuerySystemTags.extraSummary.ToString())).ToArray().Length <= 0)
             {
                 await EvaluateExtraTermSummaryAsync(chatId, settings, summaryDbModel);
-            } else
-            {
-                LoggingManager.LogToFile("60bee602-80c3-4976-b5fb-33fe07604896", $"A extra-term summary background query is already processing. Delaying.");
             }
 
             if (pendingRequests.Where(w => w.Tags.Contains(BackgroundQuerySystemTags.overflowSummary.ToString())).ToArray().Length <= 0)
             {
                 await EvaluateOverflowTermSummaryAsync(chatId, settings, summaryDbModel);
-            } else
-            {
-                LoggingManager.LogToFile("4e70f3a8-bed1-4afd-bd10-888a20b1efdd", $"A overflow-term summary background query is already processing. Delaying.");
             }
         }
 

@@ -158,6 +158,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 CreatedAtUtc = DateTime.UtcNow,
                 SourceType = Common.BusinessObjects.MessageSourceType.AI,
                 Summarized = false,
+                InRoleplayDateTime = null,// At this point, we just generated the message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
                 MessageContent = character.FirstMessage,
                 CharacterId = character.CharacterId,
                 AvatarFilePath = null,

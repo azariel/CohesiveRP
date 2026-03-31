@@ -269,6 +269,20 @@ const adjustTextareaHeight = () => {
         console.log("Generation complete, clearing polling.");
         backgroundQueryNetworkError.current = 0;
         clearInterval(pollInterval);
+
+        // Fetch the updated player message (avatarFilePath is now populated)
+        const playerMsgId = activeModule?.lastPlayerMessageId;
+        if (playerMsgId && response?.chatId) {
+          const playerMsgResponse = await getFromServerApiAsync<ChatMessageResponseDto>(
+            `api/chat/${response.chatId}/messages/${playerMsgId}`
+          );
+          const updatedPlayerMsg = playerMsgResponse?.messageObj;
+          if (updatedPlayerMsg) {
+            setMessages((prev) =>
+              prev.map((m) => m.messageId === playerMsgId ? { ...m, avatarFilePath: updatedPlayerMsg.avatarFilePath } : m)
+            );
+          }
+        }
         
         // These local state updates are now safe because they aren't 
         // nested inside another component's state update logic
@@ -354,7 +368,7 @@ const adjustTextareaHeight = () => {
           sourceType: 1,
           messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
           summarized: false,
-          avatarFilePath: "avatar",
+          avatarFilePath: null,
           characterId: null,
           characterName: "",
           personaId: null,
@@ -371,7 +385,7 @@ const adjustTextareaHeight = () => {
           sourceType: 1,
           messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
           summarized: false,
-          avatarFilePath: "avatar",
+          avatarFilePath: null,
           characterId: null,
           characterName: "",
           personaId: null,
@@ -382,7 +396,13 @@ const adjustTextareaHeight = () => {
       cleanupMessages();
     }
 
-    setActiveModule((prev) => prev ? { ...prev, mainQueryId: response.mainQueryId, currentUserInputValue: "" } : prev);
+    setActiveModule((prev) => prev ? {
+      ...prev,
+      mainQueryId: response.mainQueryId,
+      lastPlayerMessageId: response.messageObj?.messageId ?? null,
+      currentUserInputValue: "" 
+    } : prev);
+
     UpdateInputControlState();
     // setIsInputBlockedDueToServer(false);
 

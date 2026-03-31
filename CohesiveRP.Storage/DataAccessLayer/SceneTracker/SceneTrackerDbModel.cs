@@ -19,7 +19,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         [MaxLength(32)]
         public string ChatId { get; set; }
 
-        public string LinkMessageId {get;set; }
-        public string Content {get;set; }
+        public string LinkMessageId { get; set; }
+        
+        public string Content { get; set; }
     }
 }

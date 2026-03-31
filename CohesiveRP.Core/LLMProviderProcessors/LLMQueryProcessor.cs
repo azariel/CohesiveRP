@@ -82,7 +82,9 @@ namespace CohesiveRP.Core.LLMProviderManager
 
                 if (response == null)
                 {
-                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                    await Task.Delay(2000);
+                    backgroundQueryDbModel.Content = "";
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// retry
                     return;
                 }
 
@@ -92,6 +94,7 @@ namespace CohesiveRP.Core.LLMProviderManager
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.ProcessingFinalInstruction;
             } catch (Exception e)
             {
+                await Task.Delay(2000);
                 LoggingManager.LogToFile("07b4df24-1780-4a0b-a81d-97fedb852d41", $"The query to HttpLLMApiProviderService failed. Unhandled error.", e);
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
                 return;

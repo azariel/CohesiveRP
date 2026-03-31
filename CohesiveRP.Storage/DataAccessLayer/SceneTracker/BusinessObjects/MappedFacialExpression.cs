@@ -1,0 +1,39 @@
+﻿namespace CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects
+{
+    public enum MappedFacialExpression
+    {
+        Neutral,// Default, Unknown
+        Admiration,
+        Amusement,
+        Anger,
+        Annoyance,
+        Arousal,//Desire
+        Arrogant,
+        Bored,
+        Confusion,
+        Crying,
+        Curiosity,
+        Disappointment,
+        Disapproval,
+        Disgust,
+        Embarassed,
+        Excitement,
+        Gratitude,
+        Grief,
+        Laughing,
+        Jealousy,
+        Joy,
+        Fear,
+        Nervoussness,
+        Pride,
+        Realization,
+        Remorse,
+        Relief,
+        Sadness,
+        Serious,
+        Shy,
+        Surprised,
+        Sleepy,
+        Worried,
+    }
+}

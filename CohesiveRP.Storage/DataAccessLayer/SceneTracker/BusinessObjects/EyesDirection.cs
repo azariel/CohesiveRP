@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CohesiveRP.Storage.DataAccessLayer.SceneAnalyzer.BusinessObjects.CharacterAnalyze
+namespace CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects
 {
     public class EyesDirection
     {

@@ -11,5 +11,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         bool Summarized { get; set; }
         string CharacterId { get; }
         string AvatarFilePath { get; }
+        DateTime? InRoleplayDateTime { get; set; }
     }
 }
