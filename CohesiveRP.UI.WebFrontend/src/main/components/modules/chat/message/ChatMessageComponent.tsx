@@ -4,7 +4,7 @@ import styles from "./ChatMessageComponent.module.css";
 import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification, HiMiniChevronRight } from "react-icons/hi2";
 import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
-import { FormatUtcDate } from "../../../../../utils/DateUtils";
+import { FormatDateTimeDurationMinutesAndSeconds, FormatUtcDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
 import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
@@ -104,7 +104,7 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
               {message?.sourceType == 0 ? <label>{message?.personaName ?? "User"}</label> : <label>{message?.characterName ?? "Character"}</label>}
             </div>
             <div className={styles.messageHeaderContentModel}>
-              model-name (?m??s)
+              model-name ({FormatDateTimeDurationMinutesAndSeconds((Date.parse(message?.endFocusedGenerationDateTimeUtc ?? "") - Date.parse(message?.startFocusedGenerationDateTimeUtc ?? "")).toString()) ?? "-"})
             </div>
             <div className={styles.messageHeaderContentCreatedAt}>
               {message?.summarized ? (<MdOutlineSummarize className={styles.messageHeaderSummarizeIcon} title="Summarized" />) : ""}

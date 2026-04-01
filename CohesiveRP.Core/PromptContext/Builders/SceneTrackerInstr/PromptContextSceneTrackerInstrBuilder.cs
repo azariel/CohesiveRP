@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -14,12 +15,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextSceneTrackerInstrBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
+        public PromptContextSceneTrackerInstrBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.chatDbModel = chatDbModel;
+            this.personaLinkedToChat = personaLinkedToChat;
+            this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
@@ -67,7 +72,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             StringBuilder sceneAnalysisInjection = new();
             GenerateSceneAnalysisInjection(sceneAnalysis, sceneAnalysisInjection);
 
-            return ($"<last_scene_analysis>{Environment.NewLine}{sceneAnalysisInjection}{Environment.NewLine}</last_scene_analysis>{Environment.NewLine}{Environment.NewLine}<scene_tracker>{Environment.NewLine}Details on the current scene in the story{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+            return ($"<last_scene_analysis>{Environment.NewLine}{sceneAnalysisInjection.ToString().InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</last_scene_analysis>{Environment.NewLine}{Environment.NewLine}<scene_tracker>{Environment.NewLine}Details on the current scene in the story{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{messages_after_last_scene_tracker}}", sceneTrackerMessagesContent)
                 .Replace("{{last_scene_tracker}}", lastSceneTracker?.Content ?? "Empty. Generate a new scene tracker.")}{Environment.NewLine}</scene_tracker>{Environment.NewLine}{Environment.NewLine}",
                 new ShareableContextLink

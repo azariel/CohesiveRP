@@ -43,6 +43,8 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             }
 
             string chatName = "New chat";
+
+            requestDto.LorebookIds ??= [];
             if(!string.IsNullOrWhiteSpace(requestDto.CharacterId))
             { 
                 var character = await storageService.GetCharacterByIdAsync(requestDto.CharacterId);
@@ -50,6 +52,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 if(character != null)
                 {
                     chatName = character.Name;
+                    requestDto.LorebookIds.AddRange(character.InherentLorebookIds);
                 }
             }
 

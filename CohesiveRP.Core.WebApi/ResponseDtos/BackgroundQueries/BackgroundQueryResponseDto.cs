@@ -34,5 +34,11 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.BackgroundQueries
 
         [JsonPropertyName("tags")]
         public List<string> Tags { get; set; }
+
+        [JsonPropertyName("startFocusedGenerationDateTimeUtc")]
+        public DateTime StartFocusedGenerationDateTimeUtc { get; set; }
+
+        [JsonPropertyName("endFocusedGenerationDateTimeUtc")]
+        public DateTime EndFocusedGenerationDateTimeUtc { get; set; }
     }
 }

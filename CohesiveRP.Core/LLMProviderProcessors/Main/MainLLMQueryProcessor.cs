@@ -46,7 +46,6 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
         private async Task<string> GetCharacterAvatarFromSceneAnalysisFilePathAsync(ChatDbModel chatDbModel, SceneTrackerDbModel dbModel)
         {
-            //string finalAvatarSelectionFilePath = $"{Path.Combine(WebConstants.ChatsAvatarFilePath, chatDbModel.ChatId.ToLowerInvariant())}";
             string finalAvatarSelectionFilePath = null;
 
             var sceneTracker = LLMResponseParser.ParseFromApiMessageContent<VisualSceneTracker>(dbModel.Content);
@@ -407,6 +406,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 // Summary
                 _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, globalSettings);
 
+                backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
             } catch (Exception e)

@@ -10,6 +10,10 @@ interface ChatMessage {
     personaId: string | null;
     personaName: string | null;
     avatarFilePath: string | null;// if a specific message has an avatar override
+
+    // Injected fields
+    startFocusedGenerationDateTimeUtc?: string;
+    endFocusedGenerationDateTimeUtc?: string;
 }
 
 export type {

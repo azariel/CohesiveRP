@@ -1,5 +1,6 @@
 ﻿using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -16,14 +17,18 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private GlobalSettingsDbModel settings;
         private ChatDbModel chatDbModel;
         private string contextLinkedId;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextLastXMessagesToSummarizeBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, string contextLinkedId)
+        public PromptContextLastXMessagesToSummarizeBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, string contextLinkedId, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.settings = settings;
             this.chatDbModel = chatDbModel;
             this.contextLinkedId = contextLinkedId;
+            this.personaLinkedToChat = personaLinkedToChat;
+            this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
@@ -63,7 +68,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             output = output.Replace("{{item_description}}", value);
             output += $"{Environment.NewLine}</instructions>";
-            return (output, new ShareableContextLink
+            return (output.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name), new ShareableContextLink
             {
                 LinkedBuilder = this,
                 Value = messagesToProcess.Select(s => s.MessageId).ToArray()

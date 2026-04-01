@@ -78,6 +78,7 @@ namespace CohesiveRP.Core.LLMProviderManager
                     return;
                 }
 
+                backgroundQueryDbModel.StartFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(completionPresetType.ToString(), availableLLMApiProviders, promptContext);
 
                 if (response == null)

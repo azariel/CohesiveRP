@@ -36,10 +36,20 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         [MaxLength(16384)]
         public string Content { get; set; }
 
-        [MaxLength(32)]
+        [MaxLength(32)] public string Description { get; set; }
         public string ChatId { get; set; }
 
         [MaxLength(32)]
         public string LinkedId { get; set; }
+
+        /// <summary>
+        /// When the background query is actually running instead of waiting on another query to finish or waiting in a queue.
+        /// </summary>
+        public DateTime StartFocusedGenerationDateTimeUtc { get; set; }
+
+         /// <summary>
+        /// When the background query status pass to completed or error.
+        /// </summary>
+        public DateTime EndFocusedGenerationDateTimeUtc { get; set; }
     }
 }

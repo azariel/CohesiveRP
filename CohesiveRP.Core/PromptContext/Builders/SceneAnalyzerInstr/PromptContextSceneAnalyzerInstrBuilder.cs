@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -14,12 +15,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextSceneAnalyzerInstrBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
+        public PromptContextSceneAnalyzerInstrBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.chatDbModel = chatDbModel;
+            this.personaLinkedToChat = personaLinkedToChat;
+            this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
@@ -97,7 +102,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             str.AppendLine($"</informationOnCurrentScene>{Environment.NewLine}");
 
             var persona = await storageService.GetPersonaByIdAsync(chatDbModel.PersonaId);
-            return ($"{str}"
+            return ($"{str.ToString().InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}"
                 .Replace(Constants.USER_PLACEHOLDER, persona?.Name ?? "User")
                 .Trim(),
                 new ShareableContextLink

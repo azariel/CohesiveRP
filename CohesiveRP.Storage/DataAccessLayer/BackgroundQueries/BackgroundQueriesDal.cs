@@ -78,6 +78,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 {
                     BackgroundQueryId = Guid.NewGuid().ToString(),
                     LinkedId = queryModel.LinkedId,
+                    StartFocusedGenerationDateTimeUtc = queryModel.StartFocusedGenerationDateTimeUtc,
+                    EndFocusedGenerationDateTimeUtc = queryModel.EndFocusedGenerationDateTimeUtc,
                     CreatedAtUtc = DateTime.UtcNow,
                     ChatId = queryModel.ChatId,
                     Status = BackgroundQueryStatus.Pending,

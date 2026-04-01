@@ -144,6 +144,11 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
             LorebookDbModel lorebookDbModel = lorebookDtoConverter.Convert(characterCardCCv3.Data.CharacterBook);
             LorebookDbModel resultLoreBook = await storageService.AddLorebookAsync(lorebookDbModel);
 
+            // Link that lorebook to the character inherent lorebooks (the lorebooks that will be tethered to this character automatically upon new chat)
+            importCharacterResult.InherentLorebookIds ??= new List<string>();
+            if (!importCharacterResult.InherentLorebookIds.Contains(resultLoreBook.LorebookId))
+                importCharacterResult.InherentLorebookIds.Add(resultLoreBook.LorebookId);
+
             if (resultLoreBook != null)
             {
                 try

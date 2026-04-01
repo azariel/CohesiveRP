@@ -22,5 +22,9 @@ namespace CohesiveRP.Storage.QueryModels.BackgroundQuery
         /// Higher priority will run before lower priority.
         /// </summary>
         public BackgroundQueryPriority Priority { get; set; }
+
+        public DateTime StartFocusedGenerationDateTimeUtc { get; set; }
+
+        public DateTime EndFocusedGenerationDateTimeUtc { get; set; }
     }
 }

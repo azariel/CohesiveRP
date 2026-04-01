@@ -260,6 +260,9 @@ const adjustTextareaHeight = () => {
               } else {
                 updated[tempAIReplyMessageIndex].messageId = response?.linkedId ?? "";
               }
+
+              updated[tempAIReplyMessageIndex].startFocusedGenerationDateTimeUtc = response?.startFocusedGenerationDateTimeUtc ?? "";
+              updated[tempAIReplyMessageIndex].endFocusedGenerationDateTimeUtc = response?.endFocusedGenerationDateTimeUtc ?? "";
             }
           }
           return updated;

@@ -28,8 +28,23 @@ const FormatDateTimeToMinutes = (date: string | Date | null | undefined): string
   return `${yyyy}-${mm}-${dd} ${hh}h${min}`;
 };
 
+const FormatDateTimeDurationMinutesAndSeconds = (date: string | Date | null | undefined): string => {
+  if (!date)
+    return "";
+
+  const d = new Date(date);
+  const min = String(d.getMinutes()).padStart(2, "0");
+  const sec = String(d.getSeconds()).padStart(2, "0");
+
+  if(d.getMinutes() > 0)
+    return `${min}m${sec}s`;
+
+  return `${sec}s`;
+};
+
 
 export {
     FormatUtcDate,
-    FormatDateTimeToMinutes
+    FormatDateTimeToMinutes,
+    FormatDateTimeDurationMinutesAndSeconds
 };

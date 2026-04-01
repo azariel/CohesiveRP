@@ -28,6 +28,8 @@ public class GetBackgroundQueriesByChatIdWorkflow : IGetBackgroundQueriesByChatI
             {
                 LinkedId = s.LinkedId,
                 BackgroundQueryId = s.BackgroundQueryId,
+                StartFocusedGenerationDateTimeUtc = s.StartFocusedGenerationDateTimeUtc,
+                EndFocusedGenerationDateTimeUtc = s.EndFocusedGenerationDateTimeUtc,
                 Tags = s.Tags,
                 DependenciesTags = s.DependenciesTags,
                 Status = s.Status,
