@@ -6,11 +6,10 @@ import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
 import { FormatUtcDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
-import { GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
+import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
 
 interface Props {
-  // messagesRef?: React.RefObject<HTMLDivElement | null>;
   message?: ChatMessage;
   chatId: string;
   enableDeleteBtn?: boolean;
@@ -20,7 +19,7 @@ interface Props {
   onDelete?: (messageId: string) => Promise<void>;
 }
 
-export default function ChatMessageComponent({ message, chatId, enableSwipeBtn = false,  enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
+export default function ChatMessageComponent({ message, chatId, enableSwipeBtn = false, enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
   const isRevertingRef = useRef(false);
@@ -32,16 +31,12 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
       return;
 
     const el = textareaRef.current;
-
-    // Size to fit existing content (runs once, not on every keystroke)
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight}px`;
-
     el.focus();
     el.setSelectionRange(el.value.length, el.value.length);
 
     const isMobile = navigator.maxTouchPoints > 0;
-
     if (isMobile) {
       setTimeout(() => {
         el.scrollIntoView({ block: "end", behavior: "smooth" });
@@ -55,23 +50,18 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
 
     setEditContent(message?.content ?? "");
     setIsEditing(true);
-
-    // setTimeout(() => {
-    //   if (messagesRef?.current)
-    //     messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    // }, 0);
   };
 
   const handleRevert = () => {
     isRevertingRef.current = true;
-    setEditContent(message?.content ?? ""); // restore original
+    setEditContent(message?.content ?? "");
     setIsEditing(false);
     isRevertingRef.current = false;
   };
 
   const handleDelete = async () => {
     if (!message?.messageId || !onDelete)
-    return;
+      return;
 
     await onDelete(message.messageId);
   };
@@ -79,18 +69,19 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
   const handleBlur = async () => {
     if (isRevertingRef.current) {
       isRevertingRef.current = false;
-      return; // skip save
+      return;
     }
 
     setIsEditing(false);
     const trimmed = editContent.trim();
 
-    // Skip save if nothing changed
     if (!trimmed || trimmed === message?.content || !message?.messageId || !onSave)
       return;
-    
+
     await onSave(message.messageId, trimmed);
   };
+
+  const displayedContent = message?.content ?? "[empty]";
 
   return (
     <main className={styles.chatMessageComponent}>
@@ -100,21 +91,21 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
             {message?.sourceType == 0 ? (
               <img src={GetAvatarPathFromPersonaId(message?.personaId ?? "")} alt="Avatar" />
             ) : (
-              <img src={GetAvatarPathFromChatIdAndAvatarId(chatId, message?.avatarId ?? "avatar")} alt="Avatar" />
+              <img src={message?.avatarFilePath && message.avatarFilePath !== "avatar" ? GetAvatarPathFromAvatarFilePath(message.avatarFilePath) : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar")} alt="Avatar" />
             )}
           </div>
           <div className={styles.messageInfoContainer}>
             <div title="messageId">{!message?.messageIndex ? "-" : "# " + message.messageIndex}</div>
-            {/* <div title="message generation time">??s</div>
-            <div title="tokens in message">????t</div> */}
           </div>
         </div>
         <div className={styles.messageContent}>
           <div className={styles.messageHeaderContent}>
             <div className={styles.messageHeaderContentName}>
-              {message?.sourceType == 0 ? <label>{message?.personaName ?? "User"}</label> : <label>{message?.characterName ?? "User"}</label>}
+              {message?.sourceType == 0 ? <label>{message?.personaName ?? "User"}</label> : <label>{message?.characterName ?? "Character"}</label>}
             </div>
-            <div className={styles.messageHeaderContentModel}>model-name (?m??s)</div>
+            <div className={styles.messageHeaderContentModel}>
+              model-name (?m??s)
+            </div>
             <div className={styles.messageHeaderContentCreatedAt}>
               {message?.summarized ? (<MdOutlineSummarize className={styles.messageHeaderSummarizeIcon} title="Summarized" />) : ""}
               {message?.createdAtUtc ? FormatUtcDate(message.createdAtUtc) : ""}
@@ -131,9 +122,9 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
                 onChange={(e) => setEditContent(e.target.value)}
                 onBlur={handleBlur}
               />
-              <GrRevert 
+              <GrRevert
                 className={styles.messageRevertBtn}
-                onMouseDown={(e) => e.preventDefault()} // prevents textarea blur firing first
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={handleRevert}
               />
             </div>
@@ -142,7 +133,7 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
               className={`${styles.messageContentValue} ${isEditable ? styles.messageContentValueEditable : ""}`}
               onDoubleClick={handleDoubleClick}
             >
-              <HighlightedText text={message?.content ?? "[empty]"} />
+              <HighlightedText text={displayedContent} />
             </div>
           )}
 
@@ -155,11 +146,13 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
               <HiCircleStack />
               <HiAdjustmentsHorizontal />
               <HiCog6Tooth />
+              {/* Roll 1-20 incl */}
+              {/* <label>{Math.floor(Math.random() * 20) + 1}</label> */}
             </div>
 
             <div className={styles.messageContentFooterRightSideIcons}>
               {enableDeleteBtn ? (
-                  <FaTrashAlt className={styles.messageContentFooterRightSideDeleteIconsBtn} onClick={handleDelete} />
+                <FaTrashAlt className={styles.messageContentFooterRightSideDeleteIconsBtn} onClick={handleDelete} />
               ) : (
                 <div />
               )}

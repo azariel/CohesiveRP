@@ -23,6 +23,6 @@
         DirectCharactersDescription = 18,
         PathfinderSkillChecksInitiator = 19,
         PathfinderSkillChecksResults = 20,
-        //CharacterSheetWithoutChat = 21,
+        SceneAnalyze = 21,
     }
 }

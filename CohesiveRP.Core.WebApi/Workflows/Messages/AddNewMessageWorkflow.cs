@@ -1,7 +1,9 @@
-﻿using CohesiveRP.Common.Exceptions;
+﻿using CohesiveRP.Common.BusinessObjects;
+using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
@@ -10,6 +12,7 @@ using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Message;
 
@@ -18,10 +21,12 @@ namespace CohesiveRP.Core.WebApi.Workflows.Messages;
 public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
 {
     private IStorageService storageService;
+    private ISummaryService summaryService;
 
-    public AddNewMessageWorkflow(IStorageService storageService)
+    public AddNewMessageWorkflow(IStorageService storageService, ISummaryService summaryService)
     {
         this.storageService = storageService;
+        this.summaryService = summaryService;
     }
 
     public async Task<IWebApiResponseDto> AddNewMessageAsync(AddNewMessageRequestDto requestDto)
@@ -64,11 +69,15 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         var characters = await storageService.GetCharactersAsync();
 
         // if it's the first player message in the chat, aseptise the previous messages
-        await AseptisePreviousMessageIfRequiredAsync(chat, persona, characters);
+        HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
+        await AseptisePreviousMessageIfRequiredAsync(chat, persona, characters, hotMessagesDbModel);
 
         // Add a background query to generate the sceneTracker first and foremost
         // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
-        await AddSceneTrackerBackgroundQueryAsync(chat);
+        if (hotMessagesDbModel != null && hotMessagesDbModel.Messages.Count > 4)
+        {
+            await AddSceneTrackerBackgroundQueryAsync(chat);
+        }
 
         // Also query the skillChecksInitiator query+
         await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
@@ -81,11 +90,12 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             {
                 ChatId = requestDto.ChatId,
                 Summarized = false,// adding a brand new message, so ofc it's not summarized yet
-                SourceType = Common.BusinessObjects.MessageSourceType.User,
+                SourceType = MessageSourceType.User,
+                InRoleplayDateTime = null,// At this point, the player just generated its message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
                 MessageContent = requestDto.Message.Content,
                 CreatedAtUtc = DateTime.UtcNow,
                 CharacterId = null,// Null as this is from the User
-                AvatarId = null,// TODO: generate a different avatar from time to time using comfyui?
+                AvatarFilePath = null,// TODO: generate a different avatar from time to time using comfyui?
             };
 
             message = await storageService.AddMessageAsync(messageQueryModel);
@@ -116,6 +126,10 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             }
         }
 
+        // Also queue up a summarization background query to process any pending ones with low/very low priority
+        GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
+        _ = summaryService.EvaluateSummaryAsync(chat.ChatId, globalSettings);
+
         // Convert DbModel to an acceptable web model (without sensitive information)
         var responseDto = new MessageResponseDto
         {
@@ -125,8 +139,9 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 MessageId = message?.MessageId,
                 PersonaId = chat?.PersonaId,
                 PersonaName = persona?.Name,
+                InRoleplayDateTime = message?.InRoleplayDateTime,
                 Summarized = message?.Summarized ?? false,
-                AvatarId = message?.AvatarId,
+                AvatarFilePath = message?.AvatarFilePath,
                 Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User")
             },
             MainQueryId = backgroundQuery.BackgroundQueryId,
@@ -135,10 +150,8 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         return responseDto;
     }
 
-    private async Task AseptisePreviousMessageIfRequiredAsync(ChatDbModel chat, PersonaDbModel persona, CharacterDbModel[] characters)
+    private async Task AseptisePreviousMessageIfRequiredAsync(ChatDbModel chat, PersonaDbModel persona, CharacterDbModel[] characters, HotMessagesDbModel hotMessagesDbModel)
     {
-        HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
-
         if (hotMessagesDbModel?.Messages == null || hotMessagesDbModel.Messages.Count <= 0)
         {
             return;
@@ -152,7 +165,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         foreach (var message in hotMessagesDbModel.Messages)
         {
             message.Content = message.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User");
-            await storageService.UpdateHotMessageAsync(chat.ChatId, (MessageDbModel)message);
+            await storageService.UpdateHotMessageAsync(chat.ChatId, message);
         }
     }
 

@@ -26,7 +26,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
         {
             string innerStr = "";
 
-            innerStr += $"<{currentCharacterSheetInstance.CharacterSheet.FirstName.Trim()}>";
+            innerStr += $"<{currentCharacterSheetInstance.CharacterSheet.FirstName.Trim()}>{Environment.NewLine}";
             foreach (ChatCharacterRoll roll in rollsToInject)
             {
                 // inject the roll into the prompt
@@ -39,7 +39,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             }
 
             innerStr = innerStr.Trim().TrimEnd(Environment.NewLine.ToCharArray());
-            innerStr += $"</{currentCharacterSheetInstance.CharacterSheet.FirstName.Trim()}>";
+            innerStr += $"{Environment.NewLine}</{currentCharacterSheetInstance.CharacterSheet.FirstName.Trim()}>";
             return innerStr.ToString();
         }
 
@@ -48,7 +48,11 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             StringBuilder str = new();
             str.AppendLine($"  <roll>{Environment.NewLine}    {currentCharacterSheetInstance.CharacterSheet.FirstName.Trim()} has rolled {roll.Value} for skill {roll.ActionCategory}.{Environment.NewLine}  </roll>");
             str.AppendLine($"  <actions>{Environment.NewLine}    -{string.Join($"{Environment.NewLine}-", roll.Reasonings)}{Environment.NewLine}  </actions>");
-            str.AppendLine($"  <otherCharacters>{Environment.NewLine}    {FormatActionResult(roll, characterSheetsInstances)}{Environment.NewLine}  </otherCharacters>");
+
+
+            str.AppendLine($"  <otherCharactersRollAgainstTheseActions>{Environment.NewLine}{FormatActionResult(roll, characterSheetsInstances)}{Environment.NewLine}  </otherCharactersRollAgainstTheseActions>");
+
+
             return str.ToString();
         }
 
@@ -63,7 +67,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                 if (characterSheetInstance == null)
                     continue;
 
-                outputValue += $"- {characterSheetInstance.CharacterSheet.FirstName} has rolled {characterInScene.CharacterInSceneCounterRoll.Value} for attribute {characterInScene.CharacterInSceneCounterRoll.Attribute}.{Environment.NewLine}";
+                outputValue += $"    - {characterSheetInstance.CharacterSheet.FirstName} has rolled {characterInScene.CharacterInSceneCounterRoll.Value} for attribute {characterInScene.CharacterInSceneCounterRoll.Attribute}.{Environment.NewLine}";
             }
 
             return outputValue.Trim().TrimEnd(Environment.NewLine.ToCharArray());

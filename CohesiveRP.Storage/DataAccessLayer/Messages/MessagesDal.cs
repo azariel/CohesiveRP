@@ -212,11 +212,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 {
                     MessageId = Guid.NewGuid().ToString(),
                     Summarized = queryModel.Summarized,
+                    InRoleplayDateTime = queryModel.InRoleplayDateTime,
                     Content = queryModel.MessageContent,
                     SourceType = queryModel.SourceType,
                     CreatedAtUtc = queryModel.CreatedAtUtc,
                     CharacterId = queryModel.CharacterId,
-                    AvatarId = queryModel.AvatarId,
+                    AvatarFilePath = queryModel.AvatarFilePath,
                 };
 
                 // Check if HotMessages for this chat already exist

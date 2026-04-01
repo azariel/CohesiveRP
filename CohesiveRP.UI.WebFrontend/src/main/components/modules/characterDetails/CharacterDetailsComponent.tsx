@@ -8,7 +8,7 @@ import { deleteFromServerApiAsync, getBlobFromServerApiAsync, getFromServerApiAs
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
-import { GetAvatarPathFromCharacterId, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromCharacterName, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
 import { ImSpinner2 } from "react-icons/im";
 import type { SelectableChatsResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatsResponseDto";
 import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatResponseDto";
@@ -27,7 +27,6 @@ export default function CharacterDetailsComponent() {
   const { navigateTo } = sharedContext();
   const didComponentMountAlready = useRef(false);
   const chatsContainerRef = useRef<HTMLDivElement>(null);
-  const importFileRef = useRef<HTMLInputElement>(null);
   const importCharacterCardRef = useRef<HTMLInputElement>(null);
   const [isNetworkDown, setIsNetworkDown] = useState(false);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
@@ -333,58 +332,6 @@ export default function CharacterDetailsComponent() {
     }
   };
 
-  const handleExportJson = () => {
-    if (!characterResponse?.character) return;
-
-    const exportPayload = {
-      characterId: characterResponse.character.characterId,
-      name: characterName,
-      description: characterDescription,
-      creator,
-      creatorNotes,
-      tags,
-      firstMessage,
-      alternateGreetings,
-    };
-
-    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${characterName || "character"}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const parsed = JSON.parse(event.target?.result as string);
-
-        setCharacterName(parsed.name ?? "");
-        setCreator(parsed.creator ?? "");
-        setCreatorNotes(parsed.creatorNotes ?? "");
-        setTags(parsed.tags ?? []);
-        setFirstMessage(parsed.firstMessage ?? "");
-        setAlternateGreetings(parsed.alternateGreetings ?? []);
-        setCharacterDescription(parsed.description ?? "");
-
-        // Reset the input so the same file can be re-imported if needed
-        e.target.value = "";
-
-        await handleSave();
-      } catch (err) {
-        console.error("Failed to parse imported JSON:", err);
-        setOperationError(true);
-      }
-    };
-    reader.readAsText(file);
-  };
-
   return (
     <div className={styles.characterDetailsComponent}>
       {isNetworkDown ? (
@@ -400,7 +347,7 @@ export default function CharacterDetailsComponent() {
             <div className={styles.characterDetailsContainer}>
               <div className={styles.characterHeaderContainer}>
                 <div className={styles.characterAvatarContainer}>
-                  <img src={GetAvatarPathFromCharacterId(characterResponse?.character?.characterId ?? "")} alt="dev/Placeholder.png" />
+                  <img src={GetAvatarPathFromCharacterName(characterResponse?.character?.name ?? "")} alt="dev/Placeholder.png" />
                 </div>
                 <div className={styles.characterHeaderRightSideContainer}>
                   <textarea
@@ -455,29 +402,6 @@ export default function CharacterDetailsComponent() {
                   <>
                     {/* ── JSON export / import ── */}
                     <div className={styles.jsonActionsContainer}>
-                      <button
-                        className={styles.jsonActionButton}
-                        onClick={handleExportJson}
-                        disabled={isSaving}
-                        title="Export character as JSON"
-                      >
-                        Export JSON
-                      </button>
-                      <button
-                        className={styles.jsonActionButton}
-                        onClick={() => importFileRef.current?.click()}
-                        disabled={isSaving}
-                        title="Import character from JSON and save"
-                      >
-                        Import JSON
-                      </button>
-                      <input
-                        ref={importFileRef}
-                        type="file"
-                        accept="application/json,.json"
-                        className={styles.hiddenFileInput}
-                        onChange={handleImportJson}
-                      />
                       <button
                         className={styles.jsonActionButton}
                         onClick={handleExportCharacterCard}

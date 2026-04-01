@@ -1,10 +1,10 @@
-const GetAvatarPathFromCharacterId = (characterId: string): string => {
+const GetAvatarPathFromCharacterName = (characterName: string): string => {
     try {
-      if(characterId === "") {
+      if(characterName === "") {
         return `./assets/empty-avatar.svg`;
       }
       
-      return `./characters/${characterId}/avatar.png`;
+      return `./characters/${characterName.toLowerCase()}/avatar.png`;
   }catch(err){
     return "";
   }
@@ -58,10 +58,24 @@ const GetAvatarPathFromChatIdAndAvatarId = (chatId: string, avatarId: string): s
   }
 };
 
+const GetAvatarPathFromAvatarFilePath = (avatarFilePath: string): string => {
+    try {
+      if (avatarFilePath === "") {
+        return `./assets/empty-avatar.svg`;
+      }
+
+      const normalized = avatarFilePath.toLowerCase().replace(/\\/g, "/").replace(/^\//, "");
+      return `./${normalized}`;
+    } catch (err) {
+      return "";
+    }
+};
+
 export {
-    GetAvatarPathFromCharacterId,
+    GetAvatarPathFromCharacterName,
     GetAvatarPathFromPersonaId,
     GetAvatarPathFromLorebookId,
     GetAvatarPathFromChatId,
-    GetAvatarPathFromChatIdAndAvatarId
+    GetAvatarPathFromChatIdAndAvatarId,
+    GetAvatarPathFromAvatarFilePath
 };

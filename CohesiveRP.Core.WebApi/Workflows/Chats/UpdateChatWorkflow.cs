@@ -46,11 +46,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 var missingCharacters = requestDto.CharacterIds.Where(a => !characterIds.Any(an => an.Equals(a, StringComparison.InvariantCultureIgnoreCase))).ToArray();
                 if (missingCharacters.Length > 0)
                 {
-                    return new WebApiException
-                    {
-                        HttpResultCode = System.Net.HttpStatusCode.NotFound,
-                        Message = $"Couldn't update chat with id {requestDto.ChatId}. Characters [{string.Join(",", missingCharacters)}] were not found in storage."
-                    };
+                    requestDto.CharacterIds = requestDto.CharacterIds.Except(missingCharacters).ToList();
                 }
             }
 
@@ -85,6 +81,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             chat.PersonaId = requestDto.PersonaId;
             chat.CharacterIds = requestDto.CharacterIds;
             chat.LorebookIds = requestDto.LorebookIds;
+            chat.AvatarFilePath = requestDto.AvatarFilePath;
             var updateChatResult = await storageService.UpdateChatAsync(chat);
             if (!updateChatResult)
             {
@@ -102,6 +99,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 CharacterIds = chat.CharacterIds,
                 LastActivityAtUtc = chat.LastActivityAtUtc,
                 ChatName = chat.Name,
+                AvatarFilePath = chat.AvatarFilePath,
                 PersonaId = chat.PersonaId,
                 HttpResultCode = System.Net.HttpStatusCode.OK,
             };

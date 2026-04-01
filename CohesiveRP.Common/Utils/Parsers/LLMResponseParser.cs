@@ -1,5 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
+using CohesiveRP.Common.Utils.Parsers.BusinessObjects;
 
 namespace CohesiveRP.Common.Utils.Parsers
 {
@@ -33,6 +35,33 @@ namespace CohesiveRP.Common.Utils.Parsers
             {
                 return JsonCommonSerializer.DeserializeFromString<T[]>(LLMrawResponse);
             }
+        }
+
+        /// <summary>
+        /// Handles API responses where the payload is an array of role/content
+        /// messages and the actual JSON lives inside the "content" string value
+        /// (i.e. double-serialized). Extracts the first assistant message's
+        /// content, then delegates to ParseOnlyJson.
+        /// </summary>
+        public static T ParseFromApiMessageContent<T>(string aApiResponse)
+        {
+            try
+            {
+                // Unwrap the outer message array to get the raw content string
+                var messages = JsonCommonSerializer.DeserializeFromString<List<ApiMessage>>(aApiResponse);
+
+                ApiMessage target = messages?.FirstOrDefault();
+
+                if (target == null || string.IsNullOrWhiteSpace(target.Content))
+                    throw new InvalidOperationException("No valid assistant message found in API response.");
+
+                return ParseOnlyJson<T>(target.Content);
+            } catch (Exception e)
+            {
+                // ignore
+            }
+
+            return ParseOnlyJson<T>(aApiResponse);
         }
     }
 }

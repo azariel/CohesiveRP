@@ -39,7 +39,7 @@ public class UpdateSceneTrackerWorkflow : IUpdateSceneTrackerWorkflow
             Content = requestDto.SceneTracker.Content,
         };
 
-        var result = await storageService.UpdateSceneTrackerAsync(queryModel);
+        var result = await storageService.CreateOrUpdateSceneTrackerAsync(queryModel);
         if (result == null)
         {
             return new WebApiException

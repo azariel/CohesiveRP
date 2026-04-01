@@ -31,6 +31,7 @@ using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.SceneAnalyzer;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Summary.Short;
@@ -137,6 +138,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ILLMApiQueriesDal, LLMApiQueriesDal>();
             services.AddSingleton<ISummaryDal, SummaryDal>();
             services.AddSingleton<ISceneTrackerDal, SceneTrackerDal>();
+            services.AddSingleton<ISceneAnalyzerDal, SceneAnalyzerDal>();
             services.AddSingleton<ICharacterSheetsDal, CharacterSheetsDal>();
             services.AddSingleton<ICharacterSheetInstancesDal, CharacterSheetInstancesDal>();
             services.AddSingleton<IChatCharactersRollsDal, ChatCharactersRollsDal>();

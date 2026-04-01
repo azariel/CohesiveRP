@@ -45,7 +45,7 @@ public class ExportCharacterCardWorkflow : IExportCharacterCardWorkflow
 
         var characterSheet = await storageService.GetCharacterSheetByCharacterIdAsync(characterId);
 
-        string directoryCharacterAvatar = Path.Combine(WebConstants.CharactersAvatarFilePath, characterId);
+        string directoryCharacterAvatar = Path.Combine(WebConstants.CharactersAvatarFilePath, character.Name.ToLowerInvariant());
         string fileName = Path.Combine(directoryCharacterAvatar, WebConstants.AvatarFileName);
         if (!File.Exists(fileName))
         {
@@ -75,54 +75,60 @@ public class ExportCharacterCardWorkflow : IExportCharacterCardWorkflow
                     AlternateGreetings = character.AlternateGreetings,
                     Description = character.Description,
                 },
-                CharacterSheet = new CharacterSheet()
-                {
-                    AgeGroup = characterSheet.CharacterSheet.AgeGroup,
-                    Attractiveness = characterSheet.CharacterSheet.Attractiveness,
-                    Behavior = characterSheet.CharacterSheet.Behavior,
-                    BirthdayDate = characterSheet.CharacterSheet.BirthdayDate,
-                    BodyType = characterSheet.CharacterSheet.BodyType,
-                    BreastsSize = characterSheet.CharacterSheet.BreastsSize,
-                    ClothesPreference = characterSheet.CharacterSheet.ClothesPreference,
-                    CombatAffinityAttack = characterSheet.CharacterSheet.CombatAffinityAttack,
-                    CombatAffinityDefense = characterSheet.CharacterSheet.CombatAffinityDefense,
-                    Dislikes = characterSheet.CharacterSheet.Dislikes,
-                    EarShape = characterSheet.CharacterSheet.EarShape,
-                    EyeColor = characterSheet.CharacterSheet.EyeColor,
-                    Fears = characterSheet.CharacterSheet.Fears,
-                    FirstName = characterSheet.CharacterSheet.FirstName,
-                    Gender = characterSheet.CharacterSheet.Gender,
-                    Genitals = characterSheet.CharacterSheet.Genitals,
-                    GoalsForNextYear = characterSheet.CharacterSheet.GoalsForNextYear,
-                    HairColor = characterSheet.CharacterSheet.HairColor,
-                    HairStyle = characterSheet.CharacterSheet.HairStyle,
-                    Height = characterSheet.CharacterSheet.Height,
-                    Kinks = characterSheet.CharacterSheet.Kinks,
-                    LastName = characterSheet.CharacterSheet.LastName,
-                    Likes = characterSheet.CharacterSheet.Likes,
-                    LongTermGoals = characterSheet.CharacterSheet.LongTermGoals,
-                    Mannerisms = characterSheet.CharacterSheet.Mannerisms,
-                    PersonalityTraits = characterSheet.CharacterSheet.PersonalityTraits,
-                    PreferredCombatStyle = characterSheet.CharacterSheet.PreferredCombatStyle,
-                    Profession = characterSheet.CharacterSheet.Profession,
-                    Race = characterSheet.CharacterSheet.Race,
-                    Relationships = characterSheet.CharacterSheet.Relationships,
-                    Reputation = characterSheet.CharacterSheet.Reputation,
-                    SecretKinks = characterSheet.CharacterSheet.SecretKinks,
-                    Secrets = characterSheet.CharacterSheet.Secrets,
-                    Sexuality = characterSheet.CharacterSheet.Sexuality,
-                    Skills = characterSheet.CharacterSheet.Skills,
-                    SkinColor = characterSheet.CharacterSheet.SkinColor,
-                    SocialAnxiety = characterSheet.CharacterSheet.SocialAnxiety,
-                    SpeechImpairment = characterSheet.CharacterSheet.SpeechImpairment,
-                    SpeechPattern = characterSheet.CharacterSheet.SpeechPattern,
-                    Weaknesses = characterSheet.CharacterSheet.Weaknesses,
-                    WeaponsProficiency = characterSheet.CharacterSheet.WeaponsProficiency,
-                    PathfinderAttributesValues = characterSheet.CharacterSheet.PathfinderAttributesValues,
-                    PathfinderSkillsValues = characterSheet.CharacterSheet.PathfinderSkillsValues,
-                },
+                CharacterSheet = null,
             }
         };
+
+        if (characterSheet != null)
+        {
+            characterCardToSaveCRPv1.Data.CharacterSheet = new CharacterSheet()
+            {
+                AgeGroup = characterSheet.CharacterSheet.AgeGroup,
+                Attractiveness = characterSheet.CharacterSheet.Attractiveness,
+                Behavior = characterSheet.CharacterSheet.Behavior,
+                BirthdayDate = characterSheet.CharacterSheet.BirthdayDate,
+                BodyType = characterSheet.CharacterSheet.BodyType,
+                BreastsSize = characterSheet.CharacterSheet.BreastsSize,
+                ClothesPreference = characterSheet.CharacterSheet.ClothesPreference,
+                CombatAffinityAttack = characterSheet.CharacterSheet.CombatAffinityAttack,
+                CombatAffinityDefense = characterSheet.CharacterSheet.CombatAffinityDefense,
+                Dislikes = characterSheet.CharacterSheet.Dislikes,
+                EarShape = characterSheet.CharacterSheet.EarShape,
+                EyeColor = characterSheet.CharacterSheet.EyeColor,
+                Fears = characterSheet.CharacterSheet.Fears,
+                FirstName = characterSheet.CharacterSheet.FirstName,
+                Gender = characterSheet.CharacterSheet.Gender,
+                Genitals = characterSheet.CharacterSheet.Genitals,
+                PenisSize = characterSheet.CharacterSheet.PenisSize,
+                GoalsForNextYear = characterSheet.CharacterSheet.GoalsForNextYear,
+                HairColor = characterSheet.CharacterSheet.HairColor,
+                HairStyle = characterSheet.CharacterSheet.HairStyle,
+                Height = characterSheet.CharacterSheet.Height,
+                Kinks = characterSheet.CharacterSheet.Kinks,
+                LastName = characterSheet.CharacterSheet.LastName,
+                Likes = characterSheet.CharacterSheet.Likes,
+                LongTermGoals = characterSheet.CharacterSheet.LongTermGoals,
+                Mannerisms = characterSheet.CharacterSheet.Mannerisms,
+                PersonalityTraits = characterSheet.CharacterSheet.PersonalityTraits,
+                PreferredCombatStyle = characterSheet.CharacterSheet.PreferredCombatStyle,
+                Profession = characterSheet.CharacterSheet.Profession,
+                Race = characterSheet.CharacterSheet.Race,
+                Relationships = characterSheet.CharacterSheet.Relationships,
+                Reputation = characterSheet.CharacterSheet.Reputation,
+                SecretKinks = characterSheet.CharacterSheet.SecretKinks,
+                Secrets = characterSheet.CharacterSheet.Secrets,
+                Sexuality = characterSheet.CharacterSheet.Sexuality,
+                Skills = characterSheet.CharacterSheet.Skills,
+                SkinColor = characterSheet.CharacterSheet.SkinColor,
+                SocialAnxiety = characterSheet.CharacterSheet.SocialAnxiety,
+                SpeechImpairment = characterSheet.CharacterSheet.SpeechImpairment,
+                SpeechPattern = characterSheet.CharacterSheet.SpeechPattern,
+                Weaknesses = characterSheet.CharacterSheet.Weaknesses,
+                WeaponsProficiency = characterSheet.CharacterSheet.WeaponsProficiency,
+                PathfinderAttributesValues = characterSheet.CharacterSheet.PathfinderAttributesValues,
+                PathfinderSkillsValues = characterSheet.CharacterSheet.PathfinderSkillsValues,
+            };
+        }
 
         CCv3CharacterCard characterCardToSaveCCv3 = new()
         {

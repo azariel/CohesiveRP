@@ -112,7 +112,8 @@ namespace CohesiveRP.Core.Services
 
             try
             {
-                string rawResponse = await httpClient.PostAsync(selectedLLMApiQueryDbModel.ApiUrl, payload);
+                CancellationToken token = new CancellationTokenSource(180000).Token;
+                string rawResponse = await httpClient.PostAsync(selectedLLMApiQueryDbModel.ApiUrl, payload, token);
                 IHttpLLMApiQueryResponseDto httpLLMApiQueryResponseDto = LLMApiQueryResponseDtoConverter.Convert(selectedLLMApiQueryDbModel.Type, rawResponse);
                 return httpLLMApiQueryResponseDto;
 
@@ -127,6 +128,8 @@ namespace CohesiveRP.Core.Services
                 {
                     LoggingManager.LogToFile("4b4683cf-e3a1-4494-8ecd-1e288bb61e81", $"Can't execute Http request. The requested Api is down. ApiUrl: [{selectedLLMApiQueryDbModel.ApiUrl}].");
                 }
+
+                LoggingManager.LogToFile("dd346c77-ea60-463b-8dda-ed7c95d62757", $"LLM query failed. Exception:[{e.Message}].");
                 
                 return null;
             }

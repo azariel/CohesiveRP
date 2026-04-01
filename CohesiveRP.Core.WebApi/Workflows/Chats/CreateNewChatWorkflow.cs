@@ -76,7 +76,8 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             // Add the chat default Avatar (same as the character's)
             if (newlyCreatedChat.CharacterIds != null && newlyCreatedChat.CharacterIds.Count > 0)
             {
-                string characterAvatarFilePath = Path.Combine(WebConstants.CharactersAvatarFilePath, newlyCreatedChat.CharacterIds.First(), WebConstants.AvatarFileName);
+                var characterDbModel = await storageService.GetCharacterByIdAsync(newlyCreatedChat.CharacterIds.First().ToLowerInvariant());
+                string characterAvatarFilePath = Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name, WebConstants.AvatarFileName);
                 if (File.Exists(characterAvatarFilePath))
                 {
                     string chatDirectoryPath = Path.Combine(WebConstants.ChatsAvatarFilePath, newlyCreatedChat.ChatId);
@@ -110,6 +111,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             {
                 ChatId = newlyCreatedChat.ChatId,
                 ChatName = newlyCreatedChat.Name,
+                AvatarFilePath = newlyCreatedChat.AvatarFilePath,
                 HttpResultCode = System.Net.HttpStatusCode.OK,
             };
         }
@@ -156,9 +158,10 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 CreatedAtUtc = DateTime.UtcNow,
                 SourceType = Common.BusinessObjects.MessageSourceType.AI,
                 Summarized = false,
+                InRoleplayDateTime = null,// At this point, we just generated the message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
                 MessageContent = character.FirstMessage,
                 CharacterId = character.CharacterId,
-                AvatarId = null,
+                AvatarFilePath = null,
             };
             await storageService.AddMessageAsync(queryModel);
         }

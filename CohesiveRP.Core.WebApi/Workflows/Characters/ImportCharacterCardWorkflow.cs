@@ -121,7 +121,7 @@ public class ImportCharacterCardWorkflow : IImportCharacterCardWorkflow
         }
 
         // Override the image (avatar) on disk
-        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, character.CharacterId);
+        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, character.Name.ToLowerInvariant());
         if (!Directory.Exists(directoryCharacter))
         {
             Directory.CreateDirectory(directoryCharacter);

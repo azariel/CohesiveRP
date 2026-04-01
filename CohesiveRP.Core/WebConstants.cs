@@ -1,4 +1,4 @@
-﻿namespace CohesiveRP.Core.WebApi
+﻿namespace CohesiveRP.Core
 {
     public class WebConstants
     {

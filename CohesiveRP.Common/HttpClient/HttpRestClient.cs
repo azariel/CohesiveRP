@@ -38,19 +38,24 @@ namespace CohesiveRP.Common.HttpClient
         /// <summary>
         /// Asynchronous get
         /// </summary>
-        public async Task<string> GetAsync(string url)
+        public async Task<string> GetAsync(string url, CancellationToken cancellationToken)
         {
             HttpResponseMessage response = null;
 
             try
             {
-                response = await httpClient.GetAsync(url);
+                response = await httpClient.GetAsync(url, cancellationToken);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     return responseContent;
                 }
+            }
+            catch(OperationCanceledException operationCanceled)
+            {
+                LoggingManager.LogToFile("7639240a-77e5-4cee-aa43-c97a29736cb5", $"[{nameof(HttpRestClient)}.{nameof(PostAsync)}] failed due to cancellationToken reaching its time limit.");
+                throw;
             }
             catch (AggregateException aggregateException) when (aggregateException.InnerExceptions.Any(a => a.GetType() == typeof(HttpRequestException)))
             {
@@ -67,11 +72,11 @@ namespace CohesiveRP.Common.HttpClient
             throw new ApiException(response.StatusCode, $"[{nameof(HttpRestClient)}.{nameof(GetAsync)}] request failed when querying [{url}]. Error: [{await response.Content.ReadAsStringAsync()}].");// TODO: wrap error
         }
 
-        public async Task<string> PostAsync(string url, string jsonPayload)
+        public async Task<string> PostAsync(string url, string jsonPayload, CancellationToken cancellationToken)
         {
             try
             {
-                HttpResponseMessage response = await httpClient.PostAsync(url, new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
+                HttpResponseMessage response = await httpClient.PostAsync(url, new StringContent(jsonPayload, Encoding.UTF8, "application/json"), cancellationToken);
                 string responseMessageContent = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -80,6 +85,11 @@ namespace CohesiveRP.Common.HttpClient
                 string errorMessage = $"Couldn't post async to dependent service. Url = [{url}]. HTTP Response Code = [{response.StatusCode}]. Response Message = [{responseMessageContent}].";
                 LoggingManager.LogToFile("b423f45b-7032-4eb4-b674-6296a95783db", errorMessage);
                 throw new Exception(errorMessage);
+            }
+            catch(OperationCanceledException operationCanceled)
+            {
+                LoggingManager.LogToFile("1d7350e0-f550-4209-8687-b6f935ebb210", $"[{nameof(HttpRestClient)}.{nameof(PostAsync)}] failed due to cancellationToken reaching its time limit.");
+                throw;
             }
             catch (AggregateException aggregateException) when (aggregateException.InnerExceptions.Any(a => a.GetType() == typeof(HttpRequestException)))
             {
@@ -95,14 +105,19 @@ namespace CohesiveRP.Common.HttpClient
             throw new Exception($"[{nameof(HttpRestClient)}.{nameof(PostAsync)}] Unhandled exception when querying [{url}].");// TODO: wrap error
         }
 
-        public async Task<string> PatchAsync(string url, string jsonPayload)
+        public async Task<string> PatchAsync(string url, string jsonPayload, CancellationToken cancellationToken)
         {
             try
             {
-                HttpResponseMessage response = await httpClient.PatchAsync(url, new StringContent(jsonPayload, Encoding.UTF8, "application/json"));
+                HttpResponseMessage response = await httpClient.PatchAsync(url, new StringContent(jsonPayload, Encoding.UTF8, "application/json"), cancellationToken);
 
                 if (response.IsSuccessStatusCode)
                     return await response.Content.ReadAsStringAsync();
+            }
+            catch(OperationCanceledException operationCanceled)
+            {
+                LoggingManager.LogToFile("1850e585-1ee8-41b3-a76b-fa8b125ebc3c", $"[{nameof(HttpRestClient)}.{nameof(PostAsync)}] failed due to cancellationToken reaching its time limit.");
+                throw;
             }
             catch (AggregateException aggregateException) when (aggregateException.InnerExceptions.Any(a => a.GetType() == typeof(HttpRequestException)))
             {

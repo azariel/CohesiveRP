@@ -43,10 +43,25 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     // TODO: replace this dev option
                     LLMProviders = new List<LLMProviderConfig>()
                     {
+                        //new LLMProviderConfig
+                        //{
+                        //    ProviderConfigId = Guid.NewGuid().ToString(),
+                        //    Name = "IntenseRP-V2-GLM-Chat",
+                        //    Model = "glm-chat",
+                        //    ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
+                        //    Type = LLMProviderType.OpenAICustom,
+                        //    ConcurrencyLimit = 1,
+                        //    Tags = [],
+                        //    TimeoutStrategy = new TimeoutStrategy
+                        //    {
+                        //        Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                        //        Retries = 3,
+                        //    }
+                        //},
                         new LLMProviderConfig
                         {
                             ProviderConfigId = Guid.NewGuid().ToString(),
-                            Name = "IntenseRP-V2-GLM",
+                            Name = "IntenseRP-V2-GLM-Think",
                             Model = "glm-reasoner",
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
@@ -61,33 +76,63 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         new LLMProviderConfig
                         {
                             ProviderConfigId = Guid.NewGuid().ToString(),
-                            Name = "IntenseRP-V2-DS",
+                            Name = "IntenseRP-V2-DS-Chat",
                             Model = "deepseek-chat",
-                            ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
+                            ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.SkillChecksInitiator],// TODO: move SkillChecksInitiator elsewhere, it conflicts with SceneTracker
+                            Tags = [ChatCompletionPresetType.SkillChecksInitiator, ChatCompletionPresetType.SceneTracker],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
                                 Retries = 1,
                             }
                         },
+                        //new LLMProviderConfig
+                        //{
+                        //    ProviderConfigId = Guid.NewGuid().ToString(),
+                        //    Name = "IntenseRP-V2-DS-Think",
+                        //    Model = "deepseek-reasoner",
+                        //    ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
+                        //    Type = LLMProviderType.OpenAICustom,
+                        //    ConcurrencyLimit = 1,
+                        //    Tags = [ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
+                        //    TimeoutStrategy = new TimeoutStrategy
+                        //    {
+                        //        Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                        //        Retries = 1,
+                        //    }
+                        //},
                         new LLMProviderConfig
                         {
                             ProviderConfigId = Guid.NewGuid().ToString(),
-                            Name = "IntenseRP-V2-DS-Think",
-                            Model = "deepseek-reasoner",
-                            ApiUrl = "http://127.0.0.1:7779/v1/chat/completions",
+                            Name = "IntenseRP-V2-KIMI-Chat",
+                            Model = "moonshot-chat",
+                            ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
+                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneAnalyze],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
-                                Retries = 1,
+                                Retries = 3,
                             }
-                        }
+                        },
+                        //new LLMProviderConfig
+                        //{
+                        //    ProviderConfigId = Guid.NewGuid().ToString(),
+                        //    Name = "IntenseRP-V2-KIMI-Think",
+                        //    Model = "moonshot-reasoner",
+                        //    ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
+                        //    Type = LLMProviderType.OpenAICustom,
+                        //    ConcurrencyLimit = 1,
+                        //    Tags = [],
+                        //    TimeoutStrategy = new TimeoutStrategy
+                        //    {
+                        //        Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                        //        Retries = 3,
+                        //    }
+                        //},
                     },
                     ChatCompletionPresetsMap = new ChatCompletionPresetsMap()
                     {
@@ -122,6 +167,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             {
                                 Type = ChatCompletionPresetType.SkillChecksInitiator,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_PATHFINDER_SKILLS_CHECKS_INITIATOR_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.SceneAnalyze,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_ANALYZE_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                         }

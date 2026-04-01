@@ -56,6 +56,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonPropertyName("genitals")]
         public string Genitals { get; set; }// e.g: female
 
+        [JsonPropertyName("penisSize")]
+        public string PenisSize { get; set; }// e.g: average
+
         [JsonPropertyName("breastsSize")]
         public string BreastsSize { get; set; }// e.g: small
 

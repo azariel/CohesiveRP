@@ -65,10 +65,11 @@ public class PatchSpecificMessageByIdWorkflow : IPatchSpecificMessageByIdWorkflo
                 MessageId = message.MessageId,
                 Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", persona?.Name ?? "User"),
                 SourceType = message.SourceType,
+                InRoleplayDateTime = message.InRoleplayDateTime,
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,
                 CharacterId = message.CharacterId,
-                AvatarId = message.AvatarId,
+                AvatarFilePath = message.AvatarFilePath,
             },
             MainQueryId = null
         };

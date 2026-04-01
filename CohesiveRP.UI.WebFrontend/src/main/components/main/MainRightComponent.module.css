@@ -9,4 +9,34 @@
   border-radius: 14px;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
+  display: flex;
+  justify-content: center;
+}
+
+.avatarContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 1em 0;
+
+  -webkit-mask-image:
+    linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image:
+    linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+}
+
+.avatar {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Hide entirely on mobile */
+@media (max-width: 876px) {
+  .body {
+    display: none;
+  }
 }

@@ -4,6 +4,7 @@ using CohesiveRP.Core.HttpLLMApiProvider;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
@@ -25,6 +26,8 @@ namespace CohesiveRP.Core.LLMProviderManager
         protected ISummaryService summaryService;
         protected IPromptContextBuilder contextBuilder;
         protected IPromptContext promptContext;
+
+        protected LLMApiResponseMessage[] messages = null;
 
         public LLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
@@ -79,7 +82,9 @@ namespace CohesiveRP.Core.LLMProviderManager
 
                 if (response == null)
                 {
-                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                    await Task.Delay(2000);
+                    backgroundQueryDbModel.Content = "";
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// retry
                     return;
                 }
 
@@ -89,6 +94,7 @@ namespace CohesiveRP.Core.LLMProviderManager
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.ProcessingFinalInstruction;
             } catch (Exception e)
             {
+                await Task.Delay(2000);
                 LoggingManager.LogToFile("07b4df24-1780-4a0b-a81d-97fedb852d41", $"The query to HttpLLMApiProviderService failed. Unhandled error.", e);
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
                 return;
@@ -114,6 +120,37 @@ namespace CohesiveRP.Core.LLMProviderManager
             return true;
         }
 
-        public abstract Task ProcessCompletedQueryAsync();
+        public virtual async Task<bool> ProcessCompletedQueryAsync()
+        {
+            if (backgroundQueryDbModel == null || backgroundQueryDbModel.Status != BackgroundQueryStatus.ProcessingFinalInstruction)
+            {
+                LoggingManager.LogToFile("f26a3023-556d-43fb-b064-5f19643804a5", $"Ignoring background query [{backgroundQueryDbModel?.BackgroundQueryId}]. Status was [{backgroundQueryDbModel?.Status}].");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(backgroundQueryDbModel.Content))
+            {
+                LoggingManager.LogToFile("e4acf29a-cb5e-4de9-975a-0d508c0ad950", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content was null or empty. Task will be set to Pending status for re-generation.");
+                return false;
+            }
+
+            // Deserialize the generic content into a valid Scene Analyzer
+            try
+            {
+                messages = JsonCommonSerializer.DeserializeFromString<LLMApiResponseMessage[]>(backgroundQueryDbModel.Content);
+
+                if (messages == null || messages.Length <= 0)
+                {
+                    LoggingManager.LogToFile("a86f6951-e51a-44c2-ba9d-71433b0d9407", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content no messages generated from the inference server. One message was expected (no more, no less). Task will be set to Pending status for re-generation.");
+                    return false;
+                }
+            } catch (Exception e)
+            {
+                LoggingManager.LogToFile("be1a2097-a9d4-4242-9a9d-4e60429f59df", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
+                return false;
+            }
+
+            return true;
+        }
     }
 }

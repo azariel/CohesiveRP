@@ -2,6 +2,7 @@
 using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.QueryModels.Chat;
 using Microsoft.Extensions.Hosting;
 
 namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
@@ -111,7 +112,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
         private async Task<List<string>> GetTagsFromIdleProvidersAsync()
         {
             // FOR DEBUG
-            return new List<string>() { "main", "sceneTracker" };
+            return Enum.GetValues<ChatCompletionPresetType>().Select(s => s.ToString().ToLowerInvariant()).ToList();
         }
 
         /// <summary>
@@ -149,7 +150,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             if (validQueries.Count > 1)
             {
                 // Filter by the tags allowed by the providers. Only the tags tied to idle providers (or provider with sufficient concurrency) are accepted
-                validQueries = validQueries.Where(w => tagsAllowedByIdleProviders.Any(a => w.Tags.Contains(a))).ToList();
+                validQueries = validQueries.Where(w => tagsAllowedByIdleProviders.Any(a => w.Tags.Select(s=>s.ToLowerInvariant()).Contains(a))).ToList();
 
                 if (validQueries.Count <= 0)
                 {

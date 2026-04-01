@@ -37,8 +37,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 var dbModel = new SceneTrackerDbModel
                 {
                     SceneTrackerId = Guid.NewGuid().ToString(),
+                    CreatedAtUtc = DateTime.UtcNow,
                     ChatId = queryModel.ChatId,
-                    CreatedAtUtc = queryModel.CreatedAtUtc,
                     LinkMessageId = queryModel.LinkMessageId,
                     Content = queryModel.Content,
                 };

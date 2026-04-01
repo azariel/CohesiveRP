@@ -10,9 +10,9 @@ import type { CharacterSheetRequestDto } from "../../../../RequestDto/characters
 /* ─────────────────────────── Constants ─────────────────────── */
 
 const GENDER_OPTIONS = ["", "Male", "Female"];
-const AGE_GROUP_OPTIONS = ["", "Child", "Teenager", "YoungAdult", "Adult", "MiddleAged", "Elderly"];
+const AGE_GROUP_OPTIONS = ["", "Child", "Teenager", "Young Adult", "Adult", "Elderly"];
 const GENITALS_OPTIONS = ["", "Male", "Female", "Both", "None"];
-const BREASTS_SIZE_OPTIONS = ["", "Flat", "Small", "Medium", "Large", "ExtraLarge"];
+const BREASTS_SIZE_OPTIONS = ["", "Flat", "Small", "Average", "Large", "ExtraLarge"];
 
 const PATHFINDER_ATTR_KEYS = [
   "Fortitude", "Reflex", "Willpower", "Stamina",
@@ -130,11 +130,29 @@ function ArrayField({
   onChange: (v: string[]) => void;
   minHeight?: string;
 }) {
+  const [localText, setLocalText] = useState(() => arrToText(value));
+
+  useEffect(() => {
+    setLocalText((prevText) => {
+      const parsedLocal = textToArr(prevText);
+      // Compare arrays to see if the parent was updated by the server/import
+      if (JSON.stringify(parsedLocal) !== JSON.stringify(value)) {
+        return arrToText(value);
+      }
+      return prevText;
+    });
+  }, [value]);
+
+  const handleTextChange = (v: string) => {
+    setLocalText(v);
+    onChange(textToArr(v));
+  };
+
   return (
     <Field label={`${label} (one per line)`}>
       <SheetTextarea
-        value={arrToText(value)}
-        onChange={(v) => onChange(textToArr(v))}
+        value={localText}
+        onChange={handleTextChange}
         minHeight={minHeight}
       />
     </Field>
@@ -180,6 +198,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
   const [skinColor, setSkinColor] = useState("");
   const [genitals, setGenitals] = useState("");
   const [breastsSize, setBreastsSize] = useState("");
+  const [penisSize, setPenisSize] = useState("");
   const [sexuality, setSexuality] = useState("");
   const [attractiveness, setAttractiveness] = useState("");
 
@@ -242,6 +261,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
     setSkinColor(s.characterSheet?.skinColor ?? "");
     setGenitals(s.characterSheet?.genitals ?? "");
     setBreastsSize(s.characterSheet?.breastsSize ?? "");
+    setPenisSize(s.characterSheet?.penisSize ?? "");
     setSexuality(s.characterSheet?.sexuality ?? "");
     setAttractiveness(s.characterSheet?.attractiveness ?? "");
     setSpeechPattern(s.characterSheet?.speechPattern ?? "");
@@ -400,6 +420,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           skinColor,
           genitals: genitals || null,
           breastsSize: breastsSize || null,
+          penisSize: penisSize || null,
           sexuality: sexuality || null,
           attractiveness,
           speechPattern,
@@ -692,7 +713,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
             <SheetSelect value={gender} onChange={setGender} options={GENDER_OPTIONS} />
           </Field>
           <Field label="Sexuality">
-            <SheetInput value={sexuality} onChange={setSexuality} placeholder="Straight" />
+            <SheetInput value={sexuality} onChange={setSexuality} placeholder="Heterosexual" />
           </Field>
         </div>
         <Field label="Race / Species">
@@ -729,17 +750,21 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
             <SheetInput value={hairStyle} onChange={setHairStyle} placeholder="Long, straight, slicked back" />
           </Field>
         </div>
-        <div className={styles.threeCol}>
+        <div className={styles.twoCol}>
           <Field label="Ear Shape">
             <SheetInput value={earShape} onChange={setEarShape} placeholder="Normal" />
           </Field>
           <Field label="Genitals">
             <SheetSelect value={genitals} onChange={setGenitals} options={GENITALS_OPTIONS} />
           </Field>
+        </div>
+        <div className={styles.twoCol}>
           <Field label="Breasts Size">
             <SheetSelect value={breastsSize} onChange={setBreastsSize} options={BREASTS_SIZE_OPTIONS} />
           </Field>
-          
+          <Field label="Penis Size">
+            <SheetInput value={penisSize} onChange={setPenisSize} placeholder="Average (5 inches)" />
+          </Field>
         </div>
         <div className={styles.oneCol}>
           <Field label="Attractiveness">
