@@ -85,6 +85,8 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         IMessageDbModel message = null;
         if (!string.IsNullOrWhiteSpace(requestDto.Message.Content))
         {
+            var now = DateTime.UtcNow;
+
             // Add the message
             CreateMessageQueryModel messageQueryModel = new()
             {
@@ -93,9 +95,13 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 SourceType = MessageSourceType.User,
                 InRoleplayDateTime = null,// At this point, the player just generated its message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
                 MessageContent = requestDto.Message.Content,
-                CreatedAtUtc = DateTime.UtcNow,
+                MessageThink = "",
+                CreatedAtUtc = now,
                 CharacterId = null,// Null as this is from the User
-                AvatarFilePath = null,// TODO: generate a different avatar from time to time using comfyui?
+                AvatarsFilePath = null,// TODO: generate a different avatar from time to time using comfyui?
+                StartGenerationDateTimeUtc = now,
+                EndFocusedGenerationDateTimeUtc = now,
+                StartFocusedGenerationDateTimeUtc = now,
             };
 
             message = await storageService.AddMessageAsync(messageQueryModel);
@@ -141,8 +147,11 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 PersonaName = persona?.Name,
                 InRoleplayDateTime = message?.InRoleplayDateTime,
                 Summarized = message?.Summarized ?? false,
-                AvatarFilePath = message?.AvatarFilePath,
-                Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User")
+                AvatarsFilePath = message?.AvatarsFilePath,
+                Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User"),
+                StartGenerationDateTimeUtc = message?.StartGenerationDateTimeUtc,
+                StartFocusedGenerationDateTimeUtc = message?.StartFocusedGenerationDateTimeUtc,
+                EndFocusedGenerationDateTimeUtc = message?.EndFocusedGenerationDateTimeUtc,
             },
             MainQueryId = backgroundQuery.BackgroundQueryId,
         };

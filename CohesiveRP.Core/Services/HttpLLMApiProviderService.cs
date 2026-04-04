@@ -1,8 +1,14 @@
-﻿using CohesiveRP.Common.Diagnostics;
+﻿using System.Reflection.PortableExecutable;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.HttpClient;
+using CohesiveRP.Common.Serialization;
 using CohesiveRP.Core.HttpLLMApiProvider;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services.LLMApiProvider;
+using CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request;
+using CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Response;
 using CohesiveRP.Core.Services.LLMApiProvider.Utils;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
@@ -20,7 +26,7 @@ namespace CohesiveRP.Core.Services
             this.llmApiQueryPayloadBuilderFactory = llmApiQueryPayloadBuilderFactory;
         }
 
-        public async Task<IHttpLLMApiQueryResponseDto> QueryApiAsync(string tag, LLMProviderConfig[] availableLLMApiProviders, IPromptContext promptContext)
+        public async Task<IHttpLLMApiQueryResponseDto> QueryApiAsync(string tag, LLMProviderConfig[] availableLLMApiProviders, IPromptContext promptContext, BackgroundQueryDbModel backgroundQueryDbModel)
         {
             if (availableLLMApiProviders == null || availableLLMApiProviders.Length <= 0)
             {
@@ -75,7 +81,7 @@ namespace CohesiveRP.Core.Services
             try
             {
                 // Now once we have a state in Db for our query, we can poke the actual inference server api
-                var LLMApiResult = await PostLLMApiAsync(selectedLLMApiQueryDbModel, promptContext);
+                var LLMApiResult = await PostLLMApiAsync(selectedLLMApiQueryDbModel, promptContext, backgroundQueryDbModel);
                 return LLMApiResult;
 
                 // TODO: Manage the state of the ongoing query to the inference server api
@@ -97,7 +103,25 @@ namespace CohesiveRP.Core.Services
             }
         }
 
-        private async Task<IHttpLLMApiQueryResponseDto> PostLLMApiAsync(LLMProviderConfig selectedLLMApiQueryDbModel, IPromptContext promptContext)
+        private static string? TryExtractContentDelta(string json)
+        {
+            try
+            {
+                using JsonDocument doc = JsonDocument.Parse(json);
+
+                return doc.RootElement
+                    .GetProperty("choices")[0]
+                    .GetProperty("delta")
+                    .TryGetProperty("content", out JsonElement content)
+                        ? content.GetString()
+                        : null;
+            } catch (Exception)
+            {
+                return null; // malformed frame — skip silently
+            }
+        }
+
+        private async Task<IHttpLLMApiQueryResponseDto> PostLLMApiAsync(LLMProviderConfig selectedLLMApiQueryDbModel, IPromptContext promptContext, BackgroundQueryDbModel backgroundQueryDbModel)
         {
             if (selectedLLMApiQueryDbModel == null || string.IsNullOrWhiteSpace(selectedLLMApiQueryDbModel.Model) || string.IsNullOrWhiteSpace(selectedLLMApiQueryDbModel.ApiUrl))
             {
@@ -108,14 +132,42 @@ namespace CohesiveRP.Core.Services
             using HttpRestClient httpClient = new HttpRestClient();
 
             ILLMApiQueryPayloadBuilder llmApiQueryPayloadBuilder = llmApiQueryPayloadBuilderFactory.Create(selectedLLMApiQueryDbModel.Type);
-            string payload = llmApiQueryPayloadBuilder.BuildPayload(promptContext, selectedLLMApiQueryDbModel.Model);
+            string payload = llmApiQueryPayloadBuilder.BuildPayload(promptContext, selectedLLMApiQueryDbModel);
 
             try
             {
-                CancellationToken token = new CancellationTokenSource(180000).Token;
-                string rawResponse = await httpClient.PostAsync(selectedLLMApiQueryDbModel.ApiUrl, payload, token);
-                IHttpLLMApiQueryResponseDto httpLLMApiQueryResponseDto = LLMApiQueryResponseDtoConverter.Convert(selectedLLMApiQueryDbModel.Type, rawResponse);
-                return httpLLMApiQueryResponseDto;
+                if (selectedLLMApiQueryDbModel.Stream)
+                {
+                    CancellationToken token = new CancellationTokenSource(180000).Token;
+                    await foreach (string chunk in httpClient.PostStreamAsync(selectedLLMApiQueryDbModel.ApiUrl, payload, token))
+                    {
+                        if (backgroundQueryDbModel != null)
+                        {
+                            var content = ParseNextLLMStreamedContent(chunk);
+                            backgroundQueryDbModel.Content += content;
+                            await storageService.UpdateBackgroundQueryAsync(backgroundQueryDbModel);
+                        }
+                    }
+
+                    IHttpLLMApiQueryResponseDto httpLLMApiQueryResponseDto = new DirectMessagesResponseDto()
+                    {
+                        HttpResultCode = System.Net.HttpStatusCode.OK,
+                        Messages = [
+                           new OpenAIChatCompletionMessage
+                           {
+                               Role = OpenAIChatCompletionRole.assistant,
+                               Content = backgroundQueryDbModel?.Content,
+                           }
+                        ],
+                    };
+                    return httpLLMApiQueryResponseDto;
+                } else
+                {
+                    CancellationToken token = new CancellationTokenSource(180000).Token;
+                    string rawResponse = await httpClient.PostAsync(selectedLLMApiQueryDbModel.ApiUrl, payload, token);
+                    IHttpLLMApiQueryResponseDto httpLLMApiQueryResponseDto = LLMApiQueryResponseDtoConverter.Convert(selectedLLMApiQueryDbModel.Type, rawResponse);
+                    return httpLLMApiQueryResponseDto;
+                }
 
             } catch (Exception e)
             {
@@ -124,15 +176,33 @@ namespace CohesiveRP.Core.Services
                     LoggingManager.LogToFile("611e883a-f3c6-4e9a-9f35-458690125ede", $"The configured LLMProviderConfig [{selectedLLMApiQueryDbModel.ProviderConfigId}] is incorrectly configured. The OpenAI compliant inference server has refused to serve the request due to an incorrect configuration.");
                 }
 
-                if(e.Message.Contains("no connection could be made because the target machine actively refused it", StringComparison.InvariantCultureIgnoreCase))
+                if (e.Message.Contains("no connection could be made because the target machine actively refused it", StringComparison.InvariantCultureIgnoreCase))
                 {
                     LoggingManager.LogToFile("4b4683cf-e3a1-4494-8ecd-1e288bb61e81", $"Can't execute Http request. The requested Api is down. ApiUrl: [{selectedLLMApiQueryDbModel.ApiUrl}].");
                 }
 
                 LoggingManager.LogToFile("dd346c77-ea60-463b-8dda-ed7c95d62757", $"LLM query failed. Exception:[{e.Message}].");
-                
+
                 return null;
             }
+        }
+
+        private string ParseNextLLMStreamedContent(string rawChunk)
+        {
+            if (string.IsNullOrWhiteSpace(rawChunk))
+                return "";
+
+            if (!rawChunk.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+                return "";
+
+            string payload = rawChunk["data:".Length..].Trim();
+
+            string chunk = TryExtractContentDelta(payload);
+
+            if (chunk is not null)
+                return chunk;
+
+            return "";
         }
     }
 }

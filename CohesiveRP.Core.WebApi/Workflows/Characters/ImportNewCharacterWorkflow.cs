@@ -74,7 +74,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         {
             queryModel = new()
             {
-                Name = characterCardCRPv1.Data.Character.Name,
+                Name = characterCardCRPv1.Data.Character.Name.Trim(),
                 Creator = characterCardCRPv1.Data.Character.Creator,
                 CreatorNotes = characterCardCRPv1.Data.Character.CreatorNotes,
                 Description = characterCardCRPv1.Data.Character.Description,
@@ -86,7 +86,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         {
             queryModel = new()
             {
-                Name = characterCardCCv3.Data.Name,
+                Name = characterCardCCv3.Data.Name.Trim(),
                 Creator = characterCardCCv3.Data.Creator,
                 CreatorNotes = characterCardCCv3.Data.CreatorNotes,
                 Description = characterCardCCv3.Data.Description,
@@ -130,7 +130,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         // Save the image (avatar) on disk
-        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, importCharacterResult.Name.ToLowerInvariant());
+        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, importCharacterResult.Name.ToLowerInvariant().Trim());
         if (!Directory.Exists(directoryCharacter))
         {
             Directory.CreateDirectory(directoryCharacter);
@@ -147,7 +147,10 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
             // Link that lorebook to the character inherent lorebooks (the lorebooks that will be tethered to this character automatically upon new chat)
             importCharacterResult.InherentLorebookIds ??= new List<string>();
             if (!importCharacterResult.InherentLorebookIds.Contains(resultLoreBook.LorebookId))
+            {
                 importCharacterResult.InherentLorebookIds.Add(resultLoreBook.LorebookId);
+                await storageService.UpdateCharacterAsync(importCharacterResult);
+            }
 
             if (resultLoreBook != null)
             {

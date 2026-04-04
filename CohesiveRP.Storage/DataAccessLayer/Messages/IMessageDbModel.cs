@@ -10,7 +10,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         DateTime CreatedAtUtc { get; set; }
         bool Summarized { get; set; }
         string CharacterId { get; }
-        string AvatarFilePath { get; }
+        string[] AvatarsFilePath { get; }
         DateTime? InRoleplayDateTime { get; set; }
+        DateTime? StartGenerationDateTimeUtc { get; set; }
+        DateTime? StartFocusedGenerationDateTimeUtc { get; set; }
+        DateTime? EndFocusedGenerationDateTimeUtc { get; set; }
     }
 }

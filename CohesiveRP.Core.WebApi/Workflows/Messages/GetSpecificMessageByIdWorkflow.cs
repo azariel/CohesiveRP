@@ -44,10 +44,13 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,
                 CharacterId = message.CharacterId,
-                AvatarFilePath = message.AvatarFilePath,
+                AvatarsFilePath = message.AvatarsFilePath,
                 CharacterName = character?.Name,
                 PersonaId = persona.PersonaId,
                 PersonaName = persona.Name,
+                StartGenerationDateTimeUtc = message.StartGenerationDateTimeUtc,
+                StartFocusedGenerationDateTimeUtc = message.StartFocusedGenerationDateTimeUtc,
+                EndFocusedGenerationDateTimeUtc = message.EndFocusedGenerationDateTimeUtc,
             },
             MainQueryId = null
         };

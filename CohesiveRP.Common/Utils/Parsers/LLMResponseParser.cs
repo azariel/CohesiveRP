@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers.BusinessObjects;
 
@@ -7,6 +6,21 @@ namespace CohesiveRP.Common.Utils.Parsers
 {
     public static class LLMResponseParser
     {
+        public static string ParseOnlyJson(string LLMrawResponse)
+        {
+            try
+            {
+                // Use a regex to find the array and remove everything that is inconsequential
+                var match = Regex.Match(LLMrawResponse, @"\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}", RegexOptions.Singleline);
+                string result = match.Value;
+
+                return result;
+            } catch (Exception)
+            {
+                return LLMrawResponse;
+            }
+        }
+
         public static T ParseOnlyJson<T>(string LLMrawResponse)
         {
             try

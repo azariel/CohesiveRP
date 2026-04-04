@@ -98,39 +98,45 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             }
 
             // Handle kinks in a way that is more segregated from other information
-            str.AppendLine($"    <kinks>");
-            foreach (var kinkValue in characterSheet.Kinks)
+            if (characterSheet.Kinks != null)
             {
-                // If standard (key:value), handle it differently
-                string[] splitValue = kinkValue.Split(':');
-                if (splitValue.Length == 2)
+                str.AppendLine($"    <kinks>");
+                foreach (var kinkValue in characterSheet.Kinks)
                 {
-                    str.AppendLine($"      <{splitValue[0]}>{splitValue[1]}</{splitValue[0]}>");
-                } else
-                {
-                    // Non-standard format, just add it as is
-                    str.AppendLine($"      - {kinkValue}");
+                    // If standard (key:value), handle it differently
+                    string[] splitValue = kinkValue.Split(':');
+                    if (splitValue.Length == 2)
+                    {
+                        str.AppendLine($"      <{splitValue[0]}>{splitValue[1]}</{splitValue[0]}>");
+                    } else
+                    {
+                        // Non-standard format, just add it as is
+                        str.AppendLine($"      - {kinkValue}");
+                    }
                 }
+
+                str.AppendLine($"    </kinks>");
             }
 
-            str.AppendLine($"    </kinks>");
-
-            str.AppendLine($"    <secretKinks>");
-            foreach (var kinkValue in characterSheet.SecretKinks)
+            if (characterSheet.SecretKinks != null)
             {
-                // If standard (key:value), handle it differently
-                string[] splitValue = kinkValue.Split(':');
-                if (splitValue.Length == 2)
+                str.AppendLine($"    <secretKinks>");
+                foreach (var kinkValue in characterSheet.SecretKinks)
                 {
-                    str.AppendLine($"      <{splitValue[0]}>{splitValue[1]}</{splitValue[0]}>");
-                } else
-                {
-                    // Non-standard format, just add it as is
-                    str.AppendLine($"      - {kinkValue}");
+                    // If standard (key:value), handle it differently
+                    string[] splitValue = kinkValue.Split(':');
+                    if (splitValue.Length == 2)
+                    {
+                        str.AppendLine($"      <{splitValue[0]}>{splitValue[1]}</{splitValue[0]}>");
+                    } else
+                    {
+                        // Non-standard format, just add it as is
+                        str.AppendLine($"      - {kinkValue}");
+                    }
                 }
-            }
 
-            str.AppendLine($"    </secretKinks>");
+                str.AppendLine($"    </secretKinks>");
+            }
 
             // Handle the Pathfinder special properties
             str.AppendLine($"    <attributes>");

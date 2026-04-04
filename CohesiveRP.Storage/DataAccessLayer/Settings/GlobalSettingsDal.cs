@@ -63,6 +63,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ProviderConfigId = Guid.NewGuid().ToString(),
                             Name = "IntenseRP-V2-GLM-Think",
                             Model = "glm-reasoner",
+                            Stream = true,
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
@@ -78,6 +79,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ProviderConfigId = Guid.NewGuid().ToString(),
                             Name = "IntenseRP-V2-DS-Chat",
                             Model = "deepseek-chat",
+                            Stream = true,
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
@@ -108,6 +110,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ProviderConfigId = Guid.NewGuid().ToString(),
                             Name = "IntenseRP-V2-KIMI-Chat",
                             Model = "moonshot-chat",
+                            Stream = true,
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
@@ -181,7 +184,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     {
                         NbRawMessagesToKeepInContext = 5,
                         HotMessagesAmountLimit = 30,
-                        ColdMessagesAmountLimit = 200,
+                        ColdMessagesAmountLimit = 500,
                         Short = new ShortSummaryConfig
                         {
                             NbMessageInChunk = 3,

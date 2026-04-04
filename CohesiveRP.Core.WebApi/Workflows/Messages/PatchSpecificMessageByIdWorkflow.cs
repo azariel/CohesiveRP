@@ -69,7 +69,7 @@ public class PatchSpecificMessageByIdWorkflow : IPatchSpecificMessageByIdWorkflo
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,
                 CharacterId = message.CharacterId,
-                AvatarFilePath = message.AvatarFilePath,
+                AvatarsFilePath = message.AvatarsFilePath,
             },
             MainQueryId = null
         };

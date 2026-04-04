@@ -36,7 +36,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         [MaxLength(16384)]
         public string Content { get; set; }
 
-        [MaxLength(32)] public string Description { get; set; }
+        [MaxLength(32)]
         public string ChatId { get; set; }
 
         [MaxLength(32)]

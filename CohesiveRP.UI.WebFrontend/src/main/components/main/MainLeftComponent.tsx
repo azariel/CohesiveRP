@@ -10,11 +10,12 @@ export default function MainLeftComponent() {
 
   const lastPersonaMessage = [...messages]
     .reverse()
-    .find((m) => m.sourceType === 0 && m.avatarFilePath);
+    .find((m) => m.sourceType === 0 && m.avatarsFilePath && m.avatarsFilePath.length > 0);
 
-  const avatarSrc = lastPersonaMessage
-    ? lastPersonaMessage.avatarFilePath && lastPersonaMessage.avatarFilePath !== "avatar"
-      ? GetAvatarPathFromAvatarFilePath(lastPersonaMessage.avatarFilePath)
+  const firstPath = lastPersonaMessage?.avatarsFilePath?.[0];
+  const avatarSrc = firstPath
+    ? firstPath !== "avatar"
+      ? GetAvatarPathFromAvatarFilePath(firstPath)
       : GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar")
     : null;
 

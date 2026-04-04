@@ -119,7 +119,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
             sourceType: 1,
             messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 1,
             summarized: false,
-            avatarFilePath: "avatar",
+            avatarsFilePath: [],
             characterId: null,
             characterName: "",
             personaId: null,
@@ -282,7 +282,7 @@ const adjustTextareaHeight = () => {
           const updatedPlayerMsg = playerMsgResponse?.messageObj;
           if (updatedPlayerMsg) {
             setMessages((prev) =>
-              prev.map((m) => m.messageId === playerMsgId ? { ...m, avatarFilePath: updatedPlayerMsg.avatarFilePath } : m)
+              prev.map((m) => m.messageId === playerMsgId ? { ...m, avatarsFilePath: updatedPlayerMsg.avatarsFilePath } : m)
             );
           }
         }
@@ -371,7 +371,7 @@ const adjustTextareaHeight = () => {
           sourceType: 1,
           messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
           summarized: false,
-          avatarFilePath: null,
+          avatarsFilePath: [],
           characterId: null,
           characterName: "",
           personaId: null,
@@ -388,7 +388,7 @@ const adjustTextareaHeight = () => {
           sourceType: 1,
           messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
           summarized: false,
-          avatarFilePath: null,
+          avatarsFilePath: [],
           characterId: null,
           characterName: "",
           personaId: null,

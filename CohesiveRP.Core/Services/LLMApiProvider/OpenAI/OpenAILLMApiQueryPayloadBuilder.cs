@@ -1,6 +1,7 @@
 ﻿using CohesiveRP.Common.Serialization;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request;
+using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
 
 namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI
 {
@@ -20,12 +21,13 @@ namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI
             }).ToArray();
         }
 
-        public string BuildPayload(IPromptContext promptContext, string model)
+        public string BuildPayload(IPromptContext promptContext, LLMProviderConfig providerConfig)
         {
             OpenAIChatCompletionRequestDto requestDto = new OpenAIChatCompletionRequestDto
             {
-                Model = model,
+                Model = providerConfig.Model,
                 Messages = ConvertPromptMessagesToOpenAICompatiblePromptMessages(promptContext.Messages),
+                Stream = providerConfig.Stream,
             };
 
             var serializedModel = JsonCommonSerializer.SerializeToString(requestDto);

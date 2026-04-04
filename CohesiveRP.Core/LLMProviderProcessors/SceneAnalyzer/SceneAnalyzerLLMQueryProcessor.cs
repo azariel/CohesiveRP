@@ -214,6 +214,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneAnalyzer
                 //var avatarFilePath = await GetChatAvatarFromSceneAnalysisFilePathAsync(chat, dbModel);
                 //await SetChatAvatarAsync(chat, messageId, avatarFilePath);
 
+                backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
             } catch (Exception e)
             {

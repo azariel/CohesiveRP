@@ -47,7 +47,7 @@ namespace CohesiveRP.Core.Services
         Task<BackgroundQueryDbModel[]> GetBackgroundQueriesByChatIdAsync(string chatId);
         Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync();
         Task<LLMApiQueryDbModel[]> GetQueriesOnLLMApisAsync(string tag);
-        Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery);
+        Task<bool> UpdateBackgroundQueryAsync(BackgroundQueryDbModel backgroundQueryDbModel);
         Task<bool> DeleteQueryByIdAsync(string lLMApiQueryId);
         Task<bool> DeleteBackgroundQueriesByChatIdAsync(string chatId);
 
@@ -129,5 +129,8 @@ namespace CohesiveRP.Core.Services
         Task<LorebookInstanceDbModel> AddLorebookInstanceAsync(LorebookInstanceDbModel dbModel);
         Task<bool> UpdateLorebookInstanceAsync(LorebookInstanceDbModel lorebookDbModel);
         Task<bool> DeleteLorebookInstanceAsync(string chatId);
+
+        // LLMQueries
+        Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery);
     }
 }

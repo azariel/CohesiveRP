@@ -9,13 +9,12 @@ interface ChatMessage {
     characterName: string | null;
     personaId: string | null;
     personaName: string | null;
-    avatarFilePath: string | null;// if a specific message has an avatar override
-
+    avatarsFilePath: string[] | null; // zero to ten avatar path overrides for this message
     // Injected fields
+    startGenerationDateTimeUtc?: string;
     startFocusedGenerationDateTimeUtc?: string;
     endFocusedGenerationDateTimeUtc?: string;
 }
-
 export type {
     ChatMessage
 };

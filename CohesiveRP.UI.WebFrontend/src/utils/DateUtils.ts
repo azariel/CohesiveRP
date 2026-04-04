@@ -28,18 +28,33 @@ const FormatDateTimeToMinutes = (date: string | Date | null | undefined): string
   return `${yyyy}-${mm}-${dd} ${hh}h${min}`;
 };
 
-const FormatDateTimeDurationMinutesAndSeconds = (date: string | Date | null | undefined): string => {
-  if (!date)
-    return "";
+export function ParseFocusedGenerationDate(raw: string | null | undefined): number | null {
+  if (!raw)
+    return null;
 
-  const d = new Date(date);
-  const min = String(d.getMinutes()).padStart(2, "0");
-  const sec = String(d.getSeconds()).padStart(2, "0");
+  let iso = raw.trim().replace(" ", "T");
 
-  if(d.getMinutes() > 0)
-    return `${min}m${sec}s`;
+  if (iso.startsWith("0001-01-01"))
+    return null;
 
-  return `${sec}s`;
+  // Force UTC if no timezone info is present
+  if (!iso.endsWith("Z") && !iso.includes("+"))
+    iso += "Z";
+
+  const ms = Date.parse(iso);
+  return isNaN(ms) ? null : ms;
+}
+
+const FormatDateTimeDurationMinutesAndSeconds = (ms: number | null | undefined): string => {
+  if (ms === null || ms === undefined || isNaN(ms))
+    return "-";
+  const totalSeconds = Math.floor(ms / 1000);
+  const min = Math.floor(totalSeconds / 60);
+  const sec = totalSeconds % 60;
+  const secStr = String(sec).padStart(2, "0");
+  if (min > 0)
+    return `${String(min).padStart(2, "0")}m${secStr}s`;
+  return `${secStr}s`;
 };
 
 

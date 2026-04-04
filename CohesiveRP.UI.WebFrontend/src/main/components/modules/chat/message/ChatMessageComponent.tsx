@@ -4,7 +4,7 @@ import styles from "./ChatMessageComponent.module.css";
 import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification, HiMiniChevronRight } from "react-icons/hi2";
 import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
-import { FormatDateTimeDurationMinutesAndSeconds, FormatUtcDate } from "../../../../../utils/DateUtils";
+import { FormatDateTimeDurationMinutesAndSeconds, FormatUtcDate, ParseFocusedGenerationDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
 import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
@@ -24,6 +24,12 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
   const [editContent, setEditContent] = useState(message?.content ?? "");
   const isRevertingRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const start = ParseFocusedGenerationDate(message?.startGenerationDateTimeUtc);
+  const startFocused = ParseFocusedGenerationDate(message?.startFocusedGenerationDateTimeUtc);
+  const end = ParseFocusedGenerationDate(message?.endFocusedGenerationDateTimeUtc);
+  const durationMs = startFocused !== null && end !== null ? (end - startFocused) : null;
+  const totalDurationMs = start !== null && end !== null ? (end - start) : null;
+
 
   // Focus + size once when entering edit mode
   useEffect(() => {
@@ -88,11 +94,19 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
       <div className={styles.container}>
         <div className={styles.leftMessageContainer}>
           <div className={styles.messageAvatarContainer}>
-            {message?.sourceType == 0 ? (
-              <img src={GetAvatarPathFromPersonaId(message?.personaId ?? "")} alt="Avatar" />
-            ) : (
-              <img src={message?.avatarFilePath && message.avatarFilePath !== "avatar" ? GetAvatarPathFromAvatarFilePath(message.avatarFilePath) : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar")} alt="Avatar" />
-            )}
+            <div className={styles.messageAvatarContainer}>
+              {(() => {
+                const avatarPath = message?.avatarsFilePath?.[0];
+                const src = message?.sourceType === 0
+                  ? (avatarPath && avatarPath !== "avatar"
+                      ? GetAvatarPathFromAvatarFilePath(avatarPath)
+                      : GetAvatarPathFromPersonaId(message?.personaId ?? ""))
+                  : (avatarPath && avatarPath !== "avatar"
+                      ? GetAvatarPathFromAvatarFilePath(avatarPath)
+                      : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar"));
+                return <img src={src} alt="Avatar" />;
+              })()}
+            </div>
           </div>
           <div className={styles.messageInfoContainer}>
             <div title="messageId">{!message?.messageIndex ? "-" : "# " + message.messageIndex}</div>
@@ -104,7 +118,7 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
               {message?.sourceType == 0 ? <label>{message?.personaName ?? "User"}</label> : <label>{message?.characterName ?? "Character"}</label>}
             </div>
             <div className={styles.messageHeaderContentModel}>
-              model-name ({FormatDateTimeDurationMinutesAndSeconds((Date.parse(message?.endFocusedGenerationDateTimeUtc ?? "") - Date.parse(message?.startFocusedGenerationDateTimeUtc ?? "")).toString()) ?? "-"})
+              <label>{FormatDateTimeDurationMinutesAndSeconds(totalDurationMs) ?? "-"} ({FormatDateTimeDurationMinutesAndSeconds(durationMs) ?? "-"})</label>
             </div>
             <div className={styles.messageHeaderContentCreatedAt}>
               {message?.summarized ? (<MdOutlineSummarize className={styles.messageHeaderSummarizeIcon} title="Summarized" />) : ""}

@@ -214,10 +214,14 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     Summarized = queryModel.Summarized,
                     InRoleplayDateTime = queryModel.InRoleplayDateTime,
                     Content = queryModel.MessageContent,
+                    ThinkingContent = queryModel.MessageThink,
                     SourceType = queryModel.SourceType,
                     CreatedAtUtc = queryModel.CreatedAtUtc,
                     CharacterId = queryModel.CharacterId,
-                    AvatarFilePath = queryModel.AvatarFilePath,
+                    AvatarsFilePath = queryModel.AvatarsFilePath,
+                    StartGenerationDateTimeUtc = queryModel.StartGenerationDateTimeUtc,
+                    StartFocusedGenerationDateTimeUtc = queryModel.StartFocusedGenerationDateTimeUtc,
+                    EndFocusedGenerationDateTimeUtc = queryModel.EndFocusedGenerationDateTimeUtc,
                 };
 
                 // Check if HotMessages for this chat already exist
