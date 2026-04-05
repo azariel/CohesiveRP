@@ -95,7 +95,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 SourceType = MessageSourceType.User,
                 InRoleplayDateTime = null,// At this point, the player just generated its message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
                 MessageContent = requestDto.Message.Content,
-                MessageThink = "",
+                ThinkingContent = "",
                 CreatedAtUtc = now,
                 CharacterId = null,// Null as this is from the User
                 AvatarsFilePath = null,// TODO: generate a different avatar from time to time using comfyui?
@@ -148,6 +148,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 InRoleplayDateTime = message?.InRoleplayDateTime,
                 Summarized = message?.Summarized ?? false,
                 AvatarsFilePath = message?.AvatarsFilePath,
+                ThinkingContent = message?.ThinkingContent,
                 Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User"),
                 StartGenerationDateTimeUtc = message?.StartGenerationDateTimeUtc,
                 StartFocusedGenerationDateTimeUtc = message?.StartFocusedGenerationDateTimeUtc,

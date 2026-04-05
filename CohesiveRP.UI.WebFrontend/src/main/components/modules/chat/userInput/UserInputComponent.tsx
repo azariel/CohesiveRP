@@ -115,6 +115,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
           {
             messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
             content: "...",
+            thinkingContent: "",
             createdAtUtc: null,
             sourceType: 1,
             messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 1,
@@ -367,6 +368,7 @@ const adjustTextareaHeight = () => {
         {
           messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
           content: "...",
+          thinkingContent: "",
           createdAtUtc: null,
           sourceType: 1,
           messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
@@ -384,6 +386,7 @@ const adjustTextareaHeight = () => {
         {
           messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
           content: "...",
+          thinkingContent: "",
           createdAtUtc: null,
           sourceType: 1,
           messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,

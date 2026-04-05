@@ -7,7 +7,7 @@ namespace CohesiveRP.Storage.QueryModels.Message
     {
         public string ChatId { get; set; }
         public string MessageContent { get; set; }
-        public string MessageThink { get; set; }
+        public string ThinkingContent { get; set; }
         public DateTime CreatedAtUtc { get; set; }
 
         [JsonConverter(typeof(JsonNumberEnumConverter<MessageSourceType>))]

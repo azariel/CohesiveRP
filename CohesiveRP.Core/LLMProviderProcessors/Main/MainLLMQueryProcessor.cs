@@ -443,7 +443,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     Summarized = false,// New message, so it's not summarized yet
                     InRoleplayDateTime = null,// At this point, we just generated the message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
                     MessageContent = ChatMessageParserUtils.ParseMessage(message.Content),
-                    MessageThink = ChatMessageParserUtils.ParseThinking(message.Content),
+                    ThinkingContent = ChatMessageParserUtils.ParseThinking(message.Content),
                     CreatedAtUtc = DateTime.UtcNow,
                     StartGenerationDateTimeUtc = backgroundQueryDbModel.CreatedAtUtc,
                     StartFocusedGenerationDateTimeUtc = backgroundQueryDbModel.StartFocusedGenerationDateTimeUtc,

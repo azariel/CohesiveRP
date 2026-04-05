@@ -2,6 +2,7 @@ interface ChatMessage {
     messageId: string;
     messageIndex: number | null;
     content: string | null;
+    thinkingContent: string | null;
     sourceType: number;
     createdAtUtc: string | null;
     summarized: boolean | null;

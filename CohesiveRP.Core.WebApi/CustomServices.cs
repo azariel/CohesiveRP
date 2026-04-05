@@ -16,6 +16,8 @@ using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
 using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.ChatCharacterRolls;
+using CohesiveRP.Core.WebApi.Workflows.ChatCharacterRolls.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.ChatCompletionPresets.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Chats;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
@@ -142,6 +144,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ICharacterSheetsDal, CharacterSheetsDal>();
             services.AddSingleton<ICharacterSheetInstancesDal, CharacterSheetInstancesDal>();
             services.AddSingleton<IChatCharactersRollsDal, ChatCharactersRollsDal>();
+            services.AddSingleton<IChatCharacterRollsWorkflow, GetChatCharacterRollsWorkflow>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

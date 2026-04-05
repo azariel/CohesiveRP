@@ -214,7 +214,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     Summarized = queryModel.Summarized,
                     InRoleplayDateTime = queryModel.InRoleplayDateTime,
                     Content = queryModel.MessageContent,
-                    ThinkingContent = queryModel.MessageThink,
+                    ThinkingContent = queryModel.ThinkingContent,
                     SourceType = queryModel.SourceType,
                     CreatedAtUtc = queryModel.CreatedAtUtc,
                     CharacterId = queryModel.CharacterId,

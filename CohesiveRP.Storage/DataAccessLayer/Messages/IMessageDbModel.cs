@@ -6,6 +6,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
     {
         string MessageId { get; set; }
         string Content { get; set; }
+        string ThinkingContent { get; set; }
         MessageSourceType SourceType { get; set; }
         DateTime CreatedAtUtc { get; set; }
         bool Summarized { get; set; }

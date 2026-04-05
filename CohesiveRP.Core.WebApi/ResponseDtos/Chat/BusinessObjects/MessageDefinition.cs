@@ -12,6 +12,9 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
         [JsonPropertyName("content")]
         public string Content { get; set; }
 
+        [JsonPropertyName("thinkingContent")]
+        public string ThinkingContent { get; set; }
+
         [JsonConverter(typeof(JsonNumberEnumConverter<MessageSourceType>))]
 
         [JsonPropertyName("sourceType")]

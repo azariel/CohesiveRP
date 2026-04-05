@@ -64,6 +64,7 @@ public class PatchSpecificMessageByIdWorkflow : IPatchSpecificMessageByIdWorkflo
             {
                 MessageId = message.MessageId,
                 Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", persona?.Name ?? "User"),
+                ThinkingContent = message.ThinkingContent.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", persona?.Name ?? "User"),
                 SourceType = message.SourceType,
                 InRoleplayDateTime = message.InRoleplayDateTime,
                 Summarized = message.Summarized,

@@ -22,6 +22,7 @@ interface Props {
 export default function ChatMessageComponent({ message, chatId, enableSwipeBtn = false, enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
+  const [isThinkingExpanded, setIsThinkingExpanded] = useState(false);
   const isRevertingRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const start = ParseFocusedGenerationDate(message?.startGenerationDateTimeUtc);
@@ -126,6 +127,26 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
             </div>
           </div>
           <div className={styles.messageContentSeparator} />
+
+          {message?.thinkingContent && (
+            <div className={styles.thinkingContainer}>
+              <button
+                className={styles.thinkingToggle}
+                onClick={() => setIsThinkingExpanded(prev => !prev)}
+              >
+                <HiBeaker className={styles.thinkingIcon} />
+                <span>Thinking</span>
+                <HiMiniChevronRight
+                  className={`${styles.thinkingChevron} ${isThinkingExpanded ? styles.thinkingChevronOpen : ""}`}
+                />
+              </button>
+              {isThinkingExpanded && (
+                <div className={styles.thinkingContent}>
+                  <HighlightedText text={message.thinkingContent} />
+                </div>
+              )}
+            </div>
+          )}
 
           {isEditing ? (
             <div>

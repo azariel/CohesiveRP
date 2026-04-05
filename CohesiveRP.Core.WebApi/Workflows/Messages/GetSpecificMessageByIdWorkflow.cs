@@ -39,6 +39,7 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
             {
                 MessageId = message.MessageId,
                 Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", persona.Name),
+                ThinkingContent = message.ThinkingContent.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", persona.Name),
                 SourceType = message.SourceType,
                 InRoleplayDateTime = message.InRoleplayDateTime,
                 Summarized = message.Summarized,

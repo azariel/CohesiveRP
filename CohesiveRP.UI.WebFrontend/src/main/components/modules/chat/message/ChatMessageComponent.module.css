@@ -211,6 +211,61 @@
     animation: spin 1s linear infinite;
 }
 
+.thinkingContainer {
+  margin-bottom: 0.4em;
+  margin-right: 1em;
+  margin-top: 0.7em;
+  border: 1px solid #2e2e2e;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.thinkingToggle {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.3em 0.6em;
+  font-size: 0.75em;
+  font-weight: bold;
+  color: #696969;
+  cursor: pointer;
+  background: transparent;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.thinkingToggle:hover {
+  color: #3484e0;
+  background-color: rgba(52, 132, 224, 0.05);
+}
+
+.thinkingIcon {
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+
+.thinkingChevron {
+  margin-left: auto;
+  font-size: 1.1em;
+  transition: transform 0.2s ease;
+}
+
+.thinkingChevronOpen {
+  transform: rotate(90deg);
+}
+
+.thinkingContent {
+  padding: 0.5em 0.6em;
+  padding-top: 0;
+  font-size: 0.85em;
+  color: #888888;
+  white-space: pre-line;
+  border-top: 1px solid #2e2e2e;
+  font-style: italic;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
