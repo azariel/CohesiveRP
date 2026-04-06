@@ -7,6 +7,6 @@ namespace CohesiveRP.Core.Services
 {
     public interface IHttpLLMApiProviderService
     {
-        Task<IHttpLLMApiQueryResponseDto> QueryApiAsync(string tag, LLMProviderConfig[] availableLLMApiProviders, IPromptContext promptContext, BackgroundQueryDbModel backgroundQueryDbModel);
+        Task<IHttpLLMApiQueryResponseDto> QueryApiAsync(string tag, LLMProviderConfig[] availableLLMApiProviders, IPromptContext promptContext, BackgroundQueryDbModel backgroundQueryDbModel, CancellationToken token);
     }
 }

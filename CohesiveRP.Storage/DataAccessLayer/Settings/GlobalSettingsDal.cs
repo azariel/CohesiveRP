@@ -83,7 +83,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.SkillChecksInitiator, ChatCompletionPresetType.SceneTracker],
+                            Tags = [ChatCompletionPresetType.SkillChecksInitiator, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,

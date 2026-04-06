@@ -57,7 +57,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
 
         // If a background with main tag is already running, forbid adding a new message until we're done
         var backgroundQueriesInProgress = await storageService.GetPendingOrProcessingBackgroundQueryAsync();
-        if (backgroundQueriesInProgress.Any(a => a.Tags.Contains(BackgroundQuerySystemTags.main.ToString())))
+        if (backgroundQueriesInProgress.Any(a => a.Tags.Contains(BackgroundQuerySystemTags.main.ToString()) && a.ChatId == requestDto.ChatId))
         {
             return new WebApiException
             {

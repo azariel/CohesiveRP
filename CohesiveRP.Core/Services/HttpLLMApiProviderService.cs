@@ -1,5 +1,6 @@
 ﻿using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.HttpClient;
@@ -26,7 +27,7 @@ namespace CohesiveRP.Core.Services
             this.llmApiQueryPayloadBuilderFactory = llmApiQueryPayloadBuilderFactory;
         }
 
-        public async Task<IHttpLLMApiQueryResponseDto> QueryApiAsync(string tag, LLMProviderConfig[] availableLLMApiProviders, IPromptContext promptContext, BackgroundQueryDbModel backgroundQueryDbModel)
+        public async Task<IHttpLLMApiQueryResponseDto> QueryApiAsync(string tag, LLMProviderConfig[] availableLLMApiProviders, IPromptContext promptContext, BackgroundQueryDbModel backgroundQueryDbModel, CancellationToken token)
         {
             if (availableLLMApiProviders == null || availableLLMApiProviders.Length <= 0)
             {
@@ -81,7 +82,7 @@ namespace CohesiveRP.Core.Services
             try
             {
                 // Now once we have a state in Db for our query, we can poke the actual inference server api
-                var LLMApiResult = await PostLLMApiAsync(selectedLLMApiQueryDbModel, promptContext, backgroundQueryDbModel);
+                var LLMApiResult = await PostLLMApiAsync(selectedLLMApiQueryDbModel, promptContext, backgroundQueryDbModel, token);
                 return LLMApiResult;
 
                 // TODO: Manage the state of the ongoing query to the inference server api
@@ -121,7 +122,7 @@ namespace CohesiveRP.Core.Services
             }
         }
 
-        private async Task<IHttpLLMApiQueryResponseDto> PostLLMApiAsync(LLMProviderConfig selectedLLMApiQueryDbModel, IPromptContext promptContext, BackgroundQueryDbModel backgroundQueryDbModel)
+        private async Task<IHttpLLMApiQueryResponseDto> PostLLMApiAsync(LLMProviderConfig selectedLLMApiQueryDbModel, IPromptContext promptContext, BackgroundQueryDbModel backgroundQueryDbModel, CancellationToken token)
         {
             if (selectedLLMApiQueryDbModel == null || string.IsNullOrWhiteSpace(selectedLLMApiQueryDbModel.Model) || string.IsNullOrWhiteSpace(selectedLLMApiQueryDbModel.ApiUrl))
             {
@@ -138,12 +139,14 @@ namespace CohesiveRP.Core.Services
             {
                 if (selectedLLMApiQueryDbModel.Stream)
                 {
-                    CancellationToken token = new CancellationTokenSource(180000).Token;
+                    StringBuilder str = new();
                     await foreach (string chunk in httpClient.PostStreamAsync(selectedLLMApiQueryDbModel.ApiUrl, payload, token))
                     {
+                        var content = ParseNextLLMStreamedContent(chunk);
+                        str.Append(content);
+
                         if (backgroundQueryDbModel != null)
                         {
-                            var content = ParseNextLLMStreamedContent(chunk);
                             backgroundQueryDbModel.Content += content;
                             await storageService.UpdateBackgroundQueryAsync(backgroundQueryDbModel);
                         }
@@ -156,14 +159,13 @@ namespace CohesiveRP.Core.Services
                            new OpenAIChatCompletionMessage
                            {
                                Role = OpenAIChatCompletionRole.assistant,
-                               Content = backgroundQueryDbModel?.Content,
+                               Content = str.ToString(),
                            }
                         ],
                     };
                     return httpLLMApiQueryResponseDto;
                 } else
                 {
-                    CancellationToken token = new CancellationTokenSource(180000).Token;
                     string rawResponse = await httpClient.PostAsync(selectedLLMApiQueryDbModel.ApiUrl, payload, token);
                     IHttpLLMApiQueryResponseDto httpLLMApiQueryResponseDto = LLMApiQueryResponseDtoConverter.Convert(selectedLLMApiQueryDbModel.Type, rawResponse);
                     return httpLLMApiQueryResponseDto;
