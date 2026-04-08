@@ -34,7 +34,6 @@ public class GetCharacterByIdWorkflow : IGetCharacterByIdWorkflow
         var responseDto = new CharacterResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
-            // TODO: pagination instead of take(50)
             Character = new CharacterResponse
             {
                 CharacterId = character.CharacterId,
