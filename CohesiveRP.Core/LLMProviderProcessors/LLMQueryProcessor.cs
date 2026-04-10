@@ -70,7 +70,6 @@ namespace CohesiveRP.Core.LLMProviderManager
             {
                 GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
                 LLMProviderConfig[] availableLLMApiProviders = globalSettings.LLMProviders.Where(w => w.Tags.Contains(completionPresetType)).ToArray();
-
                 if (availableLLMApiProviders == null || availableLLMApiProviders.Length <= 0)
                 {
                     LoggingManager.LogToFile("834a0e28-4ec7-4e04-a78b-d8bd6113d6bb", $"Couldn't query a LLM Api because not one was configured for [{completionPresetType}].");
@@ -78,7 +77,8 @@ namespace CohesiveRP.Core.LLMProviderManager
                     return;
                 }
 
-                IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(completionPresetType.ToString(), availableLLMApiProviders, promptContext);
+                IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(completionPresetType.ToString(), globalSettings.LLMProviders.ToArray(), availableLLMApiProviders, promptContext);
+                backgroundQueryDbModel.RetryCount++;
 
                 if (response == null)
                 {

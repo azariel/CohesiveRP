@@ -41,5 +41,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
 
         [MaxLength(32)]
         public string LinkedId { get; set; }
+
+        public int RetryCount { get; set; }
     }
 }
