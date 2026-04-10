@@ -26,6 +26,7 @@ namespace CohesiveRP.Core.LLMProviderManager
         protected ISummaryService summaryService;
         protected IPromptContextBuilder contextBuilder;
         protected IPromptContext promptContext;
+
         protected LLMApiResponseMessage[] messages = null;
 
         public LLMQueryProcessor(
@@ -69,7 +70,6 @@ namespace CohesiveRP.Core.LLMProviderManager
             {
                 GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
                 LLMProviderConfig[] availableLLMApiProviders = globalSettings.LLMProviders.Where(w => w.Tags.Contains(completionPresetType)).ToArray();
-
                 if (availableLLMApiProviders == null || availableLLMApiProviders.Length <= 0)
                 {
                     LoggingManager.LogToFile("834a0e28-4ec7-4e04-a78b-d8bd6113d6bb", $"Couldn't query a LLM Api because not one was configured for [{completionPresetType}].");
@@ -77,9 +77,8 @@ namespace CohesiveRP.Core.LLMProviderManager
                     return;
                 }
 
-                backgroundQueryDbModel.StartFocusedGenerationDateTimeUtc = DateTime.UtcNow;
-                CancellationToken token = new CancellationTokenSource(180000).Token;
-                IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(completionPresetType.ToString(), availableLLMApiProviders, promptContext, backgroundQueryDbModel, token);
+                IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(completionPresetType.ToString(), globalSettings.LLMProviders.ToArray(), availableLLMApiProviders, promptContext);
+                backgroundQueryDbModel.RetryCount++;
 
                 if (response == null)
                 {
@@ -93,7 +92,6 @@ namespace CohesiveRP.Core.LLMProviderManager
 
                 backgroundQueryDbModel.Content = JsonCommonSerializer.SerializeToString(response.Messages);
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.ProcessingFinalInstruction;
-                await storageService.UpdateBackgroundQueryAsync(backgroundQueryDbModel);
             } catch (Exception e)
             {
                 await Task.Delay(2000);

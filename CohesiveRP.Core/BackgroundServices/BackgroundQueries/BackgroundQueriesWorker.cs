@@ -63,7 +63,11 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                 return;
             }
 
-            await queryProcessor.QueueProcessAsync();
+            if(!await queryProcessor.QueueProcessAsync())
+            {
+                LoggingManager.LogToFile("6bcabdd1-63e4-44dc-bebe-09481441edab", $"LLMProviderQueryerFactory failed to queue the process of the query [{selectedQuery.BackgroundQueryId}].");
+                return;
+            }
 
             // Start a new thread and execute the task asynchronously
             var cancellationToken = new CancellationTokenSource(new TimeSpan(0, 30, 0)).Token;// 30 minutes max
@@ -76,6 +80,12 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                     {
                         if (selectedQuery.Status == BackgroundQueryStatus.Completed || selectedQuery.Status == BackgroundQueryStatus.Error || selectedQuery.Status == BackgroundQueryStatus.ProcessingFinalInstruction)
                         {
+                            if(selectedQuery.Status == BackgroundQueryStatus.Error)
+                            {
+                                // Nothing to do, simly save the state and drop the query altogether
+                                break;
+                            }
+
                             // process the resulting completed query. If it was a 'main', it'll add a new AI message, if it was a sceneTracker, it'll attach the tracker, if it was a summary, it'll attach the summary to an existing message, etc.
                             await queryProcessor.ProcessCompletedQueryAsync();
 

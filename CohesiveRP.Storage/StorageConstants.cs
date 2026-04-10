@@ -9,5 +9,9 @@
         internal const string DEFAULT_PATHFINDER_SKILLS_CHECKS_INITIATOR_COMPLETION_PRESET = "34c5561a-789e-4f96-b7ae-fb58afe5390e";
         internal const string DEFAULT_PATHFINDER_CHARACTER_SHEET_REGENERATION_COMPLETION_PRESET = "3fc6bd9d-4cab-429b-ab78-e3269d4f571d";
         internal const string DEFAULT_SCENE_ANALYZE_COMPLETION_PRESET = "9dfa2a94-7ff6-4e96-a42e-23e3015980d7";
+
+        internal const string DEFAULT_LLM_PROVIDER_CONFIG_ID_1 = "7f824d86-198d-4f01-ab3f-45e12fe519c0";
+        internal const string DEFAULT_LLM_PROVIDER_CONFIG_ID_2 = "d0cb4ff4-cb71-42af-9720-8c87739ac043";
+        internal const string DEFAULT_LLM_PROVIDER_CONFIG_ID_3 = "712906d5-9c20-48d7-be27-4b660beed25d";
     }
 }
