@@ -8,7 +8,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         public string MessageId { get; set; }
 
         public string Content { get; set; }
-
+        public string ThinkingContent { get; set; }
 
         [JsonConverter(typeof(JsonNumberEnumConverter<MessageSourceType>))]
         public MessageSourceType SourceType { get; set; }
@@ -19,8 +19,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
 
         public string CharacterId { get; set; }
 
-        public string AvatarFilePath { get; set; }
+        public string[] AvatarsFilePath { get; set; }
 
         public DateTime? InRoleplayDateTime { get; set; }
+
+        public DateTime? StartGenerationDateTimeUtc { get; set; }
+        public DateTime? StartFocusedGenerationDateTimeUtc { get; set; }
+        public DateTime? EndFocusedGenerationDateTimeUtc { get; set; }
     }
 }

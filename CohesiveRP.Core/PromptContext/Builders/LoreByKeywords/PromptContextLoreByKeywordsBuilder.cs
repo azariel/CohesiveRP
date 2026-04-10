@@ -3,6 +3,7 @@ using CohesiveRP.Common;
 using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders.LoreByKeywords.BusinessObjects;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -17,8 +18,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextLoreByKeywordsBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
+        public PromptContextLoreByKeywordsBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
@@ -282,7 +285,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 str.Append($"Infer the lore from the roleplay context.");
             }
 
-            return ($"<lore>{Environment.NewLine}{str.Replace(Constants.USER_PLACEHOLDER, userPersonaName)}{Environment.NewLine}</lore>{Environment.NewLine}{Environment.NewLine}",
+            return ($"<lore>{Environment.NewLine}{str.ToString().InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</lore>{Environment.NewLine}{Environment.NewLine}",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

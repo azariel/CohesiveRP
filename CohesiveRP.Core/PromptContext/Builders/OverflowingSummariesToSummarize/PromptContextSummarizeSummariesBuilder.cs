@@ -1,5 +1,6 @@
 ﻿using CohesiveRP.Common.Utils;
 using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
@@ -17,14 +18,18 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private GlobalSettingsDbModel settings;
         private ChatDbModel chatDbModel;
         private BackgroundQuerySystemTags tag;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextSummarizeSummariesBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, BackgroundQuerySystemTags tag)
+        public PromptContextSummarizeSummariesBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, BackgroundQuerySystemTags tag, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.settings = settings;
             this.chatDbModel = chatDbModel;
             this.tag = tag;
+            this.personaLinkedToChat = personaLinkedToChat;
+            this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
@@ -152,7 +157,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             var output = promptContextFormatElement.Options?.Format.Replace("{{item_description}}", value);
-            return (output,
+            return (output.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name),
                     new ShareableContextLink
                     {
                         LinkedBuilder = this,

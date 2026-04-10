@@ -9,5 +9,8 @@ namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request
 
         [JsonPropertyName("messages")]
         public OpenAIChatCompletionMessage[] Messages {get; set; }
+
+        [JsonPropertyName("stream")]
+        public bool Stream { get; set; }
     }
 }

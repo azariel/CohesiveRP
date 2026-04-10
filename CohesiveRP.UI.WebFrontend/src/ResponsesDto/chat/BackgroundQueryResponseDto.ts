@@ -8,7 +8,9 @@ interface BackgroundQueryResponseDto extends ServerApiResponseDto {
     tags : string[],
     status : string,
     priority : number,
-    content : string
+    content : string,
+    startFocusedGenerationDateTimeUtc: string,
+    endFocusedGenerationDateTimeUtc: string,
     createdAtUtc : string
 }
 

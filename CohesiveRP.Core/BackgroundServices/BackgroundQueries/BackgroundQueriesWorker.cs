@@ -169,7 +169,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
 
                 // Select by priority
                 BackgroundQueryDbModel[] priorityQueries = validQueries.Where(w => w.Priority == validQueries.Max(m => m.Priority)).ToArray();
-                selectedQuery = priorityQueries.FirstOrDefault();
+                selectedQuery = priorityQueries?.OrderBy(o=>o.CreatedAtUtc).FirstOrDefault();
 
                 if (selectedQuery == null)
                 {

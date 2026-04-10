@@ -4,7 +4,7 @@ const GetAvatarPathFromCharacterName = (characterName: string): string => {
         return `./assets/empty-avatar.svg`;
       }
       
-      return `./characters/${characterName.toLowerCase()}/avatar.png`;
+      return `./characters/${characterName.toLowerCase().trim()}/avatar.png`;
   }catch(err){
     return "";
   }

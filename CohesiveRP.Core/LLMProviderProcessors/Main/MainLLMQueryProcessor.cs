@@ -1,6 +1,7 @@
 ﻿using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Utils.Parsers;
+using CohesiveRP.Core.LLMProviderProcessors.Main.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Directive;
@@ -14,6 +15,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Lorebooks.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
@@ -44,18 +46,40 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
         {
         }
 
-        private async Task<string> GetCharacterAvatarFromSceneAnalysisFilePathAsync(ChatDbModel chatDbModel, SceneTrackerDbModel dbModel)
+        private string[] GetAvatarsFilePathFromCharactersInScene(VisualSceneTracker sceneTracker, CharacterSheetInstancesDbModel characterSheetInstances)
         {
-            //string finalAvatarSelectionFilePath = $"{Path.Combine(WebConstants.ChatsAvatarFilePath, chatDbModel.ChatId.ToLowerInvariant())}";
-            string finalAvatarSelectionFilePath = null;
+            List<string> characterAvatars = new();
 
-            var sceneTracker = LLMResponseParser.ParseFromApiMessageContent<VisualSceneTracker>(dbModel.Content);
-            if (string.IsNullOrWhiteSpace(sceneTracker?.PlayerAnalysis?.EyesDirection?.LookingAtCharacterName))
+            foreach (VisualCharacterAnalysis characterAnalysis in sceneTracker.CharactersAnalysis.Where(w => !string.IsNullOrWhiteSpace(w.Name)))
+            {
+                string targetCharacterName = characterAnalysis.Name.ToLowerInvariant().Trim();
+                CharacterSheetInstance targetCharacterSheet = characterSheetInstances.CharacterSheetInstances.FirstOrDefault(w =>
+                    targetCharacterName.Equals(w.CharacterSheet.FirstName, StringComparison.InvariantCultureIgnoreCase) ||
+                    targetCharacterName.Equals(w.CharacterSheet.LastName, StringComparison.InvariantCultureIgnoreCase) ||
+                    targetCharacterName == $"{w.CharacterSheet.FirstName.ToLowerInvariant()} {w.CharacterSheet.LastName?.ToLowerInvariant()}");
+
+                if (targetCharacterSheet == null)
+                {
+                    continue;
+                }
+
+
+            }
+
+            return characterAvatars.ToArray();
+        }
+
+        private async Task<List<string>> GetAvatarsFromSceneAnalysisFilePathAsync(ChatDbModel chatDbModel, SceneTrackerDbModel dbModel)
+        {
+            List<string> finalAvatarSelectionFilePath = new();
+
+            if (chatDbModel == null || dbModel == null)
             {
                 return finalAvatarSelectionFilePath;
             }
 
-            if (chatDbModel?.CharacterIds == null || chatDbModel.CharacterIds.Count <= 0)
+            var sceneTracker = LLMResponseParser.ParseFromApiMessageContent<VisualSceneTracker>(dbModel.Content);
+            if (sceneTracker?.CharactersAnalysis == null || sceneTracker.CharactersAnalysis.Length <= 0)
             {
                 return finalAvatarSelectionFilePath;
             }
@@ -76,15 +100,62 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 return finalAvatarSelectionFilePath;
             }
 
-            string targetCharacterName = sceneTracker.PlayerAnalysis.EyesDirection.LookingAtCharacterName.ToLowerInvariant().Trim();
+            List<VisualCharacterAnalysis> characterTargetsToHandle = [];
+
+            // Then we add the rest of the characters in scene that we want to handle
+            if (sceneTracker?.CharactersAnalysis != null && sceneTracker.CharactersAnalysis.Length > 0)
+            {
+                foreach (VisualCharacterAnalysis character in sceneTracker.CharactersAnalysis.Where(w => !string.IsNullOrWhiteSpace(w.Name)))
+                {
+                    character.Name = character.Name.ToLowerInvariant().Trim();
+                    characterTargetsToHandle.Add(character);
+                }
+            }
+
+            // When the player is looking at a character, we want to prioritize showing the avatar of that character, so we add it at the beginning of the list of character to handle
+            if (!string.IsNullOrWhiteSpace(sceneTracker.PlayerAnalysis?.EyesDirection?.LookingAtCharacterName))
+            {
+                string targetName = sceneTracker.PlayerAnalysis.EyesDirection.LookingAtCharacterName.ToLowerInvariant().Trim();
+                if (characterTargetsToHandle.Any(a => a.Name == targetName))
+                {
+                    var value = characterTargetsToHandle.First(a => a.Name == targetName);
+                    characterTargetsToHandle.Remove(value);
+                    characterTargetsToHandle.Insert(0, value);
+                } else
+                {
+                    // TODO: else what exactly?... we could set the default avatar, but we don't have clothes status or facial expression..
+                }
+            }
+
+            // Now that we have the names of the characters we want to handle in order of priority, we loop through them and try to find an avatar for each of them
+            foreach (VisualCharacterAnalysis characterTarget in characterTargetsToHandle)
+            {
+                string avatarPath = await GetAvatarFromSceneAnalysisCharacterTargetAsync(characterTarget, charactersToConsider);
+
+                if (!string.IsNullOrWhiteSpace(avatarPath) && !finalAvatarSelectionFilePath.Contains(avatarPath))
+                    finalAvatarSelectionFilePath.Add(avatarPath);
+            }
+
+            return finalAvatarSelectionFilePath;
+        }
+
+        private async Task<string> GetAvatarFromSceneAnalysisCharacterTargetAsync(VisualCharacterAnalysis targetCharacter, CharacterSheetInstance[] charactersToConsider)
+        {
+            string avatarFilePath = null;
+
+            if (targetCharacter == null || string.IsNullOrWhiteSpace(targetCharacter.Name))
+            {
+                return avatarFilePath;
+            }
+
             CharacterSheetInstance targetCharacterSheet = charactersToConsider.FirstOrDefault(w =>
-                targetCharacterName.Equals(w.CharacterSheet.FirstName, StringComparison.InvariantCultureIgnoreCase) ||
-                targetCharacterName.Equals(w.CharacterSheet.LastName, StringComparison.InvariantCultureIgnoreCase) ||
-                targetCharacterName == $"{w.CharacterSheet.FirstName.ToLowerInvariant()} {w.CharacterSheet.LastName?.ToLowerInvariant()}");
+                targetCharacter.Name.Equals(w.CharacterSheet.FirstName, StringComparison.InvariantCultureIgnoreCase) ||
+                targetCharacter.Name.Equals(w.CharacterSheet.LastName, StringComparison.InvariantCultureIgnoreCase) ||
+                targetCharacter.Name == $"{w.CharacterSheet.FirstName.ToLowerInvariant()} {w.CharacterSheet.LastName?.ToLowerInvariant()}");
 
             if (targetCharacterSheet == null)
             {
-                return finalAvatarSelectionFilePath;
+                return avatarFilePath;
             }
 
             // Check if the character has an assets folder in this chat
@@ -92,63 +163,66 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             string characterFolderPath = Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name.ToLowerInvariant());
             if (!Directory.Exists(WebConstants.CharactersAvatarFilePath))
             {
-                return finalAvatarSelectionFilePath;
+                return avatarFilePath;
             }
 
             // Alright, we got an assets folder for this character
             // Let's check if there's an avatar there so that we can default to it
-            string avatarFilePath = Path.Combine(characterFolderPath, WebConstants.AvatarFileName);
-            if (File.Exists(avatarFilePath))
+            string defaultAvatarFilePath = Path.Combine(characterFolderPath, WebConstants.AvatarFileName);
+            if (File.Exists(defaultAvatarFilePath))
             {
-                finalAvatarSelectionFilePath = avatarFilePath;
+                avatarFilePath = defaultAvatarFilePath;
             }
 
-            // Start by validating that we have a folder for the outfit the lookedAt character is currently wearing
-            var targetCharacter = sceneTracker.CharactersAnalysis.FirstOrDefault(f =>
-            f.Name.Equals(targetCharacterSheet.CharacterSheet.FirstName, StringComparison.InvariantCultureIgnoreCase) ||
-            f.Name.Equals(targetCharacterSheet.CharacterSheet.LastName, StringComparison.InvariantCultureIgnoreCase) ||
-            f.Name.Equals($"{targetCharacterSheet.CharacterSheet.FirstName} {targetCharacterSheet.CharacterSheet.LastName}", StringComparison.InvariantCultureIgnoreCase));
-
-            if (targetCharacter != null)
+            string currentOutfitFolderPath = Path.Combine(characterFolderPath, targetCharacter.ClothingStateOfDress);
+            if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
             {
-                string currentOutfitFolderPath = Path.Combine(characterFolderPath, targetCharacter.ClothingStateOfDress);
-                if (!Directory.Exists(currentOutfitFolderPath))
+                // Try to default back to 'clothed'
+                currentOutfitFolderPath = Path.Combine(characterFolderPath, ClothingStateOfDress.Clothed.ToString());
+
+                if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
                 {
-                    return finalAvatarSelectionFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
-                }
-
-                // Ok, the folder with the right outfit exists. Let's check if there's an avatar matching the right expression there so that we can prioritize it over the default one
-                // TODO: use 'neutral' folder and default to avatar.png if not found
-                string avatarWithNeutralExpressionFilePath = Path.Combine(currentOutfitFolderPath, WebConstants.AvatarFileName);
-                if (File.Exists(avatarWithNeutralExpressionFilePath))
-                {
-                    finalAvatarSelectionFilePath = avatarWithNeutralExpressionFilePath;
-                }
-
-                // TODO: check semen folder here as it's more important that the facial expression
-                // TODO: check for body position
-
-                // Lastly, if there's an avatar matching the current facial expression, let's prioritize it over the neutral one
-                string avatarWithCurrentExpressionFilePath = Path.Combine(currentOutfitFolderPath, targetCharacter.FacialExpression?.ToLowerInvariant());
-                if (Directory.Exists(avatarWithCurrentExpressionFilePath))
-                {
-                    // Get a random file within that folder, if any
-                    string[] availableAvatarsWithTheRightExpressionAndClothes = Directory.GetFiles(avatarWithCurrentExpressionFilePath, "*.*", SearchOption.AllDirectories);
-
-                    if (availableAvatarsWithTheRightExpressionAndClothes != null && availableAvatarsWithTheRightExpressionAndClothes.Length > 0)
-                    {
-                        string choosenFile = availableAvatarsWithTheRightExpressionAndClothes[new Random(DateTime.Now.Millisecond).Next(0, availableAvatarsWithTheRightExpressionAndClothes.Length - 1)];
-                        finalAvatarSelectionFilePath = choosenFile;
-                    }
+                    // give up
+                    return avatarFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
                 }
             }
 
-            return finalAvatarSelectionFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
+            // Ok, the folder with the right outfit exists. Let's check if there's an avatar matching the right expression there so that we can prioritize it over the default one
+            // TODO: use 'neutral' folder and default to avatar.png if not found
+            string avatarWithNeutralExpressionFilePath = Path.Combine(currentOutfitFolderPath, WebConstants.AvatarFileName);
+            if (File.Exists(avatarWithNeutralExpressionFilePath))
+            {
+                avatarFilePath = avatarWithNeutralExpressionFilePath;
+            }
+
+            // TODO: check semen folder here as it's more important that the facial expression
+            // TODO: check for body position
+
+            // Lastly, if there's an avatar matching the current facial expression, let's prioritize it over the neutral one
+            string avatarWithCurrentExpressionFilePath = Path.Combine(currentOutfitFolderPath, targetCharacter.FacialExpression?.ToLowerInvariant());
+            if (Directory.Exists(avatarWithCurrentExpressionFilePath))
+            {
+                // Get a random file within that folder, if any
+                string[] availableAvatarsWithTheRightExpressionAndClothes = Directory.GetFiles(avatarWithCurrentExpressionFilePath, "*.*", SearchOption.AllDirectories);
+
+                if (availableAvatarsWithTheRightExpressionAndClothes != null && availableAvatarsWithTheRightExpressionAndClothes.Length > 0)
+                {
+                    string choosenFile = availableAvatarsWithTheRightExpressionAndClothes[new Random(DateTime.Now.Millisecond).Next(0, availableAvatarsWithTheRightExpressionAndClothes.Length - 1)];
+                    avatarFilePath = choosenFile;
+                }
+            }
+
+            return avatarFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
         }
 
         private async Task<string> GetPersonaAvatarFromSceneAnalysisFilePathAsync(ChatDbModel chatDbModel, SceneTrackerDbModel dbModel)
         {
             string finalAvatarSelectionFilePath = null;
+
+            if (chatDbModel == null || dbModel == null)
+            {
+                return finalAvatarSelectionFilePath;
+            }
 
             var sceneTracker = LLMResponseParser.ParseFromApiMessageContent<VisualSceneTracker>(dbModel.Content);
             if (string.IsNullOrWhiteSpace(sceneTracker?.PlayerAnalysis?.Name))
@@ -177,9 +251,16 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             }
 
             string currentOutfitFolderPath = Path.Combine(personaFolderPath, sceneTracker.PlayerAnalysis.ClothingStateOfDress);
-            if (!Directory.Exists(currentOutfitFolderPath))
+            if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
             {
-                return finalAvatarSelectionFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
+                // Try to default back to 'clothed'
+                currentOutfitFolderPath = Path.Combine(personaFolderPath, ClothingStateOfDress.Clothed.ToString());
+
+                if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
+                {
+                    // give up
+                    return finalAvatarSelectionFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
+                }
             }
 
             // Ok, the folder with the right outfit exists. Let's check if there's an avatar matching the right expression there so that we can prioritize it over the default one
@@ -210,9 +291,9 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             return finalAvatarSelectionFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
         }
 
-        private async Task SetMessageAvatarAsync(ChatDbModel chat, string messageId, string avatarFilePath)
+        private async Task SetMessageAvatarAsync(ChatDbModel chat, string messageId, List<string> avatarFilePaths)
         {
-            if (string.IsNullOrWhiteSpace(avatarFilePath) || chat == null || string.IsNullOrWhiteSpace(messageId))
+            if (avatarFilePaths == null || avatarFilePaths.Count <= 0 || chat == null || string.IsNullOrWhiteSpace(messageId))
             {
                 return;
             }
@@ -222,7 +303,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             if (message == null)
                 return;
 
-            message.AvatarFilePath = avatarFilePath;
+            message.AvatarsFilePath = avatarFilePaths.ToArray(); ;
 
             //chat.AvatarFilePath = avatarFilePath;
             await storageService.UpdateHotMessageAsync(chat.ChatId, message);
@@ -350,17 +431,23 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     return false;
                 }
 
+                backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
+
                 // Add the AI reply message to the end of the chat
                 CreateMessageQueryModel messageQueryModel = new()
                 {
                     ChatId = backgroundQueryDbModel.ChatId,
                     SourceType = MessageSourceType.AI,
                     CharacterId = chat.CharacterIds.FirstOrDefault(),
-                    AvatarFilePath = null,
+                    AvatarsFilePath = null,
                     Summarized = false,// New message, so it's not summarized yet
                     InRoleplayDateTime = null,// At this point, we just generated the message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
                     MessageContent = ChatMessageParserUtils.ParseMessage(message.Content),
+                    ThinkingContent = ChatMessageParserUtils.ParseThinking(message.Content),
                     CreatedAtUtc = DateTime.UtcNow,
+                    StartGenerationDateTimeUtc = backgroundQueryDbModel.CreatedAtUtc,
+                    StartFocusedGenerationDateTimeUtc = backgroundQueryDbModel.StartFocusedGenerationDateTimeUtc,
+                    EndFocusedGenerationDateTimeUtc = backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc,
                 };
 
                 IMessageDbModel newMessageInStorage = await storageService.AddMessageAsync(messageQueryModel);
@@ -398,11 +485,11 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 // Prebuild the images to show in the UI according to context
                 var sceneTracker = await storageService.GetSceneTrackerAsync(backgroundQueryDbModel.ChatId);
 
-                var characterAvatarFilePath = await GetCharacterAvatarFromSceneAnalysisFilePathAsync(chat, sceneTracker);
+                var characterAvatarFilePath = await GetAvatarsFromSceneAnalysisFilePathAsync(chat, sceneTracker);
                 await SetMessageAvatarAsync(chat, newMessageInStorage.MessageId, characterAvatarFilePath);
 
                 var personaAvatarFilePath = await GetPersonaAvatarFromSceneAnalysisFilePathAsync(chat, sceneTracker);
-                await SetMessageAvatarAsync(chat, lastPlayerMessage?.MessageId, personaAvatarFilePath);
+                await SetMessageAvatarAsync(chat, lastPlayerMessage?.MessageId, [personaAvatarFilePath]);
 
                 // Summary
                 _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, globalSettings);

@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -14,12 +15,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public SkillChecksResultsBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
+        public SkillChecksResultsBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.chatDbModel = chatDbModel;
+            this.personaLinkedToChat = personaLinkedToChat;
+            this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
         private string GeneratePromptInjectionForCharacterRolls(ChatCharacterRoll[] rollsToInject, CharacterSheetInstance currentCharacterSheetInstance, CharacterSheetInstancesDbModel characterSheetsInstances)
@@ -114,7 +119,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                 return (null, new ShareableContextLink { LinkedBuilder = this, });
             }
 
-            return ($"<pathfinder_module_skills_checks>{Environment.NewLine}Details on characters reactions following recent actions. Consider these  some details in your reply about how other characters react.{Environment.NewLine}{str}{Environment.NewLine}</pathfinder_module_skills_checks>{Environment.NewLine}{Environment.NewLine}",
+            return ($"<pathfinder_module_skills_checks>{Environment.NewLine}Details on characters reactions following recent actions. Consider these  some details in your reply about how other characters react.{Environment.NewLine}{str.ToString().InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</pathfinder_module_skills_checks>{Environment.NewLine}{Environment.NewLine}",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

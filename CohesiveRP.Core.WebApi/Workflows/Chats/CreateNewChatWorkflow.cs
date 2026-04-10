@@ -43,13 +43,18 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             }
 
             string chatName = "New chat";
-            if(!string.IsNullOrWhiteSpace(requestDto.CharacterId))
-            { 
+
+            requestDto.LorebookIds ??= [];
+            if (!string.IsNullOrWhiteSpace(requestDto.CharacterId))
+            {
                 var character = await storageService.GetCharacterByIdAsync(requestDto.CharacterId);
 
-                if(character != null)
+                if (character != null)
                 {
                     chatName = character.Name;
+
+                    if (character.InherentLorebookIds != null && character.InherentLorebookIds.Count > 0)
+                        requestDto.LorebookIds.AddRange(character.InherentLorebookIds);
                 }
             }
 
@@ -160,8 +165,9 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 Summarized = false,
                 InRoleplayDateTime = null,// At this point, we just generated the message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
                 MessageContent = character.FirstMessage,
+                ThinkingContent = "",
                 CharacterId = character.CharacterId,
-                AvatarFilePath = null,
+                AvatarsFilePath = null,
             };
             await storageService.AddMessageAsync(queryModel);
         }

@@ -1,5 +1,6 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -14,13 +15,17 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
         private GlobalSettingsDbModel settings;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextSummaryShortTermBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel)
+        public PromptContextSummaryShortTermBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.chatDbModel = chatDbModel;
             this.settings = settings;
+            this.personaLinkedToChat = personaLinkedToChat;
+            this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
@@ -48,7 +53,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             output += $"{Environment.NewLine}</summary_short_term>{Environment.NewLine}";
-            return (output,
+            return (output.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name),
                     new ShareableContextLink
                     {
                         LinkedBuilder = this,

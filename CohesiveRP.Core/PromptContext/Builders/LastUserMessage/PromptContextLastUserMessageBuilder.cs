@@ -1,5 +1,6 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -13,12 +14,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextLastUserMessageBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
+        public PromptContextLastUserMessageBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.chatDbModel = chatDbModel;
+            this.personaLinkedToChat = personaLinkedToChat;
+            this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
@@ -53,7 +58,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            return ($"<last_message_by_{linkedPersona.Name}>{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content)}{Environment.NewLine}</last_message_by_{linkedPersona.Name}>",
+            return ($"<last_message_by_{linkedPersona.Name}>{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content).InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</last_message_by_{linkedPersona.Name}>",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

@@ -24,8 +24,8 @@ public class GetAllPersonasWorkflow : IGetAllPersonasWorkflow
         var responseDto = new PersonasResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
-            // TODO: pagination instead of take(50)
-            Personas = personas.Take(50).Select(s => new PersonaResponse
+            // TODO: pagination instead of take(256)
+            Personas = personas.Take(256).Select(s => new PersonaResponse
             {
                 PersonaId = s.PersonaId,
                 Name = s.Name,

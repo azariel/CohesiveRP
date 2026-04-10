@@ -41,5 +41,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         public List<string> AlternateGreetings { get; set; }
 
         public DateTime LastActivityAtUtc { get; set; }
+
+        public List<string> InherentLorebookIds { get; set; }
     }
 }

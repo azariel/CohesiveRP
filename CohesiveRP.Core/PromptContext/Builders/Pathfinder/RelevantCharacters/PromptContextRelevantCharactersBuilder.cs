@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -17,12 +18,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextRelevantCharactersBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
+        public PromptContextRelevantCharactersBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.chatDbModel = chatDbModel;
+            this.personaLinkedToChat = personaLinkedToChat;
+            this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
         private static string FormatPropertyValue(object value)
@@ -93,39 +98,45 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             }
 
             // Handle kinks in a way that is more segregated from other information
-            str.AppendLine($"    <kinks>");
-            foreach (var kinkValue in characterSheet.Kinks)
+            if (characterSheet.Kinks != null)
             {
-                // If standard (key:value), handle it differently
-                string[] splitValue = kinkValue.Split(':');
-                if (splitValue.Length == 2)
+                str.AppendLine($"    <kinks>");
+                foreach (var kinkValue in characterSheet.Kinks)
                 {
-                    str.AppendLine($"      <{splitValue[0]}>{splitValue[1]}</{splitValue[0]}>");
-                } else
-                {
-                    // Non-standard format, just add it as is
-                    str.AppendLine($"      - {kinkValue}");
+                    // If standard (key:value), handle it differently
+                    string[] splitValue = kinkValue.Split(':');
+                    if (splitValue.Length == 2)
+                    {
+                        str.AppendLine($"      <{splitValue[0]}>{splitValue[1]}</{splitValue[0]}>");
+                    } else
+                    {
+                        // Non-standard format, just add it as is
+                        str.AppendLine($"      - {kinkValue}");
+                    }
                 }
+
+                str.AppendLine($"    </kinks>");
             }
 
-            str.AppendLine($"    </kinks>");
-
-            str.AppendLine($"    <secretKinks>");
-            foreach (var kinkValue in characterSheet.SecretKinks)
+            if (characterSheet.SecretKinks != null)
             {
-                // If standard (key:value), handle it differently
-                string[] splitValue = kinkValue.Split(':');
-                if (splitValue.Length == 2)
+                str.AppendLine($"    <secretKinks>");
+                foreach (var kinkValue in characterSheet.SecretKinks)
                 {
-                    str.AppendLine($"      <{splitValue[0]}>{splitValue[1]}</{splitValue[0]}>");
-                } else
-                {
-                    // Non-standard format, just add it as is
-                    str.AppendLine($"      - {kinkValue}");
+                    // If standard (key:value), handle it differently
+                    string[] splitValue = kinkValue.Split(':');
+                    if (splitValue.Length == 2)
+                    {
+                        str.AppendLine($"      <{splitValue[0]}>{splitValue[1]}</{splitValue[0]}>");
+                    } else
+                    {
+                        // Non-standard format, just add it as is
+                        str.AppendLine($"      - {kinkValue}");
+                    }
                 }
-            }
 
-            str.AppendLine($"    </secretKinks>");
+                str.AppendLine($"    </secretKinks>");
+            }
 
             // Handle the Pathfinder special properties
             str.AppendLine($"    <attributes>");
@@ -251,7 +262,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 finalKnownCharacters = $"<known_characters_in_story_context>{string.Join(",", knownCharacters)}</known_characters_in_story_context>";
             }
 
-            return ($"<relevant_characters>{Environment.NewLine}{str.ToString().Trim().TrimEnd(Environment.NewLine.ToCharArray())}{Environment.NewLine}</relevant_characters>{Environment.NewLine}Please note that secretKinks are kinks or fetishes that the character is ashamed or embarassed about and will avoid openly talk about, but that character will react positively when exposed to situations implementing their kinks and secret kinks or fetishes.{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
+            return ($"<relevant_characters>{Environment.NewLine}{str.ToString().Trim().TrimEnd(Environment.NewLine.ToCharArray()).InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</relevant_characters>{Environment.NewLine}Please note that secretKinks are kinks or fetishes that the character is ashamed or embarassed about and will avoid openly talk about, but that character will react positively when exposed to situations implementing their kinks and secret kinks or fetishes.{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
         }
 
         private static string GetCharacterFullName(string firstName, string lastName, string separator = " ") => $"{firstName}{separator}{lastName}".Trim();

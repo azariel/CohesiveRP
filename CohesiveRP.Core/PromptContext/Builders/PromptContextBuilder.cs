@@ -6,6 +6,7 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.Chat;
 
@@ -63,12 +64,16 @@ namespace CohesiveRP.Core.PromptContext.Summary
                     return null;
                 }
 
+                var personaLinkedToChat = await storageService.GetPersonaByIdAsync(chat.PersonaId);
+                var charactersLinkedToChat = await storageService.GetCharactersAsync();
+                charactersLinkedToChat = charactersLinkedToChat.Where(w => chat.CharacterIds.Any(a => a == w.CharacterId)).ToArray();
+
                 // for each elements in our format, we need to build them accordingly
                 List<IShareableContextLink> shareableLinks = new();
                 StringBuilder str = new();
-                foreach (var contextElement in presetTypeChatCompletionPreset.Format.OrderedElementsWithinTheGlobalPromptContext)
+                foreach (PromptContextFormatElement contextElement in presetTypeChatCompletionPreset.Format.OrderedElementsWithinTheGlobalPromptContext.Where(w => w != null && w.Enabled))
                 {
-                    var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement, settings, chat, backgroundQuery, tag);
+                    var builder = await promptContextElementBuilderFactory.GenerateBuilderAsync(contextElement, settings, chat, backgroundQuery, tag, personaLinkedToChat, charactersLinkedToChat);
 
                     if (builder == null)
                     {

@@ -115,11 +115,12 @@ export default function UserInputComponent({ messagesRef }: Props) {
           {
             messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
             content: "...",
+            thinkingContent: "",
             createdAtUtc: null,
             sourceType: 1,
             messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 1,
             summarized: false,
-            avatarFilePath: "avatar",
+            avatarsFilePath: [],
             characterId: null,
             characterName: "",
             personaId: null,
@@ -260,6 +261,9 @@ const adjustTextareaHeight = () => {
               } else {
                 updated[tempAIReplyMessageIndex].messageId = response?.linkedId ?? "";
               }
+
+              updated[tempAIReplyMessageIndex].startFocusedGenerationDateTimeUtc = response?.startFocusedGenerationDateTimeUtc ?? "";
+              updated[tempAIReplyMessageIndex].endFocusedGenerationDateTimeUtc = response?.endFocusedGenerationDateTimeUtc ?? "";
             }
           }
           return updated;
@@ -279,7 +283,7 @@ const adjustTextareaHeight = () => {
           const updatedPlayerMsg = playerMsgResponse?.messageObj;
           if (updatedPlayerMsg) {
             setMessages((prev) =>
-              prev.map((m) => m.messageId === playerMsgId ? { ...m, avatarFilePath: updatedPlayerMsg.avatarFilePath } : m)
+              prev.map((m) => m.messageId === playerMsgId ? { ...m, avatarsFilePath: updatedPlayerMsg.avatarsFilePath } : m)
             );
           }
         }
@@ -364,11 +368,12 @@ const adjustTextareaHeight = () => {
         {
           messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
           content: "...",
+          thinkingContent: "",
           createdAtUtc: null,
           sourceType: 1,
           messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
           summarized: false,
-          avatarFilePath: null,
+          avatarsFilePath: [],
           characterId: null,
           characterName: "",
           personaId: null,
@@ -381,11 +386,12 @@ const adjustTextareaHeight = () => {
         {
           messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
           content: "...",
+          thinkingContent: "",
           createdAtUtc: null,
           sourceType: 1,
           messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 2,
           summarized: false,
-          avatarFilePath: null,
+          avatarsFilePath: [],
           characterId: null,
           characterName: "",
           personaId: null,

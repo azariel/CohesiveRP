@@ -39,15 +39,19 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
             {
                 MessageId = message.MessageId,
                 Content = message.Content.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", persona.Name),
+                ThinkingContent = message.ThinkingContent.ReplacePromptBasicPlaceholders(character?.Name ?? "(the character)", persona.Name),
                 SourceType = message.SourceType,
                 InRoleplayDateTime = message.InRoleplayDateTime,
                 Summarized = message.Summarized,
                 CreatedAtUtc = message.CreatedAtUtc,
                 CharacterId = message.CharacterId,
-                AvatarFilePath = message.AvatarFilePath,
+                AvatarsFilePath = message.AvatarsFilePath,
                 CharacterName = character?.Name,
                 PersonaId = persona.PersonaId,
                 PersonaName = persona.Name,
+                StartGenerationDateTimeUtc = message.StartGenerationDateTimeUtc,
+                StartFocusedGenerationDateTimeUtc = message.StartFocusedGenerationDateTimeUtc,
+                EndFocusedGenerationDateTimeUtc = message.EndFocusedGenerationDateTimeUtc,
             },
             MainQueryId = null
         };

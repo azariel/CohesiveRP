@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -11,12 +12,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public SkillChecksInitiatorBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
+        public SkillChecksInitiatorBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.chatDbModel = chatDbModel;
+            this.personaLinkedToChat = personaLinkedToChat;
+            this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
@@ -38,7 +43,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             string contextOnScene = string.Join($"{Environment.NewLine}", LastXMessagesforGeneralContext.OrderBy(o => o.CreatedAtUtc).Select(s => $"<message>{s.Content}</message>"));
 
             MessageDbModel[] LastXMessagesforRequest = [..hotMessages.Take(nbMessagesRequest)];
-            string lastMessage = string.Join($"{Environment.NewLine}", LastXMessagesforRequest.OrderBy(o => o.CreatedAtUtc).Select(s => $"<message>{s.Content}</message>"));
+            string lastMessage = string.Join($"{Environment.NewLine}", LastXMessagesforRequest.OrderBy(o => o.CreatedAtUtc).Select(s => $"<message>{s.Content.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}</message>"));
             return ($"<story_scene>{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{messages_for_context_on_scene}}", contextOnScene)
                 .Replace("{{scene_to_categorize}}", lastMessage)}{Environment.NewLine}</story_scene>",

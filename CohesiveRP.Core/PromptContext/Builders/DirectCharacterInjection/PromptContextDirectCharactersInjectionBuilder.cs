@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using CohesiveRP.Core.PromptContext.Abstractions;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -11,12 +12,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
         private ChatDbModel chatDbModel;
+        private PersonaDbModel personaLinkedToChat;
+        private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextDirectCharactersInjectionBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel)
+        public PromptContextDirectCharactersInjectionBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
             this.chatDbModel = chatDbModel;
+            this.personaLinkedToChat = personaLinkedToChat;
+            this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
@@ -38,14 +43,13 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                     str += promptContextFormatElement?.Options?.Format?
                         .Replace("{{character_name}}", character.Name)
                         .Replace("{{character_description}}", character.Description)
-                        .Replace(Constants.CHARACTER_PLACEHOLDER, character?.Name ?? "the character")
-                        .Replace(Constants.USER_PLACEHOLDER, persona?.Name ?? "User")
+                        .InjectMacros(characterName: character.Name)
                         .Trim()
                         .TrimEnd(Environment.NewLine.ToCharArray());
                 }
             }
-            
-            return ($"<characters>{Environment.NewLine}{str}{Environment.NewLine}</characters>{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
+
+            return ($"{str.ToString().InjectMacros(personaLinkedToChat?.Name)}", new ShareableContextLink { LinkedBuilder = this });
         }
     }
 }

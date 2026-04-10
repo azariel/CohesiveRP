@@ -5,13 +5,11 @@ using CohesiveRP.Core.CharacterCards.Loaders;
 using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
 using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.DtoConverters.Abstractions;
-using CohesiveRP.Core.Lorebooks;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
-using CohesiveRP.Storage.QueryModels.Chat;
 using SixLabors.ImageSharp;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;

@@ -43,16 +43,19 @@ public class GetAllHotMessagesWorkflow : IGetAllHotMessagesWorkflow
                 MessageId = messagesDbModel.Messages[i].MessageId,
                 MessageIndex = messagesDbModel.NbColdMessages + i + 1,
                 Content = messagesDbModel.Messages[i].Content.ReplacePromptBasicPlaceholders(characterName ?? "(the character)", persona?.Name ?? "User"),
+                ThinkingContent = messagesDbModel.Messages[i].ThinkingContent?.ReplacePromptBasicPlaceholders(characterName ?? "(the character)", persona?.Name ?? "User"),
                 SourceType = messagesDbModel.Messages[i].SourceType,
                 InRoleplayDateTime = messagesDbModel.Messages[i].InRoleplayDateTime,
                 Summarized = messagesDbModel.Messages[i].Summarized,
                 CreatedAtUtc = messagesDbModel.Messages[i].CreatedAtUtc,
                 CharacterId = messagesDbModel.Messages[i].CharacterId,
-                AvatarFilePath = messagesDbModel.Messages[i].AvatarFilePath,
+                AvatarsFilePath = messagesDbModel.Messages[i].AvatarsFilePath,
                 CharacterName = characterName,
                 PersonaId = chat.PersonaId,
                 PersonaName = persona?.Name ?? "User",
-                
+                StartGenerationDateTimeUtc = messagesDbModel.Messages[i].StartGenerationDateTimeUtc,
+                StartFocusedGenerationDateTimeUtc = messagesDbModel.Messages[i].StartFocusedGenerationDateTimeUtc,
+                EndFocusedGenerationDateTimeUtc = messagesDbModel.Messages[i].EndFocusedGenerationDateTimeUtc,
             });
         }
 

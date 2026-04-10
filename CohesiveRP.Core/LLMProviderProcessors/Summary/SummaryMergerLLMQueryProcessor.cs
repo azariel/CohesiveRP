@@ -63,6 +63,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 if (!await ExecuteCompletingProcess())
                     return false;
 
+                backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
             } catch (Exception e)

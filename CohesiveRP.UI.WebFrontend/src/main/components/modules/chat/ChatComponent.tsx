@@ -10,6 +10,7 @@ import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 import { useChatMessages } from "../../../../store/MessagesStoreContext";
 import SceneTrackerComponent from "./sceneTracker/SceneTrackerComponent";
+import ChatRollsComponent from "./chatRolls/ChatRollsComponent";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -120,6 +121,7 @@ export default function ChatComponent() {
         )}
         {activeModule?.chatId ? (
         <div className={styles.userInputContainer}>
+          <ChatRollsComponent sceneTrackerRefreshToken={activeModule?.sceneTrackerRefreshToken} />
           <UserInputComponent messagesRef={messagesRef} />
         </div>
         ):(

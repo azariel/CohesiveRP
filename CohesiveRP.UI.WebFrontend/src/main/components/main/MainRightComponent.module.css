@@ -10,19 +10,19 @@
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;   /* stack large avatar + small row */
+  align-items: center;
+  justify-content: flex-start;
 }
 
+/* Identical to the left component — keeps both avatars the same rendered size */
 .avatarContainer {
   width: 100%;
   display: flex;
   justify-content: center;
   padding: 1em 0;
-
-  -webkit-mask-image:
-    linear-gradient(to bottom, black 60%, transparent 100%);
-  mask-image:
-    linear-gradient(to bottom, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image:          linear-gradient(to bottom, black 60%, transparent 100%);
   mask-repeat: no-repeat;
   mask-size: 100% 100%;
 }
@@ -32,6 +32,29 @@
   height: auto;
   object-fit: cover;
   border-radius: 10px;
+}
+
+/* Small avatars row — sits directly below the large avatar */
+.smallAvatarsRow {
+  display: grid;
+  width: 100%;
+  padding: 0 0 0.75em 0;
+  gap: 0.25rem;
+  /* column count injected inline: repeat(n, 1fr) */
+}
+
+.smallAvatarContainer {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: transparent; /* no letterbox color needed with contain */
+}
+
+.smallAvatarContainer img {
+  width: 100%;
+  height: auto;        /* natural height, no crop */
+  object-fit: contain;
+  display: block;
 }
 
 /* Hide entirely on mobile */

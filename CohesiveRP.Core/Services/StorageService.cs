@@ -198,6 +198,7 @@ namespace CohesiveRP.Core.Services
         public async Task<BackgroundQueryDbModel> GetBackgroundQueryAsync(string queryId) => await backgroundQueriesDal.GetBackgroundQueryAsync(queryId);
         public async Task<BackgroundQueryDbModel[]> GetPendingOrProcessingBackgroundQueryAsync() => await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
         public async Task<BackgroundQueryDbModel[]> GetBackgroundQueriesByChatIdAsync(string chatId) => await backgroundQueriesDal.GetBackgroundQueriesByChatIdAsync(chatId);
+        public async Task<bool> UpdateBackgroundQueryAsync(BackgroundQueryDbModel backgroundQueryDbModel) => await backgroundQueriesDal.UpdateBackgroundQueryAsync(backgroundQueryDbModel);
         public async Task<bool> DeleteBackgroundQueriesByChatIdAsync(string chatId) => await backgroundQueriesDal.DeleteBackgroundQueriesByChatIdAsync(chatId);
 
         // ChatCompletionPresets

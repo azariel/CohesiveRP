@@ -50,6 +50,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_1,
                             Name = "IntenseRP-V2-GLM-Think",
                             Model = "glm-reasoner",
+                            Stream = true,
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
@@ -86,11 +87,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_2,
                             Name = "IntenseRP-V2-DS-Chat",
                             Model = "deepseek-chat",
+                            Stream = true,
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.SkillChecksInitiator, ChatCompletionPresetType.SceneTracker],
+                            Tags = [ChatCompletionPresetType.SkillChecksInitiator, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -116,6 +118,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_3,
                             Name = "IntenseRP-V2-KIMI-Chat",
                             Model = "moonshot-chat",
+                            Stream = true,
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
@@ -189,7 +192,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     {
                         NbRawMessagesToKeepInContext = 5,
                         HotMessagesAmountLimit = 30,
-                        ColdMessagesAmountLimit = 200,
+                        ColdMessagesAmountLimit = 500,
                         Short = new ShortSummaryConfig
                         {
                             NbMessageInChunk = 3,

@@ -25,5 +25,11 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.BackgroundQueries.BusinessObjects
 
         [JsonPropertyName("tags")]
         public List<string> Tags { get; set; }
+
+        [JsonPropertyName("startFocusedGenerationDateTimeUtc")]
+        public DateTime StartFocusedGenerationDateTimeUtc { get; set; }
+
+        [JsonPropertyName("endFocusedGenerationDateTimeUtc")]
+        public DateTime EndFocusedGenerationDateTimeUtc { get; set; }
     }
 }

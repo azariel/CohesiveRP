@@ -4,7 +4,7 @@ import styles from "./ChatMessageComponent.module.css";
 import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification, HiMiniChevronRight } from "react-icons/hi2";
 import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
-import { FormatUtcDate } from "../../../../../utils/DateUtils";
+import { FormatDateTimeDurationMinutesAndSeconds, FormatUtcDate, ParseFocusedGenerationDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
 import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
@@ -22,8 +22,15 @@ interface Props {
 export default function ChatMessageComponent({ message, chatId, enableSwipeBtn = false, enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
+  const [isThinkingExpanded, setIsThinkingExpanded] = useState(false);
   const isRevertingRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const start = ParseFocusedGenerationDate(message?.startGenerationDateTimeUtc);
+  const startFocused = ParseFocusedGenerationDate(message?.startFocusedGenerationDateTimeUtc);
+  const end = ParseFocusedGenerationDate(message?.endFocusedGenerationDateTimeUtc);
+  const durationMs = startFocused !== null && end !== null ? (end - startFocused) : null;
+  const totalDurationMs = start !== null && end !== null ? (end - start) : null;
+
 
   // Focus + size once when entering edit mode
   useEffect(() => {
@@ -88,11 +95,19 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
       <div className={styles.container}>
         <div className={styles.leftMessageContainer}>
           <div className={styles.messageAvatarContainer}>
-            {message?.sourceType == 0 ? (
-              <img src={GetAvatarPathFromPersonaId(message?.personaId ?? "")} alt="Avatar" />
-            ) : (
-              <img src={message?.avatarFilePath && message.avatarFilePath !== "avatar" ? GetAvatarPathFromAvatarFilePath(message.avatarFilePath) : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar")} alt="Avatar" />
-            )}
+            <div className={styles.messageAvatarContainer}>
+              {(() => {
+                const avatarPath = message?.avatarsFilePath?.[0];
+                const src = message?.sourceType === 0
+                  ? (avatarPath && avatarPath !== "avatar"
+                      ? GetAvatarPathFromAvatarFilePath(avatarPath)
+                      : GetAvatarPathFromPersonaId(message?.personaId ?? ""))
+                  : (avatarPath && avatarPath !== "avatar"
+                      ? GetAvatarPathFromAvatarFilePath(avatarPath)
+                      : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar"));
+                return <img src={src} alt="Avatar" />;
+              })()}
+            </div>
           </div>
           <div className={styles.messageInfoContainer}>
             <div title="messageId">{!message?.messageIndex ? "-" : "# " + message.messageIndex}</div>
@@ -104,7 +119,7 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
               {message?.sourceType == 0 ? <label>{message?.personaName ?? "User"}</label> : <label>{message?.characterName ?? "Character"}</label>}
             </div>
             <div className={styles.messageHeaderContentModel}>
-              model-name (?m??s)
+              <label>{FormatDateTimeDurationMinutesAndSeconds(totalDurationMs) ?? "-"} ({FormatDateTimeDurationMinutesAndSeconds(durationMs) ?? "-"})</label>
             </div>
             <div className={styles.messageHeaderContentCreatedAt}>
               {message?.summarized ? (<MdOutlineSummarize className={styles.messageHeaderSummarizeIcon} title="Summarized" />) : ""}
@@ -112,6 +127,26 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
             </div>
           </div>
           <div className={styles.messageContentSeparator} />
+
+          {message?.thinkingContent && (
+            <div className={styles.thinkingContainer}>
+              <button
+                className={styles.thinkingToggle}
+                onClick={() => setIsThinkingExpanded(prev => !prev)}
+              >
+                <HiBeaker className={styles.thinkingIcon} />
+                <span>Thinking</span>
+                <HiMiniChevronRight
+                  className={`${styles.thinkingChevron} ${isThinkingExpanded ? styles.thinkingChevronOpen : ""}`}
+                />
+              </button>
+              {isThinkingExpanded && (
+                <div className={styles.thinkingContent}>
+                  <HighlightedText text={message.thinkingContent} />
+                </div>
+              )}
+            </div>
+          )}
 
           {isEditing ? (
             <div>

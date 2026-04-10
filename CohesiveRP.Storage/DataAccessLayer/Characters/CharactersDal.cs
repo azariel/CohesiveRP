@@ -112,6 +112,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 character.FirstMessage = characterDbModel.FirstMessage;
                 character.Name = characterDbModel.Name;
                 character.Tags = characterDbModel.Tags;
+                character.InherentLorebookIds = characterDbModel.InherentLorebookIds;
 
                 EntityEntry<CharacterDbModel> result = dbContext.Characters.Update(character);
                 if (result.State != EntityState.Modified)

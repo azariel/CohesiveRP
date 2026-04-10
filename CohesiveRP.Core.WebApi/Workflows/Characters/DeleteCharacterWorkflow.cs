@@ -40,6 +40,13 @@ public class DeleteCharacterWorkflow : IDeleteCharacterWorkflow
             };
         }
 
+        // delete character folder
+        string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, currentCharacter.Name.ToLowerInvariant());
+        if (Directory.Exists(directoryCharacter))
+        {
+            Directory.Delete(directoryCharacter, true);
+        }
+
         var responseDto = new CharacterResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,

@@ -82,6 +82,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 }
 
                 //backgroundQueryDbModel.LinkedId = newSummaryEntryInStorage.MessageIdTracker;
+                backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
             } catch (Exception e)

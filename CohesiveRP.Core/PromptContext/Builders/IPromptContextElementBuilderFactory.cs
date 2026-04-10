@@ -8,6 +8,6 @@ namespace CohesiveRP.Core.PromptContext.Builders
 {
     public interface IPromptContextElementBuilderFactory
     {
-        Task<IPromptContextElementBuilder> GenerateBuilderAsync(PromptContextFormatElement contextElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, BackgroundQueryDbModel backgroundQuery, BackgroundQuerySystemTags tag);
+        Task<IPromptContextElementBuilder> GenerateBuilderAsync(PromptContextFormatElement contextElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, BackgroundQueryDbModel backgroundQuery, BackgroundQuerySystemTags tag, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat);
     }
 }

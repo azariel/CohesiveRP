@@ -11,12 +11,8 @@ using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
-using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
-using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.SceneTracker;
 
@@ -104,13 +100,15 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                     return false;
                 }
 
+                string sceneTrackerJson = LLMResponseParser.ParseOnlyJson(messages.First().Content);
+  
                 // Replace the scene tracker tied to this chat with the new one
                 string linkedMessageId = shareableContextLink.Value as string;
                 CreateSceneTrackerQueryModel queryModel = new()
                 {
                     ChatId = backgroundQueryDbModel.ChatId,
                     LinkMessageId = linkedMessageId,
-                    Content = LLMmessage.Content,
+                    Content = sceneTrackerJson,
                 };
 
                 SceneTrackerDbModel updatedMessageInStorage = await storageService.CreateOrUpdateSceneTrackerAsync(queryModel);
@@ -124,6 +122,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 // Update the time tracker of the messages
                 await UpdateMessagesTimeTrackerAsync(updatedMessageInStorage);
 
+                backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
             } catch (Exception e)

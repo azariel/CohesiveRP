@@ -12,6 +12,9 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
         [JsonPropertyName("content")]
         public string Content { get; set; }
 
+        [JsonPropertyName("thinkingContent")]
+        public string ThinkingContent { get; set; }
+
         [JsonConverter(typeof(JsonNumberEnumConverter<MessageSourceType>))]
 
         [JsonPropertyName("sourceType")]
@@ -38,10 +41,19 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
         [JsonPropertyName("personaName")]
         public string PersonaName { get; set; }
 
-        [JsonPropertyName("avatarFilePath")]
-        public string AvatarFilePath { get; set; }
+        [JsonPropertyName("avatarsFilePath")]
+        public string[] AvatarsFilePath { get; set; }
 
         [JsonPropertyName("inRoleplayDateTime")]
         public DateTime? InRoleplayDateTime { get; set; }
+
+        [JsonPropertyName("startGenerationDateTimeUtc")]
+        public DateTime? StartGenerationDateTimeUtc { get; set; }
+
+        [JsonPropertyName("startFocusedGenerationDateTimeUtc")]
+        public DateTime? StartFocusedGenerationDateTimeUtc { get; set; }
+
+        [JsonPropertyName("endFocusedGenerationDateTimeUtc")]
+        public DateTime? EndFocusedGenerationDateTimeUtc { get; set; }
     }
 }

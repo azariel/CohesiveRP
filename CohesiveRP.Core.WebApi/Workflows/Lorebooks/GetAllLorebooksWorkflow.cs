@@ -24,8 +24,8 @@ public class GetAllLorebooksWorkflow : IGetAllLorebooksWorkflow
         var responseDto = new LorebooksResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
-            // TODO: pagination instead of take(50)
-            Lorebooks = lorebooks?.Take(50).Select(s => new LorebookResponse
+            // TODO: pagination instead of take(256)
+            Lorebooks = lorebooks?.Take(256).Select(s => new LorebookResponse
             {
                 LorebookId = s.LorebookId,
                 Name = s.Name,
