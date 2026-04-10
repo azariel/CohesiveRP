@@ -36,6 +36,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders
         [JsonPropertyName("timeoutStrategy")]
         public TimeoutStrategy TimeoutStrategy { get; set; } = new();
 
+        [JsonPropertyName("stream")]
+        public bool Stream { get; set; } = false;
+
         [JsonPropertyName("fallbackStrategies")]
         public List<FallbackStrategy> FallbackStrategies { get; set; } = new();
 

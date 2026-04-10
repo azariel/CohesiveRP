@@ -26,7 +26,6 @@ namespace CohesiveRP.Core.LLMProviderManager
         protected ISummaryService summaryService;
         protected IPromptContextBuilder contextBuilder;
         protected IPromptContext promptContext;
-
         protected LLMApiResponseMessage[] messages = null;
 
         public LLMQueryProcessor(
@@ -77,8 +76,9 @@ namespace CohesiveRP.Core.LLMProviderManager
                     return;
                 }
 
-                IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(completionPresetType.ToString(), globalSettings.LLMProviders.ToArray(), availableLLMApiProviders, promptContext);
-                backgroundQueryDbModel.RetryCount++;
+                backgroundQueryDbModel.StartFocusedGenerationDateTimeUtc = DateTime.UtcNow;
+                CancellationToken token = new CancellationTokenSource(180000).Token;
+                IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(completionPresetType.ToString(), globalSettings.LLMProviders.ToArray(), availableLLMApiProviders, promptContext, backgroundQueryDbModel, token);
 
                 if (response == null)
                 {
@@ -92,6 +92,7 @@ namespace CohesiveRP.Core.LLMProviderManager
 
                 backgroundQueryDbModel.Content = JsonCommonSerializer.SerializeToString(response.Messages);
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.ProcessingFinalInstruction;
+                await storageService.UpdateBackgroundQueryAsync(backgroundQueryDbModel);
             } catch (Exception e)
             {
                 await Task.Delay(2000);

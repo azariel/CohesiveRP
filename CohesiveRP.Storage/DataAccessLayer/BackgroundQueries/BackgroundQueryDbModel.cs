@@ -43,5 +43,15 @@ namespace CohesiveRP.Storage.DataAccessLayer.AIQueries
         public string LinkedId { get; set; }
 
         public int RetryCount { get; set; }
+
+        /// <summary>
+        /// When the background query is actually running instead of waiting on another query to finish or waiting in a queue.
+        /// </summary>
+        public DateTime StartFocusedGenerationDateTimeUtc { get; set; }
+
+         /// <summary>
+        /// When the background query status pass to completed or error.
+        /// </summary>
+        public DateTime EndFocusedGenerationDateTimeUtc { get; set; }
     }
 }
