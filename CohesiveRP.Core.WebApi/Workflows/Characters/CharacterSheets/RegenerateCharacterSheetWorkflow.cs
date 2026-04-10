@@ -98,7 +98,7 @@ public class RegenerateCharacterSheetWorkflow : IRegenerateCharacterSheetWorkflo
 
         GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
         LLMProviderConfig[] availableLLMApiProviders = globalSettings.LLMProviders.Where(w => w.Tags.Contains(ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration)).ToArray();
-        IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration.ToString(), availableLLMApiProviders, promptContext);
+        IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration.ToString(), globalSettings.LLMProviders.ToArray(), availableLLMApiProviders, promptContext);
 
         if (response?.Messages == null || response.Messages.Length <= 0)
         {

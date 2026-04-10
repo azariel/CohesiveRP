@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CohesiveRP.Storage.DataAccessLayer.LLMApiQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.FallbackStrategies;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.TimeoutStrategies;
 using CohesiveRP.Storage.QueryModels.Chat;
 
@@ -34,5 +35,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders
 
         [JsonPropertyName("timeoutStrategy")]
         public TimeoutStrategy TimeoutStrategy { get; set; } = new();
+
+        [JsonPropertyName("fallbackStrategies")]
+        public List<FallbackStrategy> FallbackStrategies { get; set; } = new();
+
+        [JsonPropertyName("errorsBehavior")]
+        public ErrorBehavior ErrorsBehavior { get; set; } = new();
     }
 }
