@@ -98,7 +98,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 ThinkingContent = "",
                 CreatedAtUtc = now,
                 CharacterId = null,// Null as this is from the User
-                AvatarsFilePath = null,// TODO: generate a different avatar from time to time using comfyui?
+                CharacterAvatars = null,// TODO: generate a different avatar from time to time using comfyui?
                 StartGenerationDateTimeUtc = now,
                 EndFocusedGenerationDateTimeUtc = now,
                 StartFocusedGenerationDateTimeUtc = now,
@@ -147,7 +147,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 PersonaName = persona?.Name,
                 InRoleplayDateTime = message?.InRoleplayDateTime,
                 Summarized = message?.Summarized ?? false,
-                AvatarsFilePath = message?.AvatarsFilePath,
+                CharacterAvatars = message?.CharacterAvatars,
                 ThinkingContent = message?.ThinkingContent,
                 Content = message?.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User"),
                 StartGenerationDateTimeUtc = message?.StartGenerationDateTimeUtc,

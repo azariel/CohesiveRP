@@ -66,10 +66,10 @@ namespace CohesiveRP.Core.Services
             foreach (LLMProviderConfig config in availableConfigs)
             {
                 var selectedLLmApiProviderErrorState = llmApiProviderErrorStates.FirstOrDefault(f => f.ProviderConfigId == config.ProviderConfigId);
-                var maxmimalAmountOfErrorsAllowedInMainPath = 100;
+                var maximalAmountOfErrorsAllowedInMainPath = 100;
                 
                 if(config.FallbackStrategies != null && config.FallbackStrategies.Count > 0)
-                    maxmimalAmountOfErrorsAllowedInMainPath = config.FallbackStrategies.Min(o => o.ErrorsTreshold);
+                    maximalAmountOfErrorsAllowedInMainPath = config.FallbackStrategies.Min(o => o.ErrorsTreshold);
 
                 if (selectedLLmApiProviderErrorState?.TimeoutUntilDateTimeUtc != null && selectedLLmApiProviderErrorState.TimeoutUntilDateTimeUtc <= DateTime.UtcNow)
                 {
@@ -79,7 +79,7 @@ namespace CohesiveRP.Core.Services
 
                 // Is the maximal amount of simulteanous queries running on this Api reached
                 if (ongoingQueriesRunningAgainstLLMApis.Count(w => w.LLMProviderConfigId == config.ProviderConfigId) < config.ConcurrencyLimit &&
-                    (selectedLLmApiProviderErrorState == null || (selectedLLmApiProviderErrorState.ErrorsBalance < maxmimalAmountOfErrorsAllowedInMainPath && (selectedLLmApiProviderErrorState.TimeoutUntilDateTimeUtc == null || selectedLLmApiProviderErrorState.TimeoutUntilDateTimeUtc <= DateTime.UtcNow))))
+                    (selectedLLmApiProviderErrorState == null || (selectedLLmApiProviderErrorState.ErrorsBalance < maximalAmountOfErrorsAllowedInMainPath && (selectedLLmApiProviderErrorState.TimeoutUntilDateTimeUtc == null || selectedLLmApiProviderErrorState.TimeoutUntilDateTimeUtc <= DateTime.UtcNow))))
                 {
                     // This provider is good to go, select it
                     selectedLLMApiQueryDbModel = config;
@@ -91,7 +91,7 @@ namespace CohesiveRP.Core.Services
                 {
                     foreach (var fallbackStrategy in config.FallbackStrategies.OrderBy(o => o.ErrorsTreshold))
                     {
-                        if (selectedLLmApiProviderErrorState.ErrorsBalance >= fallbackStrategy.ErrorsTreshold)
+                        if (selectedLLmApiProviderErrorState != null && selectedLLmApiProviderErrorState.ErrorsBalance >= fallbackStrategy.ErrorsTreshold)
                         {
                             // The treshold to use this fallback was reached
                             // Although, if the concurrency limit of this provider is already reached, we should still skip it

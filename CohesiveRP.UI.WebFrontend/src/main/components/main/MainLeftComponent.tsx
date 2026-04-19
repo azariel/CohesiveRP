@@ -2,7 +2,7 @@ import styles from "./MainLeftComponent.module.css";
 import { sharedContext } from '../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../store/SharedContextChatType";
 import { useChatMessages } from "../../../store/MessagesStoreContext";
-import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromChatIdAndAvatarId } from "../../../utils/avatarUtils";
+import { GetAvatarPathFromPersonaAvatarDefinition, GetAvatarPathFromChatIdAndAvatarId } from "../../../utils/avatarUtils";
 
 export default function MainLeftComponent() {
   const { activeModule } = sharedContext<SharedContextChatType>();
@@ -10,12 +10,12 @@ export default function MainLeftComponent() {
 
   const lastPersonaMessage = [...messages]
     .reverse()
-    .find((m) => m.sourceType === 0 && m.avatarsFilePath && m.avatarsFilePath.length > 0);
+    .find((m) => m.sourceType === 0 && m.characterAvatars && m.characterAvatars.length > 0);
 
-  const firstPath = lastPersonaMessage?.avatarsFilePath?.[0];
+  const firstPath = lastPersonaMessage?.characterAvatars?.[0];
   const avatarSrc = firstPath
-    ? firstPath !== "avatar"
-      ? GetAvatarPathFromAvatarFilePath(firstPath)
+    ? firstPath?.name !== null
+      ? GetAvatarPathFromPersonaAvatarDefinition(firstPath)
       : GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar")
     : null;
 
@@ -24,7 +24,7 @@ export default function MainLeftComponent() {
       <div className={styles.centerModule}>
         {avatarSrc && (
           <div className={styles.avatarContainer}>
-            <img src={avatarSrc} alt="Persona avatar" className={styles.avatar} />
+            <img src={avatarSrc} alt="Persona avatar" className={styles.avatar} onError={(e) => { e.currentTarget.src = GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar"); }} />
           </div>
         )}
       </div>

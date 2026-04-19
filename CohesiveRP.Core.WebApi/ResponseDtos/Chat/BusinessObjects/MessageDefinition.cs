@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json.Serialization;
 using CohesiveRP.Common.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Messages.BusinessObjects;
 
 namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
 {
@@ -41,8 +42,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects
         [JsonPropertyName("personaName")]
         public string PersonaName { get; set; }
 
-        [JsonPropertyName("avatarsFilePath")]
-        public string[] AvatarsFilePath { get; set; }
+        [JsonPropertyName("characterAvatars")]
+        public CharacterAvatarDefinition[] CharacterAvatars { get; set; }
 
         [JsonPropertyName("inRoleplayDateTime")]
         public DateTime? InRoleplayDateTime { get; set; }

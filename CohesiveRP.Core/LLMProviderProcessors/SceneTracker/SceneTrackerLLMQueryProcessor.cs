@@ -86,6 +86,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
             {
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                backgroundQueryDbModel.RetryCount++;
                 return false;
             }
 
@@ -130,6 +131,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 LoggingManager.LogToFile("be1a2097-a9d4-4242-9a9d-4e60429f59df", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                backgroundQueryDbModel.RetryCount++;
                 return false;
             }
         }

@@ -85,6 +85,7 @@ namespace CohesiveRP.Core.LLMProviderManager
                     await Task.Delay(2000);
                     backgroundQueryDbModel.Content = "";
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// retry
+                    backgroundQueryDbModel.RetryCount++;
                     return;
                 }
 

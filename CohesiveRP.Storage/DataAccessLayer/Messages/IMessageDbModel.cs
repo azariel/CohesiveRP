@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Common.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Messages.BusinessObjects;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Messages
 {
@@ -11,7 +12,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         DateTime CreatedAtUtc { get; set; }
         bool Summarized { get; set; }
         string CharacterId { get; }
-        string[] AvatarsFilePath { get; }
+        public CharacterAvatarDefinition[] CharacterAvatars { get; set; }
         DateTime? InRoleplayDateTime { get; set; }
         DateTime? StartGenerationDateTimeUtc { get; set; }
         DateTime? StartFocusedGenerationDateTimeUtc { get; set; }

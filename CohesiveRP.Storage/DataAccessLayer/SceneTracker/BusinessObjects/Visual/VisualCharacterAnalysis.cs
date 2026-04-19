@@ -10,8 +10,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual
         [JsonPropertyName("facialExpression")]
         public string FacialExpression { get; set; }
 
-        [JsonPropertyName("outfit")]
-        public string Outfit { get; set; }
+        //[JsonPropertyName("outfit")]
+        //public string Outfit { get; set; }
 
         [JsonPropertyName("clothingStateOfDress")]
         public string ClothingStateOfDress { get; set; }

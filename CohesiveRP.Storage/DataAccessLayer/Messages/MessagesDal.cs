@@ -218,7 +218,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                     SourceType = queryModel.SourceType,
                     CreatedAtUtc = queryModel.CreatedAtUtc,
                     CharacterId = queryModel.CharacterId,
-                    AvatarsFilePath = queryModel.AvatarsFilePath,
+                    CharacterAvatars = queryModel.CharacterAvatars,
                     StartGenerationDateTimeUtc = queryModel.StartGenerationDateTimeUtc,
                     StartFocusedGenerationDateTimeUtc = queryModel.StartFocusedGenerationDateTimeUtc,
                     EndFocusedGenerationDateTimeUtc = queryModel.EndFocusedGenerationDateTimeUtc,

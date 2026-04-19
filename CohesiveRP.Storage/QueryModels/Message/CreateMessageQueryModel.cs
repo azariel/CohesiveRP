@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CohesiveRP.Common.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Messages.BusinessObjects;
 
 namespace CohesiveRP.Storage.QueryModels.Message
 {
@@ -14,7 +15,7 @@ namespace CohesiveRP.Storage.QueryModels.Message
         public MessageSourceType SourceType { get; set; }
         public bool Summarized { get; set; }
         public string CharacterId { get; set; }
-        public string[] AvatarsFilePath { get; set; }
+        public CharacterAvatarDefinition[] CharacterAvatars { get; set; }
         public DateTime? InRoleplayDateTime { get; set; }
         public DateTime? StartGenerationDateTimeUtc { get; set; }
         public DateTime? StartFocusedGenerationDateTimeUtc { get; set; }

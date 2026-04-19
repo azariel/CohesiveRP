@@ -1,3 +1,5 @@
+import type { CharacterAvatar } from "../ResponsesDto/chat/BusinessObjects/CharacterAvatar";
+
 const GetAvatarPathFromCharacterName = (characterName: string): string => {
     try {
       if(characterName === "") {
@@ -71,11 +73,36 @@ const GetAvatarPathFromAvatarFilePath = (avatarFilePath: string): string => {
     }
 };
 
+const getAvatarPathFromSourceAvatarDefinition = (avatarDefinition: CharacterAvatar): string => {
+ try {
+    if (!avatarDefinition || !avatarDefinition.name || !avatarDefinition.filePath) {
+      return ""; // TODO: empty avatar? default? placeholder?
+    }
+
+    const normalized = avatarDefinition.filePath.toLowerCase().replace(/\\/g, "/").replace(/^\//, "");
+    console.error(`FILE: ${normalized}`);
+    return `./${normalized}`;
+  } catch (err) {
+    console.log(`Avatar not found for Character [${avatarDefinition?.name}], Outfit [${avatarDefinition?.outfit}], Expression [${avatarDefinition?.expression}], Error: ${err}`);
+    return "";
+  }
+}
+
+const getAvatarPathFromCharacterAvatarDefinition = (avatarDefinition: CharacterAvatar): string => {
+  return getAvatarPathFromSourceAvatarDefinition(avatarDefinition);
+};
+
+const GetAvatarPathFromPersonaAvatarDefinition = (avatarDefinition: CharacterAvatar): string => {
+  return getAvatarPathFromSourceAvatarDefinition(avatarDefinition);
+};
+
 export {
     GetAvatarPathFromCharacterName,
     GetAvatarPathFromPersonaId,
     GetAvatarPathFromLorebookId,
     GetAvatarPathFromChatId,
     GetAvatarPathFromChatIdAndAvatarId,
-    GetAvatarPathFromAvatarFilePath
+    GetAvatarPathFromAvatarFilePath,
+    getAvatarPathFromCharacterAvatarDefinition,
+    GetAvatarPathFromPersonaAvatarDefinition
 };
