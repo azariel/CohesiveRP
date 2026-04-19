@@ -616,6 +616,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             {
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                backgroundQueryDbModel.RetryCount++;
                 return false;
             }
 
@@ -639,6 +640,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 LoggingManager.LogToFile("025c0b1d-cfef-4a20-bab7-8bde505060be", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                backgroundQueryDbModel.RetryCount++;
                 return false;
             }
         }

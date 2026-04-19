@@ -6,7 +6,7 @@ import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
 import { FormatDateTimeDurationMinutesAndSeconds, FormatUtcDate, ParseFocusedGenerationDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
-import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
+import { getAvatarPathFromCharacterAvatarDefinition, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
 
 interface Props {
@@ -97,15 +97,15 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
           <div className={styles.messageAvatarContainer}>
             <div className={styles.messageAvatarContainer}>
               {(() => {
-                const avatarPath = message?.avatarsFilePath?.[0];
+                const avatarPath = message?.characterAvatars?.[0];
                 const src = message?.sourceType === 0
-                  ? (avatarPath && avatarPath !== "avatar"
-                      ? GetAvatarPathFromAvatarFilePath(avatarPath)
+                  ? (avatarPath && avatarPath.expression !== null
+                      ? getAvatarPathFromCharacterAvatarDefinition(avatarPath)
                       : GetAvatarPathFromPersonaId(message?.personaId ?? ""))
-                  : (avatarPath && avatarPath !== "avatar"
-                      ? GetAvatarPathFromAvatarFilePath(avatarPath)
+                  : (avatarPath && avatarPath.expression !== null
+                      ? getAvatarPathFromCharacterAvatarDefinition(avatarPath)
                       : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar"));
-                return <img src={src} alt="Avatar" />;
+                return <img src={src} alt="Avatar" onError={(e) => { e.currentTarget.src = GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar"); }} />;
               })()}
             </div>
           </div>

@@ -1,28 +1,37 @@
+/* MainRightComponent.module.css */
 .body {
   background: #111111;
+  height: 100%;
+}
+
+/* App.css */
+.bodyControlRight {
+  flex: 0 0 25%;
+  height: 100%;
 }
 
 .centerModule {
   width: 98%;
-  min-height: 5dvh;
-  background: #1B1B1B;
+  height: 100%;         
+  overflow: hidden;
+  background: #111111;
   border-radius: 14px;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
   display: flex;
-  flex-direction: column;   /* stack large avatar + small row */
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   justify-content: flex-start;
 }
 
 /* Identical to the left component — keeps both avatars the same rendered size */
 .avatarContainer {
+  flex-shrink: 0;        /* ← don't shrink the main avatar */
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 1em 0;
   -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-  mask-image:          linear-gradient(to bottom, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
   mask-repeat: no-repeat;
   mask-size: 100% 100%;
 }
@@ -36,25 +45,28 @@
 
 /* Small avatars row — sits directly below the large avatar */
 .smallAvatarsRow {
+  flex: 1;               /* ← take all remaining height */
   display: grid;
   width: 100%;
   padding: 0 0 0.75em 0;
   gap: 0.25rem;
-  /* column count injected inline: repeat(n, 1fr) */
+  min-height: 0;         /* ← critical: allows flex child to shrink below content size */
 }
 
 .smallAvatarContainer {
   width: 100%;
-  overflow: hidden;
+  height: 100%;          /* ← fill the grid cell */
   border-radius: 8px;
-  background: transparent; /* no letterbox color needed with contain */
+  overflow: hidden;
+  background: transparent;
 }
 
 .smallAvatarContainer img {
   width: 100%;
-  height: auto;        /* natural height, no crop */
-  object-fit: contain;
+  height: 100%;          /* ← fill the container */
+  object-fit: fill;      /* ← stretch */
   display: block;
+  border-radius: 8px;
 }
 
 /* Hide entirely on mobile */

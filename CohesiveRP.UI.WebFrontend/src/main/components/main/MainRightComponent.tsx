@@ -2,7 +2,7 @@ import styles from "./MainRightComponent.module.css";
 import { sharedContext } from '../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../store/SharedContextChatType";
 import { useChatMessages } from "../../../store/MessagesStoreContext";
-import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromChatIdAndAvatarId } from "../../../utils/avatarUtils";
+import { getAvatarPathFromCharacterAvatarDefinition, GetAvatarPathFromChatIdAndAvatarId } from "../../../utils/avatarUtils";
 
 export default function MainRightComponent() {
   const { activeModule } = sharedContext<SharedContextChatType>();
@@ -10,14 +10,14 @@ export default function MainRightComponent() {
 
   const lastAiMessage = [...messages]
     .reverse()
-    .find((m) => m.sourceType === 1 && m.avatarsFilePath && m.avatarsFilePath.length > 0);
+    .find((m) => m.sourceType === 1 && m.characterAvatars && m.characterAvatars.length > 0);
 
-  const paths = lastAiMessage?.avatarsFilePath ?? [];
+  const paths = lastAiMessage?.characterAvatars ?? [];
   const firstPath = paths[0];
 
   const avatarSrc = firstPath
-    ? firstPath !== "avatar"
-      ? GetAvatarPathFromAvatarFilePath(firstPath)
+    ? firstPath?.name !== null
+      ? getAvatarPathFromCharacterAvatarDefinition(firstPath)
       : GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar")
     : null;
 
@@ -25,8 +25,8 @@ export default function MainRightComponent() {
   const smallAvatarSrcs = paths
     .slice(1, 4)
     .map((p) =>
-      p !== "avatar"
-        ? GetAvatarPathFromAvatarFilePath(p)
+      p?.name !== null
+        ? getAvatarPathFromCharacterAvatarDefinition(p)
         : GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar")
     );
 
@@ -36,17 +36,17 @@ export default function MainRightComponent() {
         {avatarSrc && (
           <>
             <div className={styles.avatarContainer}>
-              <img src={avatarSrc} alt="Character avatar" className={styles.avatar} />
+              <img src={avatarSrc} alt="Character avatar" className={styles.avatar} onError={(e) => { e.currentTarget.src = GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar"); }} />
             </div>
 
             {smallAvatarSrcs.length > 0 && (
               <div
                 className={styles.smallAvatarsRow}
-                style={{ gridTemplateColumns: `repeat(${smallAvatarSrcs.length}, 1fr)` }}
+                style={{ gridTemplateColumns: `repeat(${Math.max(smallAvatarSrcs.length, 2)}, 1fr)` }}
               >
                 {smallAvatarSrcs.map((src, i) => (
                   <div key={i} className={styles.smallAvatarContainer}>
-                    <img src={src} alt={`Character avatar ${i + 2}`} className={styles.smallAvatar} />
+                    <img src={src} alt={`Character avatar ${i + 2}`} onError={(e) => { e.currentTarget.src = GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar"); }} />
                   </div>
                 ))}
               </div>

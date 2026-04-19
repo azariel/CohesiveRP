@@ -201,7 +201,7 @@
   outline: none;
   overflow: hidden;
   overflow-y: auto;
-  max-height: 400px;
+  max-height: 800px;
 }
 
 .sceneAnalyzeSpinner {
@@ -273,24 +273,26 @@
 }
 
 /* Mobile breakpoint: mobile display or smaller screens */
-@media (max-width: 876px) {
-    .messageAvatarContainer {
-        width: clamp(5rem, 25dvw, 9rem);
+@media (max-width: 600px) {
+    .messageInfoContainer {
+        padding-right: 0.5em;
+        font-size: 0.6em;
     }
 
-    .messageAvatarContainer img {
-        width: clamp(5rem, 25dvw, 9rem);
+    .messageHeaderContentModel {
+        display: none; /* duration info is noisy on small screens */
     }
 
-    .messageHeaderContentName {
-        font-size: 1em;
+    .messageHeaderContentCreatedAt {
+        font-size: 0.55em;
+        margin-right: 0.4em;
     }
 
     .messageContentValue {
-        font-size: 1em;
+        padding-right: 0.4em;
     }
 
-    .messageContentValueEditArea {
-        font-size: 1em;
+    .thinkingContainer {
+        margin-right: 0.3em;
     }
 }

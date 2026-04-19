@@ -8,11 +8,31 @@ namespace CohesiveRP.Common.Utils.Parsers
         {
             string message = rawMessage;
 
-            // remove <think></think>
-            message = Regex.Replace(message, @"(?s)<think>.*?</think>", "");
+            //// remove <think></think>
+            //message = Regex.Replace(message, @"(?s)<think>.*?</think>", "");
 
-            // remove <thinking></thinking>
-            message = Regex.Replace(message, @"(?s)<thinking>.*?</thinking>", "");
+            //// remove <thinking></thinking>
+            //message = Regex.Replace(message, @"(?s)<thinking>.*?</thinking>", "");
+
+            // remove <think></think> and <thinking></thinking>
+            message = Regex.Replace(message, @"(?s)<(think|thinking)>.*?</\1>", "");
+
+            // normalize quotes
+            message = message
+                .Replace("“", "\"")
+                .Replace("”", "\"")
+                .Replace("„", "\"")
+                .Replace("‟", "\"")
+                .Replace("’", "'")
+                .Replace("‘", "'")
+                .Replace("‚", "'")
+                .Replace("‛", "'");
+
+            // convert double single-quotes to double quotes
+            message = Regex.Replace(message, @"''", "\"");
+
+            // replace *** with **
+            message = Regex.Replace(message, @"\*{3}", "**");
 
             // TODO: add regexes as needed, could also most likely allow custom regexes (from globalSettings, passed in params)
 
@@ -21,16 +41,9 @@ namespace CohesiveRP.Common.Utils.Parsers
 
         public static string ParseThinking(string content)
         {
-            string message = content;
-            var pattern = @"(?s)<think>(.*?)</think>";
-
-            var insideText = string.Concat(
-                Regex.Matches(message, pattern)
-                    .Cast<Match>()
-                    .Select(m => m.Groups[1].Value)
-            );
-
-            return message;
+            var pattern = @"(?s)<(think|thinking)>.*?</\1>";
+            var result = string.Concat(Regex.Matches(content, pattern).Cast<Match>().Select(m => m.Value));
+            return result;
         }
     }
 }

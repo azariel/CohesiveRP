@@ -182,3 +182,31 @@
     transform: rotate(360deg);
   }
 }
+
+@media (max-width: 600px) {
+    .characterAvatarContainer {
+        width: 28%;
+    }
+
+    .characterCharNameLabel {
+        font-size: 1em;
+    }
+
+    .characterTagsLabel {
+        font-size: 0.65em;
+        margin-top: -0.3em;
+    }
+
+    .characterDescriptionLabel {
+        font-size: 0.75em;
+        padding-top: 0.5em;
+    }
+
+    .characterInfoPanel {
+        padding: 0.3em;
+    }
+
+    .characterContainer {
+        gap: 0.3em;
+    }
+}

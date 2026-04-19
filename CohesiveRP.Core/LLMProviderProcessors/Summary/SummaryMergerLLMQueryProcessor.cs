@@ -47,6 +47,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             {
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                backgroundQueryDbModel.RetryCount++;
                 return false;
             }
 
@@ -58,6 +59,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     LoggingManager.LogToFile("215dc539-06ba-4b1b-9850-b3d49a8b44c4", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content embedding [{messages.Length}] messages generated from the inference server. One message was expected (no more, no less). Task will be set to Pending status for re-generation.");
                     backgroundQueryDbModel.Content = null;
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                    backgroundQueryDbModel.RetryCount++;
                 }
 
                 if (!await ExecuteCompletingProcess())
@@ -71,6 +73,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 LoggingManager.LogToFile("e6db3317-7952-4ba9-900c-39d97ec510d3", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                backgroundQueryDbModel.RetryCount++;
                 return false;
             }
         }
@@ -118,6 +121,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 LoggingManager.LogToFile("aa1dc4b6-635f-4d42-91c8-b525c16b0684", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content embedding [{messages.Length}] messages generated from the inference server. One message was expected (no more, no less). Task will be set to Pending status for re-generation.");
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                backgroundQueryDbModel.RetryCount++;
                 return false;
             }
 
@@ -172,6 +176,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 LoggingManager.LogToFile("dcd06d1e-a7f4-4147-8f2d-6671d976b57e", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. The Content embedding [{messages.Length}] messages generated from the inference server. One message was expected (no more, no less). Task will be set to Pending status for re-generation.");
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                backgroundQueryDbModel.RetryCount++;
                 return false;
             }
 

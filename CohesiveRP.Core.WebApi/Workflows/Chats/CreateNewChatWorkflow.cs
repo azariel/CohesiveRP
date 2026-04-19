@@ -167,7 +167,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 MessageContent = character.FirstMessage,
                 ThinkingContent = "",
                 CharacterId = character.CharacterId,
-                AvatarsFilePath = null,
+                CharacterAvatars = null,
             };
             await storageService.AddMessageAsync(queryModel);
         }

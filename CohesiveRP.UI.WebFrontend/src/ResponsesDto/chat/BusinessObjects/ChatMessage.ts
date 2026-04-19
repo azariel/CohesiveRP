@@ -1,3 +1,5 @@
+import type { CharacterAvatar } from "./CharacterAvatar";
+
 interface ChatMessage {
     messageId: string;
     messageIndex: number | null;
@@ -10,7 +12,7 @@ interface ChatMessage {
     characterName: string | null;
     personaId: string | null;
     personaName: string | null;
-    avatarsFilePath: string[] | null; // zero to ten avatar path overrides for this message
+    characterAvatars: CharacterAvatar[] | null;
     // Injected fields
     startGenerationDateTimeUtc?: string;
     startFocusedGenerationDateTimeUtc?: string;

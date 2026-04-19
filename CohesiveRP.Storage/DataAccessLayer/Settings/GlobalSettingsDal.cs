@@ -73,10 +73,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                   ErrorsTreshold = 2,
                                   ErrorsTresholdBelowXToAllowFallback = 3,
                                   ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_2,
-                              },
+                              },    
                               new FallbackStrategy()
                               {
-                                  // After 2 errors, but after this preceding fallback, fallback to second backup provider
+                                  // After 2 errors, but after this preceding fallback (if concurrrency is too high for ex), fallback to second backup provider
                                   ErrorsTreshold = 2,
                                   ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_3,
                               },
