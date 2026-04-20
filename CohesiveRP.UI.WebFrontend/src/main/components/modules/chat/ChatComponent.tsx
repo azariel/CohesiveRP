@@ -11,6 +11,7 @@ import type { SharedContextChatType } from "../../../../store/SharedContextChatT
 import { useChatMessages } from "../../../../store/MessagesStoreContext";
 import SceneTrackerComponent from "./sceneTracker/SceneTrackerComponent";
 import ChatRollsComponent from "./chatRolls/ChatRollsComponent";
+import InteractiveUserInputComponent from "./interactiveUserInput/InteractiveUserInputComponent";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -57,7 +58,9 @@ export default function ChatComponent() {
 
   useEffect(() => {
     if (messagesRef?.current)
+    {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
   }, []);
 
   const handleSaveMessage = async (messageId: string, newContent: string) => {
@@ -121,6 +124,11 @@ export default function ChatComponent() {
         )}
         {activeModule?.chatId ? (
         <div className={styles.userInputContainer}>
+          {/* ── Interactive prompts shown after each AI response ── */}
+          <InteractiveUserInputComponent
+            chatId={activeModule.chatId}
+            refreshToken={activeModule?.interactiveInputRefreshToken}
+          />
           <ChatRollsComponent sceneTrackerRefreshToken={activeModule?.sceneTrackerRefreshToken} />
           <UserInputComponent messagesRef={messagesRef} />
         </div>

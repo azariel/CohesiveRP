@@ -2,6 +2,7 @@
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
@@ -41,6 +42,7 @@ namespace CohesiveRP.Core.Services
         private ISummaryDal summaryDal;
         private ISceneTrackerDal sceneTrackerDal;
         private ISceneAnalyzerDal sceneAnalyzerDal;
+        private IInteractiveUserInputDal interactiveUserInputDal;
 
         public StorageService(
             IChatsDal chatsDal,
@@ -58,7 +60,8 @@ namespace CohesiveRP.Core.Services
             ILLMApiQueriesDal llmApiQueriesDal,
             ISummaryDal summaryDal,
             ISceneTrackerDal sceneTrackerDal,
-            ISceneAnalyzerDal sceneAnalyzerDal)
+            ISceneAnalyzerDal sceneAnalyzerDal,
+            IInteractiveUserInputDal interactiveUserInputDal)
         {
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;
@@ -76,6 +79,7 @@ namespace CohesiveRP.Core.Services
             this.summaryDal = summaryDal;
             this.sceneTrackerDal = sceneTrackerDal;
             this.sceneAnalyzerDal = sceneAnalyzerDal;
+            this.interactiveUserInputDal = interactiveUserInputDal;
         }
 
         // Chats
@@ -238,5 +242,12 @@ namespace CohesiveRP.Core.Services
         public async Task<SceneAnalyzerDbModel> AddSceneAnalyzerAsync(SceneAnalyzerDbModel dbModel) => await sceneAnalyzerDal.AddSceneAnalyzerAsync(dbModel);
         public async Task<SceneAnalyzerDbModel> CreateOrUpdateSceneAnalyzerAsync(SceneAnalyzerDbModel dbModel) => await sceneAnalyzerDal.CreateOrUpdateSceneAnalyzerAsync(dbModel);
         public async Task<bool> DeleteSceneAnalyzerAsync(string chatId) => await sceneAnalyzerDal.DeleteSceneAnalyzerAsync(chatId);
+
+        // InteractiveUserInputQuery
+        public async Task<InteractiveUserInputDbModel[]> GetInteractiveUserInputQueriesAsync(Func<InteractiveUserInputDbModel, bool> func) => await interactiveUserInputDal.GetInteractiveUserInputQueriesAsync(func);
+        public async Task<InteractiveUserInputDbModel[]> GetInteractiveUserInputQueriesAsync() => await interactiveUserInputDal.GetInteractiveUserInputQueriesAsync();
+        public async Task<InteractiveUserInputDbModel> AddInteractiveUserInputQueryAsync(InteractiveUserInputDbModel interactiveUserInputDbModel) => await interactiveUserInputDal.AddInteractiveUserInputQueryAsync(interactiveUserInputDbModel);
+        public async Task<bool> UpdateInteractiveUserInputQueryAsync(InteractiveUserInputDbModel interactiveUserInputDbModel) => await interactiveUserInputDal.UpdateInteractiveUserInputQueryAsync(interactiveUserInputDbModel);
+        public async Task<bool> DeleteInteractiveUserInputQueryAsync(string interactiveUserInputDbModel) => await interactiveUserInputDal.DeleteInteractiveUserInputQueryAsync(interactiveUserInputDbModel);
     }
 }

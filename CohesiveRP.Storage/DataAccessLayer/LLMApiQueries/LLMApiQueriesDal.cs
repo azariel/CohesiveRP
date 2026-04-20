@@ -3,7 +3,6 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 

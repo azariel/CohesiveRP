@@ -292,7 +292,12 @@ const adjustTextareaHeight = () => {
         // nested inside another component's state update logic
         setIsInputBlockedDueToServer(false);
         setSendMessageQueryStatus(response?.status ?? "");
-        setActiveModule((prev) => prev ? { ...prev, mainQueryId: null } : prev);
+        setActiveModule((prev) => prev ? {
+          ...prev,
+          mainQueryId: null,
+          // ── Trigger InteractiveUserInputComponent to fetch new pending queries ──
+          interactiveInputRefreshToken: (prev.interactiveInputRefreshToken ?? 0) + 1,
+        } : prev);
         
         if (messagesRef?.current) {
           setTimeout(() => {

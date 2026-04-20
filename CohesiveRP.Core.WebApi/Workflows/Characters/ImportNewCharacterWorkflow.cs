@@ -133,7 +133,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, importCharacterResult.Name.ToLowerInvariant().Trim());
         if (!Directory.Exists(directoryCharacter))
         {
-            Directory.CreateDirectory(directoryCharacter);
+           Directory.CreateDirectory(directoryCharacter);
         }
 
         image?.Save(Path.Combine(directoryCharacter, WebConstants.AvatarFileName));

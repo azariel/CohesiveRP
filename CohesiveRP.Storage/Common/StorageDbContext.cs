@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
@@ -108,6 +109,8 @@ namespace CohesiveRP.Storage.Common
         public DbSet<LorebookDbModel> Lorebooks { get; set; }
 
         public DbSet<LorebookInstanceDbModel> LorebookInstances { get; set; }
+        
+        public DbSet<InteractiveUserInputDbModel> InteractiveUserInputQueries { get; set; }
 
         // Pathfinder
         public DbSet<CharacterSheetDbModel> CharacterSheets { get; set; }

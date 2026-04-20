@@ -1,5 +1,6 @@
 ﻿using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
@@ -132,5 +133,12 @@ namespace CohesiveRP.Core.Services
 
         // LLMQueries
         Task<LLMApiQueryDbModel> AddNewQueryAsync(LLMApiQueryDbModel newQuery);
+
+        // InteractiveUserInputQuery
+        Task<InteractiveUserInputDbModel[]> GetInteractiveUserInputQueriesAsync(Func<InteractiveUserInputDbModel, bool> func);
+        Task<InteractiveUserInputDbModel[]> GetInteractiveUserInputQueriesAsync();
+        Task<InteractiveUserInputDbModel> AddInteractiveUserInputQueryAsync(InteractiveUserInputDbModel interactiveUserInputDbModel);
+        Task<bool> UpdateInteractiveUserInputQueryAsync(InteractiveUserInputDbModel interactiveUserInputDbModel);
+        Task<bool> DeleteInteractiveUserInputQueryAsync(string interactiveUserInputDbModel);
     }
 }

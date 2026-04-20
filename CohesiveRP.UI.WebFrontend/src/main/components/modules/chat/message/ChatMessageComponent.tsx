@@ -8,6 +8,9 @@ import { FormatDateTimeDurationMinutesAndSeconds, FormatUtcDate, ParseFocusedGen
 import { HighlightedText } from "../../../../../utils/HighlightText";
 import { getAvatarPathFromCharacterAvatarDefinition, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
 import { FaTrashAlt } from "react-icons/fa";
+import { getFromServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
+import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+import type { PromptResponseDto } from "../../../../../ResponsesDto/chat/PromptResponseDto";
 
 interface Props {
   message?: ChatMessage;
@@ -31,6 +34,11 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
   const durationMs = startFocused !== null && end !== null ? (end - startFocused) : null;
   const totalDurationMs = start !== null && end !== null ? (end - start) : null;
 
+  // Prompt
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+  const [promptText, setPromptText] = useState<string | null>(null);
+  const [isLoadingPrompt, setIsLoadingPrompt] = useState(false);
+  const [promptCopied, setPromptCopied] = useState(false);
 
   // Focus + size once when entering edit mode
   useEffect(() => {
@@ -86,6 +94,51 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
       return;
 
     await onSave(message.messageId, trimmed);
+  };
+
+  // Prompt
+  const handleShowPrompt = async () => {
+    if (!chatId) return;
+    setIsPromptModalOpen(true);
+    setIsLoadingPrompt(true);
+    setPromptText(null);
+
+    const response = await getFromServerApiAsync<PromptResponseDto>(`api/chat/${chatId}/prompt`);
+    setIsLoadingPrompt(false);
+
+    const err = response as ServerApiExceptionResponseDto | null;
+    if (!response || response.code !== 200 || err?.message) {
+      console.error(`Failed to fetch prompt. Code:[${response?.code}]`);
+      setPromptText("[Error: could not load prompt.]");
+      return;
+    }
+
+    setPromptText(response.prompt);
+  };
+
+  const handleCopyPrompt = async () => {
+    if (!promptText) return;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(promptText);
+      } else {
+        // Fallback for HTTP / older browsers
+        const el = document.createElement("textarea");
+        el.value = promptText;
+        el.style.position = "fixed";
+        el.style.opacity = "0";
+        document.body.appendChild(el);
+        el.focus();
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+      }
+      setPromptCopied(true);
+      setTimeout(() => setPromptCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy prompt:", err);
+    }
   };
 
   const displayedContent = message?.content ?? "[empty]";
@@ -174,15 +227,17 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
 
           <div className={styles.messageContentFooter}>
             <div className={styles.messageContentFooterLeftSideIcons}>
-              <HiChatBubbleLeftEllipsis />
+              <HiChatBubbleLeftEllipsis
+                className={styles.footerIconBtn}
+                onClick={handleShowPrompt}
+                title="View prompt"
+              />
               <HiMiniUsers />
               <HiIdentification />
               <HiBeaker />
               <HiCircleStack />
               <HiAdjustmentsHorizontal />
               <HiCog6Tooth />
-              {/* Roll 1-20 incl */}
-              {/* <label>{Math.floor(Math.random() * 20) + 1}</label> */}
             </div>
 
             <div className={styles.messageContentFooterRightSideIcons}>
@@ -203,6 +258,36 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
           </div>
         </div>
       </div>
+      {isPromptModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsPromptModalOpen(false)}>
+          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <span className={styles.modalTitle}>Prompt</span>
+              <button className={styles.modalCloseBtn} onClick={() => setIsPromptModalOpen(false)}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              {isLoadingPrompt ? (
+                <span className={styles.modalLoading}>Loading…</span>
+              ) : (
+                <textarea
+                  className={styles.modalTextarea}
+                  readOnly
+                  value={promptText ?? ""}
+                />
+              )}
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.modalCopyBtn}
+                onClick={handleCopyPrompt}
+                disabled={!promptText || isLoadingPrompt}
+              >
+                {promptCopied ? "Copied!" : "Copy to clipboard"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

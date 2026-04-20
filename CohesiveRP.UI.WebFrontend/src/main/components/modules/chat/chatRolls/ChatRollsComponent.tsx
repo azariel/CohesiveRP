@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HiMiniChevronRight } from "react-icons/hi2";
 import { ImSpinner2 } from "react-icons/im";
 import { GiDiceTwentyFacesTwenty } from "react-icons/gi";
@@ -15,8 +15,8 @@ import type { ChatCharacterRoll, ChatCharacterRollResponse, ChatCharacterRollsRe
 function tierClass(value: number): string {
   if (value >= 18) return styles["tier-critical"];
   if (value >= 14) return styles["tier-high"];
-  if (value >= 9)  return styles["tier-mid"];
-  if (value >= 5)  return styles["tier-low"];
+  if (value >= 10) return styles["tier-mid"];
+  if (value >= 6) return styles["tier-low"];
   return styles["tier-critical-fail"];
 }
 
@@ -104,16 +104,19 @@ interface Props {
 
 export default function ChatRollsComponent({ sceneTrackerRefreshToken }: Props) {
   const { activeModule } = sharedContext<SharedContextChatType>();
+  const didFetchOnce = useRef(false);
   const [isOpen,    setIsOpen]    = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [rolls, setRolls]         = useState<ChatCharacterRollResponse[]>([]);
 
   useEffect(() => {
     if (!activeModule?.chatId) return;
+    if (didFetchOnce.current && sceneTrackerRefreshToken === undefined) return;
 
     const abort = new AbortController();
 
     const fetchRolls = async () => {
+      console.error(`FETCHING`);
       setIsLoading(true);
 
       const response = await getFromServerApiAsync<ChatCharacterRollsResponseDto>(

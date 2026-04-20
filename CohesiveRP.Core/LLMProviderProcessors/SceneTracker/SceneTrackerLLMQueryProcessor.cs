@@ -11,8 +11,12 @@ using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.SceneTracker;
 
@@ -60,11 +64,11 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
             // Deserialize the sceneTracker to find out the inRoleplay datetime
             var deserializedSceneTracker = JsonCommonSerializer.DeserializeFromString<BasicInformationSceneTracker>(sceneTracker.Content);
-            if(deserializedSceneTracker?.CurrentDateTime == null)
+            if (deserializedSceneTracker?.CurrentDateTime == null)
                 return;
 
             // Parse the date
-            if(!DateTime.TryParse(deserializedSceneTracker.CurrentDateTime, out DateTime sceneTrackerParsedDate))
+            if (!DateTime.TryParse(deserializedSceneTracker.CurrentDateTime, out DateTime sceneTrackerParsedDate))
                 return;
 
             foreach (var message in chunkOfMessagesToUpdate)
@@ -74,7 +78,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
             var resultUpdate = await storageService.UpdateHotMessagesAsync(hotMessagesObj);
 
-            if(!resultUpdate)
+            if (!resultUpdate)
             {
                 LoggingManager.LogToFile("5d1768ec-c217-4554-bb2a-8372a09dc431", $"Failed to update messages inRoleplayDateTime with sceneTracker dateTime.");
             }
@@ -102,7 +106,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 }
 
                 string sceneTrackerJson = LLMResponseParser.ParseOnlyJson(messages.First().Content);
-  
+
                 // Replace the scene tracker tied to this chat with the new one
                 string linkedMessageId = shareableContextLink.Value as string;
                 CreateSceneTrackerQueryModel queryModel = new()
@@ -112,8 +116,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                     Content = sceneTrackerJson,
                 };
 
-                SceneTrackerDbModel updatedMessageInStorage = await storageService.CreateOrUpdateSceneTrackerAsync(queryModel);
-                if (updatedMessageInStorage == null)
+                SceneTrackerDbModel sceneTrackerDbModel = await storageService.CreateOrUpdateSceneTrackerAsync(queryModel);
+                if (sceneTrackerDbModel == null)
                 {
                     LoggingManager.LogToFile("c352fa3d-7019-4ed1-923a-d4b17db6d7a1", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Couldn't update storage. Skipping.");
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
@@ -121,7 +125,10 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 }
 
                 // Update the time tracker of the messages
-                await UpdateMessagesTimeTrackerAsync(updatedMessageInStorage);
+                await UpdateMessagesTimeTrackerAsync(sceneTrackerDbModel);
+
+                // Analyze the scene to extract new Characters / NPCs
+                await CreateNewCharactersWhenRequired(sceneTrackerDbModel);
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
@@ -133,6 +140,60 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
                 backgroundQueryDbModel.RetryCount++;
                 return false;
+            }
+        }
+
+        // TODO: generalize into an utils
+        private CharacterSheetInstance FindCharacterSheetInstanceFromCharacterName(List<CharacterSheetInstance> characterSheetInstances, string characterName)
+        {
+            string characterNameLower = characterName.ToLowerInvariant().Trim();
+            var selectedCharacterSheetInstance = characterSheetInstances?.FirstOrDefault(f =>
+            f.CharacterSheet.FirstName?.ToLowerInvariant().Trim() == characterNameLower ||
+            f.CharacterSheet.LastName?.ToLowerInvariant().Trim() == characterNameLower ||
+            $"{f.CharacterSheet.FirstName?.ToLowerInvariant().Trim()} {f.CharacterSheet.LastName?.ToLowerInvariant().Trim()}" == characterNameLower);
+
+            return selectedCharacterSheetInstance;
+        }
+
+        /// <summary>
+        /// Analyze the scene to extract new Characters / NPCs
+        /// Try to match those characters to existing ones.
+        /// If no match is found, create queries to send to the User to ask him if we should trigger the creation of a new character based on the extracted one.
+        /// If so, then create the new character based on the extracted one, linking it to the scene and to the chat.
+        /// </summary>
+        private async Task CreateNewCharactersWhenRequired(SceneTrackerDbModel sceneTrackerDbModel)
+        {
+            var charactersInScene = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerDbModel.Content);
+            if (charactersInScene?.CharactersAnalysis == null || charactersInScene.CharactersAnalysis.Length <= 0)
+                return;
+
+            var characterSheetInstances = await storageService.GetCharacterSheetsInstanceByChatIdAsync(sceneTrackerDbModel.ChatId);
+            var allCurrentInteractiveUserInputQueries = await storageService.GetInteractiveUserInputQueriesAsync(c => c.ChatId == sceneTrackerDbModel.ChatId);
+            foreach (VisualCharacterAnalysis characterAnalysis in charactersInScene.CharactersAnalysis)
+            {
+                string characterName = characterAnalysis.Name;
+
+                if (string.IsNullOrWhiteSpace(characterName))
+                    continue;
+
+                var characterSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstances?.CharacterSheetInstances, characterName);
+
+                // Ok, at this point, we need to scan our storage to find a character tied to the current chat with that name
+                if (characterSheetInstances?.CharacterSheetInstances == null || characterSheetInstances.CharacterSheetInstances.Count <= 0 || characterSheetInstance == null)
+                {
+                    if (allCurrentInteractiveUserInputQueries == null || allCurrentInteractiveUserInputQueries.Length <= 0 || allCurrentInteractiveUserInputQueries.All(a => a != null && !string.IsNullOrWhiteSpace(a.Metadata) && a.Metadata.ToLowerInvariant().Trim().Contains(characterName.ToLowerInvariant().Trim())))
+                    {
+                        // There is no linked character sheet to the chat, we can directly consider that this is a new character
+                        await storageService.AddInteractiveUserInputQueryAsync(new InteractiveUserInputDbModel
+                        {
+                            ChatId = sceneTrackerDbModel.ChatId,
+                            SceneTrackerId = sceneTrackerDbModel.SceneTrackerId,
+                            Status = InteractiveUserInputStatus.WaitingUserInput,
+                            Type = InteractiveUserInputType.NewCharacterDetected,
+                            Metadata = characterName,
+                        });
+                    }
+                }
             }
         }
     }

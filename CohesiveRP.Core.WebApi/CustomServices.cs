@@ -21,6 +21,8 @@ using CohesiveRP.Core.WebApi.Workflows.ChatCharacterRolls.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.ChatCompletionPresets.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Chats;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.InteractiveUserInputQueries;
+using CohesiveRP.Core.WebApi.Workflows.InteractiveUserInputQueries.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Lorebooks.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Messages;
 using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
@@ -31,6 +33,7 @@ using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.SceneAnalyzer;
@@ -58,6 +61,10 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
             services.AddSingleton<IPatchSpecificMessageByIdWorkflow, PatchSpecificMessageByIdWorkflow>();
             services.AddSingleton<IDeleteSpecificMessageByIdWorkflow, DeleteSpecificMessageByIdWorkflow>();
+            services.AddSingleton<IGetPromptByChatIdWorkflow, GetPromptByChatIdWorkflow>();
+
+            // Workflows.ChatCharacterRolls
+            services.AddSingleton<IChatCharacterRollsWorkflow, GetChatCharacterRollsWorkflow>();
 
             // Workflows.Characters
             services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
@@ -110,6 +117,10 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IUpdateChatCompletionPresetWorkflow, UpdateChatCompletionPresetWorkflow>();
             services.AddSingleton<IDeleteChatCompletionPresetWorkflow, DeleteChatCompletionPresetWorkflow>();
 
+            // Workflows.InteractiveUserInputQueries
+            services.AddSingleton<IGetInteractiveUserInputQueriesFromChatIdWorkflow, GetInteractiveUserInputQueriesFromChatIdWorkflow>();
+            services.AddSingleton<IPutInteractiveUserInputQueryWorkflow, PutInteractiveUserInputQueryWorkflow>();
+
             // DtoConverters
             services.AddSingleton<ILorebookDtoConverter, LorebookDtoConverter>();
 
@@ -144,7 +155,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ICharacterSheetsDal, CharacterSheetsDal>();
             services.AddSingleton<ICharacterSheetInstancesDal, CharacterSheetInstancesDal>();
             services.AddSingleton<IChatCharactersRollsDal, ChatCharactersRollsDal>();
-            services.AddSingleton<IChatCharacterRollsWorkflow, GetChatCharacterRollsWorkflow>();
+            services.AddSingleton<IInteractiveUserInputDal, InteractiveUserInputDal>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

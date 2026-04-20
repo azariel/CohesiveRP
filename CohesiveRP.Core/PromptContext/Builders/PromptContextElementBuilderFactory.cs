@@ -63,7 +63,7 @@ namespace CohesiveRP.Core.PromptContext.Builders
                 case PromptContextFormatTag.BehavioralInstructions:
                     return new PromptContextBehavioralInstructionsBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.LastXMessagesToSummarize:
-                    return new PromptContextLastXMessagesToSummarizeBuilder(storageService, contextElement, settings, chatDbModel, backgroundQuery.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                    return new PromptContextLastXMessagesToSummarizeBuilder(storageService, contextElement, settings, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.LastUnsummarizedMessages:
                     return new PromptContextLastUnsummarizedMessagesBuilder(storageService, contextElement, settings, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.OverflowingSummariesToSummarize:

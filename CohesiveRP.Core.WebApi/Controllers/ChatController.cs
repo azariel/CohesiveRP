@@ -1,6 +1,7 @@
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chat.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
+using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CohesiveRP.Storage.WebApi.Controllers
@@ -15,18 +16,22 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         private IPatchSpecificMessageByIdWorkflow putSpecificMessageByIdWorkflow;
         private IChatAddNewMessageWorkflow addNewMessageWorkflow;
 
+        private IGetPromptByChatIdWorkflow getPromptByChatIdWorkflow;
+
         public ChatController(
             IGetAllHotMessagesWorkflow getAllHotMessagesWorkflow,
             IGetSpecificMessageByIdWorkflow getSpecificMessageByIdWorkflow,
             IDeleteSpecificMessageByIdWorkflow deleteSpecificMessageByIdWorkflow,
             IPatchSpecificMessageByIdWorkflow putSpecificMessageByIdWorkflow,
-            IChatAddNewMessageWorkflow chatAddNewMessageWorkflow)
+            IChatAddNewMessageWorkflow chatAddNewMessageWorkflow,
+            IGetPromptByChatIdWorkflow getPromptByChatIdWorkflow)
         {
             this.getAllHotMessagesWorkflow = getAllHotMessagesWorkflow;
             this.getSpecificMessageByIdWorkflow = getSpecificMessageByIdWorkflow;
             this.deleteSpecificMessageByIdWorkflow = deleteSpecificMessageByIdWorkflow;
             this.putSpecificMessageByIdWorkflow = putSpecificMessageByIdWorkflow;
             this.addNewMessageWorkflow = chatAddNewMessageWorkflow;
+            this.getPromptByChatIdWorkflow = getPromptByChatIdWorkflow;
         }
 
         [HttpGet]
@@ -66,6 +71,14 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> PutSpecificMessageById(PatchSpecificMessageRequestDto requestDto)
         {
             return new JsonResult(await putSpecificMessageByIdWorkflow.PatchSpecificMessage(requestDto));
+        }
+
+        // Prompt
+        [HttpGet]
+        [Route("prompt")]
+        public async Task<IActionResult> GetPrompt([FromRoute] string chatId)
+        {
+            return new JsonResult(await getPromptByChatIdWorkflow.GeneratePromptForChatId(chatId, BackgroundQuerySystemTags.main.ToString()));
         }
     }
 }
