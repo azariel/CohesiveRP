@@ -2,7 +2,6 @@
 {
     public enum MappedFacialExpression
     {
-        Neutral,// Default, Unknown
         Admiration,
         Amusement,
         Anger,
@@ -16,24 +15,25 @@
         Disappointment,
         Disapproval,
         Disgust,
-        Embarassed,
+        Embarrassment,
         Excitement,
+        Fear,
         Gratitude,
         Grief,
-        Laughing,
         Jealousy,
         Joy,
-        Fear,
+        Laughing,
         Nervoussness,
+        Neutral,// Default, Unknown
         Pride,
         Realization,
-        Remorse,
         Relief,
+        Remorse,
         Sadness,
         Serious,
         Shy,
-        Surprised,
         Sleepy,
+        Surprised,
         Worried,
     }
 }

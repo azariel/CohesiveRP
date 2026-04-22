@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Common.Exceptions;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.CharacterCards;
 using CohesiveRP.Core.CharacterCards.Loaders;
@@ -6,6 +7,7 @@ using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
 using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.DtoConverters.Abstractions;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
@@ -74,25 +76,27 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         {
             queryModel = new()
             {
-                Name = characterCardCRPv1.Data.Character.Name.Trim(),
+                Name = FileUtils.SanitizeNameForWindowsPath(characterCardCRPv1.Data.Character.Name.Trim()),
                 Creator = characterCardCRPv1.Data.Character.Creator,
                 CreatorNotes = characterCardCRPv1.Data.Character.CreatorNotes,
                 Description = characterCardCRPv1.Data.Character.Description,
                 Tags = characterCardCRPv1.Data.Character.Tags,
                 FirstMessage = characterCardCRPv1.Data.Character.FirstMessage,
                 AlternateGreetings = characterCardCRPv1.Data.Character.AlternateGreetings,
+                ImageGenerationConfiguration = characterCardCRPv1.Data.Character.ImageGenerationConfiguration,
             };
         } else if (characterCardCCv3?.Data != null)
         {
             queryModel = new()
             {
-                Name = characterCardCCv3.Data.Name.Trim(),
+                Name = FileUtils.SanitizeNameForWindowsPath(characterCardCCv3.Data.Name.Trim()),
                 Creator = characterCardCCv3.Data.Creator,
                 CreatorNotes = characterCardCCv3.Data.CreatorNotes,
                 Description = characterCardCCv3.Data.Description,
                 Tags = characterCardCCv3.Data.Tags,
                 FirstMessage = characterCardCCv3.Data.FirstMessage,
                 AlternateGreetings = characterCardCCv3.Data.AlternateGreetings,
+                ImageGenerationConfiguration = new(),
             };
         }
 
@@ -128,6 +132,8 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
                 await storageService.UpdateCharacterSheetAsync(existingCharacterSheet);
             }
         }
+
+        CharacterUtils.CreateCharacterAssets(importCharacterResult);
 
         // Save the image (avatar) on disk
         string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, importCharacterResult.Name.ToLowerInvariant().Trim());
@@ -187,6 +193,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
                 AlternateGreetings = importCharacterResult.AlternateGreetings,
                 LastActivityAtUtc = importCharacterResult.LastActivityAtUtc,
                 CreatedAtUtc = importCharacterResult.CreatedAtUtc,
+                ImageGenerationConfiguration = importCharacterResult.ImageGenerationConfiguration,
             }
         };
 

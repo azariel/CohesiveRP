@@ -15,5 +15,8 @@
         internal const string DEFAULT_LLM_PROVIDER_CONFIG_ID_1 = "7f824d86-198d-4f01-ab3f-45e12fe519c0";
         internal const string DEFAULT_LLM_PROVIDER_CONFIG_ID_2 = "d0cb4ff4-cb71-42af-9720-8c87739ac043";
         internal const string DEFAULT_LLM_PROVIDER_CONFIG_ID_3 = "712906d5-9c20-48d7-be27-4b660beed25d";
+        internal const string DEFAULT_LLM_PROVIDER_CONFIG_ID_4 = "e177d0ab-dfcc-42eb-972e-8b36c26223c8";
+        internal const string DEFAULT_LLM_PROVIDER_CONFIG_ID_5 = "c5ea32d7-32e5-419a-abee-5576fff945f4";
+        internal const string DEFAULT_LLM_PROVIDER_CONFIG_ID_6 = "bd63a466-bd46-423b-b2a3-9a600f69b9fe";
     }
 }

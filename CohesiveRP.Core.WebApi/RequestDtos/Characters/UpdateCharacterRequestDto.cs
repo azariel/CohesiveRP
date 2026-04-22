@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CohesiveRP.Common.WebApi;
+using CohesiveRP.Storage.DataAccessLayer.Characters.BusinessObjects;
 
 namespace CohesiveRP.Core.WebApi.RequestDtos.Characters
 {
@@ -28,5 +29,8 @@ namespace CohesiveRP.Core.WebApi.RequestDtos.Characters
 
         [JsonPropertyName("alternateGreetings")]
         public string[] AlternateGreetings { get; set; }
+
+        [JsonPropertyName("imageGenerationConfiguration")]
+        public CharacterImageGenerationConfiguration ImageGenerationConfiguration { get; set; }
     }
 }

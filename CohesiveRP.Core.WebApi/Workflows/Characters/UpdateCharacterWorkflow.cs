@@ -1,12 +1,11 @@
-﻿using System.Xml.Linq;
-using CohesiveRP.Common.Exceptions;
+﻿using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -44,6 +43,7 @@ public class UpdateCharacterWorkflow : IUpdateCharacterWorkflow
         currentCharacter.Description = requestDto.CharacterDescription;
         currentCharacter.Tags = requestDto.Tags?.ToList();
         currentCharacter.AlternateGreetings = requestDto.AlternateGreetings?.ToList();
+        currentCharacter.ImageGenerationConfiguration = requestDto.ImageGenerationConfiguration;
 
         bool result = await storageService.UpdateCharacterAsync(currentCharacter);
         if (!result)
@@ -54,6 +54,8 @@ public class UpdateCharacterWorkflow : IUpdateCharacterWorkflow
                 Message = $"Character [{requestDto.CharacterId}] update failed."
             };
         }
+
+        CharacterUtils.CreateCharacterAssets(currentCharacter);
 
         var responseDto = new CharacterResponseDto
         {

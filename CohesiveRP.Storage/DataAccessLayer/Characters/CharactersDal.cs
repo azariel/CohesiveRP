@@ -72,6 +72,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     FirstMessage = queryModel.FirstMessage,
                     AlternateGreetings = queryModel.AlternateGreetings,
                     LastActivityAtUtc = DateTime.UtcNow,
+                    InherentLorebookIds = queryModel.InherentLorebookIds,
+                    ImageGenerationConfiguration = queryModel.ImageGenerationConfiguration,
                 };
 
                 EntityEntry<CharacterDbModel> result = await dbContext.Characters.AddAsync(CharacterDbModel);
@@ -113,6 +115,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 character.Name = characterDbModel.Name;
                 character.Tags = characterDbModel.Tags;
                 character.InherentLorebookIds = characterDbModel.InherentLorebookIds;
+                character.ImageGenerationConfiguration = characterDbModel.ImageGenerationConfiguration;
 
                 EntityEntry<CharacterDbModel> result = dbContext.Characters.Update(character);
                 if (result.State != EntityState.Modified)

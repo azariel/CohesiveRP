@@ -59,6 +59,14 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.DynamicCharactersCreator
                 return;
             }
 
+            if (selectedQuery.UserChoice == false)
+            {
+                // The user specified NOT to generate a character from this detected characterName, set it to completed immediately
+                selectedQuery.Status = InteractiveUserInputStatus.Completed;
+                await storageService.UpdateInteractiveUserInputQueryAsync(selectedQuery);
+                return;
+            }
+
             // Register a new backgroundTask to handle it (we're just delegating the whole hard work to an handler)
             CreateBackgroundQueryQueryModel backgroundQuery = new()
             {
@@ -70,7 +78,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.DynamicCharactersCreator
             };
 
             var dbModel = await storageService.AddBackgroundQueryAsync(backgroundQuery);
-            if(dbModel == null)
+            if (dbModel == null)
                 return;
 
             selectedQuery.Status = InteractiveUserInputStatus.WaitingOnBackgroundTask;
@@ -132,7 +140,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.DynamicCharactersCreator
             {
                 // Check if that query is allowed to run, we only want it to run when there's basically nothing going on to avoid delaying chatting
                 var sameChatClashingBackgroundQueries = clashingBackgroundQueries.Where(w => w.ChatId == pendingQuery.ChatId).ToArray();
-                if(sameChatClashingBackgroundQueries.Length > 0)
+                if (sameChatClashingBackgroundQueries.Length > 0)
                 {
                     continue;
                 }
@@ -141,7 +149,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.DynamicCharactersCreator
                 break;
             }
 
-            if(selectedQuery == null)
+            if (selectedQuery == null)
             {
                 return null;
             }

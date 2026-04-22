@@ -251,9 +251,44 @@
     width: 99%;
 }
 
-.characterCreatorNotesLabel {
+.illustratorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 1em;
+    width: 99%;
+}
+
+.illustratorPromptInjection {
+    font-size: 1em;
+    width: 100%;
+    min-height: 10em;
+    max-height: 30em;
+    box-sizing: border-box;
+    display: block;
+    resize: vertical;
+    background-color: #12121f;
+    color: #d4d4e8;
+    border: 1px solid #2e2e48;
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: "Georgia", serif;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    outline: none;
+}
+
+.customLabel {
     font-size: 1.2em;
     font-weight: 500;
+}
+
+.sectionDivider {
+  width: 100%;
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #f6911d55, #f6911d88, #f6911d55, transparent);
+  margin: 1.2em 0 0.6em;
 }
 
 .characterCreatorNotes {
@@ -535,6 +570,212 @@
     width: 3em;
     height: 3em;
     animation: spin 1s linear infinite;
+}
+
+/* ── Avatar carousel ── */
+.avatarCarouselContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 0.6em;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.6em 0 0.8em;
+  scrollbar-width: thin;
+  scrollbar-color: #2e2e48 transparent;
+}
+
+.avatarCarouselContainer::-webkit-scrollbar {
+  height: 4px;
+}
+.avatarCarouselContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+.avatarCarouselContainer::-webkit-scrollbar-thumb {
+  background-color: #2e2e48;
+  border-radius: 2px;
+}
+
+.avatarCarouselItem {
+  flex-shrink: 0;
+  width: clamp(5rem, 8dvw, 9rem);
+  aspect-ratio: 1 / 1.5;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #2e2e48;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+
+.avatarCarouselItem:hover {
+  border-color: #f6911d88;
+}
+
+.avatarCarouselItem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatarCarouselSeed {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.25em 0.4em;
+  font-size: 0.55em;
+  color: #d4d4e8cc;
+  background: linear-gradient(to top, #0e0e1cdd, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.02em;
+}
+
+.outfitSelect {
+  font-size: 0.9em;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #0e0e1c;
+  color: #d4d4e8;
+  border: 1px solid #2e2e48;
+  border-radius: 5px;
+  padding: 0.35em 0.6em;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.outfitSelect:focus {
+  border-color: #5a5a90;
+}
+
+/* ── Lightbox ── */
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(8, 8, 18, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: lightboxFadeIn 0.18s ease;
+}
+
+@keyframes lightboxFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.lightboxCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: min(72vw, 36rem);
+  max-height: 92dvh;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #2e2e48;
+  box-shadow: 0 0 60px 4px rgba(246, 145, 29, 0.12), 0 8px 40px rgba(0,0,0,0.6);
+  animation: lightboxSlideUp 0.2s ease;
+}
+
+@keyframes lightboxSlideUp {
+  from { transform: translateY(18px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+
+.lightboxImage {
+  width: 100%;
+  height: 100%;
+  max-height: 88dvh;
+  object-fit: contain;
+  display: block;
+  border-radius: 12px;
+}
+
+.lightboxSeed {
+  position: absolute;
+  bottom: 3rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.65em;
+  color: #d4d4e8bb;
+  background: linear-gradient(to top, #0e0e1ccc, transparent);
+  padding: 0.4em 0.6em;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+.lightboxActions {
+  position: absolute;
+  top: 0.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 0.7rem;
+}
+
+.lightboxBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: rgba(14, 14, 28, 0.82);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: pointer;
+  font-size: 1rem;
+  border: none;                     /* ← add */
+  appearance: none;                 /* ← add */
+  -webkit-appearance: none;         /* ← add (Safari) */
+}
+
+.lightboxBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lightboxDeleteBtn {
+  color: rgb(255, 90, 90);
+}
+
+.lightboxDeleteBtn:hover:not(:disabled) {
+  background: rgba(200, 40, 40, 0.25);
+  border-color: rgb(255, 90, 90);
+}
+
+.lightboxCloseBtn {
+  color: #d4d4e8;
+}
+
+.lightboxCloseBtn:hover {
+  background: rgba(100, 100, 160, 0.25);
+  border-color: #cea456;
+}
+
+.lightboxSpinner {
+  width: 1em;
+  height: 1em;
+  animation: spin 1s linear infinite;
+}
+
+/* Mobile: go nearly full-screen */
+@media (max-width: 876px) {
+  .lightboxCard {
+    max-width: 94vw;
+    max-height: 90dvh;
+    border-radius: 10px;
+  }
 }
 
 @keyframes spin {

@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import styles from "./InteractiveUserInputComponent.module.css";
 import { HiUserPlus, HiCheckCircle, HiXCircle, HiSparkles } from "react-icons/hi2";
-import { ImSpinner2 } from "react-icons/im";
 import { getFromServerApiAsync, putToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
 import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import { InteractiveUserInputStatus, InteractiveUserInputType, type InteractiveUserInputQueriesResponseDto, type InteractiveUserInputQueryResponse, type PutInteractiveUserInputQueryRequest } from "../../../../../ResponsesDto/chat/interactiveUserInput/InteractiveUserInputQueriesResponseDto";

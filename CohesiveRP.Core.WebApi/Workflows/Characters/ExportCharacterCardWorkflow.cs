@@ -74,6 +74,7 @@ public class ExportCharacterCardWorkflow : IExportCharacterCardWorkflow
                     FirstMessage = character.FirstMessage,
                     AlternateGreetings = character.AlternateGreetings,
                     Description = character.Description,
+                    ImageGenerationConfiguration = character.ImageGenerationConfiguration,
                 },
                 CharacterSheet = null,
             }

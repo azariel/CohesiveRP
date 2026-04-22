@@ -8,12 +8,12 @@ import { deleteFromServerApiAsync, getBlobFromServerApiAsync, getFromServerApiAs
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
-import { GetAvatarPathFromCharacterName, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromCharacterName, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
 import { ImSpinner2 } from "react-icons/im";
 import type { SelectableChatsResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatsResponseDto";
 import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatResponseDto";
 import type { AddChatRequestDto } from "../../../../RequestDto/chat/AddChatRequestDto";
-import { MdAddBox } from "react-icons/md";
+import { MdAddBox, MdDelete } from "react-icons/md";
 import { FormatDateTimeToMinutes } from "../../../../utils/DateUtils";
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 import type { SharedContextType } from "../../../../store/SharedContextType";
@@ -21,6 +21,8 @@ import CharacterSheetComponent from "../characterSheets/CharacterSheetComponent"
 
 
 type DetailsTab = "info" | "sheet";
+type OutfitKey = "Clothed" | "Underwear" | "Naked";
+const OUTFIT_OPTIONS: OutfitKey[] = ["Clothed", "Underwear", "Naked"];
 
 export default function CharacterDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextCharacterType>();
@@ -46,9 +48,24 @@ export default function CharacterDetailsComponent() {
   const [sheetKey, setSheetKey] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [operationError, setOperationError] = useState(false);
+  const [illustratorTag, setIllustratorTag] = useState("");
+  const [selectedOutfit, setSelectedOutfit] = useState<OutfitKey>("Clothed");
+  const [illustrationMapOutfits, setillustrationMapOutfits] = useState<{ outfit: OutfitKey; illustratorPromptInjection: string }[]>([]);
+  const [lightboxAvatar, setLightboxAvatar] = useState<{ filePath: string; fileName: string; seed?: string | null } | null>(null);
+  const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
 
   // tab state
   const [activeTab, setActiveTab] = useState<DetailsTab>("info");
+
+  const getOutfitEntry = (outfit: OutfitKey) =>
+  illustrationMapOutfits.find((e) => e.outfit === outfit) ?? { outfit, illustratorPromptInjection: "" };
+
+  const setOutfitPrompt = (outfit: OutfitKey, value: string) =>
+    setillustrationMapOutfits((prev) => {
+      const exists = prev.find((e) => e.outfit === outfit);
+      if (exists) return prev.map((e) => e.outfit === outfit ? { ...e, illustratorPromptInjection: value } : e);
+      return [...prev, { outfit, illustratorPromptInjection: value }];
+    });
 
   useEffect(() => {
     const el = chatsContainerRef.current;
@@ -106,6 +123,13 @@ export default function CharacterDetailsComponent() {
         setFirstMessage(response?.character?.firstMessage ?? "");
         setAlternateGreetings(response?.character?.alternateGreetings ?? []);
         setCharacterDescription(response?.character?.description ?? "");
+        setIllustratorTag(response?.character?.imageGenerationConfiguration?.illustratorTag ?? "");
+        setillustrationMapOutfits(
+          (response?.character?.imageGenerationConfiguration?.illustrationMapOutfits ?? []).map((e) => ({
+            outfit: (e.outfit ?? "clothed") as OutfitKey,
+            illustratorPromptInjection: e.illustratorPromptInjection ?? "",
+          }))
+        );
       } catch (error) {
         console.error("Fetch characters details error:", error);
       } finally{
@@ -214,7 +238,15 @@ export default function CharacterDetailsComponent() {
         creatorNotes,
         firstMessage,
         alternateGreetings,
-        tags });
+        tags,
+        imageGenerationConfiguration: {
+          illustratorTag: illustratorTag || null,
+          illustrationMapOutfits: illustrationMapOutfits.map((e) => ({
+            outfit: e.outfit,
+            illustratorPromptInjection: e.illustratorPromptInjection || null,
+          })),
+        },
+       });
 
       const serverApiException = response as ServerApiExceptionResponseDto | null;
       if (!response || serverApiException?.message) {
@@ -288,6 +320,13 @@ export default function CharacterDetailsComponent() {
       setFirstMessage(c?.firstMessage ?? "");
       setAlternateGreetings(c?.alternateGreetings ?? []);
       setCharacterDescription(c?.description ?? "");
+      setIllustratorTag(c?.imageGenerationConfiguration?.illustratorTag ?? "");
+      setillustrationMapOutfits(
+        (c?.imageGenerationConfiguration?.illustrationMapOutfits ?? []).map((e) => ({
+          outfit: (e.outfit ?? "clothed") as OutfitKey,
+          illustratorPromptInjection: e.illustratorPromptInjection ?? "",
+        }))
+      );
 
       // Force the CharacterSheetComponent to remount and re-fetch
       setSheetKey(k => k + 1);
@@ -329,6 +368,47 @@ export default function CharacterDetailsComponent() {
       setOperationError(true);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!lightboxAvatar?.fileName || !activeModule?.selectedCharacterId || isDeletingAvatar)
+      return;
+
+    setIsDeletingAvatar(true);
+    try {
+      const response = await deleteFromServerApiAsync(
+        `api/characters/${activeModule.selectedCharacterId}/avatars/${lightboxAvatar.fileName}`
+      );
+      const ex = response as ServerApiExceptionResponseDto | null;
+      if (!response || ex?.message) {
+        console.error(`Failed to delete avatar [${lightboxAvatar.fileName}].`);
+        return;
+      }
+
+      // Remove from characterResponse in-place so the carousel updates immediately
+      setCharacterResponse((prev) => {
+        if (!prev?.character?.imageGenerationConfiguration?.illustrationMapOutfits) return prev;
+        return {
+          ...prev,
+          character: {
+            ...prev.character,
+            imageGenerationConfiguration: {
+              ...prev.character.imageGenerationConfiguration,
+              illustrationMapOutfits: prev.character.imageGenerationConfiguration.illustrationMapOutfits.map((o) => ({
+                ...o,
+                sourceAvatars: (o.sourceAvatars ?? []).filter((a) => a.avatarFileName !== lightboxAvatar.fileName),
+              })),
+            },
+          },
+        };
+      });
+
+      setLightboxAvatar(null);
+    } catch (err) {
+      console.error("Delete avatar error:", err);
+    } finally {
+      setIsDeletingAvatar(false);
     }
   };
 
@@ -464,13 +544,73 @@ export default function CharacterDetailsComponent() {
                     </div>
 
                     <div className={styles.characterCreatorNotesContainer}>
-                      <label className={styles.characterCreatorNotesLabel}>Creator Notes</label>
+                      <label className={styles.customLabel}>Creator Notes</label>
                       <textarea
                         className={styles.characterCreatorNotes}
                         value={creatorNotes}
                         onChange={(e) => setCreatorNotes(e.target.value)}
                       />
                     </div>
+
+                    <hr className={styles.sectionDivider} />
+
+                    <div className={styles.illustratorContainer}>
+                      <label className={styles.customLabel}>Illustrator Tag</label>
+                      <textarea
+                        className={styles.illustratorPromptInjection}
+                        style={{ minHeight: "1.3em", maxHeight: "3.2em" }}
+                        value={illustratorTag}
+                        onChange={(e) => setIllustratorTag(e.target.value)}
+                      />
+                    </div>
+
+                    <div className={styles.illustratorContainer}>
+                      <label className={styles.customLabel}>Outfit</label>
+                      <select
+                        className={styles.outfitSelect}
+                        value={selectedOutfit}
+                        onChange={(e) => setSelectedOutfit(e.target.value as OutfitKey)}
+                      >
+                        {OUTFIT_OPTIONS.map((o) => (
+                          <option key={o} value={o}>{o.charAt(0).toUpperCase() + o.slice(1)}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className={styles.illustratorContainer}>
+                      <label className={styles.customLabel}>Illustrator Prompt Injection</label>
+                      <textarea
+                        className={styles.illustratorPromptInjection}
+                        value={getOutfitEntry(selectedOutfit).illustratorPromptInjection}
+                        onChange={(e) => setOutfitPrompt(selectedOutfit, e.target.value)}
+                      />
+                    </div>
+
+                    {(() => {
+                      const avatars = characterResponse?.character?.imageGenerationConfiguration?.illustrationMapOutfits
+                        ?.find((e) => (e.outfit ?? "").toLowerCase() === selectedOutfit.toLowerCase())
+                        ?.sourceAvatars ?? [];
+                      return avatars.length > 0 ? (
+                        <div className={styles.avatarCarouselContainer}>
+                          {avatars.map((ap, i) => (
+                            <div key={i} className={styles.avatarCarouselItem} onClick={() => setLightboxAvatar({
+                              filePath: ap.avatarFilePath ?? "",
+                              fileName: ap.avatarFileName ?? "",
+                              seed: ap.avatarSeed,
+                            })}>
+                              <img
+                                src={GetAvatarPathFromAvatarFilePath(ap.avatarFilePath ?? "")}
+                                alt={ap.avatarFileName ?? `Avatar ${i + 1}`}
+                                onError={(e) => { e.currentTarget.style.opacity = "0.2"; }}
+                              />
+                              {ap.avatarSeed && (
+                                <span className={styles.avatarCarouselSeed}>{ap.avatarSeed}</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : null;
+                    })()}
                   </>
                 )}
 
@@ -481,7 +621,6 @@ export default function CharacterDetailsComponent() {
                   personaId={null}
                   />
                 )}
-
               </div>
             </div>
 
@@ -503,6 +642,36 @@ export default function CharacterDetailsComponent() {
             )}
           </div>
         )
+      )}
+
+      {lightboxAvatar && (
+        <div className={styles.lightboxOverlay} onClick={() => setLightboxAvatar(null)}>
+          <div className={styles.lightboxCard} onClick={(e) => e.stopPropagation()}>
+            <img
+              className={styles.lightboxImage}
+              src={GetAvatarPathFromAvatarFilePath(lightboxAvatar.filePath)}
+              alt={lightboxAvatar.fileName}
+              onError={(e) => { e.currentTarget.style.opacity = "0.2"; }}
+            />
+            <div className={styles.lightboxActions}>
+              <button
+                className={`${styles.lightboxBtn} ${styles.lightboxDeleteBtn}`}
+                onClick={handleDeleteAvatar}
+                disabled={isDeletingAvatar}
+                title="Delete avatar"
+              >
+                {isDeletingAvatar ? <ImSpinner2 className={styles.lightboxSpinner} /> : <MdDelete />}
+              </button>
+              <button
+                className={`${styles.lightboxBtn} ${styles.lightboxCloseBtn}`}
+                onClick={() => setLightboxAvatar(null)}
+                title="Close"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

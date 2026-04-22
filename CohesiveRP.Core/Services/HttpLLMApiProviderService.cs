@@ -1,10 +1,7 @@
-﻿using System.Reflection.PortableExecutable;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.HttpClient;
-using CohesiveRP.Common.Serialization;
 using CohesiveRP.Core.HttpLLMApiProvider;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services.ErrorHandlers;
@@ -22,6 +19,7 @@ namespace CohesiveRP.Core.Services
         private IStorageService storageService;
         private ILLMApiQueryPayloadBuilderFactory llmApiQueryPayloadBuilderFactory;
         private List<LLMApiProviderErrorState> llmApiProviderErrorStates = new();
+        private const int DELAY_WHEN_API_IS_DOWN_IN_MS = 30000;
 
         public HttpLLMApiProviderService(IStorageService storageService, ILLMApiQueryPayloadBuilderFactory llmApiQueryPayloadBuilderFactory)
         {
@@ -292,6 +290,7 @@ namespace CohesiveRP.Core.Services
                 if (e.Message.Contains("no connection could be made because the target machine actively refused it", StringComparison.InvariantCultureIgnoreCase))
                 {
                     LoggingManager.LogToFile("4b4683cf-e3a1-4494-8ecd-1e288bb61e81", $"Can't execute Http request. The requested Api is down. ApiUrl: [{selectedLLMApiQueryDbModel.ApiUrl}].");
+                    await Task.Delay(DELAY_WHEN_API_IS_DOWN_IN_MS);
                 }
 
                 LoggingManager.LogToFile("dd346c77-ea60-463b-8dda-ed7c95d62757", $"LLM query failed. Exception:[{e.Message}].");

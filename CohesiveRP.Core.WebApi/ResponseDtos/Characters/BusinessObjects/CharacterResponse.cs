@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using CohesiveRP.Storage.DataAccessLayer.Characters.BusinessObjects;
 
 namespace CohesiveRP.Core.WebApi.ResponseDtos.Characters.BusinessObjects
 {
@@ -33,5 +34,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Characters.BusinessObjects
 
         [JsonPropertyName("lastActivityAtUtc")]
         public DateTime LastActivityAtUtc { get; set; }
+
+        [JsonPropertyName("imageGenerationConfiguration")]
+        public CharacterImageGenerationConfiguration ImageGenerationConfiguration { get; set; }
     }
 }

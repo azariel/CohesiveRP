@@ -10,6 +10,7 @@ using CohesiveRP.Core.PromptContext.Builders.Directive;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -79,6 +80,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                     CreatorNotes = "Character was inferred from the story context and created dynamically.",
                     Description = characterFromLLMApi.Description,
                     Name = characterFromLLMApi.Name.Trim(),
+                    ImageGenerationConfiguration = new(),
                 };
 
                 CharacterDbModel characterDbModel = await storageService.AddCharacterAsync(dbModel);
@@ -90,6 +92,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                     backgroundQueryDbModel.RetryCount++;
                     return false;
                 }
+
+                CharacterUtils.CreateCharacterAssets(characterDbModel);
 
                 // Update the chat to include that character
                 var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
