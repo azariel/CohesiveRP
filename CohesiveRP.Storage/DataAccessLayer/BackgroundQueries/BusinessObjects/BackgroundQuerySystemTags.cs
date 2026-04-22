@@ -12,5 +12,7 @@
         overflowSummary = 7,
         skillChecksInitiator = 8,
         sceneAnalyze = 9,
+        dynamicCharacterCreation = 10,
+        dynamicCharacterSheetCreation = 11,
     }
 }

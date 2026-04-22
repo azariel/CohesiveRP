@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Core.LLMProviderManager.Main;
+using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator;
 using CohesiveRP.Core.LLMProviderProcessors.SceneAnalyzer;
 using CohesiveRP.Core.LLMProviderProcessors.SceneTracker;
@@ -63,6 +64,12 @@ namespace CohesiveRP.Core.LLMProviderManager
             if (tags.Contains(BackgroundQuerySystemTags.skillChecksInitiator.ToString()))
                 return BackgroundQuerySystemTags.skillChecksInitiator;
 
+            if (tags.Contains(BackgroundQuerySystemTags.dynamicCharacterCreation.ToString()))
+                return BackgroundQuerySystemTags.dynamicCharacterCreation;
+
+            if (tags.Contains(BackgroundQuerySystemTags.dynamicCharacterSheetCreation.ToString()))
+                return BackgroundQuerySystemTags.dynamicCharacterSheetCreation;
+
             return BackgroundQuerySystemTags.custom;
         }
 
@@ -95,6 +102,10 @@ namespace CohesiveRP.Core.LLMProviderManager
                     return new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.overflowSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.skillChecksInitiator:
                     return new SkillChecksInitiatorLLMQueryProcessor(ChatCompletionPresetType.SkillChecksInitiator, BackgroundQuerySystemTags.skillChecksInitiator, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
+                case BackgroundQuerySystemTags.dynamicCharacterCreation:
+                    return new DynamicCharacterCreatorLLMQueryProcessor(ChatCompletionPresetType.DynamicCharacterCreation, BackgroundQuerySystemTags.dynamicCharacterCreation, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
+                case BackgroundQuerySystemTags.dynamicCharacterSheetCreation:
+                    return new DynamicCharacterSheetCreatorLLMQueryProcessor(ChatCompletionPresetType.DynamicCharacterSheetCreation, BackgroundQuerySystemTags.dynamicCharacterSheetCreation, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
                 case BackgroundQuerySystemTags.custom:
                     break;
                 default:

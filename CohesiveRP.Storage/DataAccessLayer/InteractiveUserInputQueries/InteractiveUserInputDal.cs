@@ -26,8 +26,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
             dbContext.Database.EnsureCreated();
 
             // Always clear completed rows in this table upon startup
-            dbContext.InteractiveUserInputQueries.Where(w => w.Status == BusinessObjects.InteractiveUserInputStatus.Completed).ExecuteDelete();
-            dbContext.InteractiveUserInputQueries.Where(w => w.Status == BusinessObjects.InteractiveUserInputStatus.Error).ExecuteDelete();
+            dbContext.InteractiveUserInputQueries.Where(w => w.Status == BusinessObjects.InteractiveUserInputStatus.Completed).ExecuteDelete();// CharacterSheet was created, which mean that the process won't try to generate a new card for this specific character, we can safely delete the InteractiveUserInputQueries that are completed.
             dbContext.SaveChanges();
         }
 

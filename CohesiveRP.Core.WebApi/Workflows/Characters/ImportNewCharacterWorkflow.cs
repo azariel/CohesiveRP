@@ -96,7 +96,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
             };
         }
 
-        CharacterDbModel importCharacterResult = await storageService.ImportNewCharacterAsync(queryModel);
+        CharacterDbModel importCharacterResult = await storageService.AddCharacterAsync(queryModel);
         if (importCharacterResult == null)
         {
             return new WebApiException

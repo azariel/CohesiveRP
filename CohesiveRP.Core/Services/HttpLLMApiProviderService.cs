@@ -106,7 +106,7 @@ namespace CohesiveRP.Core.Services
                             LLMApiProviderErrorState selectedLLmApiProviderErrorStateFallback = llmApiProviderErrorStates.FirstOrDefault(f => f.ProviderConfigId == fallbackStrategy.ProviderConfigId);
                             if (selectedLLmApiProviderErrorStateFallback != null)
                             {
-                                if (selectedLLmApiProviderErrorStateFallback.TimeoutUntilDateTimeUtc > DateTime.UtcNow)
+                                if (selectedLLmApiProviderErrorStateFallback.TimeoutUntilDateTimeUtc == null || selectedLLmApiProviderErrorStateFallback.TimeoutUntilDateTimeUtc > DateTime.UtcNow)
                                 {
                                     selectedLLmApiProviderErrorStateFallback.TimeoutUntilDateTimeUtc = null;
                                     selectedLLmApiProviderErrorStateFallback.ErrorsBalance--;

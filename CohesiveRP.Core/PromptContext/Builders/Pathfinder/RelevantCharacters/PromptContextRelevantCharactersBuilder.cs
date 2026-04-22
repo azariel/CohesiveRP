@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CohesiveRP.Common.Serialization;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
@@ -10,6 +11,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheets.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
 {
@@ -211,26 +213,57 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 }
             }
 
-            if (characterRolls?.CharacterNamesInScene != null && characterRolls.CharacterNamesInScene.Count > 0)
+            var sceneTracker = await storageService.GetSceneTrackerAsync(chatDbModel.ChatId);
+            if (sceneTracker != null && !string.IsNullOrWhiteSpace(sceneTracker.Content))
             {
-                charactersToInclude = charactersToInclude.Where(w => characterRolls.CharacterNamesInScene.Any(a => AreNameEquivalent(a, w.CharacterSheet.FirstName, w.CharacterSheet.LastName))).ToArray();
+                var sceneTrackerModel = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTracker.Content);
 
-                List<CharacterSheetInstance> orderedInstances = new();
-                foreach (var characterNameInScene in characterRolls.CharacterNamesInScene)
+                if (sceneTrackerModel?.CharactersAnalysis != null && sceneTrackerModel.CharactersAnalysis.Length > 0)
                 {
-                    var selection = charactersToInclude.FirstOrDefault(f => AreNameEquivalent(characterNameInScene, f.CharacterSheet.FirstName, f.CharacterSheet.LastName));
+                    var characterNamesInScene = sceneTrackerModel.CharactersAnalysis.Select(s => s.Name).ToArray();
+                    charactersToInclude = charactersToInclude.Where(w => characterNamesInScene.Any(a => AreNameEquivalent(a, w.CharacterSheet.FirstName, w.CharacterSheet.LastName))).ToArray();
 
-                    if (selection != null)
+                    List<CharacterSheetInstance> orderedInstances = new();
+                    foreach (var characterNameInScene in characterNamesInScene)
                     {
-                        orderedInstances.Add(selection);
+                        var selection = charactersToInclude.FirstOrDefault(f => AreNameEquivalent(characterNameInScene, f.CharacterSheet.FirstName, f.CharacterSheet.LastName));
+
+                        if (selection != null)
+                        {
+                            orderedInstances.Add(selection);
+                        }
+                    }
+
+                    foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(2))// TODO: make the limit configurable
+                    {
+                        str.AppendLine($"  <{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
+                        AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
+                        str.AppendLine($"  </{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
                     }
                 }
-
-                foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(2))// TODO: make the limit configurable
+            } else
+            {
+                if (charactersToInclude != null && characterRolls?.CharacterNamesInScene != null && characterRolls.CharacterNamesInScene.Count > 0)
                 {
-                    str.AppendLine($"  <{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
-                    AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
-                    str.AppendLine($"  </{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
+                    charactersToInclude = charactersToInclude.Where(w => characterRolls.CharacterNamesInScene.Any(a => AreNameEquivalent(a, w.CharacterSheet.FirstName, w.CharacterSheet.LastName))).ToArray();
+
+                    List<CharacterSheetInstance> orderedInstances = new();
+                    foreach (var characterNameInScene in characterRolls.CharacterNamesInScene)
+                    {
+                        var selection = charactersToInclude.FirstOrDefault(f => AreNameEquivalent(characterNameInScene, f.CharacterSheet.FirstName, f.CharacterSheet.LastName));
+
+                        if (selection != null)
+                        {
+                            orderedInstances.Add(selection);
+                        }
+                    }
+
+                    foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(2))// TODO: make the limit configurable
+                    {
+                        str.AppendLine($"  <{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
+                        AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
+                        str.AppendLine($"  </{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
+                    }
                 }
             }
 
@@ -265,6 +298,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             return ($"<relevant_characters>{Environment.NewLine}{str.ToString().Trim().TrimEnd(Environment.NewLine.ToCharArray()).InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</relevant_characters>{Environment.NewLine}Please note that secretKinks are kinks or fetishes that the character is ashamed or embarassed about and will avoid openly talk about, but that character will react positively when exposed to situations implementing their kinks and secret kinks or fetishes.{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
         }
 
-        private static string GetCharacterFullName(string firstName, string lastName, string separator = " ") => $"{firstName}{separator}{lastName}".Trim();
+        private static string GetCharacterFullName(string firstName, string lastName, string separator = " ")
+        {
+            string name = firstName?.Trim();
+
+            if (!string.IsNullOrWhiteSpace(lastName))
+            {
+                name = $"{firstName}{separator}{lastName}".Trim();
+            }
+
+            return name;
+        }
     }
 }

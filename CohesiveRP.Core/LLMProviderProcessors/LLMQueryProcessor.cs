@@ -77,7 +77,7 @@ namespace CohesiveRP.Core.LLMProviderManager
                 }
 
                 backgroundQueryDbModel.StartFocusedGenerationDateTimeUtc = DateTime.UtcNow;
-                CancellationToken token = new CancellationTokenSource(180000).Token;
+                CancellationToken token = new CancellationTokenSource(300000).Token;
                 IHttpLLMApiQueryResponseDto response = await httpLLMApiProviderService.QueryApiAsync(completionPresetType.ToString(), globalSettings.LLMProviders.ToArray(), availableLLMApiProviders, promptContext, backgroundQueryDbModel, token);
 
                 if (response == null)

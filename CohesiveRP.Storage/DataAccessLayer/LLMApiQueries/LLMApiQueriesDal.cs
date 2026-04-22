@@ -39,6 +39,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
+
+                if(string.IsNullOrWhiteSpace(tag))
+                    return dbContext.LLMApiQueries.ToArray();
+
                 return dbContext.LLMApiQueries.Where(w => w.Tag == tag).ToArray();
             } catch (Exception ex)
             {

@@ -51,7 +51,11 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
         private string GeneratePromptInjectionForCharacterRoll(ChatCharacterRoll roll, CharacterSheetInstance currentCharacterSheetInstance, CharacterSheetInstancesDbModel characterSheetsInstances)
         {
             StringBuilder str = new();
-            str.AppendLine($"  <roll>{Environment.NewLine}    {currentCharacterSheetInstance.CharacterSheet.FirstName.Trim()} has rolled {roll.Value} for skill {roll.ActionCategory}.{Environment.NewLine}  </roll>");
+            string name = currentCharacterSheetInstance.CharacterSheet.FirstName.Trim();
+            if(!string.IsNullOrWhiteSpace(currentCharacterSheetInstance.CharacterSheet.LastName))
+                name += $"_{currentCharacterSheetInstance.CharacterSheet.LastName.Trim()}";
+
+            str.AppendLine($"  <roll>{Environment.NewLine}    {name} has rolled {roll.Value} for skill {roll.ActionCategory}.{Environment.NewLine}  </roll>");
             str.AppendLine($"  <actions>{Environment.NewLine}    -{string.Join($"{Environment.NewLine}-", roll.Reasonings)}{Environment.NewLine}  </actions>");
 
 

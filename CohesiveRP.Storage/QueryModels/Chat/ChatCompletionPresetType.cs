@@ -9,5 +9,7 @@
         SkillChecksInitiator = 4,
         SPECIAL_CharacterSheetGeneration = 5,
         SceneAnalyze = 6,
+        DynamicCharacterCreation = 7,
+        DynamicCharacterSheetCreation = 8,
     }
 }

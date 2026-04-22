@@ -72,6 +72,10 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new SkillChecksInitiatorBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.PathfinderSkillChecksResults:// Add the skillChecks result to the end prompt
                     return new SkillChecksResultsBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.CharacterCreation:
+                    return new PromptContextCharacterCreationBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.CharacterSheetCreation:
+                    return new PromptContextCharacterSheetCreationBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 default:
                     throw new Exception($"Unhandled [{contextElement.Tag}].");
             }

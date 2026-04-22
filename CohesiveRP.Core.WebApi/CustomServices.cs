@@ -10,6 +10,7 @@ using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
+using CohesiveRP.Core.WebApi.BackgroundServices.DynamicCharactersCreator;
 using CohesiveRP.Core.WebApi.Workflows.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
@@ -166,6 +167,7 @@ namespace CohesiveRP.Core.WebApi
 
             // Add background services
             services.AddHostedService<BackgroundQueriesWorker>();
+            services.AddHostedService<DynamicCharactersCreatorWorker>();
 
             services.AddControllers().AddJsonOptions(option =>
             {

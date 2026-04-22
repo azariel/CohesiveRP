@@ -34,6 +34,10 @@ namespace CohesiveRP.Core.PromptContext
                     return new PromptContextBuilder(ChatCompletionPresetType.SummariesMerge, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.skillChecksInitiator:
                     return new PromptContextBuilder(ChatCompletionPresetType.SkillChecksInitiator, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.dynamicCharacterCreation:
+                    return new PromptContextBuilder(ChatCompletionPresetType.DynamicCharacterCreation, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.dynamicCharacterSheetCreation:
+                    return new PromptContextBuilder(ChatCompletionPresetType.DynamicCharacterSheetCreation, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.custom:
                     return null;
                 default:

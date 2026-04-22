@@ -55,7 +55,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Main],
+                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneAnalyze, ChatCompletionPresetType.DynamicCharacterCreation, ChatCompletionPresetType.DynamicCharacterSheetCreation],// TODO: move characterSheetCreation elsewhere?
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -123,7 +123,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneAnalyze],
+                            Tags = [ChatCompletionPresetType.Main],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -184,6 +184,18 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             {
                                 Type = ChatCompletionPresetType.SceneAnalyze,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_ANALYZE_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.DynamicCharacterCreation,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_DYNAMIC_CHARACTER_CREATION_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.DynamicCharacterSheetCreation,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_DYNAMIC_CHARACTER_SHEET_CREATION_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                         }

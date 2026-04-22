@@ -22,6 +22,7 @@ export type InteractiveUserInputType = typeof InteractiveUserInputType[keyof typ
 export const InteractiveUserInputStatus = {
   WaitingUserInput: "WaitingUserInput",
   Processing: "Processing",
+  Pending: "Pending",
   Completed: "Completed",
   Error: "Error",
 } as const;

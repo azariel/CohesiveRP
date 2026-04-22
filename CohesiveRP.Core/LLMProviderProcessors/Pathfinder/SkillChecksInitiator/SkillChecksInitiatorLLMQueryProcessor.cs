@@ -166,7 +166,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     }
 
                     // Finally, process the structured information against the backend. We want keep track of the reasonings and roll the dice when required. The final info will get persisted in storage
-                    return await ProcessSkillCheckQueriesAsync(chatDbModel, chatCharactersRollsDbModel, characterSheetInstancesDbModel, skillChecksByCharacter.Key, queries, CharactersSkillChecks.AllCharactersByName);
+                    await ProcessSkillCheckQueriesAsync(chatDbModel, chatCharactersRollsDbModel, characterSheetInstancesDbModel, skillChecksByCharacter.Key, queries, CharactersSkillChecks.AllCharactersByName);
                 }
 
                 return true;

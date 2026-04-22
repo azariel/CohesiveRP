@@ -74,11 +74,11 @@ export default function InteractiveUserInputComponent({ chatId, refreshToken }: 
   }, [refreshToken, fetchQueries]);
 
   const handleChoice = async (query: InteractiveUserInputQueryResponse, userChoice: boolean) => {
-    // Immediately mark as Processing — removes it from the visible list
+    // Immediately mark as Pending — removes it from the visible list
     setQueries((prev) =>
       prev.map((q) =>
         q.queryId === query.queryId
-          ? { ...q, status: InteractiveUserInputStatus.Processing }
+          ? { ...q, status: InteractiveUserInputStatus.Pending }
           : q
       )
     );
@@ -89,7 +89,7 @@ export default function InteractiveUserInputComponent({ chatId, refreshToken }: 
       sceneTrackerId: query.sceneTrackerId,
       metadata: query.metadata,
       type: query.type,
-      status: InteractiveUserInputStatus.Processing,
+      status: InteractiveUserInputStatus.Pending,
       userChoice,
     };
 

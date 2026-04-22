@@ -4,7 +4,9 @@
     {
         WaitingUserInput = 0,
         Processing = 1,
-        Completed = 2,
-        Error = 3
+        Pending = 2,
+        WaitingOnBackgroundTask = 3,
+        Completed = 4,
+        Error = 5,
     }
 }

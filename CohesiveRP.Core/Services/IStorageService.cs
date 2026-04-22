@@ -81,7 +81,7 @@ namespace CohesiveRP.Core.Services
         // Characters
         Task<CharacterDbModel[]> GetCharactersAsync();
         Task<CharacterDbModel> GetCharacterByIdAsync(string characterId);
-        Task<CharacterDbModel> ImportNewCharacterAsync(AddCharacterQueryModel queryModel);
+        Task<CharacterDbModel> AddCharacterAsync(AddCharacterQueryModel queryModel);
         Task<bool> UpdateCharacterAsync(CharacterDbModel characterDbModel);
         Task<bool> DeleteCharacterAsync(CharacterDbModel characterDbModel);
 
