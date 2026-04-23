@@ -4,6 +4,6 @@ namespace CohesiveRP.Core.LLMProviderManager
 {
     public interface ILLMProviderQueryerFactory
     {
-        ILLMQueryProcessor Generate(BackgroundQueryDbModel queryModel);
+        Task<ILLMQueryProcessor> GenerateAsync(BackgroundQueryDbModel queryModel);
     }
 }

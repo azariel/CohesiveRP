@@ -112,6 +112,8 @@ namespace CohesiveRP.Storage.Common
         
         public DbSet<InteractiveUserInputDbModel> InteractiveUserInputQueries { get; set; }
 
+        public DbSet<IllustrationQueryDbModel> IllustrationQueries { get; set; }
+
         // Pathfinder
         public DbSet<CharacterSheetDbModel> CharacterSheets { get; set; }
         public DbSet<CharacterSheetInstancesDbModel> CharacterSheetInstances { get; set; }

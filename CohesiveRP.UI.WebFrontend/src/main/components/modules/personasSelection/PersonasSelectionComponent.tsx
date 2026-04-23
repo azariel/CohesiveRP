@@ -11,7 +11,7 @@ import type { PersonaResponseDto } from "../../../../ResponsesDto/personas/Perso
 import type { PersonasResponseDto } from "../../../../ResponsesDto/personas/PersonasResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { SharedContextPersonaType } from "../../../../store/SharedContextPersonaType";
-import { GetAvatarPathFromPersonaId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromPersonaId, GetFallbackEmpty } from "../../../../utils/avatarUtils";
 import { ImSpinner2 } from "react-icons/im";
 
 export default function PersonasSelectionComponent() {
@@ -129,6 +129,10 @@ export default function PersonasSelectionComponent() {
                     <img
                       src={GetAvatarPathFromPersonaId(persona.personaId)}
                       alt={persona.name}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = GetFallbackEmpty();
+                      }}
                     />
                   ) : (
                     <HiUserCircle className={styles.personaAvatarFallback} />

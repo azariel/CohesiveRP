@@ -1,5 +1,9 @@
 import type { CharacterAvatar } from "../ResponsesDto/chat/BusinessObjects/CharacterAvatar";
 
+const GetFallbackEmpty = (): string => {
+  return `./assets/empty-avatar.svg`;
+};
+
 const GetAvatarPathFromCharacterName = (characterName: string): string => {
     try {
       if(characterName === "") {
@@ -97,6 +101,7 @@ const GetAvatarPathFromPersonaAvatarDefinition = (avatarDefinition: CharacterAva
 };
 
 export {
+    GetFallbackEmpty,
     GetAvatarPathFromCharacterName,
     GetAvatarPathFromPersonaId,
     GetAvatarPathFromLorebookId,

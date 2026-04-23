@@ -46,14 +46,18 @@ namespace CohesiveRP.Core.LLMProviderManager
             this.storageService = storageService;
             this.httpLLMApiProviderService = httpLLMApiProviderService;
             this.summaryService = summaryService;
+        }
 
-            this.promptContext = BuildContextAsync(backgroundQueryDbModel).Result;
+        public virtual async Task<bool> InitializeAsync()
+        {
+            this.promptContext = await BuildContextAsync(backgroundQueryDbModel);
             if (promptContext == null)
             {
-                LoggingManager.LogToFile("1a5f7d13-c2ef-46ad-a2dc-726510342f4c", $"Couldn't build promptContext because not one was configured for [{completionPresetType}].");
+                LoggingManager.LogToFile("97995d28-1e24-4d9d-8cad-1ebb5dee4001", $"Couldn't build promptContext because not one was configured for [{completionPresetType}].");
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
-                return;
+                return false;
             }
+            return true;
         }
 
         public virtual async Task<BackgroundQueryDbModel> GetBackgroundQueryDbModelAsync() => backgroundQueryDbModel;

@@ -16,7 +16,7 @@ import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 import { GetChatNameFontSize } from "../../../../utils/fontSizeUtils";
 import type { SharedContextType } from "../../../../store/SharedContextType";
-import { GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromChatId, GetFallbackEmpty } from "../../../../utils/avatarUtils";
 
 export default function ChatSelectionComponent() {
   const { navigateTo } = sharedContext();
@@ -144,7 +144,10 @@ export default function ChatSelectionComponent() {
               </label>
 
               <div className={styles.chatAvatarContainer}>
-                <img src={GetAvatarPathFromChatId(chat.chatId)} alt="Avatar" />
+                <img src={GetAvatarPathFromChatId(chat.chatId)} alt="Avatar" onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = GetFallbackEmpty();
+                  }} />
               </div>
 
               {/* Hover overlay */}

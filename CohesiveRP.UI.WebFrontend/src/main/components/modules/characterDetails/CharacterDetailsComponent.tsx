@@ -8,7 +8,7 @@ import { deleteFromServerApiAsync, getBlobFromServerApiAsync, getFromServerApiAs
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { CharacterResponseDto } from "../../../../ResponsesDto/characters/CharacterResponseDto";
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
-import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromCharacterName, GetAvatarPathFromChatId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromAvatarFilePath, GetAvatarPathFromCharacterName, GetAvatarPathFromChatId, GetFallbackEmpty } from "../../../../utils/avatarUtils";
 import { ImSpinner2 } from "react-icons/im";
 import type { SelectableChatsResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatsResponseDto";
 import type { SelectableChatResponseDto } from "../../../../ResponsesDto/chatSelection/SelectableChatResponseDto";
@@ -18,6 +18,8 @@ import { FormatDateTimeToMinutes } from "../../../../utils/DateUtils";
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 import type { SharedContextType } from "../../../../store/SharedContextType";
 import CharacterSheetComponent from "../characterSheets/CharacterSheetComponent";
+import type { CharacterMainAvatarIllustrationQueryRequestDto } from "../../../../RequestDto/characters/CharacterMainAvatarIllustrationQueryRequestDto";
+import { FaImage } from "react-icons/fa";
 
 
 type DetailsTab = "info" | "sheet";
@@ -36,6 +38,7 @@ export default function CharacterDetailsComponent() {
   const [isLoadingChatsDetails, setIsLoadingChatsDetails] = useState(true);
   const [characterResponse, setCharacterResponse] = useState<CharacterResponseDto | null>(null);
   const [chatsDetailsResponse, setChatsDetailsResponse] = useState<SelectableChatsResponseDto | null>(null);
+  const [isGeneratingAvatar, setIsGeneratingAvatar] = useState(false);
 
   // saving state
   const [characterName, setCharacterName] = useState("");
@@ -412,6 +415,33 @@ export default function CharacterDetailsComponent() {
     }
   };
 
+  const handleGenerateAvatar = async () => {
+    if (isGeneratingAvatar) return;
+
+    setIsGeneratingAvatar(true);
+    try {
+      const payload: CharacterMainAvatarIllustrationQueryRequestDto = {
+        characterId: activeModule.selectedCharacterId ?? null,
+        personaId: null,
+        type: 0,
+      };
+
+      const response = await postToServerApiAsync("api/illustrator/queries", payload);
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || serverApiException?.message) {
+        console.error(`Failed to generate avatar. [${JSON.stringify(serverApiException)}]`);
+        setOperationError(true);
+      } else {
+        console.log("Avatar generation query submitted successfully.");
+      }
+    } catch (error) {
+      console.error("Generate avatar error:", error);
+      setOperationError(true);
+    } finally {
+      setIsGeneratingAvatar(false);
+    }
+  };
+
   return (
     <div className={styles.characterDetailsComponent}>
       {isNetworkDown ? (
@@ -427,7 +457,10 @@ export default function CharacterDetailsComponent() {
             <div className={styles.characterDetailsContainer}>
               <div className={styles.characterHeaderContainer}>
                 <div className={styles.characterAvatarContainer}>
-                  <img src={GetAvatarPathFromCharacterName(characterResponse?.character?.name ?? "")} alt="dev/Placeholder.png" />
+                  <img src={GetAvatarPathFromCharacterName(characterResponse?.character?.name ?? "")} alt="dev/Placeholder.png" onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = GetFallbackEmpty();
+                  }} />
                 </div>
                 <div className={styles.characterHeaderRightSideContainer}>
                   <textarea
@@ -448,7 +481,10 @@ export default function CharacterDetailsComponent() {
                         {chatsDetailsResponse?.chats?.map((chat, index) => (
                           <div key={index} className={styles.chatItem}>
                             <div className={styles.chatAvatarContainer} onClick={async () => await handleSpecificChatClick(chat)}>
-                              <img src={GetAvatarPathFromChatId(chat.chatId)} alt="Avatar" />
+                              <img src={GetAvatarPathFromChatId(chat.chatId)} alt="Avatar" onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = GetFallbackEmpty();
+                              }} />
                             </div>
                             <label className={styles.chatFootLabel}>{FormatDateTimeToMinutes(chat.lastActivityDateTime) ?? ""}</label>
                           </div>
@@ -584,6 +620,20 @@ export default function CharacterDetailsComponent() {
                         value={getOutfitEntry(selectedOutfit).illustratorPromptInjection}
                         onChange={(e) => setOutfitPrompt(selectedOutfit, e.target.value)}
                       />
+                    </div>
+
+                    {/* ── Generate Avatar ── */}
+                    <div className={styles.illustratorContainer}>
+                      <button
+                        className={styles.generateAvatarButton}
+                        onClick={handleGenerateAvatar}
+                        disabled={isGeneratingAvatar || isSaving}
+                        title="Generate avatar"
+                      >
+                        {isGeneratingAvatar
+                          ? <ImSpinner2 className={styles.saveSpinner} />
+                          : <FaImage />}
+                      </button>
                     </div>
 
                     {(() => {

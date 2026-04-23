@@ -8,8 +8,8 @@
         ProcessedWaitingForFinalInstruction = 10,
         ProcessingFinalInstruction = 11,
 
-        Completed = 99,
+        Completed = 100,
 
-        Error = 100,
+        Error = 101,
     }
 }

@@ -2,7 +2,7 @@ import styles from "./MainRightComponent.module.css";
 import { sharedContext } from '../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../store/SharedContextChatType";
 import { useChatMessages } from "../../../store/MessagesStoreContext";
-import { getAvatarPathFromCharacterAvatarDefinition, GetAvatarPathFromChatIdAndAvatarId } from "../../../utils/avatarUtils";
+import { getAvatarPathFromCharacterAvatarDefinition, GetAvatarPathFromChatIdAndAvatarId, GetFallbackEmpty } from "../../../utils/avatarUtils";
 
 export default function MainRightComponent() {
   const { activeModule } = sharedContext<SharedContextChatType>();
@@ -36,7 +36,16 @@ export default function MainRightComponent() {
         {avatarSrc && (
           <>
             <div className={styles.avatarContainer}>
-              <img src={avatarSrc} alt="Character avatar" className={styles.avatar} onError={(e) => { e.currentTarget.src = GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar"); }} />
+              <img src={avatarSrc} alt="Character avatar" className={styles.avatar} 
+                onError={(e) => {
+                const el = e.currentTarget;
+                el.onerror = () => {
+                  el.onerror = null;
+                  el.src = GetFallbackEmpty();
+                };
+
+                el.src = GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar");
+              }}/>
             </div>
 
             {smallAvatarSrcs.length > 0 && (
@@ -46,7 +55,16 @@ export default function MainRightComponent() {
               >
                 {smallAvatarSrcs.map((src, i) => (
                   <div key={i} className={styles.smallAvatarContainer}>
-                    <img src={src} alt={`Character avatar ${i + 2}`} onError={(e) => { e.currentTarget.src = GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar"); }} />
+                    <img src={src} alt={`Character avatar ${i + 2}`}
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.onerror = () => {
+                        el.onerror = null;
+                        el.src = GetFallbackEmpty();
+                      };
+
+                      el.src = GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar");
+                    }} />
                   </div>
                 ))}
               </div>

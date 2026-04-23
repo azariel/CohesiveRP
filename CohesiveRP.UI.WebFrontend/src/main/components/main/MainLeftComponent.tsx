@@ -2,7 +2,7 @@ import styles from "./MainLeftComponent.module.css";
 import { sharedContext } from '../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../store/SharedContextChatType";
 import { useChatMessages } from "../../../store/MessagesStoreContext";
-import { GetAvatarPathFromPersonaAvatarDefinition, GetAvatarPathFromChatIdAndAvatarId } from "../../../utils/avatarUtils";
+import { GetAvatarPathFromPersonaAvatarDefinition, GetAvatarPathFromChatIdAndAvatarId, GetFallbackEmpty } from "../../../utils/avatarUtils";
 
 export default function MainLeftComponent() {
   const { activeModule } = sharedContext<SharedContextChatType>();
@@ -24,7 +24,14 @@ export default function MainLeftComponent() {
       <div className={styles.centerModule}>
         {avatarSrc && (
           <div className={styles.avatarContainer}>
-            <img src={avatarSrc} alt="Persona avatar" className={styles.avatar} onError={(e) => { e.currentTarget.src = GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar"); }} />
+            <img src={avatarSrc} alt="Persona avatar" className={styles.avatar} onError={(e) => {
+              const el = e.currentTarget;
+              el.onerror = () => {
+                el.onerror = null;
+                el.src = GetFallbackEmpty();
+              };
+              el.src = GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar");
+            }} />
           </div>
         )}
       </div>

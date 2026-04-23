@@ -73,7 +73,7 @@ namespace CohesiveRP.Core.LLMProviderManager
             return BackgroundQuerySystemTags.custom;
         }
 
-        public ILLMQueryProcessor Generate(BackgroundQueryDbModel queryModel)
+        public async Task<ILLMQueryProcessor> GenerateAsync(BackgroundQueryDbModel queryModel)
         {
             if (queryModel == null)
             {
@@ -82,37 +82,40 @@ namespace CohesiveRP.Core.LLMProviderManager
 
             var runningTag = GetRunningTagFromTags(queryModel.Tags);
 
-            switch (runningTag)
+            ILLMQueryProcessor processor = runningTag switch
             {
-                case BackgroundQuerySystemTags.main:
-                    return new MainLLMQueryProcessor(ChatCompletionPresetType.Main, BackgroundQuerySystemTags.main, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.sceneTracker:
-                    return new SceneTrackerLLMQueryProcessor(ChatCompletionPresetType.SceneTracker, BackgroundQuerySystemTags.sceneTracker, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.sceneAnalyze:
-                    return new SceneAnalyzerLLMQueryProcessor(ChatCompletionPresetType.SceneAnalyze, BackgroundQuerySystemTags.sceneAnalyze, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.shortSummary:
-                    return new ShortSummaryLLMQueryProcessor(ChatCompletionPresetType.Summarize, BackgroundQuerySystemTags.shortSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.mediumSummary:
-                    return new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.mediumSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.longSummary:
-                    return new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.longSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.extraSummary:
-                    return new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.extraSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.overflowSummary:
-                    return new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.overflowSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.skillChecksInitiator:
-                    return new SkillChecksInitiatorLLMQueryProcessor(ChatCompletionPresetType.SkillChecksInitiator, BackgroundQuerySystemTags.skillChecksInitiator, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.dynamicCharacterCreation:
-                    return new DynamicCharacterCreatorLLMQueryProcessor(ChatCompletionPresetType.DynamicCharacterCreation, BackgroundQuerySystemTags.dynamicCharacterCreation, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.dynamicCharacterSheetCreation:
-                    return new DynamicCharacterSheetCreatorLLMQueryProcessor(ChatCompletionPresetType.DynamicCharacterSheetCreation, BackgroundQuerySystemTags.dynamicCharacterSheetCreation, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService);
-                case BackgroundQuerySystemTags.custom:
-                    break;
-                default:
-                    return null;
-            }
+                BackgroundQuerySystemTags.main =>
+                    new MainLLMQueryProcessor(ChatCompletionPresetType.Main, BackgroundQuerySystemTags.main, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.sceneTracker =>
+                    new SceneTrackerLLMQueryProcessor(ChatCompletionPresetType.SceneTracker, BackgroundQuerySystemTags.sceneTracker, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.sceneAnalyze =>
+                    new SceneAnalyzerLLMQueryProcessor(ChatCompletionPresetType.SceneAnalyze, BackgroundQuerySystemTags.sceneAnalyze, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.shortSummary =>
+                    new ShortSummaryLLMQueryProcessor(ChatCompletionPresetType.Summarize, BackgroundQuerySystemTags.shortSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.mediumSummary =>
+                    new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.mediumSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.longSummary =>
+                    new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.longSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.extraSummary =>
+                    new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.extraSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.overflowSummary =>
+                    new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.overflowSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.skillChecksInitiator =>
+                    new SkillChecksInitiatorLLMQueryProcessor(ChatCompletionPresetType.SkillChecksInitiator, BackgroundQuerySystemTags.skillChecksInitiator, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.dynamicCharacterCreation =>
+                    new DynamicCharacterCreatorLLMQueryProcessor(ChatCompletionPresetType.DynamicCharacterCreation, BackgroundQuerySystemTags.dynamicCharacterCreation, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.dynamicCharacterSheetCreation =>
+                    new DynamicCharacterSheetCreatorLLMQueryProcessor(ChatCompletionPresetType.DynamicCharacterSheetCreation, BackgroundQuerySystemTags.dynamicCharacterSheetCreation, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                _ => null
+            };
 
-            return null;
+            if (processor == null)
+                return null;
+
+            if (!await processor.InitializeAsync())
+                return null;
+
+            return processor;
         }
 
         //public ILLMQueryProcessor GenerateRegenerateCharacterSheetProcessor()

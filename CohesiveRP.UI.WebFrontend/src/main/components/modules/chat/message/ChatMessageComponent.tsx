@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import type { ChatMessage } from "../../../../../ResponsesDto/chat/BusinessObjects/ChatMessage";
 import styles from "./ChatMessageComponent.module.css";
-import { HiAdjustmentsHorizontal, HiBeaker, HiMiniUsers, HiChatBubbleLeftEllipsis, HiCircleStack, HiCog6Tooth, HiIdentification, HiMiniChevronRight } from "react-icons/hi2";
+import { HiBeaker, HiMiniChevronRight } from "react-icons/hi2";
 import { GrRevert } from "react-icons/gr";
 import { MdOutlineSummarize } from "react-icons/md";
 import { FormatDateTimeDurationMinutesAndSeconds, FormatUtcDate, ParseFocusedGenerationDate } from "../../../../../utils/DateUtils";
 import { HighlightedText } from "../../../../../utils/HighlightText";
-import { getAvatarPathFromCharacterAvatarDefinition, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId } from "../../../../../utils/avatarUtils";
-import { FaTrashAlt } from "react-icons/fa";
+import { getAvatarPathFromCharacterAvatarDefinition, GetAvatarPathFromChatIdAndAvatarId, GetAvatarPathFromPersonaId, GetFallbackEmpty } from "../../../../../utils/avatarUtils";
+import { FaEnvelope, FaTrashAlt } from "react-icons/fa";
 import { getFromServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
 import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { PromptResponseDto } from "../../../../../ResponsesDto/chat/PromptResponseDto";
@@ -158,21 +158,28 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
                   : (avatarPath && avatarPath.expression !== null
                       ? getAvatarPathFromCharacterAvatarDefinition(avatarPath)
                       : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar"));
-                return <img src={src} alt="Avatar" onError={(e) => { e.currentTarget.src = GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar"); }} />;
+                return <img
+                  src={src}
+                  alt="Avatar"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = GetFallbackEmpty();
+                  }}
+                />;
               })()}
             </div>
           </div>
           <div className={styles.messageInfoContainer}>
             <div title="messageId">{!message?.messageIndex ? "-" : "# " + message.messageIndex}</div>
+            <div className={styles.messageHeaderContentModel}>
+              <label>{FormatDateTimeDurationMinutesAndSeconds(totalDurationMs) ?? "-"} ({FormatDateTimeDurationMinutesAndSeconds(durationMs) ?? "-"})</label>
+            </div>
           </div>
         </div>
         <div className={styles.messageContent}>
           <div className={styles.messageHeaderContent}>
             <div className={styles.messageHeaderContentName}>
               {message?.sourceType == 0 ? <label>{message?.personaName ?? "User"}</label> : <label>{message?.characterName ?? "Character"}</label>}
-            </div>
-            <div className={styles.messageHeaderContentModel}>
-              <label>{FormatDateTimeDurationMinutesAndSeconds(totalDurationMs) ?? "-"} ({FormatDateTimeDurationMinutesAndSeconds(durationMs) ?? "-"})</label>
             </div>
             <div className={styles.messageHeaderContentCreatedAt}>
               {message?.summarized ? (<MdOutlineSummarize className={styles.messageHeaderSummarizeIcon} title="Summarized" />) : ""}
@@ -227,17 +234,17 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
 
           <div className={styles.messageContentFooter}>
             <div className={styles.messageContentFooterLeftSideIcons}>
-              <HiChatBubbleLeftEllipsis
+              <FaEnvelope
                 className={styles.footerIconBtn}
                 onClick={handleShowPrompt}
                 title="View prompt"
               />
-              <HiMiniUsers />
+              {/* <HiMiniUsers />
               <HiIdentification />
               <HiBeaker />
               <HiCircleStack />
               <HiAdjustmentsHorizontal />
-              <HiCog6Tooth />
+              <HiCog6Tooth /> */}
             </div>
 
             <div className={styles.messageContentFooterRightSideIcons}>

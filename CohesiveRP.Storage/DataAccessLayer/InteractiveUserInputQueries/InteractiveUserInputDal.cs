@@ -27,6 +27,14 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
 
             // Always clear completed rows in this table upon startup
             dbContext.InteractiveUserInputQueries.Where(w => w.Status == BusinessObjects.InteractiveUserInputStatus.Completed).ExecuteDelete();// CharacterSheet was created, which mean that the process won't try to generate a new card for this specific character, we can safely delete the InteractiveUserInputQueries that are completed.
+
+            // Reset InProgress queries
+            var inProgressQueries = dbContext.InteractiveUserInputQueries.Where(w => w.Status == BusinessObjects.InteractiveUserInputStatus.Processing).ToList();
+            foreach (var item in inProgressQueries)
+            {
+                item.Status = BusinessObjects.InteractiveUserInputStatus.Pending;
+            }
+
             dbContext.SaveChanges();
         }
 
@@ -96,23 +104,24 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                var chatCompletionPreset = dbContext.InteractiveUserInputQueries.FirstOrDefault(w => w.InteractiveUserInputQueryId == dbModel.InteractiveUserInputQueryId);
+                var item = dbContext.InteractiveUserInputQueries.FirstOrDefault(w => w.InteractiveUserInputQueryId == dbModel.InteractiveUserInputQueryId);
 
-                if (chatCompletionPreset == null)
+                if (item == null)
                 {
-                    LoggingManager.LogToFile("f1904cb6-8f86-482e-99be-626b56d51efd", $"ChatCompletionPreset [{dbModel.InteractiveUserInputQueryId}] to update wasn't found in storage.");
+                    LoggingManager.LogToFile("f1904cb6-8f86-482e-99be-626b56d51efd", $"InteractiveUserInputQuery [{dbModel.InteractiveUserInputQueryId}] to update wasn't found in storage.");
                     return false;
                 }
 
-                // Only handle overridable fields
-                chatCompletionPreset.Status = dbModel.Status;
-                chatCompletionPreset.UserChoice = dbModel.UserChoice;
-                chatCompletionPreset.Metadata = dbModel.Metadata;
+                // Force set the system, unmodifiable fields to avoid any unwanted changes
+                dbModel.CreatedAtUtc = item.CreatedAtUtc;
+                dbModel.SceneTrackerId = item.SceneTrackerId;
+                dbModel.ChatId = item.ChatId;
+                dbModel.Type = item.Type;
 
-                var result = dbContext.InteractiveUserInputQueries.Update(chatCompletionPreset);
+                var result = dbContext.InteractiveUserInputQueries.Update(item);
                 if (result.State != EntityState.Modified)
                 {
-                    LoggingManager.LogToFile("87d21c78-228c-4870-8637-dc49b4fbd7cd", $"Error when updating ChatCompletionPreset. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");
+                    LoggingManager.LogToFile("87d21c78-228c-4870-8637-dc49b4fbd7cd", $"Error when updating InteractiveUserInputQuery. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");
                     return false;
                 }
 
@@ -130,18 +139,18 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                var chatCompletionPreset = dbContext.InteractiveUserInputQueries.AsNoTracking().FirstOrDefault(w => w.InteractiveUserInputQueryId == interactionUserInputQueryId);
+                var item = dbContext.InteractiveUserInputQueries.AsNoTracking().FirstOrDefault(w => w.InteractiveUserInputQueryId == interactionUserInputQueryId);
 
-                if (chatCompletionPreset == null)
+                if (item == null)
                 {
-                    LoggingManager.LogToFile("7f5b8965-8104-47b7-ada5-e7b2349aba76", $"ChatCompletionPreset [{interactionUserInputQueryId}] to delete wasn't found in storage.");
+                    LoggingManager.LogToFile("7f5b8965-8104-47b7-ada5-e7b2349aba76", $"InteractiveUserInputQuery [{interactionUserInputQueryId}] to delete wasn't found in storage.");
                     return false;
                 }
 
-                var result = dbContext.InteractiveUserInputQueries.Remove(chatCompletionPreset);
+                var result = dbContext.InteractiveUserInputQueries.Remove(item);
                 if (result.State != EntityState.Deleted)
                 {
-                    LoggingManager.LogToFile("9f0cf225-3d2e-4b80-9d0b-7342a60b7fda", $"Error when deleting a specific ChatCompletionPreset [{interactionUserInputQueryId}]. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]..");
+                    LoggingManager.LogToFile("9f0cf225-3d2e-4b80-9d0b-7342a60b7fda", $"Error when deleting a specific InteractiveUserInputQuery [{interactionUserInputQueryId}]. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]..");
                     return false;
                 }
 

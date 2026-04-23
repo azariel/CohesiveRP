@@ -22,6 +22,8 @@ using CohesiveRP.Core.WebApi.Workflows.ChatCharacterRolls.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.ChatCompletionPresets.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Chats;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.IllustrationQueries;
+using CohesiveRP.Core.WebApi.Workflows.IllustrationQueries.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.InteractiveUserInputQueries;
 using CohesiveRP.Core.WebApi.Workflows.InteractiveUserInputQueries.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Lorebooks.Abstractions;
@@ -34,6 +36,7 @@ using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.IllustrationQueries;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
@@ -123,6 +126,10 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetInteractiveUserInputQueriesFromChatIdWorkflow, GetInteractiveUserInputQueriesFromChatIdWorkflow>();
             services.AddSingleton<IPutInteractiveUserInputQueryWorkflow, PutInteractiveUserInputQueryWorkflow>();
 
+            // Workflows.IllustrationQueries
+            services.AddSingleton<IGetIllustrationQueriesWorkflow, GetIllustrationQueriesWorkflow>();
+            services.AddSingleton<IAddIllustrationQueryWorkflow, AddIllustrationQueryWorkflow>();
+
             // DtoConverters
             services.AddSingleton<ILorebookDtoConverter, LorebookDtoConverter>();
 
@@ -158,6 +165,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ICharacterSheetInstancesDal, CharacterSheetInstancesDal>();
             services.AddSingleton<IChatCharactersRollsDal, ChatCharactersRollsDal>();
             services.AddSingleton<IInteractiveUserInputDal, InteractiveUserInputDal>();
+            services.AddSingleton<IIllustrationQueryDal, IllustrationQueryDal>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

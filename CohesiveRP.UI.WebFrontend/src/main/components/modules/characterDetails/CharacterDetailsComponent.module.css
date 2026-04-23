@@ -769,6 +769,31 @@
   animation: spin 1s linear infinite;
 }
 
+.generateAvatarButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #f6911d;
+  border: 1px solid #f6911d55;
+  border-radius: 6px;
+  padding: 0.4em 0.8em;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.generateAvatarButton:hover:not(:disabled) {
+  color: #fff;
+  border-color: #f6911d;
+  background: rgba(246, 145, 29, 0.12);
+}
+
+.generateAvatarButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Mobile: go nearly full-screen */
 @media (max-width: 876px) {
   .lightboxCard {
