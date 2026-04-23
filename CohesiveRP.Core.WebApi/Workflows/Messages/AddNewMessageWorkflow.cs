@@ -126,8 +126,11 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 try
                 {
                     var characterToUpdate = await storageService.GetCharacterByIdAsync(characterId);
-                    characterToUpdate.LastActivityAtUtc = DateTime.UtcNow;
-                    await storageService.UpdateCharacterAsync(characterToUpdate);
+                    if (characterToUpdate != null)
+                    {
+                        characterToUpdate.LastActivityAtUtc = DateTime.UtcNow;
+                        await storageService.UpdateCharacterAsync(characterToUpdate);
+                    }
                 } catch (Exception) { } // nothing, just skip
             }
         }
