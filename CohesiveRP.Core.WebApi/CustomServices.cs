@@ -10,7 +10,7 @@ using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
-using CohesiveRP.Core.WebApi.BackgroundServices.DynamicCharactersCreator;
+using CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharactersCreator;
 using CohesiveRP.Core.WebApi.Workflows.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
@@ -146,8 +146,8 @@ namespace CohesiveRP.Core.WebApi
 
             // DataAccessLayers
             services.AddDbContextFactory<StorageDbContext>();
-            //services.AddSingleton<IUsersDal, UsersDal>();
             // Those must be injected into StorageService ctor to make sure their CTOR is called upon service startup and thus default values are injected into storage at startup
+            //services.AddSingleton<IUsersDal, UsersDal>();
             services.AddSingleton<IChatsDal, ChatsDal>();
             services.AddSingleton<ICharactersDal, CharactersDal>();
             services.AddSingleton<IPersonasDal, PersonasDal>();
@@ -175,8 +175,9 @@ namespace CohesiveRP.Core.WebApi
             });
 
             // Add background services
-            services.AddHostedService<BackgroundQueriesWorker>();
-            services.AddHostedService<DynamicCharactersCreatorWorker>();
+            services.AddHostedService<BackgroundQueriesWorker>();// run background queries, usually against an LLM Api
+            services.AddHostedService<DynamicCharactersCreatorWorker>();// When an interactive query is completed and is of type DynamicCharacterCreation, queue a backgroundQuery to generate that character using an LLM Api
+            services.AddHostedService<IllustratorMainAvatarsQueriesWorker>();// Parse the queued illustration images requests one by one and run them against an image provider such as ComfyUI to generate the image and move it to the right location for fluid usage by CohesiveRp backend and frontend.
 
             services.AddControllers().AddJsonOptions(option =>
             {

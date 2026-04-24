@@ -142,7 +142,7 @@ namespace CohesiveRP.Core.Services
         Task<bool> DeleteInteractiveUserInputQueryAsync(string interactiveUserInputDbModel);
 
         // IllustrationQueries
-        Task<IEnumerable<IllustrationQueryDbModel>> GetIllustrationQueriesAsync(Func<IllustrationQueryDbModel, bool> func);
+        Task<IllustrationQueryDbModel[]> GetIllustrationQueriesAsync(Func<IllustrationQueryDbModel, bool> func);
         Task<IllustrationQueryDbModel> AddIllustrationQueryAsync(IllustrationQueryDbModel illustrationQueryDbModel);
         Task<bool> UpdateIllustrationQueryAsync(IllustrationQueryDbModel illustrationQueryDbModel);
         Task<bool> DeleteIllustrationQueryAsync(string illustrationQueryId);

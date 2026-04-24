@@ -9,7 +9,7 @@ using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 
-namespace CohesiveRP.Core.WebApi.BackgroundServices.DynamicCharactersCreator
+namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharactersCreator
 {
     public class DynamicCharactersCreatorWorker : BackgroundService
     {
