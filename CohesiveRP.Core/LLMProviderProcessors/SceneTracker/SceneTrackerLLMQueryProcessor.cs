@@ -181,7 +181,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 // Ok, at this point, we need to scan our storage to find a character tied to the current chat with that name
                 if (characterSheetInstances?.CharacterSheetInstances == null || characterSheetInstances.CharacterSheetInstances.Count <= 0 || characterSheetInstance == null)
                 {
-                    if (allCurrentInteractiveUserInputQueries == null || allCurrentInteractiveUserInputQueries.Length <= 0 || allCurrentInteractiveUserInputQueries.All(a => a != null && !string.IsNullOrWhiteSpace(a.Metadata) && a.Metadata.ToLowerInvariant().Trim().Contains(characterName.ToLowerInvariant().Trim())))
+                    if (allCurrentInteractiveUserInputQueries == null || allCurrentInteractiveUserInputQueries.Length <= 0 || allCurrentInteractiveUserInputQueries.All(a => a == null || !string.IsNullOrWhiteSpace(a.Metadata) && !a.Metadata.ToLowerInvariant().Trim().Contains(characterName.ToLowerInvariant().Trim())))
                     {
                         // There is no linked character sheet to the chat, we can directly consider that this is a new character
                         await storageService.AddInteractiveUserInputQueryAsync(new InteractiveUserInputDbModel

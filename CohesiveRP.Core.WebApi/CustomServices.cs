@@ -129,6 +129,7 @@ namespace CohesiveRP.Core.WebApi
             // Workflows.IllustrationQueries
             services.AddSingleton<IGetIllustrationQueriesWorkflow, GetIllustrationQueriesWorkflow>();
             services.AddSingleton<IAddIllustrationQueryWorkflow, AddIllustrationQueryWorkflow>();
+            services.AddSingleton<IGeneratePromptInjectionForMainCharacterAvatarWorkflow, GeneratePromptInjectionForMainCharacterAvatarWorkflow>();
 
             // DtoConverters
             services.AddSingleton<ILorebookDtoConverter, LorebookDtoConverter>();

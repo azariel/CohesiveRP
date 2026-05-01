@@ -7,6 +7,7 @@ using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator.BusinessObje
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Directive;
+using CohesiveRP.Core.PromptContext.Builders.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;

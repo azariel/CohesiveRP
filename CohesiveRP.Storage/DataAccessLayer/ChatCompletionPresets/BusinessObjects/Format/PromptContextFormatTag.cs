@@ -26,5 +26,6 @@
         SceneAnalyze = 21,
         CharacterCreation = 22,
         CharacterSheetCreation = 23,
+        IllustrationPromptInjectionForCharacterAvatar = 24,
     }
 }

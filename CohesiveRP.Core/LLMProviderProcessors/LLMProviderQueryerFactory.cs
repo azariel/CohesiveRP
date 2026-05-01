@@ -1,5 +1,6 @@
 ﻿using CohesiveRP.Core.LLMProviderManager.Main;
 using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator;
+using CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator;
 using CohesiveRP.Core.LLMProviderProcessors.SceneAnalyzer;
 using CohesiveRP.Core.LLMProviderProcessors.SceneTracker;
@@ -70,6 +71,9 @@ namespace CohesiveRP.Core.LLMProviderManager
             if (tags.Contains(BackgroundQuerySystemTags.dynamicCharacterSheetCreation.ToString()))
                 return BackgroundQuerySystemTags.dynamicCharacterSheetCreation;
 
+            if (tags.Contains(BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar.ToString()))
+                return BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar;
+
             return BackgroundQuerySystemTags.custom;
         }
 
@@ -106,6 +110,8 @@ namespace CohesiveRP.Core.LLMProviderManager
                     new DynamicCharacterCreatorLLMQueryProcessor(ChatCompletionPresetType.DynamicCharacterCreation, BackgroundQuerySystemTags.dynamicCharacterCreation, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.dynamicCharacterSheetCreation =>
                     new DynamicCharacterSheetCreatorLLMQueryProcessor(ChatCompletionPresetType.DynamicCharacterSheetCreation, BackgroundQuerySystemTags.dynamicCharacterSheetCreation, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar =>
+                    new IllustrationPromptInjectionForCharacterAvatarLLMQueryProcessor(ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar, BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 _ => null
             };
 

@@ -36,7 +36,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 CharacterId = requestDto.Body.CharacterId,
             });
 
-             if (newlyCreatedQuery == null)
+            if (newlyCreatedQuery == null)
             {
                 return new WebApiException
                 {

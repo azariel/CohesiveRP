@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Core.PromptContext.Builders.Directive;
+using CohesiveRP.Core.PromptContext.Builders.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.PromptContext.Builders.Pathfinder;
 using CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters;
 using CohesiveRP.Core.Services;
@@ -76,6 +77,8 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new PromptContextCharacterCreationBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.CharacterSheetCreation:
                     return new PromptContextCharacterSheetCreationBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.IllustrationPromptInjectionForCharacterAvatar:
+                    return new PromptContextPromptInjectionForCharacterAvatarBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 default:
                     throw new Exception($"Unhandled [{contextElement.Tag}].");
             }

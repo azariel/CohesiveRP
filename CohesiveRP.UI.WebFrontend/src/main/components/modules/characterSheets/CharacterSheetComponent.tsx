@@ -10,7 +10,7 @@ import type { CharacterSheetRequestDto } from "../../../../RequestDto/characters
 /* ─────────────────────────── Constants ─────────────────────── */
 
 const GENDER_OPTIONS = ["", "Male", "Female"];
-const AGE_GROUP_OPTIONS = ["", "Child", "Teenager", "Young Adult", "Adult", "Elderly"];
+const AGE_GROUP_OPTIONS = ["", "Child", "Teenager", "YoungAdult", "Adult", "Elderly"];
 const GENITALS_OPTIONS = ["", "Male", "Female", "Both", "None"];
 const BREASTS_SIZE_OPTIONS = ["", "Flat", "Small", "Average", "Large", "ExtraLarge"];
 

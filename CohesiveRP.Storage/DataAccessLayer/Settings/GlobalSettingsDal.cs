@@ -92,7 +92,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.DynamicCharacterCreation],
+                            Tags = [ChatCompletionPresetType.Main, ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -129,7 +129,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Main],
+                            Tags = [ChatCompletionPresetType.DynamicCharacterCreation],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -319,6 +319,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             {
                                 Type = ChatCompletionPresetType.DynamicCharacterSheetCreation,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_DYNAMIC_CHARACTER_SHEET_CREATION_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_ILLUSTRATION_PROMPT_INJECTION_FOR_CHARACTER_AVATAR_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                         }

@@ -93,7 +93,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.IllustrationQueries
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                var item = dbContext.IllustrationQueries.FirstOrDefault(w => w.IllustrationQueryId == dbModel.IllustrationQueryId);
+                var item = dbContext.IllustrationQueries.AsNoTracking().FirstOrDefault(w => w.IllustrationQueryId == dbModel.IllustrationQueryId);
 
                 if (item == null)
                 {
@@ -106,7 +106,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.IllustrationQueries
                 dbModel.Type = item.Type;
                 dbModel.ChatId = item.ChatId;
 
-                var result = dbContext.IllustrationQueries.Update(item);
+                var result = dbContext.IllustrationQueries.Update(dbModel);
                 if (result.State != EntityState.Modified)
                 {
                     LoggingManager.LogToFile("669bb48f-59d4-4f1d-a45b-7b3847df2df6", $"Error when updating IllustrationQuery. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");

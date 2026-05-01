@@ -14,5 +14,6 @@
         sceneAnalyze = 9,
         dynamicCharacterCreation = 10,
         dynamicCharacterSheetCreation = 11,
+        illustrationPromptInjectionForCharacterAvatar = 12,
     }
 }

@@ -19,12 +19,19 @@ import type { SharedContextChatType } from "../../../../store/SharedContextChatT
 import type { SharedContextType } from "../../../../store/SharedContextType";
 import CharacterSheetComponent from "../characterSheets/CharacterSheetComponent";
 import type { CharacterMainAvatarIllustrationQueryRequestDto } from "../../../../RequestDto/characters/CharacterMainAvatarIllustrationQueryRequestDto";
+import { RiRobot2Fill } from "react-icons/ri";
+import type { GeneratePromptInjectionForMainCharacterAvatarResponseDto } from "../../../../ResponsesDto/characters/GeneratePromptInjectionForMainCharacterAvatarResponseDto";
 import { FaImage } from "react-icons/fa";
 
 
 type DetailsTab = "info" | "sheet";
 type OutfitKey = "Clothed" | "Underwear" | "Naked";
 const OUTFIT_OPTIONS: OutfitKey[] = ["Clothed", "Underwear", "Naked"];
+const OUTFIT_ENUM: Record<OutfitKey, number> = {
+  Clothed: 3,
+  Underwear: 2,
+  Naked: 1,
+};
 
 export default function CharacterDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextCharacterType>();
@@ -39,6 +46,9 @@ export default function CharacterDetailsComponent() {
   const [characterResponse, setCharacterResponse] = useState<CharacterResponseDto | null>(null);
   const [chatsDetailsResponse, setChatsDetailsResponse] = useState<SelectableChatsResponseDto | null>(null);
   const [isGeneratingAvatar, setIsGeneratingAvatar] = useState(false);
+  const [isGeneratingPromptInjection, setIsGeneratingPromptInjection] = useState(false);
+
+
 
   // saving state
   const [characterName, setCharacterName] = useState("");
@@ -442,6 +452,36 @@ export default function CharacterDetailsComponent() {
     }
   };
 
+  const handleGeneratePromptInjection = async () => {
+    if (isGeneratingPromptInjection) return;
+
+    setIsGeneratingPromptInjection(true);
+    try {
+      const payload = {
+        characterId: activeModule.selectedCharacterId ?? null,
+        outfit: OUTFIT_ENUM[selectedOutfit],
+        type: 0, // IllustratorQueryType.CharacterMainAvatarGeneration
+      };
+
+      const response = await postToServerApiAsync("api/illustrator/promptInjection", payload);
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || serverApiException?.message) {
+        console.error(`Failed to generate prompt injection. [${JSON.stringify(serverApiException)}]`);
+        setOperationError(true);
+      } else {
+        console.log("Prompt injection generated:", response);
+
+        let typedResponse = response as GeneratePromptInjectionForMainCharacterAvatarResponseDto
+        setOutfitPrompt(selectedOutfit, typedResponse.promptInjection ?? "");
+      }
+    } catch (error) {
+      console.error("Generate prompt injection error:", error);
+      setOperationError(true);
+    } finally {
+      setIsGeneratingPromptInjection(false);
+    }
+  };
+
   return (
     <div className={styles.characterDetailsComponent}>
       {isNetworkDown ? (
@@ -613,8 +653,21 @@ export default function CharacterDetailsComponent() {
                       </select>
                     </div>
 
+                    {/* ── Generate Prompt Injection ── */}
                     <div className={styles.illustratorContainer}>
-                      <label className={styles.customLabel}>Illustrator Prompt Injection</label>
+                      <div className={styles.illustratorLabelRow}>
+                        <label className={styles.customLabel}>Illustrator Prompt Injection</label>
+                        <button
+                          className={styles.promptInjectionAiButton}
+                          onClick={handleGeneratePromptInjection}
+                          disabled={isGeneratingPromptInjection || isSaving}
+                          title="Auto-generate prompt injection"
+                        >
+                          {isGeneratingPromptInjection
+                            ? <ImSpinner2 className={styles.saveSpinner} />
+                            : <RiRobot2Fill />}
+                        </button>
+                      </div>
                       <textarea
                         className={styles.illustratorPromptInjection}
                         value={getOutfitEntry(selectedOutfit).illustratorPromptInjection}

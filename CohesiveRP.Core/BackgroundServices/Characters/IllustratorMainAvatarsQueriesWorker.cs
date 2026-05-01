@@ -93,6 +93,8 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                 return null;
             }
 
+            allPendingQueries = allPendingQueries.OrderByDescending(o=>o.Status).ThenBy(t=>t.CreatedAtUtc).ToArray();
+
             // Filter only those that can run on an Image generator provider and then select the first one (highest priority + oldest one)
             // TODO
             var selectedQuery = allPendingQueries.First();

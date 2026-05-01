@@ -38,6 +38,8 @@ namespace CohesiveRP.Core.PromptContext
                     return new PromptContextBuilder(ChatCompletionPresetType.DynamicCharacterCreation, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.dynamicCharacterSheetCreation:
                     return new PromptContextBuilder(ChatCompletionPresetType.DynamicCharacterSheetCreation, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar:
+                    return new PromptContextBuilder(ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.custom:
                     return null;
                 default:
