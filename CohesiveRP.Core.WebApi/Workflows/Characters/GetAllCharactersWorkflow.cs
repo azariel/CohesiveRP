@@ -41,6 +41,7 @@ public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
             {
                 CharacterId = s.CharacterId,
                 Name = s.Name,
+                CreatedAtUtc = s.CreatedAtUtc,
                 Creator = s.Creator,
                 CreatorNotes = s.CreatorNotes,
                 Description = s.Description,

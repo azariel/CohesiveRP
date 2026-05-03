@@ -1,220 +1,520 @@
-/* ─── Layout shell ──────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&display=swap');
+
+/* ─────────────────────────────────────────────────
+   PersonasSelectionComponent.module.css
+   Dark Arcane Editorial — cohesive with CharactersSelection
+───────────────────────────────────────────────── */
+
 .personasComponent {
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
+  height: 100dvh;
+  width: 50dvw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .personasMainContainer {
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    align-content: flex-start;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ─── Header ────────────────────────────────────────────────────── */
+/* ── Header bar ── */
+
 .personasHeader {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1em;
-    padding: 0;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.3em 0.5em;
+  margin-top: 0.7em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
 }
 
-.filterRow {
-    padding-top: 1em;
-    color: #dfdfdf;
-    font-size: 1em;
+/* ── Filter toggle button ── */
+
+.filterToggleButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 5, 16, 0.6);
+  color: rgba(110, 110, 165, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  padding: 0.28em 0.45em;
+  font-size: 0.85em;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
-.filterRow:hover {
-    cursor: pointer;
-    color: rgb(255, 255, 255);
-    transition: color 0.3s ease;
+
+.filterToggleButton:hover {
+  color: #dcdcf0;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
 }
+
+.filterToggleActive {
+  color: #f6911d;
+  border-color: rgba(246, 145, 29, 0.35);
+  background: rgba(246, 145, 29, 0.08);
+  box-shadow: 0 0 8px rgba(246, 145, 29, 0.12);
+}
+
+.filterBadge {
+  position: absolute;
+  top: -0.35em;
+  right: -0.35em;
+  min-width: 1.1em;
+  height: 1.1em;
+  background: #f6911d;
+  color: #0a0a18;
+  font-size: 0.58em;
+  font-weight: 700;
+  font-family: 'Cinzel', Georgia, serif;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ── Sort select ── */
+
+.sortSelect {
+  font-size: 0.8em;
+  background-color: rgba(5, 5, 16, 0.75);
+  color: #dcdcf0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.3em 2em 0.3em 0.6em;
+  font-family: 'Cinzel', Georgia, serif;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(150,150,200,0.4)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.55em center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sortSelect:focus {
+  border-color: rgba(246, 145, 29, 0.5);
+  box-shadow: 0 0 0 3px rgba(246, 145, 29, 0.07);
+}
+
+/* ── Add persona icon ── */
 
 .personasToolsComponent {
-    margin-left: auto;
-    padding-top: 1em;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
 
 .addNewPersonaIcon {
-    font-size: 1.7em;
-    color: #dfdfdf;
+  font-size: 1.55em;
+  color: rgba(110, 110, 165, 0.75);
+  cursor: pointer;
+  transition: color 0.2s ease, filter 0.2s ease;
 }
+
 .addNewPersonaIcon:hover {
-    cursor: pointer;
-    color: rgb(255, 255, 255);
-    transition: color 0.3s ease;
+  color: #f6911d;
+  filter: drop-shadow(0 0 5px rgba(246, 145, 29, 0.35));
 }
 
-/* ─── Scrollable grid ───────────────────────────────────────────── */
+/* ── Collapsible filter panel ── */
+
+.filterPanel {
+  max-height: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: max-height 0.25s ease;
+}
+
+.filterPanelOpen {
+  /* Two filter fields + results bar */
+  max-height: 130px;
+}
+
+.filterInner {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0.5em;
+  padding: 0.45em 0.5em 0.3em;
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+  flex: 1;
+}
+
+.filterLabel {
+  font-size: 0.63em;
+  font-weight: 600;
+  color: rgba(150, 150, 195, 0.6);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+.filterInput {
+  font-size: 0.82em;
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(5, 5, 16, 0.75);
+  color: #dcdcf0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.32em 0.6em;
+  font-family: "Georgia", serif;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filterInput:focus {
+  border-color: rgba(246, 145, 29, 0.5);
+  box-shadow: 0 0 0 3px rgba(246, 145, 29, 0.07);
+}
+
+.filterInput::placeholder {
+  color: rgba(110, 110, 155, 0.4);
+}
+
+.clearButton {
+  background: rgba(5, 5, 16, 0.6);
+  color: rgba(110, 110, 165, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  padding: 0.3em 0.75em;
+  font-size: 0.8em;
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  white-space: nowrap;
+  align-self: flex-end;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.clearButton:hover {
+  color: #dcdcf0;
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.resultsBar {
+  font-size: 0.63em;
+  color: rgba(130, 130, 180, 0.45);
+  letter-spacing: 0.05em;
+  font-family: 'Cinzel', Georgia, serif;
+  padding: 0.2em 0.5em 0.3em;
+  flex-shrink: 0;
+  white-space: nowrap;
+  align-self: flex-end;
+}
+
+/* ── Persona grid ── */
+
 .personasGridContainer {
-    display: flex;
-    flex-direction: column;
-    align-content: flex-start;
-    gap: 1em;
-    padding-bottom: 3em;
-    height: 100dvh;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-gutter: stable;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 0.5em;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.07) transparent;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* ─── Individual persona card ───────────────────────────────────── */
+.personasGridContainer::-webkit-scrollbar { width: 3px; }
+.personasGridContainer::-webkit-scrollbar-track { background: transparent; }
+.personasGridContainer::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+
+/* ── Persona card ── */
+
 .personaContainer {
-    cursor: pointer;
-    border: 1px solid #888;
-    border-radius: 9px;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 0.5em;
+  cursor: pointer;
+  background: linear-gradient(160deg, #141428 0%, #101020 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 9px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.5em;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.15s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
+
 .personaContainer > * {
-    pointer-events: none;
+  pointer-events: none;
 }
+
 .personaContainer:hover {
-    border-color: #187d8f;
-    transition: border-color 0.3s ease;
+  border-color: rgba(24, 185, 210, 0.32);
+  box-shadow: 0 4px 20px rgba(24, 125, 143, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
 }
 
-/* Highlight the default persona with a subtle accent border */
+/* Default persona gets a subtle cyan accent border at rest */
 .personaContainerDefault {
-    cursor: pointer;
-    border: 1px solid #888;
-    border-radius: 9px;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 0.5em;
-    border-color: #1b7586;
-    box-shadow: 0 0 0 1px #1a6a7a44;
+  cursor: pointer;
+  background: linear-gradient(160deg, #141428 0%, #101020 100%);
+  border: 1px solid rgba(27, 117, 134, 0.55);
+  border-radius: 9px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.5em;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.15s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(26, 106, 122, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
+
+.personaContainerDefault > * {
+  pointer-events: none;
+}
+
 .personaContainerDefault:hover {
-    border-color: #187d8f;
-    transition: border-color 0.3s ease;
+  border-color: rgba(24, 185, 210, 0.5);
+  box-shadow: 0 4px 20px rgba(24, 125, 143, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
 }
 
-/* ─── Avatar ────────────────────────────────────────────────────── */
+/* ── Avatar ── */
+
 .personaAvatarContainer {
-    width: 20%;
-    aspect-ratio: 1 / 1.5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+  width: 20%;
+  max-width: 80px;
+  aspect-ratio: 1 / 1.5;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    -webkit-mask-image:
-        linear-gradient(to right,  transparent 0%, black 3%, black 97%, transparent 100%),
-        linear-gradient(to bottom, transparent 0%, black 3%, black 97%, transparent 100%);
-    -webkit-mask-composite: destination-in;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-size: 100% 100%;
-    mask-image:
-        linear-gradient(to right,  transparent 0%, black 3%, black 97%, transparent 100%),
-        linear-gradient(to bottom, transparent 0%, black 3%, black 97%, transparent 100%);
-    mask-composite: intersect;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
+  -webkit-mask-image:
+    linear-gradient(to right,  transparent 0%, black 4%, black 96%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 4%, black 96%, transparent 100%);
+  -webkit-mask-composite: destination-in;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+
+  mask-image:
+    linear-gradient(to right,  transparent 0%, black 4%, black 96%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 4%, black 96%, transparent 100%);
+  mask-composite: intersect;
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
 }
+
 .personaAvatarContainer img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 7px 0 0 7px;
 }
 
-/* Fallback icon when no avatar image is set */
 .personaAvatarFallback {
-    width: 60%;
-    height: 60%;
-    color: #555;
+  width: 60%;
+  height: 60%;
+  color: rgba(80, 80, 110, 0.5);
 }
 
-/* ─── Info panel ────────────────────────────────────────────────── */
+/* ── Info panel ── */
+
 .personaInfoPanel {
-    height: auto;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0.5em;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.45em 0.45em 0.45em 0.1em;
+  min-width: 0;
 }
 
 .personaNameRow {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+  width: 100%;
 }
 
 .personaNameLabel {
-    text-align: left;
-    color: #dfdfdf;
-    font-size: 1.3em;
-    font-weight: bold;
+  text-align: left;
+  color: #dcdcf0;
+  font-size: 1.05em;
+  font-weight: 600;
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* "default" pill badge */
+/* "Default" pill badge */
 .personaDefaultBadge {
-    font-size: 0.55em;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #22a0b8;
-    border: 1px solid #22a0b855;
-    border-radius: 4px;
-    padding: 1px 5px;
-    line-height: 1.6;
-    pointer-events: none;
-}
-
-.personaTagsLabel {
-    text-align: left;
-    color: #5c5c5c;
-    font-size: 0.6em;
-    margin-top: -0.7em;
-    font-weight: bold;
+  font-size: 0.55em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #22a0b8;
+  border: 1px solid rgba(34, 160, 184, 0.35);
+  border-radius: 4px;
+  padding: 1px 5px;
+  line-height: 1.6;
+  flex-shrink: 0;
 }
 
 .personaDescriptionLabel {
-    text-align: left;
-    padding-top: 1em;
-    color: #c0c0c0;
-    font-size: 0.8em;
+  text-align: left;
+  padding-top: 0.5em;
+  color: rgba(192, 192, 210, 0.72);
+  font-size: 0.8em;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-/* ─── Network error state ───────────────────────────────────────── */
-.networkDownContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2em;
+/* ── Empty state ── */
+
+.emptyState {
+  padding: 2.5em 1em;
+  text-align: center;
+  font-size: 0.82em;
+  color: rgba(130, 130, 180, 0.4);
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: 0.06em;
 }
-.networkDownIcon {
-    font-size: 2em;
+
+/* ── Pagination bar ── */
+
+.paginationBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  padding: 0.4em 0.5em;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  padding-bottom: 3em;
 }
+
+.paginationBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.85em;
+  height: 1.85em;
+  padding: 0 0.3em;
+  background: rgba(5, 5, 16, 0.6);
+  color: rgba(110, 110, 165, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 5px;
+  font-size: 0.8em;
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  flex-shrink: 0;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  color: #dcdcf0;
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.paginationBtn:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.paginationBtnActive {
+  color: #f6911d;
+  border-color: rgba(246, 145, 29, 0.4);
+  background: rgba(246, 145, 29, 0.1);
+  box-shadow: 0 0 8px rgba(246, 145, 29, 0.14);
+  cursor: default;
+}
+
+.paginationEllipsis {
+  font-size: 0.8em;
+  color: rgba(110, 110, 165, 0.4);
+  font-family: 'Cinzel', Georgia, serif;
+  padding: 0 0.2em;
+  user-select: none;
+}
+
+.paginationInfo {
+  font-size: 0.63em;
+  color: rgba(130, 130, 180, 0.4);
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  margin-left: 0.5em;
+}
+
+/* ── Spinners ── */
 
 .loadingPersonasSpinner {
-    margin: auto;
-    color: rgb(51, 174, 231);
-    width: 3.5em;
-    height: 3.5em;
-    animation: spin 1s linear infinite;
+  margin: auto;
+  color: #33aee7;
+  width: 3.5em;
+  height: 3.5em;
+  animation: spin 1s linear infinite;
 }
 
 .addingPersonaSpinner {
-    margin: auto;
-    color: rgb(51, 174, 231);
-    width: 1%;
-    height: 1em;
-    animation: spin 1s linear infinite;
+  color: #33aee7;
+  width: 1.3em;
+  height: 1.3em;
+  animation: spin 1s linear infinite;
+}
+
+/* ── Network error ── */
+
+.networkDownContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2em;
+  color: rgba(200, 200, 220, 0.5);
+}
+
+.networkDownIcon {
+  font-size: 2em;
+}
+
+/* ── Mobile ── */
+
+@media (max-width: 600px) {
+  .personasComponent      { width: 100dvw; }
+  .personaAvatarContainer { width: 28%; max-width: 90px; }
+  .personaNameLabel       { font-size: 1em; }
+  .personaDescriptionLabel { font-size: 0.75em; padding-top: 0.4em; }
+  .personaInfoPanel       { padding: 0.3em 0.3em 0.3em 0.1em; }
+  .personaContainer,
+  .personaContainerDefault { gap: 0.3em; }
+  /* Two fields stack vertically on mobile */
+  .filterInner            { flex-direction: column; gap: 0.4em; }
+  .filterPanelOpen        { max-height: 220px; }
+  .sortSelect             { font-size: 0.6em; }
+  .paginationInfo         { display: none; }
+  .paginationBar          { gap: 0.2em; }
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }

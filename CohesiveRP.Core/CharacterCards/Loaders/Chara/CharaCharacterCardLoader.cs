@@ -2,41 +2,51 @@
 using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
+using CohesiveRP.Core.CharacterCards.Loaders.Chara.BusinessObjects;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Png.Chunks;
+using SQLitePCL;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3
 {
-    public static class CCv3CharacterCardLoader
+    /// <summary>
+    /// JanitorAI style.
+    /// </summary>
+    public static class CharaCharacterCardLoader
     {
         private static string Decode(string base64) => Encoding.UTF8.GetString(Convert.FromBase64String(base64));
         private static string Encode(string rawString) => Convert.ToBase64String(Encoding.UTF8.GetBytes(rawString));
 
-        private static ICharacterCard TryLoadCCv3Format(Image image)
+        private static ICharacterCard TryLoadCustomFormat(Image image)
         {
             try
             {
                 PngMetadata pngMeta = image.Metadata.GetFormatMetadata(PngFormat.Instance);
-                PngTextData? ccv3Chunk = pngMeta.TextData.FirstOrDefault(f => f.Keyword.Equals("ccv3", StringComparison.OrdinalIgnoreCase) || f.Keyword.Equals("chara", StringComparison.OrdinalIgnoreCase));
+                PngTextData? chunk = pngMeta.TextData.FirstOrDefault(f => f.Keyword.Equals("chara", StringComparison.OrdinalIgnoreCase));
 
-                if (ccv3Chunk == null || !ccv3Chunk.HasValue || ccv3Chunk.Value.Value == null)
+                if (chunk == null || !chunk.HasValue || chunk.Value.Value == null)
                     return null;
 
-                var json = Decode(ccv3Chunk.Value.Value);
-                var model = JsonSerializer.Deserialize<CCv3CharacterCard>(json, new JsonSerializerOptions
+                var json = Decode(chunk.Value.Value);
+                var model = JsonSerializer.Deserialize<CharaCharacterCard>(json, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = false
                 });
 
-                if(model?.Data == null || string.IsNullOrWhiteSpace(model.Data.Name))
+                if(model == null || string.IsNullOrWhiteSpace(model.Name))
                     return null;
+
+                // Sanitize fields
+                model.Description = StringUtils.RemoveXmlTags(model.Description);
+                model.Personality = StringUtils.RemoveXmlTags(model.Personality);
 
                 return model;
             } catch (Exception ex)
             {
-                LoggingManager.LogToFile("41dd0e05-a7c2-48a1-b76f-38b0ed214758", $"Something went wrong when reading CCv3 image.", ex);
+                LoggingManager.LogToFile("097d61e6-5be7-47b2-8ffb-e3a65f1b7fb8", $"Something went wrong when reading Chara image.", ex);
                 return null;
             }
         }
@@ -49,8 +59,7 @@ namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3
             }
 
             ICharacterCard card = null;
-            card = TryLoadCCv3Format(image);
-
+            card = TryLoadCustomFormat(image);
             return card;
         }
 
@@ -62,28 +71,19 @@ namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3
             try
             {
                 PngMetadata pngMeta = image.Metadata.GetFormatMetadata(PngFormat.Instance);
-                PngTextData? chunk = pngMeta.TextData.FirstOrDefault(f => f.Keyword.Equals("ccv3", StringComparison.OrdinalIgnoreCase));
+                PngTextData? chunk = pngMeta.TextData.FirstOrDefault(f => f.Keyword.Equals("chara", StringComparison.OrdinalIgnoreCase));
                 string jsonToWrite = JsonCommonSerializer.SerializeToString(characterCardCCv3);
                 string encodedContent = Encode(jsonToWrite);
 
                 if (chunk != null || chunk.HasValue || chunk.Value.Value != null)
                     pngMeta.TextData.Remove(chunk.Value);
 
-                pngMeta.TextData.Add(new PngTextData("ccv3", encodedContent, null, null));
-
-                // Also remove the "chara" tag if any available since it duplicates the ccv3 one and take space for no reason (TODO: check if other software load that instead of ccv3?)
-                PngTextData? charaChunk = pngMeta.TextData.FirstOrDefault(f => f.Keyword.Equals("chara", StringComparison.OrdinalIgnoreCase));
-                if(charaChunk != null || charaChunk.HasValue || charaChunk.Value.Value != null)
-                    pngMeta.TextData.Remove(charaChunk.Value);
-
-                // Looks like its required for compatibility. I love duplicating information : /
                 pngMeta.TextData.Add(new PngTextData("chara", encodedContent, null, null));
-
                 return image;
 
             } catch (Exception ex)
             {
-                LoggingManager.LogToFile("7358cd0d-9c66-49a0-af3b-81b632c8856f", $"Something went wrong when reading CohesiveRPv1 image.", ex);
+                LoggingManager.LogToFile("0e58d598-2895-4c17-9932-94085fa880b4", $"Something went wrong when reading CohesiveRPv1 image.", ex);
                 return null;
             }
         }

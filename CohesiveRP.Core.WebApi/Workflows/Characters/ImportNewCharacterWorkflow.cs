@@ -4,6 +4,7 @@ using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.CharacterCards;
 using CohesiveRP.Core.CharacterCards.Loaders;
 using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
+using CohesiveRP.Core.CharacterCards.Loaders.Chara.BusinessObjects;
 using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.DtoConverters.Abstractions;
 using CohesiveRP.Core.Services;
@@ -47,8 +48,9 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         var characterCardCCv3 = characterCard as CCv3CharacterCard;
+        var characterCardCharaJanitorAI = characterCard as CharaCharacterCard;
         var characterCardCRPv1 = characterCard as CohesiveRPv1CharacterCard;
-        if (characterCardCCv3 == null && characterCardCRPv1 == null)
+        if (characterCardCCv3 == null && characterCardCRPv1 == null && characterCardCharaJanitorAI == null)
         {
             return new WebApiException
             {
@@ -58,7 +60,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         // Validate that the character doesn't already exists
-        string characterName = characterCardCRPv1?.Data?.Character?.Name ?? characterCardCCv3?.Data?.Name ?? "[Unknown]";
+        string characterName = characterCardCRPv1?.Data?.Character?.Name ?? characterCardCCv3?.Data?.Name ?? characterCardCharaJanitorAI?.Name ?? "[Unknown]";
         var allCharacters = await storageService.GetCharactersAsync();
         if (allCharacters.Any(a => a.Name == characterName))
         {
@@ -85,6 +87,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
                 AlternateGreetings = characterCardCRPv1.Data.Character.AlternateGreetings,
                 ImageGenerationConfiguration = characterCardCRPv1.Data.Character.ImageGenerationConfiguration,
             };
+
         } else if (characterCardCCv3?.Data != null)
         {
             queryModel = new()
@@ -98,6 +101,46 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
                 AlternateGreetings = characterCardCCv3.Data.AlternateGreetings,
                 ImageGenerationConfiguration = new(),
             };
+
+            if (!string.IsNullOrWhiteSpace(characterCardCCv3.Data.Personality))
+            {
+                queryModel.Description += $"{Environment.NewLine}{Environment.NewLine}[Personality]{Environment.NewLine}{characterCardCCv3.Data.Personality}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(characterCardCCv3.Data.Scenario))
+            {
+                queryModel.FirstMessage += $"{Environment.NewLine}{Environment.NewLine}[Scenario]{Environment.NewLine}{characterCardCCv3.Data.Scenario}";
+            }
+
+        } else if (characterCardCharaJanitorAI != null)
+        {
+            var charName = FileUtils.SanitizeNameForWindowsPath(characterCardCharaJanitorAI.Name.Trim());
+
+            queryModel = new()
+            {
+                Name = charName,
+                Creator = "",
+                CreatorNotes = "",
+                Description = string.Empty,// Defined below
+                Tags = [],
+                FirstMessage = string.Empty,// Defined below,
+                AlternateGreetings = null,
+                ImageGenerationConfiguration = new(),
+            };
+
+            if (!string.IsNullOrWhiteSpace(characterCardCharaJanitorAI.Personality))
+            {
+                queryModel.Description += $"[{charName} Personality]{Environment.NewLine}{characterCardCharaJanitorAI.Personality}{Environment.NewLine}{Environment.NewLine}[{charName} Description]{Environment.NewLine}";
+            }
+
+            queryModel.Description += characterCardCharaJanitorAI.Description;
+
+            if (!string.IsNullOrWhiteSpace(characterCardCharaJanitorAI.Scenario))
+            {
+                queryModel.FirstMessage += $"[Scenario]{Environment.NewLine}{characterCardCharaJanitorAI.Scenario}{Environment.NewLine}{Environment.NewLine}[First Message]{Environment.NewLine}";
+            }
+
+            queryModel.FirstMessage += characterCardCharaJanitorAI.FirstMessage;
         }
 
         CharacterDbModel importCharacterResult = await storageService.AddCharacterAsync(queryModel);
@@ -139,7 +182,7 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, importCharacterResult.Name.ToLowerInvariant().Trim());
         if (!Directory.Exists(directoryCharacter))
         {
-           Directory.CreateDirectory(directoryCharacter);
+            Directory.CreateDirectory(directoryCharacter);
         }
 
         image?.Save(Path.Combine(directoryCharacter, WebConstants.AvatarFileName));
