@@ -86,12 +86,12 @@ namespace CohesiveRP.Core.Utils.Characters
             }
         }
 
-        public static void CreateCharacterAssets(CharacterDbModel currentCharacter)
+        public static void CreateCharacterAssets(string characterName)
         {
-            if (string.IsNullOrWhiteSpace(currentCharacter?.Name))
+            if (string.IsNullOrWhiteSpace(characterName))
                 return;
 
-            string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, currentCharacter.Name.ToLowerInvariant().Trim());
+            string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, characterName.ToLowerInvariant().Trim());
             if (!Directory.Exists(directoryCharacter))
             {
                 Directory.CreateDirectory(directoryCharacter);
@@ -99,6 +99,48 @@ namespace CohesiveRP.Core.Utils.Characters
 
             CreateRawsFolders(directoryCharacter);
             CreateExpressionFolders(directoryCharacter);
+        }
+
+        public static void MovePublicAssetsFolder(string oldCharacterName, string newCharacterName)
+        {
+            string oldDirectoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, oldCharacterName.ToLowerInvariant().Trim());
+            string newDirectoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, newCharacterName.ToLowerInvariant().Trim());
+
+            CreateCharacterAssets(newCharacterName);
+
+            if (Directory.Exists(oldDirectoryCharacter))
+            {
+                string[] files = Directory.EnumerateFiles(oldDirectoryCharacter, "*.*", SearchOption.AllDirectories).ToArray();
+                foreach (var filePath in files)
+                {
+                    string outFilePath = filePath.Replace(oldCharacterName, newCharacterName, StringComparison.InvariantCultureIgnoreCase);
+
+                    try
+                    {
+                        string outDir = Path.GetDirectoryName(outFilePath);
+                        if (!Directory.Exists(outDir))
+                        {
+                            Directory.CreateDirectory(outDir);
+                        }
+
+                        File.Copy(filePath, outFilePath, true);
+                    } catch (Exception)
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        File.Delete(filePath);
+                    } catch (Exception) { }
+                }
+
+                // Try to remove folder
+                try
+                {
+                    Directory.Delete(oldDirectoryCharacter, true);
+                } catch (Exception) { }
+            }
         }
     }
 }

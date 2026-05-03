@@ -94,7 +94,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                     return false;
                 }
 
-                CharacterUtils.CreateCharacterAssets(characterDbModel);
+                CharacterUtils.CreateCharacterAssets(characterDbModel.Name);
 
                 // Update the chat to include that character
                 var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);

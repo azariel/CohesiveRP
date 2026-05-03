@@ -36,6 +36,7 @@ public class UpdateCharacterWorkflow : IUpdateCharacterWorkflow
             };
         }
 
+        string oldCharacterName = currentCharacter.Name;
         currentCharacter.Name = requestDto.CharacterName;
         currentCharacter.Creator = requestDto.Creator;
         currentCharacter.CreatorNotes = requestDto.CreatorNotes;
@@ -55,7 +56,13 @@ public class UpdateCharacterWorkflow : IUpdateCharacterWorkflow
             };
         }
 
-        CharacterUtils.CreateCharacterAssets(currentCharacter);
+        CharacterUtils.CreateCharacterAssets(currentCharacter.Name);
+
+        // Move public assets folder if the character name was changed
+        if(oldCharacterName != currentCharacter.Name)
+        {
+            CharacterUtils.MovePublicAssetsFolder(oldCharacterName, currentCharacter.Name);
+        }
 
         var responseDto = new CharacterResponseDto
         {

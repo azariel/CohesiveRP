@@ -15,7 +15,7 @@ namespace CohesiveRP.Core.Utils.Characters
             string characterAvatarFolderPath = Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name.ToLowerInvariant(), WebConstants.SourceAvatarFolder, outfit.ToString().ToLowerInvariant());
             if (!Directory.Exists(characterAvatarFolderPath))
             {
-                CharacterUtils.CreateCharacterAssets(characterDbModel);
+                CharacterUtils.CreateCharacterAssets(characterDbModel.Name);
                 return avatars;
             }
 
