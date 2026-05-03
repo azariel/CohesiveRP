@@ -310,8 +310,8 @@ export default function CharactersSelectionComponent() {
                       {character.tags?.join(" / ") ?? ""}
                     </label>
                     <label className={styles.characterDescriptionLabel}>
-                      {(character.creatorNotes?.length ?? 0) > 512
-                        ? `${character.creatorNotes.substring(0, 512)}…`
+                      {(character.creatorNotes?.length ?? 0) > 1024
+                        ? `${character.creatorNotes.substring(0, 1024)}…`
                         : character.creatorNotes}
                     </label>
                   </div>

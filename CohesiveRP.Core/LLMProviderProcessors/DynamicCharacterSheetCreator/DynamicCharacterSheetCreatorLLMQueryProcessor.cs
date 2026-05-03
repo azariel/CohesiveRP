@@ -117,6 +117,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                 {
                     CharacterId = links.CharacterId,
                     CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                    CharacterSheetId = dbModelCharacterSheet.CharacterSheetId,
                     CharacterSheet = new CharacterSheet
                     {
                         AgeGroup = characterSheetFromLLMApiResponse.AgeGroup,

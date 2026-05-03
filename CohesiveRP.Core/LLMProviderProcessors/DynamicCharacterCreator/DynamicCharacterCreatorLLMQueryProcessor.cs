@@ -78,6 +78,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                 {
                     Creator = "CoherentRp",
                     CreatorNotes = "Character was inferred from the story context and created dynamically.",
+                    Tags = ["AUTO-GENERATED"],
                     Description = characterFromLLMApi.Description,
                     Name = characterFromLLMApi.Name.Trim(),
                     ImageGenerationConfiguration = new(),

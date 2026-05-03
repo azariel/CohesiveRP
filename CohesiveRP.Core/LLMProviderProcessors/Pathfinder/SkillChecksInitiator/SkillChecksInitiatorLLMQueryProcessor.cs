@@ -217,35 +217,35 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             return selectedCharacterSheetInstance;
         }
 
-        private async Task<bool> CreateMissingCharacterSheetInstancesAsync(ChatDbModel chatDbModel, CharacterSheetInstancesDbModel characterSheetInstancesDbModel, string characterName)
-        {
-            var selectedCharacterSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstancesDbModel.CharacterSheetInstances, characterName);
-            if (selectedCharacterSheetInstance == null)
-            {
-                var newCharacterInstance = new CharacterSheetInstance
-                {
-                    CharacterSheetInstanceId = Guid.NewGuid().ToString(),
-                    CharacterId = null,// Not matching a 'character', we are dealing with an NPC (that doesn't have a characterCard, it's a in-roleplay NPC)
-                    CharacterSheet = new CharacterSheet()
-                    {
-                        FirstName = characterName,// We'll assume this since we must
-                    },// Just the default values, especially around Attributes and Skills, the rest should default to null or zero until the background query updates it
-                };
+        //private async Task<bool> CreateMissingCharacterSheetInstancesAsync(ChatDbModel chatDbModel, CharacterSheetInstancesDbModel characterSheetInstancesDbModel, string characterName)
+        //{
+        //    var selectedCharacterSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstancesDbModel.CharacterSheetInstances, characterName);
+        //    if (selectedCharacterSheetInstance == null)
+        //    {
+        //        var newCharacterInstance = new CharacterSheetInstance
+        //        {
+        //            CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+        //            CharacterId = null,// Not matching a 'character', we are dealing with an NPC (that doesn't have a characterCard, it's a in-roleplay NPC)
+        //            CharacterSheet = new CharacterSheet()
+        //            {
+        //                FirstName = characterName,// We'll assume this since we must
+        //            },// Just the default values, especially around Attributes and Skills, the rest should default to null or zero until the background query updates it
+        //        };
 
-                characterSheetInstancesDbModel.CharacterSheetInstances.Add(newCharacterInstance);
+        //        characterSheetInstancesDbModel.CharacterSheetInstances.Add(newCharacterInstance);
 
-                var result = await storageService.UpdateCharacterSheetsInstanceAsync(characterSheetInstancesDbModel);
-                if (!result)
-                {
-                    LoggingManager.LogToFile("18d5f61d-36b0-4034-8526-317cfb11b354", $"Couldn't Update the characterSheetInstance tied to chat [{chatDbModel.ChatId}] in storage to add new character [{characterName}].");
-                    return false;
-                }
+        //        var result = await storageService.UpdateCharacterSheetsInstanceAsync(characterSheetInstancesDbModel);
+        //        if (!result)
+        //        {
+        //            LoggingManager.LogToFile("18d5f61d-36b0-4034-8526-317cfb11b354", $"Couldn't Update the characterSheetInstance tied to chat [{chatDbModel.ChatId}] in storage to add new character [{characterName}].");
+        //            return false;
+        //        }
 
-                // TODO: add a backgroundQuery to update this newly create characterSheetInstance. We want the AI to scan the story and generate values for each fields automatically
-            }
+        //        // TODO: add a backgroundQuery to update this newly create characterSheetInstance. We want the AI to scan the story and generate values for each fields automatically
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
 
         private async Task<bool> CreateMissingCharacterSheetInstancesMatchingACharacterAsync(ChatDbModel chatDbModel, CharacterSheetInstancesDbModel characterSheetInstancesDbModel)
         {
@@ -279,6 +279,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     {
                         CharacterId = characterIdLinkedToTheChat,
                         CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                        CharacterSheetId = characterSheetObj.CharacterSheetId,
                         CharacterSheet = characterSheetObj.CharacterSheet,
                     });
                 } else
@@ -293,6 +294,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                         {
                             CharacterId = characterIdLinkedToTheChat,
                             CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                            CharacterSheetId = null,
                             CharacterSheet = new CharacterSheet()
                             {
                                 FirstName = character.Name,
@@ -320,6 +322,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                         {
                             PersonaId = persona.PersonaId,
                             CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                            CharacterSheetId = personaCharacterSheet.CharacterSheetId,
                             CharacterSheet = personaCharacterSheet.CharacterSheet,
                         });
                     } else
@@ -330,6 +333,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                         {
                             PersonaId = persona.PersonaId,
                             CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                            CharacterSheetId = null,
                             CharacterSheet = new CharacterSheet()
                             {
                                 FirstName = persona.Name,

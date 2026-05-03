@@ -291,8 +291,8 @@ export default function PersonasSelectionComponent() {
                       )}
                     </div>
                     <label className={styles.personaDescriptionLabel}>
-                      {(persona.description?.length ?? 0) > 512
-                        ? `${persona.description?.substring(0, 512) ?? ""}…`
+                      {(persona.description?.length ?? 0) > 1024
+                        ? `${persona.description?.substring(0, 1024) ?? ""}…`
                         : persona.description}
                     </label>
                   </div>
