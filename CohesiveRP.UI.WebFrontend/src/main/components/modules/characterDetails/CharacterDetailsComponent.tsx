@@ -73,7 +73,7 @@ export default function CharacterDetailsComponent() {
   const getOutfitEntry = (outfit: OutfitKey) =>
   illustrationMapOutfits.find((e) => e.outfit === outfit) ?? { outfit, illustratorPromptInjection: "" };
 
-  const setOutfitPrompt = (outfit: OutfitKey, value: string) =>
+  const setOutfitPrompts = (outfit: OutfitKey, value: string) =>
     setillustrationMapOutfits((prev) => {
       const exists = prev.find((e) => e.outfit === outfit);
       if (exists) return prev.map((e) => e.outfit === outfit ? { ...e, illustratorPromptInjection: value } : e);
@@ -471,8 +471,11 @@ export default function CharacterDetailsComponent() {
       } else {
         console.log("Prompt injection generated:", response);
 
-        let typedResponse = response as GeneratePromptInjectionForMainCharacterAvatarResponseDto
-        setOutfitPrompt(selectedOutfit, typedResponse.promptInjection ?? "");
+        const typedResponse = response as GeneratePromptInjectionForMainCharacterAvatarResponseDto;
+        for (const item of typedResponse.promptInjections ?? []) {
+          const outfitKey = item.outfit as unknown as OutfitKey;
+          if (outfitKey) setOutfitPrompts(outfitKey, item.content ?? "");
+        }
       }
     } catch (error) {
       console.error("Generate prompt injection error:", error);
@@ -671,7 +674,7 @@ export default function CharacterDetailsComponent() {
                       <textarea
                         className={styles.illustratorPromptInjection}
                         value={getOutfitEntry(selectedOutfit).illustratorPromptInjection}
-                        onChange={(e) => setOutfitPrompt(selectedOutfit, e.target.value)}
+                        onChange={(e) => setOutfitPrompts(selectedOutfit, e.target.value)}
                       />
                     </div>
 

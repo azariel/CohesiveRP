@@ -1,5 +1,7 @@
+import type { IllustratorGenerationContent } from "./IllustratorGenerationContent";
+
 interface GeneratePromptInjectionForMainCharacterAvatarResponseDto {
-    promptInjection?: string | null;
+    promptInjections?: IllustratorGenerationContent[] | null;
 }
 
 export type {

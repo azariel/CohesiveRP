@@ -5,6 +5,7 @@ using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.HttpLLMApiProvider;
+using CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar.BusinessObjects;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request;
 using CohesiveRP.Core.WebApi.RequestDtos.IllustrationQueries.BusinessObjects;
@@ -152,9 +153,9 @@ namespace CohesiveRP.Core.WebApi.Workflows.IllustrationQueries
             }
 
             string promptInjectionResult = LLMResponseParser.ParseOnlyJson(response.Messages.First().Content);
-            StringResultWrapper promptInjectionResultWrapper = JsonCommonSerializer.DeserializeFromString<StringResultWrapper>(promptInjectionResult);
+            var promptInjectionResults = JsonCommonSerializer.DeserializeFromString<IllustratorGenerationContents>(promptInjectionResult);
 
-            if (string.IsNullOrWhiteSpace(promptInjectionResultWrapper?.Content))
+            if (promptInjectionResults?.Contents == null || promptInjectionResults.Contents.Count <= 0)
             {
                 return new WebApiException
                 {
@@ -166,7 +167,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.IllustrationQueries
             return new GeneratePromptInjectionForMainCharacterAvatarResponseDto()
             {
                 HttpResultCode = System.Net.HttpStatusCode.OK,
-                PromptInjection = promptInjectionResultWrapper.Content,
+                PromptInjections = promptInjectionResults.Contents,
             };
         }
     }
