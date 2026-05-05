@@ -2,7 +2,6 @@
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.IllustrationQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
-using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries.BusinessObjects;
 using Microsoft.Extensions.Hosting;
 
 namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharactersCreator

@@ -160,6 +160,11 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
             // Check if the character has an assets folder in this chat
             var characterDbModel = await storageService.GetCharacterByIdAsync(targetCharacterSheet.CharacterId);
+            if (characterDbModel == null)
+            {
+                return avatar;
+            }
+
             string characterFolderPath = Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name.ToLowerInvariant());
             if (!Directory.Exists(WebConstants.CharactersAvatarFilePath))
             {

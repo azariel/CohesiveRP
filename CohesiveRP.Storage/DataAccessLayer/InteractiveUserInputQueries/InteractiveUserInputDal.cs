@@ -104,7 +104,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                var item = dbContext.InteractiveUserInputQueries.FirstOrDefault(w => w.InteractiveUserInputQueryId == dbModel.InteractiveUserInputQueryId);
+                var item = dbContext.InteractiveUserInputQueries.AsNoTracking().FirstOrDefault(w => w.InteractiveUserInputQueryId == dbModel.InteractiveUserInputQueryId);
 
                 if (item == null)
                 {
@@ -118,7 +118,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
                 dbModel.ChatId = item.ChatId;
                 dbModel.Type = item.Type;
 
-                var result = dbContext.InteractiveUserInputQueries.Update(item);
+                var result = dbContext.InteractiveUserInputQueries.Update(dbModel);
                 if (result.State != EntityState.Modified)
                 {
                     LoggingManager.LogToFile("87d21c78-228c-4870-8637-dc49b4fbd7cd", $"Error when updating InteractiveUserInputQuery. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");

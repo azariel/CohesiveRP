@@ -15,10 +15,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
     public class CharactersDal : StorageDal, ICharactersDal
     {
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
+        private readonly ICharacterSheetsDal characterSheetsDal;
 
-        public CharactersDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
+        public CharactersDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory, ICharacterSheetsDal characterSheetsDal) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
+            this.characterSheetsDal = characterSheetsDal;
 
             using var dbContext = contextFactory.CreateDbContext();
             dbContext.Database.EnsureCreated();
@@ -153,6 +155,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return false;
                 }
 
+                await characterSheetsDal.DeleteCharacterSheetFromCharacterAsync(characterDbModel);
                 await dbContext.SaveChangesAsync();
                 return true;
             } catch (Exception ex)

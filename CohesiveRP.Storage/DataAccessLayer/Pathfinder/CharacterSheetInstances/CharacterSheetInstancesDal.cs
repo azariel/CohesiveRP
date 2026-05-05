@@ -154,5 +154,31 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 return false;
             }
         }
+
+        public async Task<bool> DeleteCharacterSheetInstancesFromCharacterSheetAsync(CharacterSheetDbModel dbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var characterSheetInstances = dbContext.CharacterSheetInstances.AsNoTracking().AsEnumerable().Where(w => w.CharacterSheetInstances.Any(c => c != null &&  c.CharacterSheetId == dbModel.CharacterSheetId));
+
+                if (characterSheetInstances == null || !characterSheetInstances.Any())
+                {
+                    return false;
+                }
+
+                foreach (var characterSheetInstance in characterSheetInstances)
+                {
+                    characterSheetInstance.CharacterSheetInstances.RemoveAll(c => c == null || c.CharacterSheetId == dbModel.CharacterSheetId);
+                    return await UpdateCharacterSheetsInstanceAsync(characterSheetInstance);
+                }
+
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("b18d171b-f3bd-4514-a2a2-7ef2db8322f1", $"Error when querying pending queries on table CharacterSheetInstances.", ex);
+                return false;
+            }
+        }
     }
 }

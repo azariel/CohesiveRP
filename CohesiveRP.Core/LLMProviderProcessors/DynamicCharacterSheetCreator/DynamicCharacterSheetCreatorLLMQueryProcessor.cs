@@ -1,22 +1,20 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
-using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Directive;
-using CohesiveRP.Core.PromptContext.Builders.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
-using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
@@ -79,8 +77,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
 
                 // Add a new CharacterSheet in storage for this character
                 var links = JsonCommonSerializer.DeserializeFromString<ShareableNewCharacterLinks>(backgroundQueryDbModel.LinkedId);
-
-                if(links?.CharacterId == null || links.InteractiveUserInputQueryId == null)
+                if (links?.CharacterId == null || links.InteractiveUserInputQueryId == null)
                 {
                     // There's no fix for this
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
@@ -113,6 +110,23 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                 }
 
                 currentCharacterSheetsInstancesInChat.CharacterSheetInstances ??= new();
+
+                // Remove any characterSheet matching the name of the character we're adding if they don't link to a valid blueprint
+                string newCharacterName = $"{characterSheetFromLLMApiResponse.FirstName} {characterSheetFromLLMApiResponse.LastName}".Trim();
+                var characterSheetsToRemove = currentCharacterSheetsInstancesInChat.CharacterSheetInstances.Where(w =>
+                w.CharacterSheetId == null &&
+                newCharacterName.Equals(w.CharacterSheet.FirstName, StringComparison.InvariantCultureIgnoreCase) ||
+                newCharacterName.Equals(w.CharacterSheet.LastName, StringComparison.InvariantCultureIgnoreCase) ||
+                newCharacterName.Equals($"{w.CharacterSheet.FirstName.ToLowerInvariant()} {w.CharacterSheet.LastName?.ToLowerInvariant()}", StringComparison.InvariantCultureIgnoreCase));
+
+                if (characterSheetsToRemove.Any())
+                {
+                    foreach (var characterSheetInstanceToRemove in characterSheetsToRemove)
+                    {
+                        currentCharacterSheetsInstancesInChat.CharacterSheetInstances.Remove(characterSheetInstanceToRemove);
+                    }
+                }
+
                 currentCharacterSheetsInstancesInChat.CharacterSheetInstances.Add(new CharacterSheetInstance
                 {
                     CharacterId = links.CharacterId,
@@ -177,13 +191,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                     return false;
                 }
 
-                // Update the status of the linkedInteractiveUserInputQuery to Completed
-                var linkedInteractiveUserInputQuery = await storageService.GetInteractiveUserInputQueriesAsync(g => g.InteractiveUserInputQueryId == links.InteractiveUserInputQueryId);
-                if (linkedInteractiveUserInputQuery.Length == 1)
-                {
-                    linkedInteractiveUserInputQuery[0].Status = InteractiveUserInputStatus.Completed;
-                    await storageService.UpdateInteractiveUserInputQueryAsync(linkedInteractiveUserInputQuery[0]);
-                }
+                // At this point, the character AND the character sheet were created successfully in the storage, we need to queue a backgroundQuery to create the illustration data.
+                await QueueBackgroundQueryToCreateCharacterSheetAsync(characterSheetDbModel);
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
@@ -196,6 +205,26 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                 backgroundQueryDbModel.RetryCount++;
                 return false;
             }
+        }
+
+        private async Task QueueBackgroundQueryToCreateCharacterSheetAsync(CharacterSheetDbModel characterSheetDbModel)
+        {
+            if (characterSheetDbModel == null)
+                return;
+
+            CreateBackgroundQueryQueryModel addCharacterSheetForCharacterQueryModel = new()
+            {
+                ChatId = backgroundQueryDbModel.ChatId,
+                Priority = BackgroundQueryPriority.Lowest,
+                LinkedId = JsonCommonSerializer.SerializeToString(new ShareableNewCharacterLinks { InteractiveUserInputQueryId = backgroundQueryDbModel.LinkedId, CharacterId = characterSheetDbModel.CharacterId }),// Keep link to the initial InteractiveUserInputQuery
+                Tags = [BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar.ToString()],
+                DependenciesTags = Enum.GetValues<BackgroundQuerySystemTags>()// this one is blocked by basically ANYTHING except the same type
+                    .Where(w => w != BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar)
+                    .Select(s => s.ToString())
+                    .ToList(),
+            };
+
+            await storageService.AddBackgroundQueryAsync(addCharacterSheetForCharacterQueryModel);
         }
     }
 }

@@ -351,7 +351,7 @@
 .characterDescription  { min-height: 10em; max-height: 100em; height: 20em; resize: vertical; }
 .characterTags         { min-height: 2rem; max-height: 30em; resize: vertical; }
 .characterFirstMessage { min-height: 10em; max-height: 50em; height: 20em; resize: vertical; }
-.characterCreator      { height: 1.7em; resize: none; }
+.characterCreator      { height: 3em; resize: none; }
 .characterCreatorNotes { min-height: 10em; max-height: 30em; resize: vertical; }
 .illustratorPromptInjection { min-height: 10em; max-height: 30em; resize: vertical; }
 

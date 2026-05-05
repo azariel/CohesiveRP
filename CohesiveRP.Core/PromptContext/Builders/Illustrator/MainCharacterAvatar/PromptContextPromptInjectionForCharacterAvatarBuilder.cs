@@ -31,8 +31,14 @@ namespace CohesiveRP.Core.PromptContext.Builders.Illustrator.MainCharacterAvatar
         {
             try
             {
+                var links = JsonCommonSerializer.DeserializeFromString<ShareableNewCharacterLinks>(contextLinkedId);
+                if(string.IsNullOrWhiteSpace(links?.CharacterId))
+                {
+                    return ("", new ShareableContextLink { LinkedBuilder = this });
+                }
+
                 // Get the interactiveQuery associated with our backgroundQuery
-                var character = await storageService.GetCharacterByIdAsync(contextLinkedId);
+                var character = await storageService.GetCharacterByIdAsync(links.CharacterId);
                 if (character == null)
                 {
                     return ("", new ShareableContextLink { LinkedBuilder = this });

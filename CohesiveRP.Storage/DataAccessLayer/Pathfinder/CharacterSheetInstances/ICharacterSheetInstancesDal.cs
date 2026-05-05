@@ -10,5 +10,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         Task<CharacterSheetInstancesDbModel> AddCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
         Task<bool> UpdateCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
         Task<bool> DeleteCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
+        Task<bool> DeleteCharacterSheetInstancesFromCharacterSheetAsync(CharacterSheetDbModel dbModel);
     }
 }

@@ -3,6 +3,8 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
+using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator.BusinessObjects;
+using CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Illustrator.MainCharacterAvatar;
@@ -11,11 +13,13 @@ using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Characters.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries.BusinessObjects;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar
 {
-    internal class IllustrationPromptInjectionForCharacterAvatarLLMQueryProcessor: LLMQueryProcessor
+    internal class IllustrationPromptInjectionForCharacterAvatarLLMQueryProcessor : LLMQueryProcessor
     {
         public IllustrationPromptInjectionForCharacterAvatarLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
@@ -57,10 +61,18 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar
                     return false;
                 }
 
-                string promptInjectionResult = LLMResponseParser.ParseOnlyJson(messages.First().Content);
-                StringResultWrapper promptInjectionResultWrapper = JsonCommonSerializer.DeserializeFromString<StringResultWrapper>(promptInjectionResult);
+                var links = JsonCommonSerializer.DeserializeFromString<ShareableNewCharacterLinks>(backgroundQueryDbModel.LinkedId);
+                if (links?.CharacterId == null || links.InteractiveUserInputQueryId == null)
+                {
+                    // There's no fix for this
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                    return false;
+                }
 
-                if (string.IsNullOrWhiteSpace(promptInjectionResultWrapper?.Content))
+                string promptInjectionResult = LLMResponseParser.ParseOnlyJson(messages.First().Content);
+                var promptInjectionResults = JsonCommonSerializer.DeserializeFromString<IllustratorGenerationContents>(promptInjectionResult);
+
+                if (promptInjectionResults?.Contents == null || promptInjectionResults.Contents.Count <= 0)
                 {
                     backgroundQueryDbModel.Content = null;
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
@@ -69,12 +81,39 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar
                 }
 
                 // Save the promptInjection to the character
-                //var character = await storageService.GetCharacterByIdAsync(backgroundQueryDbModel.LinkedId);
-                //if(character != null)
-                //{
-                //    character.ImageGenerationConfiguration. = promptInjectionResultWrapper.Content;
-                //    await storageService.UpdateCharacterAsync(character);
-                //}
+                var character = await storageService.GetCharacterByIdAsync(links.CharacterId);
+                if (character != null)
+                {
+                    foreach (var result in promptInjectionResults.Contents)
+                    {
+                        var elements = character.ImageGenerationConfiguration.IllustrationMapOutfits.Where(w => w.Outfit == result.Outfit);
+
+                        if (elements.Any())
+                        {
+                            foreach (var element in elements)
+                            {
+                                element.IllustratorPromptInjection = result.Content;
+                            }
+                        } else
+                        {
+                            character.ImageGenerationConfiguration.IllustrationMapOutfits.Add(new IllustrationMapOutfit
+                            {
+                                Outfit = result.Outfit,
+                                IllustratorPromptInjection = result.Content
+                            });
+                        }
+                    }
+
+                    await storageService.UpdateCharacterAsync(character);
+                }
+
+                // Update the status of the linkedInteractiveUserInputQuery to Completed
+                var linkedInteractiveUserInputQuery = await storageService.GetInteractiveUserInputQueriesAsync(g => g.InteractiveUserInputQueryId == links.InteractiveUserInputQueryId);
+                if (linkedInteractiveUserInputQuery.Length == 1)
+                {
+                    linkedInteractiveUserInputQuery[0].Status = InteractiveUserInputStatus.Completed;
+                    await storageService.UpdateInteractiveUserInputQueryAsync(linkedInteractiveUserInputQuery[0]);
+                }
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;

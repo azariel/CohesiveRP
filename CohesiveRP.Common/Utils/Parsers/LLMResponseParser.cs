@@ -8,46 +8,70 @@ namespace CohesiveRP.Common.Utils.Parsers
     {
         public static string ParseOnlyJson(string LLMrawResponse)
         {
+            string responseToParse = LLMrawResponse;
+
             try
             {
+                string thinkingToRemove = ChatMessageParserUtils.ParseThinking(LLMrawResponse);
+                if (!string.IsNullOrWhiteSpace(thinkingToRemove))
+                {
+                    responseToParse = responseToParse.Replace(thinkingToRemove, string.Empty);
+                }
+
                 // Use a regex to find the array and remove everything that is inconsequential
-                var match = Regex.Match(LLMrawResponse, @"\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}", RegexOptions.Singleline);
+                var match = Regex.Match(responseToParse, @"\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}", RegexOptions.Singleline);
                 string result = match.Value;
 
                 return result;
             } catch (Exception)
             {
-                return LLMrawResponse;
+                return responseToParse;
             }
         }
 
         public static T ParseOnlyJson<T>(string LLMrawResponse)
         {
+            string responseToParse = LLMrawResponse;
+
             try
             {
+                string thinkingToRemove = ChatMessageParserUtils.ParseThinking(LLMrawResponse);
+                if (!string.IsNullOrWhiteSpace(thinkingToRemove))
+                {
+                    responseToParse = responseToParse.Replace(thinkingToRemove, string.Empty);
+                }
+
                 // Use a regex to find the array and remove everything that is inconsequential
-                var match = Regex.Match(LLMrawResponse, @"\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}", RegexOptions.Singleline);
+                var match = Regex.Match(responseToParse, @"\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}", RegexOptions.Singleline);
                 string result = match.Value;
 
                 return JsonCommonSerializer.DeserializeFromString<T>(result);
             } catch (Exception)
             {
-                return JsonCommonSerializer.DeserializeFromString<T>(LLMrawResponse);
+                return JsonCommonSerializer.DeserializeFromString<T>(responseToParse);
             }
         }
 
         public static T[] ParseOnlyJsonArray<T>(string LLMrawResponse)
         {
+            string responseToParse = LLMrawResponse;
+
             try
             {
+                string thinkingToRemove = ChatMessageParserUtils.ParseThinking(LLMrawResponse);
+                if (!string.IsNullOrWhiteSpace(thinkingToRemove))
+                {
+                    responseToParse = responseToParse.Replace(thinkingToRemove, string.Empty);
+                }
+
                 // Use a regex to find the array and remove everything that is inconsequential
-                var match = Regex.Match(LLMrawResponse, @"\[(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\]", RegexOptions.Singleline);
+                var match = Regex.Match(responseToParse, @"\[(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\]", RegexOptions.Singleline);
                 string result = match.Value;
 
                 return JsonCommonSerializer.DeserializeFromString<T[]>(result);
             } catch (Exception)
             {
-                return JsonCommonSerializer.DeserializeFromString<T[]>(LLMrawResponse);
+                return JsonCommonSerializer.DeserializeFromString<T[]>(responseToParse);
             }
         }
 
