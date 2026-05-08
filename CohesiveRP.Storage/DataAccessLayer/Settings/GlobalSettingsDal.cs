@@ -55,7 +55,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Main, ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar],
+                            Tags = [ChatCompletionPresetType.Main],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -92,7 +92,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.SceneAnalyze, ChatCompletionPresetType.DynamicCharacterSheetCreation, ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
+                            Tags = [ChatCompletionPresetType.SceneAnalyze, ChatCompletionPresetType.DynamicCharacterSheetCreation, ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar, ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,

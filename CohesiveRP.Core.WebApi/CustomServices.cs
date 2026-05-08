@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using CohesiveRP.Common.Configuration;
 using CohesiveRP.Core.BackgroundServices.BackgroundQueries;
+using CohesiveRP.Core.ComfyUI.Client;
 using CohesiveRP.Core.DtoConverters;
 using CohesiveRP.Core.DtoConverters.Abstractions;
 using CohesiveRP.Core.LLMProviderManager;
@@ -167,6 +169,15 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IChatCharactersRollsDal, ChatCharactersRollsDal>();
             services.AddSingleton<IInteractiveUserInputDal, InteractiveUserInputDal>();
             services.AddSingleton<IIllustrationQueryDal, IllustrationQueryDal>();
+
+            //// Load the API-format workflow from embedded resources or disk
+            //string templateJson = File.ReadAllText("Workflows/CohesiveRP-MainAvatarGenerator-v1.0.api.json");
+
+            //services.AddSingleton<ComfyUiEndpointConfig>(/* from appsettings */);
+            //services.AddSingleton<IWorkflowInjector>(_ => new MainAvatarWorkflowInjector(templateJson));
+            services.AddSingleton<ComfyUiEndpointConfig>(new ComfyUiEndpointConfig { BaseUrl = "http://localhost:8188" });
+            services.AddSingleton<IComfyUiClient, ComfyUiClient>();
+            //services.AddSingleton<IComfyUiAvatarService, ComfyUiAvatarService>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()

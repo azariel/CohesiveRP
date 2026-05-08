@@ -13,6 +13,7 @@ using CohesiveRP.Core.WebApi.ResponseDtos.IllustrationQueries;
 using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
 using CohesiveRP.Core.WebApi.Workflows.IllustrationQueries.Abstractions;
 using CohesiveRP.Storage;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
 using CohesiveRP.Storage.QueryModels.Chat;
@@ -119,6 +120,8 @@ namespace CohesiveRP.Core.WebApi.Workflows.IllustrationQueries
                     .Replace("{{character_hairColor}}", characterSheet.CharacterSheet.HairColor)
                     .Replace("{{character_hairStyle}}", characterSheet.CharacterSheet.HairStyle)
                     .Replace("{{character_earShape}}", characterSheet.CharacterSheet.EarShape)
+                    .Replace("{{character_breastsSize}}", characterSheet.CharacterSheet.BreastsSize)
+                    .Replace("{{character_penisSize}}", characterSheet.CharacterSheet.PenisSize)
                     .Replace("{{character_clothesPreferences}}", characterSheet.CharacterSheet.ClothesPreference);
                 str.AppendLine(value);
             }
