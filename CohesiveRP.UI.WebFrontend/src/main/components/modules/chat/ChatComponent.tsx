@@ -12,6 +12,7 @@ import { useChatMessages } from "../../../../store/MessagesStoreContext";
 import SceneTrackerComponent from "./sceneTracker/SceneTrackerComponent";
 import ChatRollsComponent from "./chatRolls/ChatRollsComponent";
 import InteractiveUserInputComponent from "./interactiveUserInput/InteractiveUserInputComponent";
+import MobileAvatarBannerComponent from "./mobileAvatarBanner/MobileAvatarBannerComponent";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -105,7 +106,13 @@ export default function ChatComponent() {
 
             return (
               <Fragment key={message.messageId}>
-                {messages.length > 1 && isLastMessage && <SceneTrackerComponent />} 
+                {messages.length > 1 && isLastMessage && (
+                  <>
+                    {/* Mobile-only avatar banner — mirrors MainRightComponent on small screens */}
+                    <MobileAvatarBannerComponent />
+                    <SceneTrackerComponent />
+                  </>
+                )}
 
                 <ChatMessageComponent
                   message={message}

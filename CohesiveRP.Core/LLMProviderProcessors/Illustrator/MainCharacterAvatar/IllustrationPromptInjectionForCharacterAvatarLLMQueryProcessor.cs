@@ -2,6 +2,7 @@
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
+using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator.BusinessObjects;
 using CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar.BusinessObjects;
@@ -14,6 +15,7 @@ using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Characters.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries.BusinessObjects;
 using CohesiveRP.Storage.QueryModels.Chat;
 
@@ -84,6 +86,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar
                 var character = await storageService.GetCharacterByIdAsync(links.CharacterId);
                 if (character != null)
                 {
+                    character.ImageGenerationConfiguration.IllustrationMapOutfits ??= new();
                     foreach (var result in promptInjectionResults.Contents)
                     {
                         var elements = character.ImageGenerationConfiguration.IllustrationMapOutfits.Where(w => w.Outfit == result.Outfit);
@@ -106,6 +109,14 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar
 
                     await storageService.UpdateCharacterAsync(character);
                 }
+
+                // Queue an Illustration generation (generate a bunch of avatars for handled outfits)
+                var newlyCreatedQuery = await storageService.AddIllustrationQueryAsync(new IllustrationQueryDbModel
+                {
+                    ChatId = backgroundQueryDbModel.ChatId,
+                    Type = IllustratorQueryType.CharacterMainAvatarGeneration,
+                    CharacterId = links.CharacterId,
+                });
 
                 // Update the status of the linkedInteractiveUserInputQuery to Completed
                 var linkedInteractiveUserInputQuery = await storageService.GetInteractiveUserInputQueriesAsync(g => g.InteractiveUserInputQueryId == links.InteractiveUserInputQueryId);

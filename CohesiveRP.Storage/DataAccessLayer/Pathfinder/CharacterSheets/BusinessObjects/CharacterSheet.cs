@@ -23,6 +23,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonPropertyName("ageGroup")]
         public string AgeGroup { get; set; }// e.g: Young adult
 
+        [JsonPropertyName("ageGroupAppearance")]
+        public string AgeGroupAppearance { get; set; }// e.g: Young adult
+
         [JsonPropertyName("race")]
         public string Race { get; set; }// e.g: human, elf, ... + add blood purity (mixed, pureblood, etc) // human (Pure-blood witch)
 

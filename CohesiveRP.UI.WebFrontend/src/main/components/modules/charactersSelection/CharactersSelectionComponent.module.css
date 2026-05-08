@@ -438,6 +438,73 @@
   animation: spin 1s linear infinite;
 }
 
+/* ── Checkbox ── */
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  align-self: flex-end;
+  padding-bottom: 0.35em;
+}
+
+.checkboxInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.checkboxCustom {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  background: rgba(5, 5, 16, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.checkboxInput:checked + .checkboxCustom {
+  background: rgba(24, 185, 210, 0.15);
+  border-color: rgba(24, 185, 210, 0.6);
+  box-shadow: 0 0 6px rgba(24, 185, 210, 0.2);
+}
+
+.checkboxInput:checked + .checkboxCustom::after {
+  content: '';
+  position: absolute;
+  width: 0.3em;
+  height: 0.55em;
+  border-right: 2px solid #18b9d2;
+  border-bottom: 2px solid #18b9d2;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.checkboxText {
+  font-size: 0.72em;
+  font-family: 'Cinzel', Georgia, serif;
+  letter-spacing: 0.05em;
+  color: rgba(150, 150, 195, 0.75);
+  transition: color 0.2s ease;
+}
+
+.checkboxLabel:hover .checkboxCustom {
+  border-color: rgba(24, 185, 210, 0.4);
+}
+
+.checkboxLabel:hover .checkboxText {
+  color: rgba(200, 200, 230, 0.9);
+}
+
 .importingCharacterSpinner {
   color: #33aee7;
   width: 1.3em;

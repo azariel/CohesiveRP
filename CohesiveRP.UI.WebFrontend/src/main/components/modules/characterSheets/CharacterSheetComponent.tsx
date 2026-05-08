@@ -10,7 +10,7 @@ import type { CharacterSheetRequestDto } from "../../../../RequestDto/characters
 /* ─────────────────────────── Constants ─────────────────────── */
 
 const GENDER_OPTIONS = ["", "Male", "Female"];
-const AGE_GROUP_OPTIONS = ["", "Child", "Teenager", "YoungAdult", "Adult", "Elderly"];
+const AGE_GROUP_OPTIONS = ["", "Infant", "Toddler", "Children", "Teenager", "YoungAdult", "Adult", "Elderly"];
 const GENITALS_OPTIONS = ["", "Male", "Female", "Both", "None"];
 const BREASTS_SIZE_OPTIONS = ["", "Flat", "Small", "Average", "Large", "ExtraLarge"];
 
@@ -186,6 +186,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
   const [birthday, setBirthday] = useState("");
   const [gender, setGender] = useState("");
   const [ageGroup, setAgeGroup] = useState("");
+  const [ageGroupAppearance, setAgeGroupAppearance] = useState("");
 
   /* ── appearance ── */
   const [race, setRace] = useState("");
@@ -251,6 +252,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
     setBirthday(s.characterSheet?.birthday ?? "");
     setGender(s.characterSheet?.gender ?? "");
     setAgeGroup(s.characterSheet?.ageGroup ?? "");
+    setAgeGroupAppearance(s.characterSheet?.ageGroupAppearance ?? "");
     setRace(s.characterSheet?.race ?? "");
     setHeight(s.characterSheet?.height ?? "");
     setBodyType(s.characterSheet?.bodyType ?? "");
@@ -410,6 +412,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           birthday: birthday || null,
           gender: gender || null,
           ageGroup: ageGroup || null,
+          ageGroupAppearance: ageGroupAppearance || null,
           race,
           height,
           bodyType,
@@ -500,6 +503,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         birthday: birthday || null,
         gender: gender || null,
         ageGroup: ageGroup || null,
+        ageGroupAppearance: ageGroupAppearance || null,
         race,
         height,
         speechPattern,
@@ -570,6 +574,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         setBirthday(s.birthday ?? "");
         setGender(s.gender ?? "");
         setAgeGroup(s.ageGroup ?? "");
+        setAgeGroupAppearance(s.ageGroupAppearance ?? "");
         setRace(s.race ?? "");
         setHeight(s.height ?? "");
         setBodyType(s.bodyType ?? "");
@@ -706,6 +711,9 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           </Field>
           <Field label="Age Group">
             <SheetSelect value={ageGroup} onChange={setAgeGroup} options={AGE_GROUP_OPTIONS} />
+          </Field>
+          <Field label="Age Group Appearance">
+            <SheetSelect value={ageGroupAppearance} onChange={setAgeGroupAppearance} options={AGE_GROUP_OPTIONS} />
           </Field>
         </div>
         <div className={styles.twoCol}>

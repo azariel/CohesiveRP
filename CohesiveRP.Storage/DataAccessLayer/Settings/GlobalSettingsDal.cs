@@ -331,7 +331,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     },
                     Summary = new SummarySettings()
                     {
-                        NbRawMessagesToKeepInContext = 5,
+                        NbRawMessagesToKeepInContext = 10,
                         HotMessagesAmountLimit = 30,
                         ColdMessagesAmountLimit = 500,
                         Short = new ShortSummaryConfig

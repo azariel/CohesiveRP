@@ -135,6 +135,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                     CharacterSheet = new CharacterSheet
                     {
                         AgeGroup = characterSheetFromLLMApiResponse.AgeGroup,
+                        AgeGroupAppearance = characterSheetFromLLMApiResponse.AgeGroupAppearance,
                         Attractiveness = characterSheetFromLLMApiResponse.Attractiveness,
                         Behavior = characterSheetFromLLMApiResponse.Behavior,
                         BirthdayDate = characterSheetFromLLMApiResponse.BirthdayDate,

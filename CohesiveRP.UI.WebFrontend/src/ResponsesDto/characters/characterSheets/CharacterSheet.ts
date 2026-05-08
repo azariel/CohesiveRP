@@ -4,6 +4,7 @@ interface CharacterSheet {
   birthday?: string | null;
   gender?: string | null;
   ageGroup?: string | null;
+  ageGroupAppearance?: string | null;
   race?: string;
   height?: string;
   speechPattern?: string;

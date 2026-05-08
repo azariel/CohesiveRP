@@ -151,21 +151,38 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
             <div className={styles.messageAvatarContainer}>
               {(() => {
                 const avatarPath = message?.characterAvatars?.[0];
-                const src = message?.sourceType === 0
-                  ? (avatarPath && avatarPath.expression !== null
+
+                const src =
+                  message?.sourceType === 0
+                    ? avatarPath && avatarPath.expression !== null
                       ? getAvatarPathFromCharacterAvatarDefinition(avatarPath)
-                      : GetAvatarPathFromPersonaId(message?.personaId ?? ""))
-                  : (avatarPath && avatarPath.expression !== null
+                      : GetAvatarPathFromPersonaId(message?.personaId ?? "")
+                    : avatarPath && avatarPath.name !== null          // ← was: expression !== null
                       ? getAvatarPathFromCharacterAvatarDefinition(avatarPath)
-                      : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar"));
-                return <img
-                  src={src}
-                  alt="Avatar"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = GetFallbackEmpty();
-                  }}
-                />;
+                      : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar");
+
+                return (
+                  <img
+                    src={src}
+                    alt="Avatar"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+
+                      if (message?.sourceType === 0) {
+                        // Persona: single-step fallback
+                        el.onerror = null;
+                        el.src = GetFallbackEmpty();
+                      } else {
+                        // AI character: two-step fallback matching MainRightComponent
+                        el.onerror = () => {
+                          el.onerror = null;
+                          el.src = GetFallbackEmpty();
+                        };
+                        el.src = GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar");
+                      }
+                    }}
+                  />
+                );
               })()}
             </div>
           </div>

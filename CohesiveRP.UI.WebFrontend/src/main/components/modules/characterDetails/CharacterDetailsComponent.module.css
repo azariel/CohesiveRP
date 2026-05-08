@@ -370,6 +370,54 @@
   width: 100%;
 }
 
+.lightboxNavBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 3rem;
+  color: #f6911d;
+  font-size: 1.5rem;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.lightboxNavBtn:hover {
+  border-color: transparent;
+  background-color: transparent;
+  color: #f6911d;
+  transform: translateY(-50%) scale(1.25);
+}
+
+.lightboxNavPrev { left:  0.55rem; }
+.lightboxNavNext { right: 0.55rem; }
+
+/* ── Lightbox position counter ───────────────────────────────────────────── */
+
+.lightboxCounter {
+  position: absolute;
+  bottom: 0.55rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65em;
+  color: rgba(200, 200, 230, 0.65);
+  background: rgba(8, 8, 20, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 0.18em 0.7em;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 /* ── Kept for backwards compat with label overrides ── */
 .characterDescriptionLabel,
 .characterTagsLabel,
@@ -733,6 +781,20 @@
 .lightboxBtn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.lightboxNavBtn svg,
+.lightboxBtn svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.generateAvatarButton svg,
+.promptInjectionAiButton svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
 }
 
 .lightboxDeleteBtn {

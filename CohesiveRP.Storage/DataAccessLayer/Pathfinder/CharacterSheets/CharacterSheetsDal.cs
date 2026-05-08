@@ -56,6 +56,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         instance.CharacterSheet = new CharacterSheet
                         {
                             AgeGroup = dbModel.CharacterSheet.AgeGroup,
+                            AgeGroupAppearance = dbModel.CharacterSheet.AgeGroupAppearance,
                             Attractiveness = dbModel.CharacterSheet.Attractiveness,
                             Behavior = dbModel.CharacterSheet.Behavior,
                             BirthdayDate = dbModel.CharacterSheet.BirthdayDate,

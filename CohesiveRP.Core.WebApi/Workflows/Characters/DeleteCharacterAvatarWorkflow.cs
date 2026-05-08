@@ -5,6 +5,7 @@ using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Characters;
 
@@ -21,8 +22,8 @@ public class DeleteCharacterAvatarWorkflow : IDeleteCharacterAvatarWorkflow
     {
         ArgumentNullException.ThrowIfNull(avatarFileName);
 
-        CharacterDbModel currentCharacter = await storageService.GetCharacterByIdAsync(characterId);
-        if (currentCharacter == null)
+        CharacterDbModel characterDbModel = await storageService.GetCharacterByIdAsync(characterId);
+        if (characterDbModel == null)
         {
             return new WebApiException
             {
@@ -31,7 +32,7 @@ public class DeleteCharacterAvatarWorkflow : IDeleteCharacterAvatarWorkflow
             };
         }
 
-        bool result = CharacterAvatarsUtils.DeleteCharacterAvatar(currentCharacter.Name, avatarFileName);
+        bool result = CharacterAvatarsUtils.DeleteCharacterAvatar(characterDbModel.Name, avatarFileName);
         if (!result)
         {
             return new WebApiException
@@ -39,6 +40,19 @@ public class DeleteCharacterAvatarWorkflow : IDeleteCharacterAvatarWorkflow
                 HttpResultCode = System.Net.HttpStatusCode.InternalServerError,
                 Message = $"Character [{characterId}] avatar [{avatarFileName}] deletion failed."
             };
+        }
+
+        // Reset main avatar to select one that still exists
+        // Select the oldest file in the raws/clothed folder
+        var clothedFolder = $"{WebConstants.CharactersAvatarFilePath}\\{characterDbModel.Name.ToLowerInvariant()}\\raws\\{ClothingStateOfDress.Clothed.ToString().ToLowerInvariant()}";
+        var oldestFile = Directory.GetFiles(clothedFolder).OrderBy(f => File.GetCreationTimeUtc(f)).FirstOrDefault();
+        if (oldestFile != null)
+        {
+            string outFilePath = $"{WebConstants.CharactersAvatarFilePath}\\{characterDbModel.Name.ToLowerInvariant()}\\avatar.png";
+            if (File.Exists(outFilePath))
+                File.Delete(outFilePath);
+
+            File.Copy(oldestFile, outFilePath);
         }
 
         var responseDto = new CharacterResponseDto
