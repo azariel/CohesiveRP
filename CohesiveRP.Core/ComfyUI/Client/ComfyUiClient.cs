@@ -1,7 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System.Text.Json;
 using CohesiveRP.Common.Configuration;
-using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.HttpClient;
 using CohesiveRP.Common.Websocket;
 
@@ -10,7 +9,7 @@ namespace CohesiveRP.Core.ComfyUI.Client
     public class ComfyUiClient : IComfyUiClient, IDisposable
     {
         private readonly HttpRestClient _http;
-        private readonly WebSocketClient _ws;
+        private WebSocketClient _ws;
         private readonly string _baseUrl;
         private readonly string _clientId = Guid.NewGuid().ToString("N");
 
@@ -31,15 +30,23 @@ namespace CohesiveRP.Core.ComfyUI.Client
 
         public async Task ConnectAsync(CancellationToken cancellationToken)
         {
-            if (_ws.State == WebSocketState.Open)
-                return;
+            // A ClientWebSocket is single-use: once it leaves the None/Open state
+            // it cannot be reconnected. Recreate it whenever it's stale.
+            if (_ws.State != WebSocketState.Open)
+            {
+                if (_ws.State != WebSocketState.None)
+                {
+                    _ws.Dispose();
+                    _ws = new WebSocketClient();
+                }
 
-            var wsUri = new Uri(_baseUrl
-                .Replace("https://", "wss://", StringComparison.OrdinalIgnoreCase)
-                .Replace("http://", "ws://", StringComparison.OrdinalIgnoreCase)
-                + $"/ws?clientId={_clientId}");
+                var wsUri = new Uri(_baseUrl
+                    .Replace("https://", "wss://", StringComparison.OrdinalIgnoreCase)
+                    .Replace("http://", "ws://", StringComparison.OrdinalIgnoreCase)
+                    + $"/ws?clientId={_clientId}");
 
-            await _ws.ConnectAsync(wsUri, cancellationToken);
+                await _ws.ConnectAsync(wsUri, cancellationToken);
+            }
         }
 
         // ------------------------------------------------------------------ //
@@ -154,6 +161,28 @@ namespace CohesiveRP.Core.ComfyUI.Client
                 Filename: image.GetProperty("filename").GetString()!,
                 Subfolder: image.GetProperty("subfolder").GetString()!,
                 Type: image.GetProperty("type").GetString()!);
+        }
+
+        // ------------------------------------------------------------------ //
+        //  Health
+        // ------------------------------------------------------------------ //
+
+        /// <summary>
+        /// Returns true when the ComfyUI REST API is reachable and responsive.
+        /// Uses /system_stats — a lightweight endpoint that requires no auth.
+        /// </summary>
+        public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                string response = await _http.GetAsync($"{_baseUrl}/system_stats", cancellationToken);
+                // Any non-throwing response with a JSON body counts as healthy
+                using var doc = JsonDocument.Parse(response);
+                return true;
+            } catch
+            {
+                return false;
+            }
         }
     }
 

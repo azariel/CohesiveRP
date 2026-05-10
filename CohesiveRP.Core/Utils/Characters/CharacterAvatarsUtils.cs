@@ -55,5 +55,49 @@ namespace CohesiveRP.Core.Utils.Characters
 
             return false;
         }
+
+        public static void RefreshDefaultAvatars(string sourceCharacterFolder, bool forceUpdate = false)
+        {
+            // Set a main Avatar if none were already selected
+            if (File.Exists($"{sourceCharacterFolder}\\{WebConstants.AvatarFileName}") && !forceUpdate)
+            {
+                return;
+
+            }
+
+            // Select the oldest file in the raws/clothed folder
+            var clothedFolder = $"{sourceCharacterFolder}\\raws\\{ClothingStateOfDress.Clothed.ToString().ToLowerInvariant()}";
+            var oldestFile = Directory.GetFiles(clothedFolder).OrderBy(f => File.GetCreationTimeUtc(f)).FirstOrDefault();
+            if (oldestFile != null)
+            {
+                string outFilePath = $"{sourceCharacterFolder}\\{WebConstants.AvatarFileName}";
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+
+                File.Copy(oldestFile, outFilePath);
+            }
+
+            // Set the main avatar for each outfit
+            foreach (var outfit in Enum.GetValues(typeof(ClothingStateOfDress)))
+            {
+                string outfitDirectory = Path.Combine(sourceCharacterFolder, WebConstants.ExpressiveAvatarFolder, outfit.ToString().ToLowerInvariant());
+                string rawOutfitDirectory = Path.Combine(sourceCharacterFolder, WebConstants.SourceAvatarFolder, outfit.ToString().ToLowerInvariant());
+
+                if(!Directory.Exists(outfitDirectory) || !Directory.Exists(rawOutfitDirectory))
+                    continue;
+
+                string newOutfitAvatarCandidateFilePath = Directory.GetFiles(rawOutfitDirectory).OrderBy(f => File.GetCreationTimeUtc(f)).FirstOrDefault();
+
+                if(string.IsNullOrWhiteSpace(newOutfitAvatarCandidateFilePath))
+                    continue;
+
+                string outFile = Path.Combine(outfitDirectory, WebConstants.AvatarFileName);
+
+                if (File.Exists(outFile))
+                    File.Delete(outFile);
+
+                File.Copy(newOutfitAvatarCandidateFilePath, outFile);
+            }
+        }
     }
 }

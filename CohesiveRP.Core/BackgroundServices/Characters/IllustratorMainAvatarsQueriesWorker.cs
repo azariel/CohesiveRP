@@ -4,12 +4,10 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Core.ComfyUI;
 using CohesiveRP.Core.ComfyUI.Client;
 using CohesiveRP.Core.Services;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Storage.DataAccessLayer.IllustrationQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.Users;
 using Microsoft.Extensions.Hosting;
 
 namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharactersCreator
@@ -45,6 +43,23 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                     if (lockedQuery == null)
                     {
                         await Task.Delay(STANDARD_DELAY_MS, stoppingToken);
+                        continue;
+                    }
+
+                    using var healthCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    bool comfyAvailable = await comfyUiClient.IsAvailableAsync(healthCts.Token);
+
+                    if (!comfyAvailable)
+                    {
+                        LoggingManager.LogToFile("bd492c4c-e2af-4846-a6cd-fe51c0da84d9",$"ComfyUI is unreachable. Reverting query [{lockedQuery.IllustrationQueryId}] to [{IllustratorQueryStatus.Pending}] and pausing for 10 minutes.");
+
+                        lockedQuery.Status = IllustratorQueryStatus.Pending;
+                        if (!await storageService.UpdateIllustrationQueryAsync(lockedQuery))
+                        {
+                            LoggingManager.LogToFile("fd8f62ff-99b4-4238-9355-1b2b56a6d816",$"Failed to revert query [{lockedQuery.IllustrationQueryId}] to Pending while ComfyUI was down. It will remain in Processing.");
+                        }
+
+                        await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
                         continue;
                     }
 
@@ -201,7 +216,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                         string workflowJson = new MainAvatarWorkflowInjector(templateJson).Inject(new AvatarGenerationRequest
                         {
                             CharacterId = selectedQuery.CharacterId,
-                            PositivePrompt = $"score_9,masterpiece,best quality,amazing quality,score_8_up,score_7_up,{genderedTags},solo,upper body,facing viewer,looking at viewer,standing,straight-on,{Environment.NewLine}{outfit.IllustratorPromptInjection}{Environment.NewLine}neutral expression,good head proportions,black background,simple background,detailed face,beautiful eyes,nsfw,explicit",
+                            PositivePrompt = $"score_9,masterpiece,best quality,amazing quality,score_8_up,score_7_up,{genderedTags},solo,upper body,facing viewer,looking at viewer,standing,straight-on,{Environment.NewLine}{outfit.IllustratorPromptInjection}{Environment.NewLine}neutral expression,good head proportions,black background,simple background,detailed face,beautiful eyes",
                             NegativePromptOverride = "CyberRealistic_Negative-neg,UnrealisticDream,BadDream,(deformed iris,deformed pupils,semi-realistic,cgi,3d,render),text,cropped,out of frame,worst quality,low quality,jpeg artifacts,ugly,duplicate,morbid,username,mutilated,extra fingers,mutated,mutated hands,poorly drawn hands,poorly drawn face,mutation,deformed,blurry,dehydrated,bad anatomy,bad proportions,extra limbs,cloned face,disfigured,gross proportions,large head,malformed limbs,missing arms,missing legs,extra arms,extra legs,fused fingers,too many fingers,long neck,bad quality,pixelated,deformed faces,deformed body,blurry,extra body parts,extra finges,extra arms,pink,worst quality ,bad-hands,(bad art: 1.4),bad eye,bad eyes,deformed eyes,bad face,deformed face,blond hair,score_6,score_5,score_4,(worst quality:1.2),(low quality:1.2),(normal quality:1.2),lowres,bad anatomy,bad hands,signature,watermarks,ugly,imperfect eyes,skewed eyes,unnatural face,unnatural body,error,extra limb,missing limbs,extra digits,fewer digits,score_6,score_5,score_4,simplified,abstract,unrealistic,impressionistic,low resolution,lowres,bad anatomy,bad hands,missing fingers,normal quality,worst detail,illustration,sketch,artificial,poor quality,colorful background,detailed background,gradient background,outdoor,indoors,scenery,landscape,sky,trees,street,censor",
                             HeightOverride = 1216,
                             WidthOverride = 832,
@@ -220,22 +235,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                     }
                 }
 
-                // Set a main Avatar if none were already selected
-                if (!File.Exists($"{WebConstants.CharactersAvatarFilePath}\\{characterDbModel.Name.ToLowerInvariant()}\\avatar.png") || atLeastOneGenerated)
-                {
-                    // Select the oldest file in the raws/clothed folder
-                    var clothedFolder = $"{WebConstants.CharactersAvatarFilePath}\\{characterDbModel.Name.ToLowerInvariant()}\\raws\\{ClothingStateOfDress.Clothed.ToString().ToLowerInvariant()}";
-                    var oldestFile = Directory.GetFiles(clothedFolder).OrderBy(f => File.GetCreationTimeUtc(f)).FirstOrDefault();
-                    if (oldestFile != null)
-                    {
-                        string outFilePath = $"{WebConstants.CharactersAvatarFilePath}\\{characterDbModel.Name.ToLowerInvariant()}\\avatar.png";
-                        if (File.Exists(outFilePath))
-                            File.Delete(outFilePath);
-
-                        File.Copy(oldestFile, outFilePath);
-                    }
-                }
-
+                CharacterAvatarsUtils.RefreshDefaultAvatars($"{WebConstants.CharactersAvatarFilePath}\\{characterDbModel.Name.ToLowerInvariant()}", atLeastOneGenerated);
                 return allSucceeded;
             } catch (Exception E)
             {

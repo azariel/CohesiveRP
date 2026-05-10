@@ -6,5 +6,6 @@
         Task<string> SubmitAsync(string workflowApiJson, CancellationToken cancellationToken);
         Task<ComfyUiOutputFile> WaitAsync(string promptId, CancellationToken cancellationToken);
         Task<byte[]> DownloadAsync(ComfyUiOutputFile file, CancellationToken cancellationToken);
+        Task<bool> IsAvailableAsync(CancellationToken cancellationToken);
     }
 }

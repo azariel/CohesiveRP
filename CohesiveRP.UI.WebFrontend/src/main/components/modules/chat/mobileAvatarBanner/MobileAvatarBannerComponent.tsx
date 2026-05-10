@@ -8,6 +8,11 @@ import {
   GetFallbackEmpty,
 } from "../../../../../utils/avatarUtils";
 
+/** Native dimensions of avatar images. Adjust if they ever change. */
+const AVATAR_W = 832;
+const AVATAR_H = 1216;
+const MAX_HEIGHT_PX = 280;
+
 export default function MobileAvatarBannerComponent() {
   const { activeModule } = sharedContext<SharedContextChatType>();
   const [messages] = useChatMessages(activeModule?.chatId);
@@ -22,23 +27,27 @@ export default function MobileAvatarBannerComponent() {
     );
 
   const paths = lastAiMessage?.characterAvatars ?? [];
-  const firstPath = paths[0];
 
-  const avatarSrc = firstPath
-    ? firstPath?.name !== null
-      ? getAvatarPathFromCharacterAvatarDefinition(firstPath)
+  const allAvatarSrcs = paths.slice(0, 4).map((p) =>
+    p?.name !== null
+      ? getAvatarPathFromCharacterAvatarDefinition(p)
       : GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar")
-    : null;
+  );
 
-  const smallAvatarSrcs = paths
-    .slice(1, 4)
-    .map((p) =>
-      p?.name !== null
-        ? getAvatarPathFromCharacterAvatarDefinition(p)
-        : GetAvatarPathFromChatIdAndAvatarId(activeModule?.chatId ?? "", "avatar")
-    );
+  if (allAvatarSrcs.length === 0) return null;
 
-  if (!avatarSrc) return null;
+  const chatId = activeModule?.chatId ?? "";
+  const count = allAvatarSrcs.length;
+
+  // Height that gives each cell exactly the native portrait ratio:
+  //   cellWidth  = 100vw / count
+  //   cellHeight = cellWidth × (AVATAR_H / AVATAR_W)
+  //              = (100 / count) × (AVATAR_H / AVATAR_W)  vw
+  // For N=2 on 390px: (100/2) × (1216/832) ≈ 73vw ≈ 285px  → fits, close to perfect ratio
+  // For N=3 on 390px: (100/3) × (1216/832) ≈ 49vw ≈ 190px  → perfect ratio
+  // For N=4 on 390px: (100/4) × (1216/832) ≈ 37vw ≈ 142px  → perfect ratio
+  // For N=1 on 390px: (100/1) × (1216/832) ≈ 146vw ≈ 570px → capped at MAX_HEIGHT_PX
+  const heightVw = (AVATAR_H / AVATAR_W / count) * 100;
 
   const makeFallback =
     (chatId: string) =>
@@ -51,49 +60,30 @@ export default function MobileAvatarBannerComponent() {
       el.src = GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar");
     };
 
-  const chatId = activeModule?.chatId ?? "";
-
   return (
     <div className={styles.banner}>
-      {/* Decorative cyan rule */}
       <span className={styles.accentLine} />
 
-      <div className={styles.strip}>
-        {/* ── Primary avatar ── */}
-        <div className={styles.primaryFrame}>
-          <img
-            src={avatarSrc}
-            alt="Character avatar"
-            className={styles.primaryImg}
-            onError={makeFallback(chatId)}
-          />
-          <div className={styles.primaryFade} />
-        </div>
-
-        {/* ── Secondary avatars ── */}
-        {smallAvatarSrcs.length > 0 && (
-          <div
-            className={styles.secondaryGrid}
-            style={{
-              gridTemplateRows: `repeat(${smallAvatarSrcs.length}, 1fr)`,
-            }}
-          >
-            {smallAvatarSrcs.map((src, i) => (
-              <div key={i} className={styles.secondaryFrame}>
-                <img
-                  src={src}
-                  alt={`Character avatar ${i + 2}`}
-                  className={styles.secondaryImg}
-                  onError={makeFallback(chatId)}
-                />
-                <div className={styles.secondaryFade} />
-              </div>
-            ))}
+      <div
+        className={styles.strip}
+        style={{
+          height: `min(${heightVw.toFixed(2)}vw, ${MAX_HEIGHT_PX}px)`,
+          gridTemplateColumns: `repeat(${count}, 1fr)`,
+        }}
+      >
+        {allAvatarSrcs.map((src, i) => (
+          <div key={i} className={styles.avatarCell}>
+            <img
+              src={src}
+              alt={`Character avatar ${i + 1}`}
+              className={styles.avatarImg}
+              onError={makeFallback(chatId)}
+            />
+            <div className={styles.cellFade} />
           </div>
-        )}
+        ))}
       </div>
 
-      {/* Decorative bottom rule */}
       <span className={styles.accentLineBottom} />
     </div>
   );

@@ -180,12 +180,12 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             };
 
             string outfit = targetCharacter.ClothingStateOfDress.ToLowerInvariant();
-            string currentOutfitFolderPath = Path.Combine(characterFolderPath, outfit);
+            string currentOutfitFolderPath = Path.Combine(characterFolderPath, WebConstants.ExpressiveAvatarFolder, outfit);
             if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
             {
                 // Try to default back to 'clothed'
                 outfit = ClothingStateOfDress.Clothed.ToString().ToLowerInvariant();
-                currentOutfitFolderPath = Path.Combine(characterFolderPath, outfit);
+                currentOutfitFolderPath = Path.Combine(characterFolderPath, WebConstants.ExpressiveAvatarFolder, outfit);
 
                 if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
                 {
@@ -270,12 +270,12 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             };
 
             string outfit = sceneTracker.PlayerAnalysis.ClothingStateOfDress.ToLowerInvariant();
-            string currentOutfitFolderPath = Path.Combine(personaFolderPath, outfit);
+            string currentOutfitFolderPath = Path.Combine(personaFolderPath, WebConstants.ExpressiveAvatarFolder, outfit);
             if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
             {
                 // Try to default back to 'clothed'
                 outfit = ClothingStateOfDress.Clothed.ToString().ToLowerInvariant();
-                currentOutfitFolderPath = Path.Combine(personaFolderPath, outfit);
+                currentOutfitFolderPath = Path.Combine(personaFolderPath, WebConstants.ExpressiveAvatarFolder, outfit);
 
                 if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
                 {
@@ -537,22 +537,6 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
                 return false;
             }
-        }
-
-        private async Task<bool> QueueSceneAnalyzeAsync(ChatDbModel chat)
-        {
-            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-            {
-                ChatId = chat.ChatId,
-                Priority = BackgroundQueryPriority.Highest,// User is waiting!
-                DependenciesTags = [],// No dependencies at all
-                Tags = [BackgroundQuerySystemTags.sceneAnalyze.ToString()],
-            };
-
-            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-                return false;
-
-            return true;
         }
     }
 }

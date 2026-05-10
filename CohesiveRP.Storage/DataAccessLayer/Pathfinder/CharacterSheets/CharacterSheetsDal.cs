@@ -44,7 +44,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         continue;
                     }
 
-                    var matchingInstances = characterSheetInstancesObj.CharacterSheetInstances.Where(w => w.CharacterSheetId == dbModel.CharacterSheetId && !w.IsDirty).ToArray();
+                    var matchingInstances = characterSheetInstancesObj.CharacterSheetInstances.Where(w => w.CharacterId == dbModel.CharacterId && !w.IsDirty).ToArray();
 
                     if (matchingInstances.Length <= 0)
                     {
@@ -101,6 +101,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Weaknesses = dbModel.CharacterSheet.Weaknesses,
                             WeaponsProficiency = dbModel.CharacterSheet.WeaponsProficiency,
                         };
+
+                        instance.CharacterSheetId = dbModel.CharacterSheetId;
                     }
 
                     // System fields
@@ -184,6 +186,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 }
 
                 await dbContext.SaveChangesAsync();
+
+                 // In a second time, update the characterSheetInstances related to this characterSheet ONLY if the instance isn't 'dirty' aka was updated by the backend with chat updates
+                await UpdateCharacterSheetInstancesAsync(dbModel);
+
                 return result.Entity;
             } catch (Exception ex)
             {

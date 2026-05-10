@@ -65,6 +65,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                 CharacterSheet characterSheetFromLLMApiResponse = JsonCommonSerializer.DeserializeFromString<CharacterSheet>(characterSheetJson);
 
                 if (string.IsNullOrWhiteSpace(characterSheetFromLLMApiResponse?.FirstName) ||
+                    characterSheetFromLLMApiResponse.FirstName.ToLowerInvariant().Trim() == "unknown" ||
                     characterSheetFromLLMApiResponse.Kinks == null || characterSheetFromLLMApiResponse.Kinks.Length <= 1 ||
                     characterSheetFromLLMApiResponse.SecretKinks == null || characterSheetFromLLMApiResponse.SecretKinks.Length <= 1
                 )
