@@ -31,6 +31,49 @@ namespace CohesiveRP.Core.Utils.Characters
                 .ToList();
         }
 
+        public static List<ExpressionAvatars> GetCharacterExpressionAvatars(CharacterDbModel characterDbModel, ClothingStateOfDress outfit)
+        {
+            List<ExpressionAvatars> avatars = new();
+
+            // Scan the Webapp public assets folder to find all the avatar images for the character
+            string[] characterAvatarFoldersPath = Directory.GetDirectories(Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name.ToLowerInvariant(), WebConstants.ExpressiveAvatarFolder, outfit.ToString().ToLowerInvariant()));
+            if (characterAvatarFoldersPath.Length == 0)
+            {
+                CharacterUtils.CreateCharacterAssets(characterDbModel.Name);
+                return avatars;
+            }
+
+            foreach (var folderPath in characterAvatarFoldersPath)
+            {
+                string[] avatarFiles = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+                var avatarsInFolder = avatarFiles
+                    .Where(file => file.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                    .Select(file => new CharacterAvatar
+                    {
+                        AvatarFilePath = file.Replace(WebConstants.WebAppPublicFolder, ""),
+                        AvatarFileName = Path.GetFileName(file),
+                        AvatarSeed = AvatarUtils.GetSeedFromFileName(file),
+                    })
+                    .ToList();
+
+                // get the last path segment (folder name) and parse to enum
+                var expressionName = Path.GetFileName(folderPath);
+                if (!Enum.TryParse<MappedFacialExpression>(expressionName, true, out var expression))
+                {
+                    // fallback: skip this folder or set a default expression
+                    continue;
+                }
+
+                avatars.Add(new ExpressionAvatars
+                {
+                    Avatars = avatarsInFolder,
+                    Expression = expression,
+                });
+            }
+
+            return avatars;
+        }
+
         public static bool DeleteCharacterAvatar(string characterName, string avatarFileName)
         {
             string characterFolderPath = Path.Combine(WebConstants.CharactersAvatarFilePath, characterName.ToLowerInvariant());
@@ -83,12 +126,12 @@ namespace CohesiveRP.Core.Utils.Characters
                 string outfitDirectory = Path.Combine(sourceCharacterFolder, WebConstants.ExpressiveAvatarFolder, outfit.ToString().ToLowerInvariant());
                 string rawOutfitDirectory = Path.Combine(sourceCharacterFolder, WebConstants.SourceAvatarFolder, outfit.ToString().ToLowerInvariant());
 
-                if(!Directory.Exists(outfitDirectory) || !Directory.Exists(rawOutfitDirectory))
+                if (!Directory.Exists(outfitDirectory) || !Directory.Exists(rawOutfitDirectory))
                     continue;
 
                 string newOutfitAvatarCandidateFilePath = Directory.GetFiles(rawOutfitDirectory).OrderBy(f => File.GetCreationTimeUtc(f)).FirstOrDefault();
 
-                if(string.IsNullOrWhiteSpace(newOutfitAvatarCandidateFilePath))
+                if (string.IsNullOrWhiteSpace(newOutfitAvatarCandidateFilePath))
                     continue;
 
                 string outFile = Path.Combine(outfitDirectory, WebConstants.AvatarFileName);

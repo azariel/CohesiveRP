@@ -18,6 +18,8 @@ namespace CohesiveRP.Core.ComfyUI
 
         private readonly string _templateJson;
 
+        public static string NodeSaveImage { get; set; } = "54";
+
         public MainAvatarWorkflowInjector(string templateJson)
         {
             _templateJson = templateJson;

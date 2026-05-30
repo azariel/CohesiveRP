@@ -42,7 +42,7 @@
   },
   "6": {
     "inputs": {
-      "ckpt_name": "novaAnimeXL_ilV180.safetensors"
+      "ckpt_name": "novaAnimeXL_ilV140.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
@@ -204,7 +204,7 @@
   "24": {
     "inputs": {
       "anything": [
-        "29",
+        "41",
         0
       ]
     },
@@ -227,10 +227,6 @@
       "upscale_model": [
         "28",
         0
-      ],
-      "image": [
-        "41",
-        0
       ]
     },
     "class_type": "ImageUpscaleWithModel",
@@ -240,7 +236,7 @@
   },
   "34": {
     "inputs": {
-      "text": "score_9, masterpiece, best quality, score_8_up, score_7_up, \n1girl, solo, adult, woman, upper body, facing viewer, looking at viewer, standing, straight-on,\n\nhuman metahuman, average height, lean athletic wiry, dark hazel eyes, warm olive skin, auburn hair, medium length slightly wavy worn loose falls across face, human ears, dark hoodie zipped to chin dark jeans long sleeves\n\nneutral expression, good head proportions, black background, simple background, detailed face, beautiful eyes"
+      "text": "score_9,masterpiece,best quality,amazing quality,score_8_up,score_7_up,1boy, boy, teenager, children,solo,upper body,facing viewer,looking at viewer,standing,straight-on,\ngrey goblin, very short height, wiry, lean-muscled, golden eyes, ash-gray skin, brown hair, matted brown dreadlocks, hair tied back, pointy ears, fur loincloth,neutral expression,good head proportions,black background,simple background,detailed face,beautiful eyes,nsfw,explicit"
     },
     "class_type": "Text _O",
     "_meta": {
@@ -264,7 +260,7 @@
       "guide_size": 512,
       "guide_size_for": true,
       "max_size": 1024,
-      "seed": 377435922086302,
+      "seed": 846658382489354,
       "steps": 20,
       "cfg": 6,
       "sampler_name": "dpmpp_2m_sde_gpu",
@@ -400,7 +396,7 @@
     "inputs": {
       "torchscript_jit": "default",
       "image": [
-        "29",
+        "41",
         0
       ]
     },
@@ -468,7 +464,7 @@
       "number_type": "integer",
       "minimum": 111111111111111,
       "maximum": 999999999999999,
-      "seed": 789265892026076
+      "seed": 425215949804987
     },
     "class_type": "Random Number",
     "_meta": {

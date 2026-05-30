@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using CohesiveRP.Storage.DataAccessLayer.IllustrationQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 
 namespace CohesiveRP.Core.WebApi.ResponseDtos.IllustrationQueries.BusinessObjects
 {
@@ -20,5 +21,17 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.IllustrationQueries.BusinessObject
 
         [JsonPropertyName("status")]
         public IllustratorQueryStatus Status { get; set; }
+
+        [JsonPropertyName("expression")]
+        public List<MappedFacialExpression> Expressions { get; set; }
+
+        [JsonPropertyName("characterId")]
+        public string CharacterId { get; set; }
+
+        [JsonPropertyName("personaId")]
+        public string PersonaId { get; set; }
+
+        [JsonPropertyName("outfit")]
+        public ClothingStateOfDress? Outfit { get; set; }
     }
 }

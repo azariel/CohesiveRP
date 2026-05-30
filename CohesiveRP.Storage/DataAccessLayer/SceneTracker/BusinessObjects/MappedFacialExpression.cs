@@ -23,7 +23,7 @@
         Jealousy,
         Joy,
         Laughing,
-        Nervoussness,
+        Nervousness,
         Neutral,// Default, Unknown
         Pride,
         Realization,

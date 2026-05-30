@@ -24,5 +24,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Characters.BusinessObjects
 
         [JsonPropertyName("sourceAvatars")]
         public List<CharacterAvatar> SourceAvatars { get; set; }
+
+        [JsonPropertyName("expressionAvatars")]
+        public List<ExpressionAvatars> ExpressionAvatars { get; set; }
     }
 }

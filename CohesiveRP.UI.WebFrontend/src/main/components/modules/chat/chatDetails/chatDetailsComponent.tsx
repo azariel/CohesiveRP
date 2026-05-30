@@ -4,21 +4,21 @@ import { AiOutlineDisconnect } from "react-icons/ai";
 import { ImSpinner2 } from "react-icons/im";
 import { MdCheck, MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 
-import { deleteFromServerApiAsync, getFromServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
-import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+import { deleteFromServerApiAsync, getFromServerApiAsync, putToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
+import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 
 /* Store */
-import { sharedContext } from '../../../../store/AppSharedStoreContext';
-import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
-import type { ChatResponseDto } from "../../../../ResponsesDto/chat/ChatResponseDto";
-import type { SharedContextType } from "../../../../store/SharedContextType";
-import { GetAvatarPathFromChatIdAndAvatarId } from "../../../../utils/avatarUtils";
-import type { Lorebook } from "../../../../ResponsesDto/lorebooks/BusinessObjects/Lorebook";
-import type { LorebooksResponseDto } from "../../../../ResponsesDto/lorebooks/LorebooksResponseDto";
-import type { Persona } from "../../../../ResponsesDto/personas/BusinessObjects/Persona";
-import type { PersonasResponseDto } from "../../../../ResponsesDto/personas/PersonasResponseDto";
-import type { CharactersResponseDto } from "../../../../ResponsesDto/characters/CharactersResponseDto";
-import type { CharacterResponse } from "../../../../ResponsesDto/characters/CharacterResponse";
+import { sharedContext } from '../../../../../store/AppSharedStoreContext';
+import type { SharedContextChatType } from "../../../../../store/SharedContextChatType";
+import type { ChatResponseDto } from "../../../../../ResponsesDto/chat/ChatResponseDto";
+import type { SharedContextType } from "../../../../../store/SharedContextType";
+import { GetAvatarPathFromChatIdAndAvatarId } from "../../../../../utils/avatarUtils";
+import type { Lorebook } from "../../../../../ResponsesDto/lorebooks/BusinessObjects/Lorebook";
+import type { LorebooksResponseDto } from "../../../../../ResponsesDto/lorebooks/LorebooksResponseDto";
+import type { Persona } from "../../../../../ResponsesDto/personas/BusinessObjects/Persona";
+import type { PersonasResponseDto } from "../../../../../ResponsesDto/personas/PersonasResponseDto";
+import type { CharactersResponseDto } from "../../../../../ResponsesDto/characters/CharactersResponseDto";
+import type { CharacterResponse } from "../../../../../ResponsesDto/characters/CharacterResponse";
 
 export default function ChatDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextChatType>();

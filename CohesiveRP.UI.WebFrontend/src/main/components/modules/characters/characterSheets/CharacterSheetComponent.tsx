@@ -1,11 +1,11 @@
 import styles from "./CharacterSheetComponent.module.css";
 import { useState, useEffect, useRef } from "react";
 import { ImSpinner2 } from "react-icons/im";
-import { getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
-import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
-import type { CharacterSheetResponseDto } from "../../../../ResponsesDto/characters/characterSheets/CharacterSheetResponseDto";
-import type { ServerApiResponseDto } from "../../../../ResponsesDto/ServerApiResponseDto";
-import type { CharacterSheetRequestDto } from "../../../../RequestDto/characters/characterSheets/CharacterSheetRequestDto";
+import { getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
+import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+import type { CharacterSheetResponseDto } from "../../../../../ResponsesDto/characters/characterSheets/CharacterSheetResponseDto";
+import type { ServerApiResponseDto } from "../../../../../ResponsesDto/ServerApiResponseDto";
+import type { CharacterSheetRequestDto } from "../../../../../RequestDto/characters/characterSheets/CharacterSheetRequestDto";
 
 /* ─────────────────────────── Constants ─────────────────────── */
 

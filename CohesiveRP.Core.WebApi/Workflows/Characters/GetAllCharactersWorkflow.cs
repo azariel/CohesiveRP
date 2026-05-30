@@ -59,6 +59,7 @@ public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
                         IllustratorPromptInjection = imo?.IllustratorPromptInjection,
                         Outfit = imo?.Outfit ?? ClothingStateOfDress.Clothed,
                         SourceAvatars = CharacterAvatarsUtils.GetCharacterSourceAvatars(s, imo?.Outfit ?? ClothingStateOfDress.Clothed),
+                        ExpressionAvatars = CharacterAvatarsUtils.GetCharacterExpressionAvatars(s, imo?.Outfit ?? ClothingStateOfDress.Clothed),
                     }).ToList()
                 },
             }).OrderByDescending(o => o.LastActivityAtUtc).ToList()

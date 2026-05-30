@@ -34,6 +34,9 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 ChatId = requestDto.Body.ChatId,
                 Type = requestDto.Body.Type,
                 CharacterId = requestDto.Body.CharacterId,
+                PersonaId = requestDto.Body.PersonaId,
+                Expressions = requestDto.Body.Expressions,
+                Outfit = requestDto.Body.Outfit,
             });
 
             if (newlyCreatedQuery == null)
@@ -54,6 +57,10 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                     ChatId = newlyCreatedQuery.ChatId,
                     CreatedAtUtc = newlyCreatedQuery.CreatedAtUtc,
                     Type = newlyCreatedQuery.Type,
+                    Outfit = newlyCreatedQuery.Outfit,
+                    Expressions = newlyCreatedQuery.Expressions,
+                    CharacterId = requestDto.Body.CharacterId,
+                    PersonaId = requestDto.Body.PersonaId,
                     Status = newlyCreatedQuery.Status,
                 }
             };

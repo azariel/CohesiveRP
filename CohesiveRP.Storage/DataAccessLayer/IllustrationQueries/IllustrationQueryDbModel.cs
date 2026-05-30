@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using CohesiveRP.Storage.DataAccessLayer.IllustrationQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 using CohesiveRP.Storage.Sqlite;
 
 namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
@@ -26,6 +27,15 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
 
         [MaxLength(32)]//FK
         public string CharacterId { get; set; }
+
+        [MaxLength(32)]//FK
+        public string PersonaId { get; set; }
+
+        [MaxLength(64)]
+        public ClothingStateOfDress? Outfit { get; set; }
+
+        [MaxLength(64)]
+        public List<MappedFacialExpression> Expressions { get; set; }
 
         [Required]
         [MaxLength(128)]

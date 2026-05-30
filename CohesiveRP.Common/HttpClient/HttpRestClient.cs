@@ -209,5 +209,35 @@ namespace CohesiveRP.Common.HttpClient
 
             throw new ApiException(response!.StatusCode, $"[{nameof(HttpRestClient)}.{nameof(GetBytesAsync)}] failed for [{url}]. Error: [{await response.Content.ReadAsStringAsync()}].");
         }
+
+        public async Task<string> PostMultipartAsync(string url, MultipartFormDataContent content, CancellationToken cancellationToken)
+        {
+            try
+            {
+                HttpResponseMessage response = await httpClient.PostAsync(url, content, cancellationToken);
+                string responseMessageContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                    return responseMessageContent;
+
+                string errorMessage = $"Couldn't post multipart to dependent service. Url = [{url}]. HTTP Response Code = [{response.StatusCode}]. Response Message = [{responseMessageContent}].";
+                LoggingManager.LogToFile("c3a1f82e-4d57-4b9a-bf23-7e8d1f905c12", errorMessage);
+                throw new Exception(errorMessage);
+            } catch (OperationCanceledException)
+            {
+                LoggingManager.LogToFile("bfb7ae77-0fb2-4daa-b274-f939e5950382", $"[{nameof(HttpRestClient)}.{nameof(PostMultipartAsync)}] failed due to cancellationToken reaching its time limit.");
+                throw;
+            } catch (AggregateException aggregateException) when (aggregateException.InnerExceptions.Any(a => a.GetType() == typeof(HttpRequestException)))
+            {
+                LoggingManager.LogToFile("321614c3-6cda-4d04-be45-ae198378d599", $"[{nameof(HttpRestClient)}.{nameof(PostMultipartAsync)}] failed.", aggregateException);
+                throw;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("d2fa01b5-a998-459e-a1fc-2effeb454970", $"Unhandled exception. [{nameof(HttpRestClient)}.{nameof(PostMultipartAsync)}] failed.", ex);
+                throw;
+            }
+
+            throw new Exception($"[{nameof(HttpRestClient)}.{nameof(PostMultipartAsync)}] Unhandled exception when querying [{url}].");
+        }
     }
 }

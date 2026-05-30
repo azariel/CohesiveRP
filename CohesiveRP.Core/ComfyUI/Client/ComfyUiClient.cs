@@ -1,6 +1,8 @@
 ﻿using System.Net.WebSockets;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using CohesiveRP.Common.Configuration;
+using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.HttpClient;
 using CohesiveRP.Common.Websocket;
 
@@ -12,8 +14,6 @@ namespace CohesiveRP.Core.ComfyUI.Client
         private WebSocketClient _ws;
         private readonly string _baseUrl;
         private readonly string _clientId = Guid.NewGuid().ToString("N");
-
-        private const string NodeSaveImage = "54";
         private const string MsgExecutionComplete = "execution_complete";
         private const string MsgExecutionError = "execution_error";
 
@@ -74,7 +74,7 @@ namespace CohesiveRP.Core.ComfyUI.Client
         /// Blocks until ComfyUI finishes the given prompt.
         /// Returns the output filename from the SaveImage node.
         /// </summary>
-        public async Task<ComfyUiOutputFile> WaitAsync(string promptId, CancellationToken cancellationToken)
+        public async Task<ComfyUiOutputFile> WaitAsync(string promptId, string nodeSaveImage, CancellationToken cancellationToken)
         {
             while (true)
             {
@@ -105,14 +105,28 @@ namespace CohesiveRP.Core.ComfyUI.Client
                     }
 
                     if (type == MsgExecutionComplete && isForThisPrompt)
-                        return await GetOutputFileAsync(promptId, cancellationToken);
+                        return await GetOutputFileAsync(promptId, nodeSaveImage, cancellationToken);
 
                     if (type == "executing" && isForThisPrompt
                         && data.TryGetProperty("node", out var node)
                         && node.ValueKind == JsonValueKind.Null)
-                        return await GetOutputFileAsync(promptId, cancellationToken);
+                        return await GetOutputFileAsync(promptId, nodeSaveImage, cancellationToken);
                 }
             }
+        }
+
+        public async Task<string> UploadImageAsync(byte[] imageBytes, string fileName, CancellationToken cancellationToken)
+        {
+            using var content = new MultipartFormDataContent();
+            using var imageContent = new ByteArrayContent(imageBytes);
+            imageContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
+            content.Add(imageContent, "image", fileName);
+            content.Add(new StringContent("input"), "type");
+            content.Add(new StringContent("true"), "overwrite");
+
+            string responseBody = await _http.PostMultipartAsync($"{_baseUrl}/upload/image", content, cancellationToken);
+            var json = JsonNode.Parse(responseBody);
+            return json!["name"]!.GetValue<string>();
         }
 
         // ------------------------------------------------------------------ //
@@ -146,21 +160,39 @@ namespace CohesiveRP.Core.ComfyUI.Client
         //  Private
         // ------------------------------------------------------------------ //
 
-        private async Task<ComfyUiOutputFile> GetOutputFileAsync(string promptId, CancellationToken cancellationToken)
+        private async Task<ComfyUiOutputFile> GetOutputFileAsync(string promptId, string nodeSaveImage, CancellationToken cancellationToken)
         {
             string response = await _http.GetAsync($"{_baseUrl}/history/{promptId}", cancellationToken);
 
-            using var doc = JsonDocument.Parse(response);
-            var image = doc.RootElement
-                .GetProperty(promptId)
-                .GetProperty("outputs")
-                .GetProperty(NodeSaveImage)
-                .GetProperty("images")[0];
+            try
+            {
+                using var doc = JsonDocument.Parse(response);
 
-            return new ComfyUiOutputFile(
-                Filename: image.GetProperty("filename").GetString()!,
-                Subfolder: image.GetProperty("subfolder").GetString()!,
-                Type: image.GetProperty("type").GetString()!);
+                // Guard: prompt entry may not exist yet if history is polled too early
+                if (!doc.RootElement.TryGetProperty(promptId, out var promptEntry))
+                    throw new Exception($"[{nameof(ComfyUiClient)}] History response has no entry for prompt [{promptId}]. Body: {response}");
+
+                if (!promptEntry.TryGetProperty("outputs", out var outputs))
+                    throw new Exception($"[{nameof(ComfyUiClient)}] History entry for [{promptId}] has no 'outputs'. Body: {response}");
+
+                if (!outputs.TryGetProperty(nodeSaveImage, out var saveNode))
+                    throw new Exception($"[{nameof(ComfyUiClient)}] Outputs for [{promptId}] has no node [{nodeSaveImage}]. Available nodes: [{string.Join(", ", outputs.EnumerateObject().Select(p => p.Name))}]. Body: {response}");
+
+                if (!saveNode.TryGetProperty("images", out var images) || images.GetArrayLength() == 0)
+                    throw new Exception($"[{nameof(ComfyUiClient)}] Node [{nodeSaveImage}] for [{promptId}] has no images. Body: {response}");
+
+                var image = images[0];
+
+                return new ComfyUiOutputFile(
+                    Filename: image.GetProperty("filename").GetString()!,
+                    Subfolder: image.GetProperty("subfolder").GetString()!,
+                    Type: image.GetProperty("type").GetString()!);
+            } catch (Exception ex) when (ex is not InvalidOperationException)
+            {
+                LoggingManager.LogToFile("3f7a9c12-8b4e-4d5a-a1f6-2e9c0d7b5f83",
+                    $"[{nameof(ComfyUiClient)}] Failed to parse history for prompt [{promptId}]. Raw response: {response}", ex);
+                throw;
+            }
         }
 
         // ------------------------------------------------------------------ //

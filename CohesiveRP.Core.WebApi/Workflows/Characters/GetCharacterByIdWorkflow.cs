@@ -58,6 +58,7 @@ public class GetCharacterByIdWorkflow : IGetCharacterByIdWorkflow
                         IllustratorPromptInjection = imo?.IllustratorPromptInjection,
                         Outfit = imo?.Outfit ?? ClothingStateOfDress.Clothed,
                         SourceAvatars = CharacterAvatarsUtils.GetCharacterSourceAvatars(character, imo?.Outfit ?? ClothingStateOfDress.Clothed),
+                        ExpressionAvatars = CharacterAvatarsUtils.GetCharacterExpressionAvatars(character, imo?.Outfit ?? ClothingStateOfDress.Clothed),
                     }).ToList()
                 },
             }

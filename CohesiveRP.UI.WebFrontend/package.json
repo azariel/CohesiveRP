@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "vite --host",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run update-readme",
+    "update-readme": "node scripts/update-readme-architecture.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

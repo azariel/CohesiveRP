@@ -15,5 +15,7 @@
 
         public int? WidthOverride { get; set; }
         public int? HeightOverride { get; set; }
+        public string SourceAvatarFileName { get; set; }
+        public string Expression { get; set; }
     }
 }
