@@ -48,6 +48,7 @@ export default function MobileAvatarBannerComponent() {
   // For N=4 on 390px: (100/4) × (1216/832) ≈ 37vw ≈ 142px  → perfect ratio
   // For N=1 on 390px: (100/1) × (1216/832) ≈ 146vw ≈ 570px → capped at MAX_HEIGHT_PX
   const heightVw = (AVATAR_H / AVATAR_W / count) * 100;
+  const adjustedHeightVw = count === 1 ? heightVw / 2 : heightVw;
 
   const makeFallback =
     (chatId: string) =>
@@ -61,13 +62,14 @@ export default function MobileAvatarBannerComponent() {
     };
 
   return (
-    <div className={styles.banner}>
-      <span className={styles.accentLine} />
+  <div className={styles.banner}>
+    <span className={styles.accentLine} />
 
+    <div className={count === 1 ? styles.stripSingleWrapper : undefined}>
       <div
         className={styles.strip}
         style={{
-          height: `min(${heightVw.toFixed(2)}vw, ${MAX_HEIGHT_PX}px)`,
+          height: `min(${adjustedHeightVw.toFixed(2)}vw, ${MAX_HEIGHT_PX}px)`,
           gridTemplateColumns: `repeat(${count}, 1fr)`,
         }}
       >
@@ -83,8 +85,9 @@ export default function MobileAvatarBannerComponent() {
           </div>
         ))}
       </div>
-
-      <span className={styles.accentLineBottom} />
     </div>
-  );
+
+    <span className={styles.accentLineBottom} />
+  </div>
+);
 }

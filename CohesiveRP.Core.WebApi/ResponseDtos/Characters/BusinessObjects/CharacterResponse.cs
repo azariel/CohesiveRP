@@ -23,6 +23,9 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Characters.BusinessObjects
         [JsonPropertyName("description")]
         public string Description { get; set; }
 
+        [JsonPropertyName("includeDescriptionInPrompt")]
+        public bool IncludeDescriptionInPrompt { get; set; }
+
         [JsonPropertyName("tags")]
         public List<string> Tags { get; set; }
 

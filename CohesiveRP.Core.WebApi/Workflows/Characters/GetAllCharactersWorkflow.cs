@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Common.WebApi;
+using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
@@ -45,6 +46,7 @@ public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
                 Creator = s.Creator,
                 CreatorNotes = s.CreatorNotes,
                 Description = s.Description,
+                IncludeDescriptionInPrompt = s.IncludeDescriptionInPrompt,
                 Tags = s.Tags,
                 FirstMessage = s.FirstMessage,
                 AlternateGreetings = s.AlternateGreetings,

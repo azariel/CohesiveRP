@@ -70,6 +70,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     Creator = queryModel.Creator,
                     CreatorNotes = queryModel.CreatorNotes,
                     Description = queryModel.Description,
+                    IncludeDescriptionInPrompt = queryModel.IncludeDescriptionInPrompt,
                     Tags = queryModel.Tags,
                     FirstMessage = queryModel.FirstMessage,
                     AlternateGreetings = queryModel.AlternateGreetings,
@@ -110,6 +111,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 // Update only the overridable fields
                 character.Description = characterDbModel.Description;
+                character.IncludeDescriptionInPrompt = characterDbModel.IncludeDescriptionInPrompt;
                 character.Creator = characterDbModel.Creator;
                 character.CreatorNotes = characterDbModel.CreatorNotes;
                 character.AlternateGreetings = characterDbModel.AlternateGreetings;

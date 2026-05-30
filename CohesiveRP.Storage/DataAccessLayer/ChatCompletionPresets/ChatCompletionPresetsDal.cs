@@ -443,16 +443,16 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                     Format = "<{{item_header}}>\r\n{{item_description}}\r\n</{{item_header}}>",
                                 }
                             },
-                            //new PromptContextFormatElement
-                            //{
-                            //    Tag = PromptContextFormatTag.DirectCharactersDescription,
-                            //    Name = "DirectCharactersDescription",
-                            //    Enabled = true,
-                            //    Options = new PromptContextFormatElementOptions
-                            //    {
-                            //        Format = "<character_instruction>\r\nInformation about {{character_name}}\r\n{{character_description}}\r\n</characters>\r\n\r\n",
-                            //    }
-                            //},
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.DirectCharactersDescription,
+                                Name = "DirectCharactersDescription",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "<character_instruction>\r\nInformation about {{character_name}}\r\n{{character_description}}\r\n</characters>\r\n\r\n",
+                                }
+                            },
                             new PromptContextFormatElement
                             {
                                 Tag = PromptContextFormatTag.LastUnsummarizedMessages,

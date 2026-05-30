@@ -64,6 +64,7 @@ export default function CharacterDetailsComponent() {
   const [illustrationMapOutfits, setillustrationMapOutfits] = useState<{ outfit: OutfitKey; illustratorPromptInjection: string }[]>([]);
   const [lightboxAvatar, setLightboxAvatar] = useState<{ filePath: string; fileName: string; seed?: string | null } | null>(null);
   const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
+  const [includeDescriptionInPrompt, setIncludeDescriptionInPrompt] = useState(true);
 
   // tab state
   const [activeTab, setActiveTab] = useState<DetailsTab>("info");
@@ -156,6 +157,7 @@ export default function CharacterDetailsComponent() {
         setFirstMessage(response?.character?.firstMessage ?? "");
         setAlternateGreetings(response?.character?.alternateGreetings ?? []);
         setCharacterDescription(response?.character?.description ?? "");
+        setIncludeDescriptionInPrompt(response?.character?.includeDescriptionInPrompt ?? true);
         setIllustratorTag(response?.character?.imageGenerationConfiguration?.illustratorTag ?? "");
         setillustrationMapOutfits(
           (response?.character?.imageGenerationConfiguration?.illustrationMapOutfits ?? []).map((e) => ({
@@ -244,6 +246,7 @@ export default function CharacterDetailsComponent() {
       const response = await putToServerApiAsync(`api/characters/${activeModule.selectedCharacterId}`, {
         characterId: activeModule.selectedCharacterId,
         characterDescription,
+        includeDescriptionInPrompt,
         characterName,
         creator,
         creatorNotes,
@@ -549,8 +552,24 @@ export default function CharacterDetailsComponent() {
                     </div>
 
                     <div className={styles.characterDescriptionContainer}>
-                      <label className={styles.characterDescriptionLabel}>Description</label>
-                      <textarea className={styles.characterDescription} value={characterDescription} onChange={(e) => setCharacterDescription(e.target.value)} />
+                      <div className={styles.descriptionLabelRow}>
+                        <label className={styles.characterDescriptionLabel}>Description</label>
+                        <label className={styles.checkboxLabel}>
+                          <input
+                            type="checkbox"
+                            className={styles.arcaneCheckbox}
+                            checked={includeDescriptionInPrompt}
+                            onChange={(e) => setIncludeDescriptionInPrompt(e.target.checked)}
+                          />
+                          <span className={styles.checkboxCustom} />
+                          <span className={styles.checkboxText}>Include in prompt</span>
+                        </label>
+                      </div>
+                      <textarea
+                        className={styles.characterDescription}
+                        value={characterDescription}
+                        onChange={(e) => setCharacterDescription(e.target.value)}
+                      />
                     </div>
 
                     <div className={styles.characterTagsContainer}>

@@ -855,6 +855,89 @@
   animation: spin 1s linear infinite;
 }
 
+/* ── Description label row ── */
+
+.descriptionLabelRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0.3em;
+}
+
+/* ── Arcane checkbox ── */
+
+.checkboxLabel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4em;
+  cursor: pointer;
+  user-select: none;
+}
+
+.arcaneCheckbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.checkboxCustom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  border: 1px solid rgba(150, 150, 195, 0.35);
+  border-radius: 3px;
+  background: rgba(5, 5, 16, 0.75);
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.checkboxCustom::after {
+  content: "";
+  position: absolute;
+  width: 0.32em;
+  height: 0.56em;
+  border-right: 1.5px solid #f6911d;
+  border-bottom: 1.5px solid #f6911d;
+  transform: rotate(45deg) translate(-1px, -1px);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.arcaneCheckbox:checked + .checkboxCustom {
+  border-color: rgba(246, 145, 29, 0.6);
+  background: rgba(246, 145, 29, 0.08);
+  box-shadow: 0 0 6px rgba(246, 145, 29, 0.15);
+}
+
+.arcaneCheckbox:checked + .checkboxCustom::after {
+  opacity: 1;
+}
+
+.checkboxLabel:hover .checkboxCustom {
+  border-color: rgba(246, 145, 29, 0.4);
+}
+
+.checkboxText {
+  font-size: 0.72em;
+  font-weight: 600;
+  color: rgba(150, 150, 195, 0.6);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.checkboxLabel:hover .checkboxText {
+  color: rgba(200, 200, 230, 0.8);
+}
+
 /* ── Mobile ── */
 
 @media (max-width: 876px) {

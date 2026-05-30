@@ -7,6 +7,7 @@ interface CharacterResponse {
     creator: string,
     creatorNotes: string,
     description: string,
+    includeDescriptionInPrompt: boolean,
     tags : string[],
     firstMessage : string,
     alternateGreetings : string[],

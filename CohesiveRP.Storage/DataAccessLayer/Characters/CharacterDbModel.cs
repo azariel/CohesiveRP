@@ -32,6 +32,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         [MaxLength(16384)]
         public string Description { get; set; }
 
+        public bool IncludeDescriptionInPrompt { get; set; }
+
         [JsonValueConverter]
         public List<string> Tags { get; set; }
 

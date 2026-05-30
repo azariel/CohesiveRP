@@ -18,6 +18,9 @@ namespace CohesiveRP.Core.WebApi.RequestDtos.Characters
         [JsonPropertyName("characterDescription")]
         public string CharacterDescription { get; set; }
 
+        [JsonPropertyName("includeDescriptionInPrompt")]
+        public bool IncludeDescriptionInPrompt { get; set; }
+
         [JsonPropertyName("tags")]
         public string[] Tags { get; set; }
 

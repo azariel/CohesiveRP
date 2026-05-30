@@ -680,18 +680,31 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           />
         </div>
 
-        <div className={styles.regenerateBar}>
-          {regenerateError && (
-            <label className={styles.saveErrorLabel}>Regeneration failed. Please try again.</label>
-          )}
-          <button
-            className={styles.regenerateButton}
-            onClick={handleRegenerate}
-            disabled={isRegenerating}
-            title="Override the whole CharacterSheet with values from querying the LLM"
-          >
-            {isRegenerating ? <ImSpinner2 className={styles.saveSpinner} /> : "Regenerate Sheet"}
-          </button>
+        <div style={{ display: "flex", gap: "1rem" }}>
+          <div className={styles.saveBar}>
+            {saveError && (
+              <label className={styles.saveErrorLabel}>Failed to save. Please try again.</label>
+            )}
+            {saveSuccess && (
+              <label className={styles.saveSuccessLabel}>Character sheet saved.</label>
+            )}
+            <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
+              {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Save Sheet"}
+            </button>
+          </div>
+          <div className={styles.regenerateBar}>
+            {regenerateError && (
+              <label className={styles.saveErrorLabel}>Regeneration failed. Please try again.</label>
+            )}
+            <button
+              className={styles.regenerateButton}
+              onClick={handleRegenerate}
+              disabled={isRegenerating}
+              title="Override the whole CharacterSheet with values from querying the LLM"
+            >
+              {isRegenerating ? <ImSpinner2 className={styles.saveSpinner} /> : "Regenerate Sheet"}
+            </button>
+          </div>
         </div>
       </div>
 
