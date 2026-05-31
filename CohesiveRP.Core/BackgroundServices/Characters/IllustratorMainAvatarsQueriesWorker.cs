@@ -42,7 +42,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                 try
                 {
                     // Check if there's any available query to process
-                    var lockedQuery = await LockNextPendingQueryIfAnyAsync();
+                    var (lockedQuery, originalStatus) = await LockNextPendingQueryIfAnyAsync();
 
                     if (lockedQuery == null)
                     {
@@ -57,7 +57,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                     {
                         LoggingManager.LogToFile("bd492c4c-e2af-4846-a6cd-fe51c0da84d9", $"ComfyUI is unreachable. Reverting query [{lockedQuery.IllustrationQueryId}] to [{IllustratorQueryStatus.Pending}] and pausing for 10 minutes.");
 
-                        lockedQuery.Status = IllustratorQueryStatus.Pending;
+                        lockedQuery.Status = originalStatus;
                         if (!await storageService.UpdateIllustrationQueryAsync(lockedQuery))
                         {
                             LoggingManager.LogToFile("fd8f62ff-99b4-4238-9355-1b2b56a6d816", $"Failed to revert query [{lockedQuery.IllustrationQueryId}] to Pending while ComfyUI was down. It will remain in Processing.");
@@ -67,7 +67,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                         continue;
                     }
 
-                    await ProcessBackgroundQueryAsync(lockedQuery);
+                    await ProcessBackgroundQueryAsync(lockedQuery, originalStatus);
 
                 } catch (Exception e)
                 {
@@ -77,14 +77,14 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
             }
         }
 
-        private async Task ProcessBackgroundQueryAsync(IllustrationQueryDbModel selectedQuery)
+        private async Task ProcessBackgroundQueryAsync(IllustrationQueryDbModel selectedQuery, IllustratorQueryStatus originalStatus)
         {
             if (selectedQuery == null)
             {
                 return;
             }
 
-            bool result = await RunQueryAgainstImageGeneratorAsync(selectedQuery);
+            bool result = await RunQueryAgainstImageGeneratorAsync(selectedQuery, originalStatus);
             if (!result)
             {
                 selectedQuery.Status = IllustratorQueryStatus.Error;
@@ -97,7 +97,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                 return;
             }
 
-            selectedQuery.Status = IllustratorQueryStatus.Completed;
+            selectedQuery.Status = originalStatus == IllustratorQueryStatus.PartialCompletion ? IllustratorQueryStatus.Completed : IllustratorQueryStatus.PartialCompletion;
             if (!await storageService.UpdateIllustrationQueryAsync(selectedQuery))
             {
                 LoggingManager.LogToFile("ec859574-29a5-4f18-84ae-8f1bb7024ec1", $"Failed to update background status of illustrator query [{selectedQuery.IllustrationQueryId}] to [{IllustratorQueryStatus.Completed}].");
@@ -107,7 +107,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
             return;
         }
 
-        private async Task<bool> RunQueryAgainstImageGeneratorAsync(IllustrationQueryDbModel selectedQuery)
+        private async Task<bool> RunQueryAgainstImageGeneratorAsync(IllustrationQueryDbModel selectedQuery, IllustratorQueryStatus originalStatus)
         {
             // TODO: Run the query against ComfyUI (or any other image provider, but let's start with ComfyUI) We should probably have a globalConfig around illustrators to define the type, tags, workflows, variables, etc.
             // TODO: check if comfyUI is ready to process the query
@@ -136,43 +136,18 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
 
                 bool allSucceeded = true;
                 bool atLeastOneGenerated = false;
+                (bool flowControl, bool value) = await GenerateAvatarsForEachOutfitsForEachExpressions(selectedQuery, characterDbModel, characterSheet, 1);
+                if (!flowControl)
+                    return value;
 
-                foreach (IllustrationMapOutfit outfit in characterDbModel.ImageGenerationConfiguration.IllustrationMapOutfits.Where(o => !string.IsNullOrWhiteSpace(o.IllustratorPromptInjection)))
+                atLeastOneGenerated = value;
+                if (originalStatus == IllustratorQueryStatus.PartialCompletion)
                 {
-                    if(selectedQuery.Outfit != null && selectedQuery.Outfit != outfit.Outfit)
-                    {
-                        continue;
-                    }
+                    (bool flowControl2, bool value2) = await GenerateAvatarsForEachOutfitsForEachExpressions(selectedQuery, characterDbModel, characterSheet, -1);
+                    if (!flowControl2)
+                        return value2;
 
-                    if (selectedQuery.Expressions == null || selectedQuery.Expressions.Count <= 0)
-                    {
-                        if (!File.Exists(CoreConstants.WORKFLOW_GENERATE_SOURCE_AVATAR))
-                        {
-                            LoggingManager.LogToFile("e12a864c-fc5e-4a2f-ae3b-d80bdc920cc3", $"Workflow file [{CoreConstants.WORKFLOW_GENERATE_SOURCE_AVATAR}] not found for illustrator query [{selectedQuery.IllustrationQueryId}].");
-                            await Task.Delay(ERROR_DELAY_MS);
-                            return false;
-                        }
-
-                        string templateJson = await File.ReadAllTextAsync(CoreConstants.WORKFLOW_GENERATE_SOURCE_AVATAR);
-
-                        (bool flowControl, atLeastOneGenerated) = await GenerateSourceAvatars(selectedQuery, characterDbModel, characterSheet, templateJson, atLeastOneGenerated, outfit);
-                        if (!flowControl)
-                            continue;
-                    } else
-                    {
-                        if (!File.Exists(CoreConstants.WORKFLOW_GENERATE_EXPRESSION_AVATAR))
-                        {
-                            LoggingManager.LogToFile("b9b5f443-e594-448a-8434-a889216e7c59", $"Workflow file [{CoreConstants.WORKFLOW_GENERATE_EXPRESSION_AVATAR}] not found for illustrator query [{selectedQuery.IllustrationQueryId}].");
-                            await Task.Delay(ERROR_DELAY_MS);
-                            return false;
-                        }
-
-                        string templateJson = await File.ReadAllTextAsync(CoreConstants.WORKFLOW_GENERATE_EXPRESSION_AVATAR);
-
-                        (bool flowControl, atLeastOneGenerated) = await GenerateExpressionAvatars(selectedQuery, characterDbModel, characterSheet, templateJson, atLeastOneGenerated, outfit);
-                        if (!flowControl)
-                            continue;
-                    }
+                    atLeastOneGenerated = value || value2;
                 }
 
                 CharacterAvatarsUtils.RefreshDefaultAvatars($"{WebConstants.CharactersAvatarFilePath}\\{characterDbModel.Name.ToLowerInvariant()}", atLeastOneGenerated);
@@ -184,8 +159,53 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
             }
         }
 
-        private async Task<(bool flowControl, bool value)> GenerateExpressionAvatars(IllustrationQueryDbModel selectedQuery, CharacterDbModel characterDbModel, CharacterSheet characterSheet, string templateJson, bool atLeastOneGenerated, IllustrationMapOutfit outfit)
+        private async Task<(bool flowControl, bool value)> GenerateAvatarsForEachOutfitsForEachExpressions(IllustrationQueryDbModel selectedQuery, CharacterDbModel characterDbModel, CharacterSheet characterSheet, int limitNbAvatarByExpressionToThisNumber)
         {
+            bool atLeastOneGenerated = false;
+            foreach (IllustrationMapOutfit outfit in characterDbModel.ImageGenerationConfiguration.IllustrationMapOutfits.Where(o => !string.IsNullOrWhiteSpace(o.IllustratorPromptInjection)))
+            {
+                if (selectedQuery.Outfit != null && selectedQuery.Outfit != outfit.Outfit)
+                {
+                    continue;
+                }
+
+                if (selectedQuery.Expressions == null || selectedQuery.Expressions.Count <= 0)
+                {
+                    if (!File.Exists(CoreConstants.WORKFLOW_GENERATE_SOURCE_AVATAR))
+                    {
+                        LoggingManager.LogToFile("e12a864c-fc5e-4a2f-ae3b-d80bdc920cc3", $"Workflow file [{CoreConstants.WORKFLOW_GENERATE_SOURCE_AVATAR}] not found for illustrator query [{selectedQuery.IllustrationQueryId}].");
+                        await Task.Delay(ERROR_DELAY_MS);
+                        return (flowControl: false, value: false);
+                    }
+
+                    string templateJson = await File.ReadAllTextAsync(CoreConstants.WORKFLOW_GENERATE_SOURCE_AVATAR);
+
+                    (bool flowControl, atLeastOneGenerated) = await GenerateSourceAvatars(selectedQuery, characterDbModel, characterSheet, templateJson, outfit);
+                    if (!flowControl)
+                        continue;
+                } else
+                {
+                    if (!File.Exists(CoreConstants.WORKFLOW_GENERATE_EXPRESSION_AVATAR))
+                    {
+                        LoggingManager.LogToFile("b9b5f443-e594-448a-8434-a889216e7c59", $"Workflow file [{CoreConstants.WORKFLOW_GENERATE_EXPRESSION_AVATAR}] not found for illustrator query [{selectedQuery.IllustrationQueryId}].");
+                        await Task.Delay(ERROR_DELAY_MS);
+                        return (flowControl: false, value: false);
+                    }
+
+                    string templateJson = await File.ReadAllTextAsync(CoreConstants.WORKFLOW_GENERATE_EXPRESSION_AVATAR);
+
+                    (bool flowControl, atLeastOneGenerated) = await GenerateExpressionAvatars(selectedQuery, characterDbModel, characterSheet, templateJson, outfit, limitNbAvatarByExpressionToThisNumber);
+                    if (!flowControl)
+                        continue;
+                }
+            }
+
+            return (flowControl: true, value: default);
+        }
+
+        private async Task<(bool flowControl, bool value)> GenerateExpressionAvatars(IllustrationQueryDbModel selectedQuery, CharacterDbModel characterDbModel, CharacterSheet characterSheet, string templateJson, IllustrationMapOutfit outfit, int limitNbAvatarByExpressionToThisNumber)
+        {
+            bool atLeastOneGenerated = false;
             string outfitName = outfit.Outfit.ToString().ToLowerInvariant();
             string rawFolder = $"{WebConstants.CharactersAvatarFilePath}\\{characterDbModel.Name.ToLowerInvariant()}\\raws\\{outfitName}";
             if (!Directory.Exists(rawFolder))
@@ -205,9 +225,15 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                 // So, the idea is to generate expressions from source avatars
                 int nbImagesToGenerate = Directory.EnumerateFiles(rawFolder, "*.*", SearchOption.TopDirectoryOnly).Count();
                 if (nbImagesToGenerate <= 0)
-                    return (flowControl: false, value: default);
+                    return (flowControl: false, value: atLeastOneGenerated);
 
-                foreach (string sourceAvatarFilePath in Directory.EnumerateFiles(rawFolder, "*.*", SearchOption.TopDirectoryOnly))
+                var sourceAvatarFilePaths = Directory.EnumerateFiles(rawFolder, "*.*", SearchOption.TopDirectoryOnly).ToArray();
+                if (limitNbAvatarByExpressionToThisNumber >= 0 && sourceAvatarFilePaths.Length > limitNbAvatarByExpressionToThisNumber)
+                {
+                    sourceAvatarFilePaths = sourceAvatarFilePaths.Take(limitNbAvatarByExpressionToThisNumber).ToArray();
+                }
+
+                foreach (string sourceAvatarFilePath in sourceAvatarFilePaths)
                 {
                     try
                     {
@@ -358,15 +384,18 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                         atLeastOneGenerated = true;
                     } catch (Exception ex)
                     {
-                        // ignore and continue
+                        // cancel current process
+                        return (flowControl: true, value: atLeastOneGenerated); ;
                     }
                 }
             }
-            return (flowControl: true, value: default);
+
+            return (flowControl: true, value: atLeastOneGenerated);
         }
 
-        private async Task<(bool flowControl, bool value)> GenerateSourceAvatars(IllustrationQueryDbModel selectedQuery, CharacterDbModel characterDbModel, CharacterSheet characterSheet, string templateJson, bool atLeastOneGenerated, IllustrationMapOutfit outfit)
+        private async Task<(bool flowControl, bool value)> GenerateSourceAvatars(IllustrationQueryDbModel selectedQuery, CharacterDbModel characterDbModel, CharacterSheet characterSheet, string templateJson, IllustrationMapOutfit outfit)
         {
+            bool atLeastOneGenerated = false;
             string rawFolder = $"{WebConstants.CharactersAvatarFilePath}\\{characterDbModel.Name.ToLowerInvariant()}\\raws\\{outfit.Outfit.ToString().ToLowerInvariant()}";
             if (!Directory.Exists(rawFolder))
             {
@@ -376,7 +405,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
             // Limit the images by outfit to 3 to avoid generating TB of stuff TODO: make this configurable
             int nbImagesToGenerate = 3 - Directory.EnumerateFiles(rawFolder, "*.*", SearchOption.TopDirectoryOnly).Count();
             if (nbImagesToGenerate <= 0)
-                return (flowControl: false, value: default);
+                return (flowControl: false, value: atLeastOneGenerated);
 
             for (int i = 0; i < nbImagesToGenerate; i++)
             {
@@ -464,25 +493,30 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
                 atLeastOneGenerated = true;
             }
 
-            return (flowControl: true, value: default);
+            return (flowControl: true, value: atLeastOneGenerated);
         }
 
         /// <summary>
         /// Not really locking the row in storage, but 'reserving it'
         /// </summary>
-        private async Task<IllustrationQueryDbModel> LockNextPendingQueryIfAnyAsync()
+        private async Task<(IllustrationQueryDbModel, IllustratorQueryStatus)> LockNextPendingQueryIfAnyAsync()
         {
             var allPendingQueries = await storageService.GetIllustrationQueriesAsync(g => g.Status == IllustratorQueryStatus.Pending || g.Status == IllustratorQueryStatus.Error);
             if (allPendingQueries.Length <= 0)
             {
-                return null;
+                allPendingQueries = await storageService.GetIllustrationQueriesAsync(g => g.Status == IllustratorQueryStatus.Pending || g.Status == IllustratorQueryStatus.Error || g.Status == IllustratorQueryStatus.PartialCompletion);
+                if (allPendingQueries.Length <= 0)
+                {
+                    return (null, default);
+                }
             }
 
-            allPendingQueries = allPendingQueries.OrderByDescending(o => o.Status).ThenBy(t => t.CreatedAtUtc).ToArray();
+            allPendingQueries = allPendingQueries.OrderBy(o => o.Status).ThenBy(t => t.Expressions?.Count ?? 0).ThenBy(t => t.CreatedAtUtc).ToArray();
 
             // Filter only those that can run on an Image generator provider and then select the first one (highest priority + oldest one)
             // TODO
             var selectedQuery = allPendingQueries.First();
+            var originalStatus = selectedQuery.Status;
 
             // change status
             selectedQuery.Status = IllustratorQueryStatus.Processing;
@@ -490,10 +524,10 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
             if (!await storageService.UpdateIllustrationQueryAsync(selectedQuery))
             {
                 LoggingManager.LogToFile("394a5c3a-6f07-497f-bcca-637a10f0c88f", $"Failed to update background status of illustrator query [{selectedQuery.IllustrationQueryId}] to [{IllustratorQueryStatus.Processing}]. Ignoring this query.");
-                return null;
+                return (null, default);
             }
 
-            return selectedQuery;
+            return (selectedQuery, originalStatus);
         }
     }
 }

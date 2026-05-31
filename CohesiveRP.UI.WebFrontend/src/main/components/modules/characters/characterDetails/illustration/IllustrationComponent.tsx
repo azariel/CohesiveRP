@@ -151,13 +151,14 @@ export default function IllustrationComponent({
 
   /* ── Handlers ── */
 
-  const handleGenerateAvatar = async () => {
+  const handleGenerateAvatars = async () => {
     if (isGeneratingAvatar) return;
     setIsGeneratingAvatar(true);
     try {
       const payload: CharacterMainAvatarIllustrationQueryRequestDto = {
         characterId: characterId ?? null,
         personaId: null,
+        outfit: OUTFIT_ENUM[selectedOutfit],
         type: 0,
       };
       const response = await postToServerApiAsync("api/illustrator/queries", payload);
@@ -335,7 +336,7 @@ export default function IllustrationComponent({
       <div className={styles.generateRow}>
         <button
           className={styles.generateAvatarButton}
-          onClick={handleGenerateAvatar}
+          onClick={handleGenerateAvatars}
           disabled={isGeneratingAvatar}
           title="Queue source avatar generation"
         >

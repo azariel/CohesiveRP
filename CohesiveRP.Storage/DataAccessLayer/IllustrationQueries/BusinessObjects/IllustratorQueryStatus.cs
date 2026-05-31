@@ -4,6 +4,7 @@
     {
         Pending = 0,
         Processing = 1,
+        PartialCompletion = 99,
         Completed = 100,
         Error = 101,
     }
