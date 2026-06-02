@@ -55,7 +55,13 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Main, ChatCompletionPresetType.SceneAnalyze, ChatCompletionPresetType.DynamicCharacterSheetCreation, ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar, ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration, ChatCompletionPresetType.DynamicCharacterCreation],
+                            Tags = [
+                                ChatCompletionPresetType.Main,
+                                ChatCompletionPresetType.SceneAnalyze,
+                                ChatCompletionPresetType.DynamicCharacterSheetCreation,
+                                ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
+                                ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
+                                ChatCompletionPresetType.DynamicCharacterCreation],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -166,7 +172,15 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.SkillChecksInitiator],// TODO: move characterSheetCreation elsewhere?
+                            Tags = [
+                                ChatCompletionPresetType.Summarize,
+                                ChatCompletionPresetType.SummariesMerge,
+                                ChatCompletionPresetType.SceneTracker,
+                                ChatCompletionPresetType.SkillChecksInitiator,
+                                ChatCompletionPresetType.CohesionEnforcement,
+                                ChatCompletionPresetType.NarrativeArchitecture,
+                                ChatCompletionPresetType.NarrativeDirection,
+                                ChatCompletionPresetType.ProseGuardian],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -325,6 +339,30 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             {
                                 Type = ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_ILLUSTRATION_PROMPT_INJECTION_FOR_CHARACTER_AVATAR_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.CohesionEnforcement,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.NarrativeArchitecture,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_NARRATIVE_ARCHITECTURE_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.NarrativeDirection,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_NARRATIVE_DIRECTION_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.ProseGuardian,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_PROSE_GUARDIAN_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                         }

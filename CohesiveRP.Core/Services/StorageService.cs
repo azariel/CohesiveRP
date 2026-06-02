@@ -1,5 +1,9 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
@@ -44,6 +48,10 @@ namespace CohesiveRP.Core.Services
         private ISceneAnalyzerDal sceneAnalyzerDal;
         private IInteractiveUserInputDal interactiveUserInputDal;
         private IIllustrationQueryDal illustrationQueriesDal;
+        private ICohesionEnforcementsDal cohesionEnforcementsDal;
+        private INarrativeArchitecturesDal narrativeArchitecturesDal;
+        private INarrativeDirectionsDal narrativeDirectionsDal;
+        private IProseGuardiansDal proseGuardiansDal;
 
         public StorageService(
             IChatsDal chatsDal,
@@ -63,7 +71,11 @@ namespace CohesiveRP.Core.Services
             ISceneTrackerDal sceneTrackerDal,
             ISceneAnalyzerDal sceneAnalyzerDal,
             IInteractiveUserInputDal interactiveUserInputDal,
-            IIllustrationQueryDal illustrationQueriesDal)
+            IIllustrationQueryDal illustrationQueriesDal,
+            ICohesionEnforcementsDal cohesionEnforcementsDal,
+            INarrativeArchitecturesDal narrativeArchitecturesDal,
+            INarrativeDirectionsDal narrativeDirectionsDal,
+            IProseGuardiansDal proseGuardiansDal)
         {
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;
@@ -83,6 +95,10 @@ namespace CohesiveRP.Core.Services
             this.sceneAnalyzerDal = sceneAnalyzerDal;
             this.interactiveUserInputDal = interactiveUserInputDal;
             this.illustrationQueriesDal = illustrationQueriesDal;
+            this.cohesionEnforcementsDal = cohesionEnforcementsDal;
+            this.narrativeArchitecturesDal = narrativeArchitecturesDal;
+            this.narrativeDirectionsDal = narrativeDirectionsDal;
+            this.proseGuardiansDal = proseGuardiansDal;
         }
 
         // Chats
@@ -261,5 +277,29 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> UpdateIllustrationQueryAsync(IllustrationQueryDbModel illustrationQueryDbModel) => await illustrationQueriesDal.UpdateIllustrationQueryAsync(illustrationQueryDbModel);
         public async Task<bool> DeleteIllustrationQueryAsync(string illustrationQueryId) => await illustrationQueriesDal.DeleteIllustrationQueryAsync(illustrationQueryId);
         public async Task<bool> DeleteIllustrationQueryAsync(Func<IllustrationQueryDbModel, bool> func) => await illustrationQueriesDal.DeleteIllustrationQueryAsync(func);
+
+        // CohesionEnforcement
+        public async Task<CohesionEnforcementDbModel[]> GetCohesionEnforcementsAsync(Func<CohesionEnforcementDbModel, bool> func) => await cohesionEnforcementsDal.GetCohesionEnforcementsAsync(func);
+        public async Task<CohesionEnforcementDbModel> AddCohesionEnforcementAsync(CohesionEnforcementDbModel dbModel) => await cohesionEnforcementsDal.AddCohesionEnforcementAsync(dbModel);
+        public async Task<CohesionEnforcementDbModel> UpdateCohesionEnforcementAsync(CohesionEnforcementDbModel dbModel) => await cohesionEnforcementsDal.UpdateCohesionEnforcementAsync(dbModel);
+        public async Task<bool> DeleteCohesionEnforcementsAsync(Func<CohesionEnforcementDbModel, bool> func) => await cohesionEnforcementsDal.DeleteCohesionEnforcementAsync(func);
+
+        // NarrativeArchitecture
+        public async Task<NarrativeArchitectureDbModel[]> GetNarrativeArchitecturesAsync(Func<NarrativeArchitectureDbModel, bool> func) => await narrativeArchitecturesDal.GetNarrativeArchitecturesAsync(func);
+        public async Task<NarrativeArchitectureDbModel> AddNarrativeArchitectureAsync(NarrativeArchitectureDbModel dbModel) => await narrativeArchitecturesDal.AddNarrativeArchitectureAsync(dbModel);
+        public async Task<NarrativeArchitectureDbModel> UpdateNarrativeArchitectureAsync(NarrativeArchitectureDbModel dbModel) => await narrativeArchitecturesDal.UpdateNarrativeArchitectureAsync(dbModel);
+        public async Task<bool> DeleteNarrativeArchitecturesAsync(Func<NarrativeArchitectureDbModel, bool> func) => await narrativeArchitecturesDal.DeleteNarrativeArchitectureAsync(func);
+
+        // NarrativeDirection
+        public async Task<NarrativeDirectionDbModel[]> GetNarrativeDirectionsAsync(Func<NarrativeDirectionDbModel, bool> func) => await narrativeDirectionsDal.GetNarrativeDirectionsAsync(func);
+        public async Task<NarrativeDirectionDbModel> AddNarrativeDirectionAsync(NarrativeDirectionDbModel dbModel) => await narrativeDirectionsDal.AddNarrativeDirectionAsync(dbModel);
+        public async Task<NarrativeDirectionDbModel> UpdateNarrativeDirectionAsync(NarrativeDirectionDbModel dbModel) => await narrativeDirectionsDal.UpdateNarrativeDirectionAsync(dbModel);
+        public async Task<bool> DeleteNarrativeDirectionsAsync(Func<NarrativeDirectionDbModel, bool> func) => await narrativeDirectionsDal.DeleteNarrativeDirectionAsync(func);
+
+        // ProseGuardian
+        public async Task<ProseGuardianDbModel[]> GetProseGuardiansAsync(Func<ProseGuardianDbModel, bool> func) => await proseGuardiansDal.GetProseGuardiansAsync(func);
+        public async Task<ProseGuardianDbModel> AddProseGuardianAsync(ProseGuardianDbModel dbModel) => await proseGuardiansDal.AddProseGuardianAsync(dbModel);
+        public async Task<ProseGuardianDbModel> UpdateProseGuardianAsync(ProseGuardianDbModel dbModel) => await proseGuardiansDal.UpdateProseGuardianAsync(dbModel);
+        public async Task<bool> DeleteProseGuardiansAsync(Func<ProseGuardianDbModel, bool> func) => await proseGuardiansDal.DeleteProseGuardianAsync(func);
     }
 }

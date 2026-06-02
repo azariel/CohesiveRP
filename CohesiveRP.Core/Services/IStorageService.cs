@@ -1,4 +1,8 @@
 ﻿using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
@@ -149,5 +153,29 @@ namespace CohesiveRP.Core.Services
         Task<bool> UpdateIllustrationQueryAsync(IllustrationQueryDbModel illustrationQueryDbModel);
         Task<bool> DeleteIllustrationQueryAsync(string illustrationQueryId);
         Task<bool> DeleteIllustrationQueryAsync(Func<IllustrationQueryDbModel, bool> func);
+
+        // CohesionEnforcement
+        Task<CohesionEnforcementDbModel[]> GetCohesionEnforcementsAsync(Func<CohesionEnforcementDbModel, bool> func);
+        Task<CohesionEnforcementDbModel> AddCohesionEnforcementAsync(CohesionEnforcementDbModel dbModel);
+        Task<CohesionEnforcementDbModel> UpdateCohesionEnforcementAsync(CohesionEnforcementDbModel dbModel);
+        Task<bool> DeleteCohesionEnforcementsAsync(Func<CohesionEnforcementDbModel, bool> func);
+
+        // NarrativeArchitecture
+        Task<NarrativeArchitectureDbModel[]> GetNarrativeArchitecturesAsync(Func<NarrativeArchitectureDbModel, bool> func);
+        Task<NarrativeArchitectureDbModel> AddNarrativeArchitectureAsync(NarrativeArchitectureDbModel dbModel);
+        Task<NarrativeArchitectureDbModel> UpdateNarrativeArchitectureAsync(NarrativeArchitectureDbModel dbModel);
+        Task<bool> DeleteNarrativeArchitecturesAsync(Func<NarrativeArchitectureDbModel, bool> func);
+
+        // NarrativeDirection
+        Task<NarrativeDirectionDbModel[]> GetNarrativeDirectionsAsync(Func<NarrativeDirectionDbModel, bool> func);
+        Task<NarrativeDirectionDbModel> AddNarrativeDirectionAsync(NarrativeDirectionDbModel dbModel);
+        Task<NarrativeDirectionDbModel> UpdateNarrativeDirectionAsync(NarrativeDirectionDbModel dbModel);
+        Task<bool> DeleteNarrativeDirectionsAsync(Func<NarrativeDirectionDbModel, bool> func);
+
+        // ProseGuardian
+        Task<ProseGuardianDbModel[]> GetProseGuardiansAsync(Func<ProseGuardianDbModel, bool> func);
+        Task<ProseGuardianDbModel> AddProseGuardianAsync(ProseGuardianDbModel dbModel);
+        Task<ProseGuardianDbModel> UpdateProseGuardianAsync(ProseGuardianDbModel dbModel);
+        Task<bool> DeleteProseGuardiansAsync(Func<ProseGuardianDbModel, bool> func);
     }
 }

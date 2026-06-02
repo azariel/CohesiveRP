@@ -12,5 +12,10 @@
         DynamicCharacterCreation = 7,
         DynamicCharacterSheetCreation = 8,
         IllustrationPromptInjectionForCharacterAvatar = 9,
+        // ChatAdditions
+        CohesionEnforcement = 10,
+        NarrativeArchitecture = 11,
+        NarrativeDirection = 12,
+        ProseGuardian = 13,
     }
 }

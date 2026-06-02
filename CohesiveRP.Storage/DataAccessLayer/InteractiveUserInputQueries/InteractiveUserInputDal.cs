@@ -99,6 +99,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
             }
         }
 
+        // TODO: return the resulting instance instead so that we can keep track of umodified fields (system)
         public async Task<bool> UpdateInteractiveUserInputQueryAsync(InteractiveUserInputDbModel dbModel)
         {
             try
@@ -177,7 +178,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
 
                 if (items == null || items.Length <= 0)
                 {
-                    LoggingManager.LogToFile("50eaab04-9cca-4d01-9e13-d0ece3f10e3f", $"InteractiveUserInputQueries tied to Func [{func}] to delete wasn't found in storage.");
+                    LoggingManager.LogToFile("50eaab04-9cca-4d01-9e13-d0ece3f10e3f", $"InteractiveUserInputQueries tied to Func [{func}] to delete weren't found in storage.");
                     return false;
                 }
 
@@ -194,7 +195,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
                 return true;
             } catch (Exception ex)
             {
-                LoggingManager.LogToFile("bfe696a3-b1e0-407c-901f-033020f2c390", $"Error when querying pending queries on table InteractiveUserInputQueries.", ex);
+                LoggingManager.LogToFile("bfe696a3-b1e0-407c-901f-033020f2c390", $"Error when querying queries on table InteractiveUserInputQueries.", ex);
                 return false;
             }
         }

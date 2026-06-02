@@ -1133,6 +1133,98 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     }
                 });
 
+                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
+                {
+                    Name = "Default-Cohesion-Enforcement-Prompt-Generator-Preset",
+                    ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_COMPLETION_PRESET,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    Format = new GlobalPromptContextFormat()
+                    {
+                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                        {
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.Directive,
+                                Name = "Directive",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "TODO\n",
+                                }
+                            },
+                        }
+                    }
+                });
+
+                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
+                {
+                    Name = "Default-Narrative-Architecture-Prompt-Generator-Preset",
+                    ChatCompletionPresetId = StorageConstants.DEFAULT_NARRATIVE_ARCHITECTURE_COMPLETION_PRESET,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    Format = new GlobalPromptContextFormat()
+                    {
+                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                        {
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.Directive,
+                                Name = "Directive",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "TODO\n",
+                                }
+                            },
+                        }
+                    }
+                });
+
+                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
+                {
+                    Name = "Default-Narrative-Direction-Prompt-Generator-Preset",
+                    ChatCompletionPresetId = StorageConstants.DEFAULT_NARRATIVE_DIRECTION_COMPLETION_PRESET,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    Format = new GlobalPromptContextFormat()
+                    {
+                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                        {
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.Directive,
+                                Name = "Directive",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "TODO\n",
+                                }
+                            },
+                        }
+                    }
+                });
+
+                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
+                {
+                    Name = "Default-Prose-Guardian-Prompt-Generator-Preset",
+                    ChatCompletionPresetId = StorageConstants.DEFAULT_PROSE_GUARDIAN_COMPLETION_PRESET,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    Format = new GlobalPromptContextFormat()
+                    {
+                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                        {
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.Directive,
+                                Name = "Directive",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "TODO\n",
+                                }
+                            },
+                        }
+                    }
+                });
+
                 dbContext.SaveChanges();
                 return;
             }
