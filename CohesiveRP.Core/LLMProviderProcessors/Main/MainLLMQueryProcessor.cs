@@ -316,8 +316,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 {
                     string choosenFile = availableAvatarsWithTheRightExpressionAndClothes[new Random(DateTime.Now.Millisecond).Next(0, availableAvatarsWithTheRightExpressionAndClothes.Length - 1)];
 
-                    if(File.Exists(choosenFile))
-                    avatar.FilePath = choosenFile?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
+                    if (File.Exists(choosenFile))
+                        avatar.FilePath = choosenFile?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
                 }
             }
 
@@ -454,6 +454,12 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             try
             {
                 var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
+                if (chat == null)
+                {
+                    backgroundQueryDbModel.Content = null;
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                    return false;
+                }
 
                 LLMApiResponseMessage message = messages.LastOrDefault();
 

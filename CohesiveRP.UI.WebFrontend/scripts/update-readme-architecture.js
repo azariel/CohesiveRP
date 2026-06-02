@@ -144,13 +144,18 @@ function main() {
     process.exit(1);
   }
 
+
+  // Detect and normalize line endings
+  const crlf = readme.includes("\r\n");
+  const normalized = readme.replace(/\r\n/g, "\n");
+
   // ── Replace the section ──────────────────────────────────────────────────
   //
   // Strategy: split on lines, find the section heading, then find where the
   // next heading begins (or EOF).  Replace everything in that range with the
   // new tree block, preserving all content outside the section.
 
-  const lines     = readme.split("\n");
+  const lines  = normalized.split("\n");
   let startIdx    = -1;          // index of the SECTION_HEADING line
   let endIdx      = lines.length; // index of the next heading line (exclusive)
 
@@ -180,17 +185,19 @@ function main() {
     ];
   }
 
-  const updated = updatedLines.join("\n");
-
   // ── Write README ─────────────────────────────────────────────────────────
 
-  if (updated === readme) {
+  // Restore original line endings before writing
+  const updated = updatedLines.join("\n");
+  const finalContent = crlf ? updated.replace(/\n/g, "\r\n") : updated;
+
+  if (finalContent === readme) {
     console.log("✅  README.md architecture section is already up to date.");
     return;
   }
 
   try {
-    writeFileSync(readmePath, updated, "utf8");
+    writeFileSync(readmePath, finalContent, "utf8");
   } catch (err) {
     console.error("❌  Could not write README.md:", err.message);
     process.exit(1);

@@ -19,10 +19,11 @@ interface Props {
   enableSwipeBtn?: boolean;
   isEditable?: boolean;
   onSave?: (messageId: string, newContent: string) => Promise<void>;
+  onSwipe?: (chatId: string, messageId: string) => Promise<void>;
   onDelete?: (messageId: string) => Promise<void>;
 }
 
-export default function ChatMessageComponent({ message, chatId, enableSwipeBtn = false, enableDeleteBtn = false, isEditable = false, onSave, onDelete }: Props) {
+export default function ChatMessageComponent({ message, chatId, enableSwipeBtn = false, enableDeleteBtn = false, isEditable = false, onSave, onSwipe, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
   const [isThinkingExpanded, setIsThinkingExpanded] = useState(false);
@@ -72,6 +73,13 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
     setEditContent(message?.content ?? "");
     setIsEditing(false);
     isRevertingRef.current = false;
+  };
+
+  const handleSwipe = async () => {
+    if (!chatId || !message?.messageId || !onSwipe)
+      return;
+
+    await onSwipe(chatId, message.messageId);
   };
 
   const handleDelete = async () => {
@@ -273,7 +281,7 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
               {enableSwipeBtn ? (
                 <div className={styles.messageContentFooterRightSideSwipeIcons}>
                   <label className={styles.messageContentFooterRightSideSwipeIconsLabel}>1/1</label>
-                  <HiMiniChevronRight className={styles.messageContentFooterRightSideSwipeIconsBtn} />
+                  <HiMiniChevronRight className={styles.messageContentFooterRightSideSwipeIconsBtn} onClick={handleSwipe} />
                 </div>
               ) : (
                 <div />

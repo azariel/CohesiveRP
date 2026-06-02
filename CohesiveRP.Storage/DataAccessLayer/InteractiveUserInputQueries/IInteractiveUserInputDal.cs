@@ -9,5 +9,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
         Task<InteractiveUserInputDbModel> AddInteractiveUserInputQueryAsync(InteractiveUserInputDbModel dbModel);
         Task<bool> UpdateInteractiveUserInputQueryAsync(InteractiveUserInputDbModel dbModel);
         Task<bool> DeleteInteractiveUserInputQueryAsync(string interactionUserInputQueryId);
+        Task<bool> DeleteInteractiveUserInputQueryAsync(Func<InteractiveUserInputDbModel, bool> func);
     }
 }

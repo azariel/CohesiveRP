@@ -35,6 +35,12 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
             // delete all backgroundqueries tied to this chat
             bool deleteBackgroundQueries = await storageService.DeleteBackgroundQueriesByChatIdAsync(chatId);
 
+            // delete interactive user inputs queries
+            bool deleteInteractiveUserInputs = await storageService.DeleteInteractiveUserInputQueryAsync(g => g.ChatId == chatId);
+
+            // delete illustration queries
+            bool deleteIllustrationQueries = await storageService.DeleteIllustrationQueryAsync(g => g.ChatId == chatId);
+
             // delete sceneTracker tied to this chat
             bool deleteSceneTracker = await storageService.DeleteSceneTrackerAsync(chatId);
 
@@ -47,6 +53,9 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
 
             // delete the lorebook instance tethered to this chat
             bool deleteLorebookInstances = await storageService.DeleteLorebookInstanceAsync(chatId);
+
+            // delete the characterSheetInstances tied to this chat
+            bool deleteCharacterSheetInstances = await storageService.DeleteCharacterSheetsInstanceAsync(g => g.ChatId == chatId);
 
             // delete the actual chat
             bool deleteChatResult = await storageService.DeleteChatAsync(chatId);

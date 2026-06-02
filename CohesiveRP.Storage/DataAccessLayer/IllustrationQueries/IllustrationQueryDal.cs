@@ -150,5 +150,41 @@ namespace CohesiveRP.Storage.DataAccessLayer.IllustrationQueries
                 return false;
             }
         }
+
+        public async Task<bool> DeleteIllustrationQueryAsync(Func<IllustrationQueryDbModel, bool> func)
+        {
+            if (func == null)
+            {
+                return true;
+            }
+
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var items = await dbContext.IllustrationQueries.AsAsyncEnumerable().Where(func.Invoke).ToArrayAsync();
+                if (items == null)
+                {
+                    LoggingManager.LogToFile("c73a621f-b123-4bbe-aced-4f2cfb2d733a", $"IllustrationQuery matching Func [{func}] to delete weren't found in storage.");
+                    return false;
+                }
+
+                foreach (var item in items)
+                {
+                    var result = dbContext.IllustrationQueries.Remove(item);
+                    if (result.State != EntityState.Deleted)
+                    {
+                        LoggingManager.LogToFile("71be8fe2-3c0e-4079-bf5d-47fb58efc1d3", $"Error when deleting a specific IllustrationQuery [{item}]. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]..");
+                        return false;
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("80fe7b6b-8418-48df-9f0a-2d41aa802123", $"Error when querying pending queries on table IllustrationQueries.", ex);
+                return false;
+            }
+        }
     }
 }

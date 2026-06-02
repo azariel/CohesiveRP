@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
@@ -44,7 +45,11 @@ public class PatchSpecificMessageByIdWorkflow : IPatchSpecificMessageByIdWorkflo
             if (!await storageService.UpdateHotMessageAsync(requestDto.ChatId, message))
             {
                 LoggingManager.LogToFile("ee8aea84-8d5a-43d3-b0b8-98ec5b460634", $"Couldn't update message [{requestDto.Message.MessageId}] from chat [{requestDto.ChatId}].");
-                return null;
+                return new WebApiException
+                {
+                    HttpResultCode = System.Net.HttpStatusCode.InternalServerError,
+                    Message = $"Message update failed. Failed to update the message in storage."
+                };
             }
         }
 

@@ -74,13 +74,16 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
 
         // Add a background query to generate the sceneTracker first and foremost
         // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
-        if (hotMessagesDbModel != null && hotMessagesDbModel.Messages.Count > 4)
+        if (requestDto.QueueDependentBackgroundTasks && (hotMessagesDbModel != null && hotMessagesDbModel.Messages.Count > 4))
         {
             await AddSceneTrackerBackgroundQueryAsync(chat);
         }
 
         // Also query the skillChecksInitiator query+
-        await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
+        if (requestDto.QueueDependentBackgroundTasks)
+        {
+            await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
+        }
 
         IMessageDbModel message = null;
         if (!string.IsNullOrWhiteSpace(requestDto.Message.Content))

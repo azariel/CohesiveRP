@@ -154,6 +154,7 @@ namespace CohesiveRP.Core.Services
         public async Task<CharacterSheetInstancesDbModel> AddCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.AddCharacterSheetsInstanceAsync(dbModel);
         public async Task<bool> UpdateCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.UpdateCharacterSheetsInstanceAsync(dbModel);
         public async Task<bool> DeleteCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.DeleteCharacterSheetsInstanceAsync(dbModel);
+        public async Task<bool> DeleteCharacterSheetsInstanceAsync(Func<CharacterSheetInstancesDbModel, bool> func) => await characterSheetInstancesDal.DeleteCharacterSheetsInstanceAsync(func);
 
         // Pathfinder.ChatCharactersRolls
         public async Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsAsync() => await chatCharactersRollsDal.GetChatCharactersRollsAsync();
@@ -252,11 +253,13 @@ namespace CohesiveRP.Core.Services
         public async Task<InteractiveUserInputDbModel> AddInteractiveUserInputQueryAsync(InteractiveUserInputDbModel interactiveUserInputDbModel) => await interactiveUserInputDal.AddInteractiveUserInputQueryAsync(interactiveUserInputDbModel);
         public async Task<bool> UpdateInteractiveUserInputQueryAsync(InteractiveUserInputDbModel interactiveUserInputDbModel) => await interactiveUserInputDal.UpdateInteractiveUserInputQueryAsync(interactiveUserInputDbModel);
         public async Task<bool> DeleteInteractiveUserInputQueryAsync(string interactiveUserInputQueryId) => await interactiveUserInputDal.DeleteInteractiveUserInputQueryAsync(interactiveUserInputQueryId);
+        public async Task<bool> DeleteInteractiveUserInputQueryAsync(Func<InteractiveUserInputDbModel, bool> func) => await interactiveUserInputDal.DeleteInteractiveUserInputQueryAsync(func);
 
         // IllustrationQueries
         public async Task<IllustrationQueryDbModel[]> GetIllustrationQueriesAsync(Func<IllustrationQueryDbModel, bool> func) => await illustrationQueriesDal.GetIllustrationQueriesAsync(func);
         public async Task<IllustrationQueryDbModel> AddIllustrationQueryAsync(IllustrationQueryDbModel illustrationQueryDbModel) => await illustrationQueriesDal.AddIllustrationQueryAsync(illustrationQueryDbModel);
         public async Task<bool> UpdateIllustrationQueryAsync(IllustrationQueryDbModel illustrationQueryDbModel) => await illustrationQueriesDal.UpdateIllustrationQueryAsync(illustrationQueryDbModel);
         public async Task<bool> DeleteIllustrationQueryAsync(string illustrationQueryId) => await illustrationQueriesDal.DeleteIllustrationQueryAsync(illustrationQueryId);
+        public async Task<bool> DeleteIllustrationQueryAsync(Func<IllustrationQueryDbModel, bool> func) => await illustrationQueriesDal.DeleteIllustrationQueryAsync(func);
     }
 }

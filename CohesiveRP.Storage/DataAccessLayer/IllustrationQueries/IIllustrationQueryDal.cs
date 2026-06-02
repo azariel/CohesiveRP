@@ -6,5 +6,6 @@
         Task<IllustrationQueryDbModel> AddIllustrationQueryAsync(IllustrationQueryDbModel illustrationQueryDbModel);
         Task<bool> UpdateIllustrationQueryAsync(IllustrationQueryDbModel illustrationQueryDbModel);
         Task<bool> DeleteIllustrationQueryAsync(string illustrationQueryId);
+        Task<bool> DeleteIllustrationQueryAsync(Func<IllustrationQueryDbModel, bool> func);
     }
 }

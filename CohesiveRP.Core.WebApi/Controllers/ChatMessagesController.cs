@@ -16,6 +16,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         private IPatchSpecificMessageByIdWorkflow putSpecificMessageByIdWorkflow;
         private IChatAddNewMessageWorkflow addNewMessageWorkflow;
 
+        private ISwipeMessageWorkflow swipeMessageWorkflow;
         private IGetPromptByChatIdWorkflow getPromptByChatIdWorkflow;
 
         public ChatController(
@@ -24,6 +25,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             IDeleteSpecificMessageByIdWorkflow deleteSpecificMessageByIdWorkflow,
             IPatchSpecificMessageByIdWorkflow putSpecificMessageByIdWorkflow,
             IChatAddNewMessageWorkflow chatAddNewMessageWorkflow,
+            ISwipeMessageWorkflow swipeMessageWorkflow,
             IGetPromptByChatIdWorkflow getPromptByChatIdWorkflow)
         {
             this.getAllHotMessagesWorkflow = getAllHotMessagesWorkflow;
@@ -31,6 +33,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             this.deleteSpecificMessageByIdWorkflow = deleteSpecificMessageByIdWorkflow;
             this.putSpecificMessageByIdWorkflow = putSpecificMessageByIdWorkflow;
             this.addNewMessageWorkflow = chatAddNewMessageWorkflow;
+            this.swipeMessageWorkflow = swipeMessageWorkflow;
             this.getPromptByChatIdWorkflow = getPromptByChatIdWorkflow;
         }
 
@@ -71,6 +74,14 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> PutSpecificMessageById(PatchSpecificMessageRequestDto requestDto)
         {
             return new JsonResult(await putSpecificMessageByIdWorkflow.PatchSpecificMessage(requestDto));
+        }
+
+        // Swipe
+        [HttpPost]
+        [Route("messages/swipe")]
+        public async Task<IActionResult> Swipe(GetSpecificMessageRequestDto requestDto)
+        {
+            return new JsonResult(await swipeMessageWorkflow.SwipeMessageAsync(requestDto));
         }
 
         // Prompt

@@ -11,7 +11,6 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.IllustrationQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 using Microsoft.Extensions.Hosting;
 
 namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharactersCreator

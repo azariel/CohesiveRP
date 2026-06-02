@@ -72,14 +72,25 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             foreach (CharacterInScene characterInScene in roll.CharactersInScene.Where(w => w.CharacterInSceneCounterRoll != null))
             {
                 var characterSheetInstance = characterSheetsInstances.CharacterSheetInstances.FirstOrDefault(f => f.CharacterSheetInstanceId == characterInScene.CharacterSheetInstanceId);
+                string characterName = characterSheetInstance?.CharacterSheet?.FirstName;
 
                 if (characterSheetInstance == null)
-                    continue;
+                {
+                    characterName = characterInScene.CharacterName?.Trim();
 
-                outputValue += $"    - {characterSheetInstance.CharacterSheet.FirstName} has rolled {characterInScene.CharacterInSceneCounterRoll.Value} for attribute {characterInScene.CharacterInSceneCounterRoll.Attribute}.{Environment.NewLine}";
+                    if(string.IsNullOrWhiteSpace(characterName))
+                        continue;
+                }
+
+                outputValue += $"    - {characterName} has rolled {characterInScene.CharacterInSceneCounterRoll.Value} for attribute {characterInScene.CharacterInSceneCounterRoll.Attribute}.{Environment.NewLine}";
             }
 
-            return outputValue.Trim().TrimEnd(Environment.NewLine.ToCharArray());
+            if(roll.CharactersInScene.Length <= 0)
+            {
+                outputValue += $"    No one. The roll success or failure depends solely on itself.";
+            }
+
+            return outputValue.TrimEnd().TrimEnd(Environment.NewLine.ToCharArray());
         }
 
         public async Task<(string, IShareableContextLink)> BuildAsync()

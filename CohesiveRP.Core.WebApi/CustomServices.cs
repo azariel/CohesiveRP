@@ -67,6 +67,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
             services.AddSingleton<IPatchSpecificMessageByIdWorkflow, PatchSpecificMessageByIdWorkflow>();
             services.AddSingleton<IDeleteSpecificMessageByIdWorkflow, DeleteSpecificMessageByIdWorkflow>();
+            services.AddSingleton<ISwipeMessageWorkflow, SwipeMessageWorkflow>();
             services.AddSingleton<IGetPromptByChatIdWorkflow, GetPromptByChatIdWorkflow>();
 
             // Workflows.ChatCharacterRolls

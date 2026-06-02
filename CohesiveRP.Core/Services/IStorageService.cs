@@ -100,6 +100,7 @@ namespace CohesiveRP.Core.Services
         Task<CharacterSheetInstancesDbModel> AddCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
         Task<bool> UpdateCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
         Task<bool> DeleteCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel);
+        Task<bool> DeleteCharacterSheetsInstanceAsync(Func<CharacterSheetInstancesDbModel, bool> func);
 
         // Pathfinder.ChatCharactersRolls
         Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsAsync();
@@ -140,11 +141,13 @@ namespace CohesiveRP.Core.Services
         Task<InteractiveUserInputDbModel> AddInteractiveUserInputQueryAsync(InteractiveUserInputDbModel interactiveUserInputDbModel);
         Task<bool> UpdateInteractiveUserInputQueryAsync(InteractiveUserInputDbModel interactiveUserInputDbModel);
         Task<bool> DeleteInteractiveUserInputQueryAsync(string interactiveUserInputDbModel);
+        Task<bool> DeleteInteractiveUserInputQueryAsync(Func<InteractiveUserInputDbModel, bool> func);
 
         // IllustrationQueries
         Task<IllustrationQueryDbModel[]> GetIllustrationQueriesAsync(Func<IllustrationQueryDbModel, bool> func);
         Task<IllustrationQueryDbModel> AddIllustrationQueryAsync(IllustrationQueryDbModel illustrationQueryDbModel);
         Task<bool> UpdateIllustrationQueryAsync(IllustrationQueryDbModel illustrationQueryDbModel);
         Task<bool> DeleteIllustrationQueryAsync(string illustrationQueryId);
+        Task<bool> DeleteIllustrationQueryAsync(Func<IllustrationQueryDbModel, bool> func);
     }
 }

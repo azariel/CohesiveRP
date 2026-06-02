@@ -47,7 +47,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
 
-                if(func == null)
+                if (func == null)
                     return dbContext.InteractiveUserInputQueries.ToArray();
 
                 var result = await dbContext.InteractiveUserInputQueries.AsAsyncEnumerable().Where(func.Invoke).ToArrayAsync();
@@ -159,6 +159,42 @@ namespace CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("d122c128-8385-43e9-a7c8-e40bee40be2b", $"Error when querying pending queries on table InteractiveUserInputQueries.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteInteractiveUserInputQueryAsync(Func<InteractiveUserInputDbModel, bool> func)
+        {
+            if (func == null)
+            {
+                return true;
+            }
+
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var items = await dbContext.InteractiveUserInputQueries.AsAsyncEnumerable().Where(func.Invoke).ToArrayAsync();
+
+                if (items == null || items.Length <= 0)
+                {
+                    LoggingManager.LogToFile("50eaab04-9cca-4d01-9e13-d0ece3f10e3f", $"InteractiveUserInputQueries tied to Func [{func}] to delete wasn't found in storage.");
+                    return false;
+                }
+
+                foreach (var item in items)
+                {
+                    var result = dbContext.InteractiveUserInputQueries.Remove(item);
+                    if (result.State != EntityState.Deleted)
+                    {
+                        LoggingManager.LogToFile("762ed8ed-b9de-414d-8664-e15acd6b8328", $"Error when deleting a specific InteractiveUserInputQuery [{item}]. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]..");
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("bfe696a3-b1e0-407c-901f-033020f2c390", $"Error when querying pending queries on table InteractiveUserInputQueries.", ex);
                 return false;
             }
         }

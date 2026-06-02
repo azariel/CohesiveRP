@@ -58,6 +58,8 @@ public class GetChatCharacterRollsWorkflow : IChatCharacterRollsWorkflow
                         Value = roll.Value,
                         Reasonings = roll.Reasonings,
                         ActionCategory = roll.ActionCategory,
+                        Bonus = roll.Bonus,
+                        CharactersWhoCanResist = roll.CharactersInScene?.Select(s => s.CharacterName).ToList(),
                         CharactersInSceneWithCounterRolls = [],
                     };
 

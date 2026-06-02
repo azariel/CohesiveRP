@@ -55,7 +55,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Main],
+                            Tags = [ChatCompletionPresetType.Main, ChatCompletionPresetType.SceneAnalyze, ChatCompletionPresetType.DynamicCharacterSheetCreation, ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar, ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration, ChatCompletionPresetType.DynamicCharacterCreation],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -92,7 +92,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.SceneAnalyze, ChatCompletionPresetType.DynamicCharacterSheetCreation, ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar, ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
+                            Tags = [],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -129,7 +129,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.DynamicCharacterCreation],
+                            Tags = [],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -166,7 +166,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge],// TODO: move characterSheetCreation elsewhere?
+                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.SkillChecksInitiator],// TODO: move characterSheetCreation elsewhere?
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -203,7 +203,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.SceneTracker],
+                            Tags = [],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -240,7 +240,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.SkillChecksInitiator],
+                            Tags = [],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
