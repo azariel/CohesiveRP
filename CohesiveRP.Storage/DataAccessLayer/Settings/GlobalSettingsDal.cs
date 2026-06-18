@@ -57,11 +57,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ConcurrencyLimit = 1,
                             Tags = [
                                 ChatCompletionPresetType.Main,
-                                ChatCompletionPresetType.SceneAnalyze,
-                                ChatCompletionPresetType.DynamicCharacterSheetCreation,
-                                ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
-                                ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
-                                ChatCompletionPresetType.DynamicCharacterCreation],
+                            ],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -98,7 +94,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [],
+                            Tags = [
+                                ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
+                                ChatCompletionPresetType.DynamicCharacterCreation,
+                                ChatCompletionPresetType.DynamicCharacterSheetCreation,
+                                ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration
+                            ],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -135,7 +136,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [],
+                            Tags = [
+                                ChatCompletionPresetType.SceneAnalyze
+                            ],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -173,14 +176,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
                             Tags = [
-                                ChatCompletionPresetType.Summarize,
-                                ChatCompletionPresetType.SummariesMerge,
-                                ChatCompletionPresetType.SceneTracker,
-                                ChatCompletionPresetType.SkillChecksInitiator,
-                                ChatCompletionPresetType.CohesionEnforcement,
-                                ChatCompletionPresetType.NarrativeArchitecture,
-                                ChatCompletionPresetType.NarrativeDirection,
-                                ChatCompletionPresetType.ProseGuardian],
+                                ChatCompletionPresetType.SkillChecksInitiator,// PRE
+                                ChatCompletionPresetType.NarrativeArchitecture,// POST++ (secretPlot)
+                            ],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -217,7 +215,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [],
+                            Tags = [
+                                ChatCompletionPresetType.SceneTracker,// PRE
+                                ChatCompletionPresetType.ProseGuardian,// PRE
+                                ChatCompletionPresetType.CohesionEnforcement,// POST
+                            ],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -254,7 +256,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [],
+                            Tags = [
+                                ChatCompletionPresetType.NarrativeDirection,// PRE
+                                ChatCompletionPresetType.Summarize,// POST++
+                                ChatCompletionPresetType.SummariesMerge,// POST++
+                            ],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,

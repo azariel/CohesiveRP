@@ -6,7 +6,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
-    public class ProseGuardianBuilder : IPromptContextElementBuilder
+    public class PromptContextNarrativeArchitectureBuilder : IPromptContextElementBuilder
     {
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
@@ -14,7 +14,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private PersonaDbModel personaLinkedToChat;
         private CharacterDbModel[] charactersLinkedToChat;
 
-        public ProseGuardianBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
+        public PromptContextNarrativeArchitectureBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, string linkedMessageId, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
@@ -25,14 +25,14 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
-            var currentValuesFromStorage = await storageService.GetProseGuardiansAsync(s=> s.ChatId == chatDbModel.ChatId);
+            var currentValuesFromStorage = await storageService.GetNarrativeArchitecturesAsync(s => s.ChatId == chatDbModel.ChatId);
             var currentValueFromStorage = currentValuesFromStorage?.FirstOrDefault();
-            if(currentValueFromStorage == null)
+            if (currentValueFromStorage == null || string.IsNullOrWhiteSpace(currentValueFromStorage?.Content?.Content))
             {
-                return (string.Empty, new ShareableContextLink{ LinkedBuilder = this });
+                return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            return ($"{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name).Replace("{{description}}", currentValueFromStorage.Content?.Content)}", new ShareableContextLink{ LinkedBuilder = this });
+            return ($"{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name).Replace("{{description}}", currentValueFromStorage.Content?.Content)}", new ShareableContextLink { LinkedBuilder = this });
         }
     }
 }

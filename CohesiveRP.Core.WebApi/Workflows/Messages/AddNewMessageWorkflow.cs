@@ -79,10 +79,12 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             await AddSceneTrackerBackgroundQueryAsync(chat);
         }
 
-        // Also query the skillChecksInitiator query+
+        // Also query the dependent queries
         if (requestDto.QueueDependentBackgroundTasks)
         {
             await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
+            await AddProseGuardianBackgroundQueryAsync(chat);
+            await AddNarrativeDirectionBackgroundQueryAsync(chat);
         }
 
         IMessageDbModel message = null;
@@ -115,7 +117,12 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         {
             ChatId = requestDto.ChatId,
             Priority = BackgroundQueryPriority.Highest,// User is waiting!
-            DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.skillChecksInitiator.ToString()],// Can't run as long as another one with one of these tag is running or pending
+            DependenciesTags = [
+                BackgroundQuerySystemTags.sceneTracker.ToString(),
+                BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                BackgroundQuerySystemTags.proseGuardian.ToString(),
+                BackgroundQuerySystemTags.narrativeDirection.ToString(),
+            ],// Can't run as long as another one with one of these tag is running or pending
             Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'
         };
 
@@ -209,6 +216,38 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             Priority = BackgroundQueryPriority.Highest,// User is waiting!
             DependenciesTags = [],// No dependencies at all
             Tags = [BackgroundQuerySystemTags.skillChecksInitiator.ToString()],
+        };
+
+        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+            return false;
+
+        return true;
+    }
+
+    private async Task<bool> AddProseGuardianBackgroundQueryAsync(ChatDbModel chat)
+    {
+        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+        {
+            ChatId = chat.ChatId,
+            Priority = BackgroundQueryPriority.Highest,// User is waiting!
+            DependenciesTags = [],// No dependencies at all
+            Tags = [BackgroundQuerySystemTags.proseGuardian.ToString()],
+        };
+
+        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+            return false;
+
+        return true;
+    }
+
+    private async Task<bool> AddNarrativeDirectionBackgroundQueryAsync(ChatDbModel chat)
+    {
+        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+        {
+            ChatId = chat.ChatId,
+            Priority = BackgroundQueryPriority.Highest,// User is waiting!
+            DependenciesTags = [],// No dependencies at all
+            Tags = [BackgroundQuerySystemTags.narrativeDirection.ToString()],
         };
 
         if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)

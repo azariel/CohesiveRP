@@ -79,6 +79,12 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new PromptContextCharacterSheetCreationBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.IllustrationPromptInjectionForCharacterAvatar:
                     return new PromptContextPromptInjectionForCharacterAvatarBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.NarrativeArchitecture:
+                    return new PromptContextNarrativeArchitectureBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.NarrativeDirection:
+                    return new PromptContextNarrativeDirectionBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.ProseGuardian:
+                    return new PromptContextProseGuardianBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 default:
                     throw new Exception($"Unhandled [{contextElement.Tag}].");
             }

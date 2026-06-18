@@ -27,5 +27,8 @@
         CharacterCreation = 22,
         CharacterSheetCreation = 23,
         IllustrationPromptInjectionForCharacterAvatar = 24,
+        NarrativeArchitecture = 25,
+        NarrativeDirection = 26,
+        ProseGuardian = 27,
     }
 }

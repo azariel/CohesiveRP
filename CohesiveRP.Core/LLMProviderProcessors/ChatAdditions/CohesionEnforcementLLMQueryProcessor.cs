@@ -1,6 +1,8 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
+using CohesiveRP.Core.LLMProviderProcessors.ChatAdditions.BusinessObjects.CohesionEnforcement;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
@@ -48,6 +50,23 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
             {
                 string LLMMessageResult = LLMResponseParser.ParseOnlyJson(messages.First().Content);
 
+                // deserialize the CohesionEnforcement
+                CohesionEnforcementResult cohesionEnforcement = null;
+
+                try
+                {
+                    cohesionEnforcement = JsonCommonSerializer.DeserializeFromString<CohesionEnforcementResult>(LLMMessageResult);
+                } catch (Exception e)
+                {
+                    LoggingManager.LogToFile("6068df55-bd22-424f-a4db-b1be7d450eed", $"Failed to deserialize CohesionEnforcementResult from LLM response.", e);
+                    backgroundQueryDbModel.Content = null;
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                    backgroundQueryDbModel.RetryCount++;
+                    return false;
+                }
+
+                var finalContent = JsonCommonSerializer.SerializeToString(cohesionEnforcement);
+
                 // Replace the CohesionEnforcement tied to this chat with the new one
                 var currentDbModels = await storageService.GetCohesionEnforcementsAsync(s => s.ChatId == backgroundQueryDbModel.ChatId);
                 var currentDbModel = currentDbModels?.FirstOrDefault();
@@ -59,7 +78,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                         ChatId = backgroundQueryDbModel.ChatId,
                         Content = new CohesionEnforcementElement
                         {
-                            Content = LLMMessageResult,
+                            Content = finalContent,
                         },
                     };
 
@@ -68,7 +87,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                 {
                     currentDbModel.Content = new CohesionEnforcementElement
                     {
-                        Content = LLMMessageResult,
+                        Content = finalContent,
                     };
 
                     await storageService.UpdateCohesionEnforcementAsync(currentDbModel);

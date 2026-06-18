@@ -484,6 +484,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 {
                     // That roll is now deemed too old and must be rolled again
                     roll.Value = await GenerateNewRollForCharacterForSkillCheckAsync(selectedCharacterSheetInstance, query.ActionCategory, query.Bonus);
+                    roll.Bonus = query.Bonus;
                 }
 
                 roll.CharactersInScene = FilterCharactersInScene(characterSheetInstancesInScene.ToArray(), selectedCharacterSheetInstance.CharacterSheetInstanceId);
@@ -491,6 +492,15 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 // Generate counter rolls for characters in scene if required
                 await GenerateCounterRollsForCharactersInSceneAsync(roll, characterSheetInstancesInScene.ToArray());
             }
+
+            // Remove old rolls
+            foreach (var rollsCharacter in chatCharactersRollsDbModel.ChatCharactersRolls)
+            {
+                rollsCharacter.Rolls.RemoveAll(r => r.NbRemainingInjectionTurns <= 0);
+            }
+
+            // Remove empty characters with no rolls
+            chatCharactersRollsDbModel.ChatCharactersRolls.RemoveAll(r => r.Rolls.Count <= 0);
 
             return chatCharactersRollsDbModel;
         }
@@ -557,7 +567,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             }
 
             var outValue = reasonings.Skip(nbReasoningsToRemove).ToList();
-            outValue.AddRange(reasonings);
             return outValue;
         }
 

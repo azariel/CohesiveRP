@@ -522,6 +522,12 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 // Scene Analyzer
                 //await QueueSceneAnalyzeAsync(chat);
 
+                // Cohesive Enforcement
+                //await QueueCohesionEnforcementAsync(chat);
+
+                // Narrative Architect (Secret Plot)
+                //await QueueNarrativeArchitectureAsync(chat);
+
                 // Prebuild the images to show in the UI according to context
                 var sceneTracker = await storageService.GetSceneTrackerAsync(backgroundQueryDbModel.ChatId);
 
@@ -543,6 +549,38 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
                 return false;
             }
+        }
+
+        private async Task<bool> QueueCohesionEnforcementAsync(ChatDbModel chat)
+        {
+            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+            {
+                ChatId = chat.ChatId,
+                Priority = BackgroundQueryPriority.Highest,// User is waiting!
+                DependenciesTags = [],// No dependencies at all
+                Tags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],
+            };
+
+            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+                return false;
+
+            return true;
+        }
+
+        private async Task<bool> QueueNarrativeArchitectureAsync(ChatDbModel chat)
+        {
+            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+            {
+                ChatId = chat.ChatId,
+                Priority = BackgroundQueryPriority.Low,// user is not waiting, we're simply generation and iterating over secret plots and narrative arcs in the background, so we can set it to low priority
+                DependenciesTags = [],// No dependencies at all
+                Tags = [BackgroundQuerySystemTags.narrativeArchitecture.ToString()],
+            };
+
+            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+                return false;
+
+            return true;
         }
     }
 }

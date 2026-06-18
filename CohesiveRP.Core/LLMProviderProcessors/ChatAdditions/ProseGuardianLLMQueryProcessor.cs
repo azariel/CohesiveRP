@@ -46,7 +46,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
 
             try
             {
-                string LLMMessageResult = LLMResponseParser.ParseOnlyJson(messages.First().Content);
+                string LLMMessageResult = messages.First().Content;
 
                 // Replace the ProseGuardian tied to this chat with the new one
                 var currentDbModels = await storageService.GetProseGuardiansAsync(s => s.ChatId == backgroundQueryDbModel.ChatId);

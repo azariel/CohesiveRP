@@ -32,7 +32,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (string.Empty, new ShareableContextLink{ LinkedBuilder = this });
             }
 
-            return ($"{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name).Replace("{{description}}", currentValueFromStorage.Content?.Content)}", new ShareableContextLink{ LinkedBuilder = this });
+            return ($"{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name).Replace("{{original_message}}", currentValueFromStorage.Content?.Content).Replace("{{description}}", currentValueFromStorage.Content?.Content)}", new ShareableContextLink{ LinkedBuilder = this });
         }
     }
 }

@@ -6,7 +6,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
-    public class NarrativeDirectionBuilder : IPromptContextElementBuilder
+    public class PromptContextNarrativeDirectionBuilder : IPromptContextElementBuilder
     {
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
@@ -14,7 +14,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private PersonaDbModel personaLinkedToChat;
         private CharacterDbModel[] charactersLinkedToChat;
 
-        public NarrativeDirectionBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
+        public PromptContextNarrativeDirectionBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, string linkedMessageId, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
@@ -27,7 +27,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         {
             var currentValuesFromStorage = await storageService.GetNarrativeDirectionsAsync(s=> s.ChatId == chatDbModel.ChatId);
             var currentValueFromStorage = currentValuesFromStorage?.FirstOrDefault();
-            if(currentValueFromStorage == null)
+            if(currentValueFromStorage == null || string.IsNullOrWhiteSpace(currentValueFromStorage?.Content?.Content))
             {
                 return (string.Empty, new ShareableContextLink{ LinkedBuilder = this });
             }

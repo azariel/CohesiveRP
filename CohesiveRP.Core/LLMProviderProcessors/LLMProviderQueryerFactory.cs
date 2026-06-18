@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Core.LLMProviderManager.Main;
+using CohesiveRP.Core.LLMProviderProcessors.ChatAdditions;
 using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator;
 using CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator;

@@ -1,6 +1,9 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
+using CohesiveRP.Core.LLMProviderProcessors.ChatAdditions.BusinessObjects.CohesionEnforcement;
+using CohesiveRP.Core.LLMProviderProcessors.ChatAdditions.BusinessObjects.NarrativeArchitecture;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
@@ -48,6 +51,23 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
             {
                 string LLMMessageResult = LLMResponseParser.ParseOnlyJson(messages.First().Content);
 
+                // deserialize the narrativeArchitecture
+                NarrativeArchitectureResult narrativeArchitecture = null;
+
+                try
+                {
+                    narrativeArchitecture = JsonCommonSerializer.DeserializeFromString<NarrativeArchitectureResult>(LLMMessageResult);
+                } catch (Exception e)
+                {
+                    LoggingManager.LogToFile("32982a08-45ab-41de-b40d-9103143c9648", $"Failed to deserialize NarrativeArchitectureResult from LLM response.", e);
+                    backgroundQueryDbModel.Content = null;
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
+                    backgroundQueryDbModel.RetryCount++;
+                    return false;
+                }
+
+                var finalContent = JsonCommonSerializer.SerializeToString(narrativeArchitecture);
+
                 // Replace the NarrativeArchitecture tied to this chat with the new one
                 var currentDbModels = await storageService.GetNarrativeArchitecturesAsync(s => s.ChatId == backgroundQueryDbModel.ChatId);
                 var currentDbModel = currentDbModels?.FirstOrDefault();
@@ -59,7 +79,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                         ChatId = backgroundQueryDbModel.ChatId,
                         Content = new NarrativeArchitectureElement
                         {
-                            Content = LLMMessageResult,
+                            Content = finalContent,
                         },
                     };
 
@@ -68,7 +88,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                 {
                     currentDbModel.Content = new NarrativeArchitectureElement
                     {
-                        Content = LLMMessageResult,
+                        Content = finalContent,
                     };
 
                     await storageService.UpdateNarrativeArchitectureAsync(currentDbModel);
