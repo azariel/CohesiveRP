@@ -16,6 +16,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
     /// <summary>
     /// DataAccessLayer around Global Settings.
+    /// 
+    /// Pre-Main: SceneTracker, SkillChecksInitiator, ProseGuardian, NarrativeDirection
+    /// Main: Main
+    /// After-Main: CohesionEnforcement
+    /// Downtime: Summarize, SummariesMerge, NarrativeArchitecture
     /// </summary>
     public class GlobalSettingsDal : StorageDal, IGlobalSettingsDal
     {

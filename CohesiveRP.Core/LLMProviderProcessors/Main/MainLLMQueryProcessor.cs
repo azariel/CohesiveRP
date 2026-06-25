@@ -523,6 +523,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 //await QueueSceneAnalyzeAsync(chat);
 
                 // Cohesive Enforcement
+                // TODO: we need to be able to update the content of the message afterwards. That part is fine, but the UI would not reflect that change since the main backgroundQuery is set as completed..
                 //await QueueCohesionEnforcementAsync(chat);
 
                 // Narrative Architect (Secret Plot)
@@ -572,8 +573,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             var backgroundQueryModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chat.ChatId,
-                Priority = BackgroundQueryPriority.Low,// user is not waiting, we're simply generation and iterating over secret plots and narrative arcs in the background, so we can set it to low priority
-                DependenciesTags = [],// No dependencies at all
+                Priority = BackgroundQueryPriority.VeryLow,// user is not waiting, we're simply generation and iterating over secret plots and narrative arcs in the background, so we can set it to very low priority
+                DependenciesTags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],// Run after cohesionEnforcement
                 Tags = [BackgroundQuerySystemTags.narrativeArchitecture.ToString()],
             };
 
