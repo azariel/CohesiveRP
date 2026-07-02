@@ -110,23 +110,28 @@ export default function UserInputComponent({ messagesRef }: Props) {
           prev ? { ...prev, mainQueryId: mainQuery.backgroundQueryId } : prev
         );
 
-        setMessages((prev) => [
-          ...prev,
-          {
-            messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
-            content: "...",
-            thinkingContent: "",
-            createdAtUtc: null,
-            sourceType: 1,
-            messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 1,
-            summarized: false,
-            characterAvatars: [],
-            characterId: null,
-            characterName: "",
-            personaId: null,
-            personaName: "",
-          },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
-        ]);
+        setMessages((prev) => {
+          if (prev.some((m) => m.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY))
+            return prev; // already inserted — don't duplicate it
+
+          return [
+            ...prev,
+            {
+              messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
+              content: "...",
+              thinkingContent: "",
+              createdAtUtc: null,
+              sourceType: 1,
+              messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 1,
+              summarized: false,
+              characterAvatars: [],
+              characterId: null,
+              characterName: "",
+              personaId: null,
+              personaName: "",
+            },
+          ];
+        });
       }
     };
 

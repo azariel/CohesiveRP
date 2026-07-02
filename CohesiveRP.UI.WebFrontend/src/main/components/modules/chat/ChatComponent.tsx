@@ -13,6 +13,7 @@ import SceneTrackerComponent from "./sceneTracker/SceneTrackerComponent";
 import ChatRollsComponent from "./chatRolls/ChatRollsComponent";
 import InteractiveUserInputComponent from "./interactiveUserInput/InteractiveUserInputComponent";
 import MobileAvatarBannerComponent from "./mobileAvatarBanner/MobileAvatarBannerComponent";
+import { TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY } from "../../../Constants";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -41,7 +42,22 @@ export default function ChatComponent() {
           return;
         }
 
-        setMessages(() => response.messages ?? []);
+        setMessages((prev) => {
+        const freshMessages = response.messages ?? [];
+
+        // UserInputComponent's backgroundQueries fetch can resolve first and insert
+        // the "generating…" placeholder before this fetch lands. Keep it instead of
+        // overwriting it with the DB list (which never contains it).
+        const pendingAIMessage = prev.find((m) => m.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
+        if (!pendingAIMessage)
+          return freshMessages;
+
+        return [
+            ...freshMessages,
+            { ...pendingAIMessage, messageIndex: (response.nbColdMessages ?? 0) + freshMessages.length + 1 },
+          ];
+        });
+
         setActiveModule((prev) => prev ? { ...prev, nbColdMessages: response.nbColdMessages } : prev);
         console.log(`Specific chat messages fetched successfully.`);
         setTimeout(() => {
