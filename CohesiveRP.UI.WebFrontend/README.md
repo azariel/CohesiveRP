@@ -248,6 +248,7 @@ export default defineConfig([
 │   ├── index.css
 │   └── main.tsx
 ├── CHANGELOG.md
+├── CLAUDE.md
 ├── CohesiveRP.UI.WebFrontend.esproj
 ├── eslint.config.js
 ├── index.html

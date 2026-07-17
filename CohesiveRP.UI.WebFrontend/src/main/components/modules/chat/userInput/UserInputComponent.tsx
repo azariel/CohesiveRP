@@ -73,8 +73,11 @@ export default function UserInputComponent({ messagesRef }: Props) {
     };
   }, [messagesRef]);
 
-  useEffect(() => {
-    if (!activeModule?.chatId)
+useEffect(() => {
+    // Wait for ChatComponent's "/messages/hot" fetch to land. Otherwise this
+    // can resolve on either side of it, and whichever runs second fights the
+    // other for control of `messages`.
+    if (!activeModule?.chatId || !activeModule?.hotMessagesLoaded)
       return;
 
     const abortController = new AbortController();
@@ -112,7 +115,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
 
         setMessages((prev) => {
           if (prev.some((m) => m.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY))
-            return prev; // already inserted — don't duplicate it
+            return prev;
 
           return [
             ...prev,
@@ -122,7 +125,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
               thinkingContent: "",
               createdAtUtc: null,
               sourceType: 1,
-              messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 1,
+              messageIndex: (activeModule.nbColdMessages ?? 0) + prev.length + 1,
               summarized: false,
               characterAvatars: [],
               characterId: null,
@@ -138,7 +141,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
     fetchBackgroundQueries();
     return () => abortController.abort();
 
-  }, [activeModule?.chatId]);
+  }, [activeModule?.chatId, activeModule?.hotMessagesLoaded]);
 
 const adjustTextareaHeight = () => {
     const el = textareaRef.current;

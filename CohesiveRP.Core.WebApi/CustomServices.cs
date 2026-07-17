@@ -184,7 +184,7 @@ namespace CohesiveRP.Core.WebApi
 
             //services.AddSingleton<ComfyUiEndpointConfig>(/* from appsettings */);
             //services.AddSingleton<IWorkflowInjector>(_ => new MainAvatarWorkflowInjector(templateJson));
-            services.AddSingleton<ComfyUiEndpointConfig>(new ComfyUiEndpointConfig { BaseUrl = "http://192.168.0.237:8188" });
+            services.AddSingleton<ComfyUiEndpointConfig>(new ComfyUiEndpointConfig { BaseUrl = "http://127.0.0.1:8188" });
             services.AddSingleton<IComfyUiClient, ComfyUiClient>();
             //services.AddSingleton<IComfyUiAvatarService, ComfyUiAvatarService>();
 

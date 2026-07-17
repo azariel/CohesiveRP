@@ -11,6 +11,7 @@ interface SharedContextChatType extends SharedContextType {
   sceneTrackerRefreshToken: number;// To refresh the sceneTracker once the backend has refreshed it (after the user sent a new message)
   sceneTrackerRefreshing: boolean;// sceneTracker is currently refreshing
   interactiveInputRefreshToken?: number;
+  hotMessagesLoaded?: boolean;
 };
 
 export type {

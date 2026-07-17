@@ -26,7 +26,10 @@ namespace CohesiveRP.Common.Utils.Parsers
                 .Replace("’", "'")
                 .Replace("‘", "'")
                 .Replace("‚", "'")
-                .Replace("‛", "'");
+                .Replace("‛", "'")
+                .Replace("—", ",");
+
+            // 
 
             // convert double single-quotes to double quotes
             message = Regex.Replace(message, @"''", "\"");
