@@ -179,6 +179,11 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 FilePath = Path.Combine(characterFolderPath, WebConstants.AvatarFileName)?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant(),
             };
 
+            if(targetCharacter.ClothingStateOfDress == null)
+            {
+                return avatar;
+            }
+
             string outfit = targetCharacter.ClothingStateOfDress.ToLowerInvariant();
             string currentOutfitFolderPath = Path.Combine(characterFolderPath, WebConstants.ExpressiveAvatarFolder, outfit);
             if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)

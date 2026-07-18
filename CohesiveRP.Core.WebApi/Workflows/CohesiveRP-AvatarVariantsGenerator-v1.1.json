@@ -63,7 +63,7 @@
   },
   "6": {
     "inputs": {
-      "ckpt_name": "novaAnimeXL_ilV180.safetensors"
+        "ckpt_name": "cyberrealisticPony_v170-lol.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {

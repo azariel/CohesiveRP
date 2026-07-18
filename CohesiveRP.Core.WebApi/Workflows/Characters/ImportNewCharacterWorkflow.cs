@@ -64,11 +64,29 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         var allCharacters = await storageService.GetCharactersAsync();
         if (allCharacters.Any(a => a.Name == characterName))
         {
-            return new WebApiException
+            if (characterCardCRPv1?.Data?.Character?.Name != null)
             {
-                HttpResultCode = System.Net.HttpStatusCode.BadRequest,
-                Message = $"Found character with name [{characterName}], but this character is already present in storage. Please remove that character before re-importing it."
-            };
+                characterCardCRPv1.Data.Character.Name = $"{characterCardCRPv1.Data.Character.Name}_{Guid.NewGuid().ToString()}";
+            } else if (characterCardCCv3?.Data?.Name != null)
+            {
+                characterCardCCv3.Data.Name = $"{characterCardCCv3.Data.Name}_{Guid.NewGuid().ToString()}";
+            } else if (characterCardCharaJanitorAI?.Name != null)
+            {
+                characterCardCharaJanitorAI.Name = $"{characterCardCharaJanitorAI.Name}_{Guid.NewGuid().ToString()}";
+            } else
+            {
+                return new WebApiException
+                {
+                    HttpResultCode = System.Net.HttpStatusCode.InternalServerError,
+                    Message = $"Unsupported format. Character card was found, but format is unsupported at the moment."
+                };
+            }
+
+            //return new WebApiException
+            //{
+            //    HttpResultCode = System.Net.HttpStatusCode.BadRequest,
+            //    Message = $"Found character with name [{characterName}], but this character is already present in storage. Please remove that character before re-importing it."
+            //};
         }
 
         // Add the character
