@@ -125,6 +125,13 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                     }
                 }
 
+                if(string.IsNullOrWhiteSpace(characterSheetFromLLMApiResponse.PenisSize) && 
+                   !string.IsNullOrWhiteSpace(characterSheetFromLLMApiResponse.Gender) &&
+                   characterSheetFromLLMApiResponse.Gender.ToLowerInvariant().Trim() != "female")
+                {
+                    characterSheetFromLLMApiResponse.PenisSize = "Average (5 inches)";
+                }
+
                 currentCharacterSheetsInstancesInChat.CharacterSheetInstances.Add(new CharacterSheetInstance
                 {
                     CharacterId = links.CharacterId,

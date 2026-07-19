@@ -20,7 +20,19 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.
         [JsonPropertyName("characterSheet")]
         public CharacterSheet CharacterSheet { get; set; }
 
-         [JsonPropertyName("isDirty")]
+        [JsonPropertyName("isDirty")]
         public bool IsDirty { get; set; }
+
+        [JsonPropertyName("consecutiveMessagesInScene")]
+        public int ConsecutiveMessagesInScene { get; set; }
+
+        [JsonPropertyName("consecutiveMessagesAbsentFromScene")]
+        public int ConsecutiveMessagesAbsentFromScene { get; set; }// grace counter used ONLY to debounce sceneTracker flicker; always 0 except mid-departure-confirmation
+
+        [JsonPropertyName("lastConfirmedAbsentMessageId")]
+        public string LastConfirmedAbsentMessageId { get; set; }// messageId of the most recent cycle this character was confirmed absent; marks the start of their current/next presence session
+
+        [JsonPropertyName("lastStatusCheckMessageId")]
+        public string LastStatusCheckMessageId { get; set; }
     }
 }

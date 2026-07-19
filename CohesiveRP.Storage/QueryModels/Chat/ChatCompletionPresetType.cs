@@ -17,5 +17,6 @@
         NarrativeArchitecture = 11,
         NarrativeDirection = 12,
         ProseGuardian = 13,
+        CharacterStatusUpdate = 14,
     }
 }

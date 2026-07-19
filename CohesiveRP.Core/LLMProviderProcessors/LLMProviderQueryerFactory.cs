@@ -2,6 +2,7 @@
 using CohesiveRP.Core.LLMProviderProcessors.ChatAdditions;
 using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator;
 using CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar;
+using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator;
 using CohesiveRP.Core.LLMProviderProcessors.SceneAnalyzer;
 using CohesiveRP.Core.LLMProviderProcessors.SceneTracker;
@@ -87,6 +88,9 @@ namespace CohesiveRP.Core.LLMProviderManager
             if (tags.Contains(BackgroundQuerySystemTags.proseGuardian.ToString()))
                 return BackgroundQuerySystemTags.proseGuardian;
 
+            if (tags.Contains(BackgroundQuerySystemTags.characterStatusUpdate.ToString()))
+                return BackgroundQuerySystemTags.characterStatusUpdate;
+
             return BackgroundQuerySystemTags.custom;
         }
 
@@ -134,6 +138,8 @@ namespace CohesiveRP.Core.LLMProviderManager
                     new NarrativeDirectionLLMQueryProcessor(ChatCompletionPresetType.NarrativeDirection, BackgroundQuerySystemTags.narrativeDirection, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.proseGuardian =>
                     new ProseGuardianLLMQueryProcessor(ChatCompletionPresetType.ProseGuardian, BackgroundQuerySystemTags.proseGuardian, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.characterStatusUpdate =>
+                    new CharacterStatusUpdateLLMQueryProcessor(ChatCompletionPresetType.CharacterStatusUpdate, BackgroundQuerySystemTags.characterStatusUpdate, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 _ => null
             };
 

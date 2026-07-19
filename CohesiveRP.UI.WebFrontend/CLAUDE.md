@@ -17,9 +17,19 @@ One to update the sceneTracker, which tracks the main themes of the scene (such 
 
 The second background task is to update the SkillCheckInitiator, which will analyse the scene and infer what Attributes or Skills may be in play. The backend will then roll dices, using the characterSheets attributes and skills to infer their success or failures in the scene.
 
-After those two tasks, the main task is queued. The main task will query the main LLM with the context, characters in scene, rolls, etc.
+The third background task is to give a narrative direction. The role of this step is to find out and guide what should happen next.
+
+the fourth background task is to enforce the prose. It analyzes the last messages and produce concrete, actionable writing directives for the next generation.
+
+After those four tasks, the main task is queued. The main task will query the main LLM with the context, characters in scene, rolls, etc.
 
 After this main task, the backend will queue summarization background tasks to summarize the messages between the User and AI and to summarize the summaries to shrink the space required in the context.
+
+### Character Sheet
+A character sheet represents the information about a character that helps the AI impersonate it. The information include first name, last name, birthday, age group, age group appearance (when the character looks younger than their age for instance), gender, sexuality (hetero, bisexual, etc), race/species, profession, body type, height, eye color, skin color, hair color, hair style, ear shape, genitals, breasts size, penis size, attractiveness, clothes preference, speech pattern, speedch impairment, mannerisms, social anxiety, behavior(personality), personality traits, likes, dislikes, fears, secrets, skills, weaknesses, reputation, relationships, preferred combat style, weapons proficiency, combat affinity (attack), combat affinity (defense), goals for the next year, long-term goals, kinks, secret kinks, pathfinder attributes (sort of DnD attributes), pathfinder skills (sort of DnD skills).
+
+#### Character Sheet Instance
+When a new chat is created, a copy of the Character Sheet of each character linked to that Chat is created. As long as the data within the instance is identical to the parent (Character Sheet), any modification on the character sheet will be reflected to the character sheet instance. Otherwise, it becomes distinct. This allow a character within a specific Chat to change, evolve, grow over the course of the story and roleplay without impacting the initial 'blueprint'.
 
 ## Frontend
 The first tab is a view to select a specific chat. When the User clicks on one chat, the chat view opens. That view shows the messages, the input to send new message, the avatars, sceneTracker, buttons (edit message, delete message, etc).

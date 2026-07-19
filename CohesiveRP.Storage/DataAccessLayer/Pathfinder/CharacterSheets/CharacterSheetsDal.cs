@@ -81,6 +81,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             LastName = dbModel.CharacterSheet.LastName,
                             Likes = dbModel.CharacterSheet.Likes,
                             LongTermGoals = dbModel.CharacterSheet.LongTermGoals,
+                            MagicalEffects = dbModel.CharacterSheet.MagicalEffects,
+                            BodyStatus = dbModel.CharacterSheet.BodyStatus,
+                            Wounds = dbModel.CharacterSheet.Wounds,
                             Mannerisms = dbModel.CharacterSheet.Mannerisms,
                             PathfinderAttributesValues = dbModel.CharacterSheet.PathfinderAttributesValues,
                             PathfinderSkillsValues = dbModel.CharacterSheet.PathfinderSkillsValues,
@@ -187,7 +190,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 await dbContext.SaveChangesAsync();
 
-                 // In a second time, update the characterSheetInstances related to this characterSheet ONLY if the instance isn't 'dirty' aka was updated by the backend with chat updates
+                // In a second time, update the characterSheetInstances related to this characterSheet ONLY if the instance isn't 'dirty' aka was updated by the backend with chat updates
                 await UpdateCharacterSheetInstancesAsync(dbModel);
 
                 return result.Entity;

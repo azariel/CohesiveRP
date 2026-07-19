@@ -1,6 +1,7 @@
 ﻿using CohesiveRP.Core.PromptContext.Builders.Directive;
 using CohesiveRP.Core.PromptContext.Builders.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.PromptContext.Builders.Pathfinder;
+using CohesiveRP.Core.PromptContext.Builders.Pathfinder.CharactersMutations;
 using CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
@@ -85,6 +86,8 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new PromptContextNarrativeDirectionBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.ProseGuardian:
                     return new PromptContextProseGuardianBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.CharacterStatusUpdateInstructions:
+                    return new PromptContextCharacterStatusUpdateBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 default:
                     throw new Exception($"Unhandled [{contextElement.Tag}].");
             }

@@ -223,6 +223,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Tags = [
                                 ChatCompletionPresetType.SceneTracker,// PRE
                                 ChatCompletionPresetType.ProseGuardian,// PRE
+                                ChatCompletionPresetType.CharacterStatusUpdate,// POST
                                 ChatCompletionPresetType.CohesionEnforcement,// POST
                             ],
                             TimeoutStrategy = new TimeoutStrategy
@@ -374,6 +375,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             {
                                 Type = ChatCompletionPresetType.ProseGuardian,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_PROSE_GUARDIAN_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.CharacterStatusUpdate,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_CHARACTER_STATUS_UPDATE_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                         }

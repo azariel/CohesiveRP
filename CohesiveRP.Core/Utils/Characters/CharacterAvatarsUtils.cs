@@ -105,20 +105,19 @@ namespace CohesiveRP.Core.Utils.Characters
             if (File.Exists($"{sourceCharacterFolder}\\{WebConstants.AvatarFileName}") && !forceUpdate)
             {
                 return;
-
             }
 
             // Select the oldest file in the raws/clothed folder
-            var clothedFolder = $"{sourceCharacterFolder}\\raws\\{ClothingStateOfDress.Clothed.ToString().ToLowerInvariant()}";
-            var oldestFile = Directory.GetFiles(clothedFolder).OrderBy(f => File.GetCreationTimeUtc(f)).FirstOrDefault();
-            if (oldestFile != null)
-            {
-                string outFilePath = $"{sourceCharacterFolder}\\{WebConstants.AvatarFileName}";
-                if (File.Exists(outFilePath))
-                    File.Delete(outFilePath);
+            //var clothedFolder = $"{sourceCharacterFolder}\\raws\\{ClothingStateOfDress.Clothed.ToString().ToLowerInvariant()}";
+            //var oldestFile = Directory.GetFiles(clothedFolder).OrderBy(f => File.GetCreationTimeUtc(f)).FirstOrDefault();
+            //if (oldestFile != null)
+            //{
+            //    string outFilePath = $"{sourceCharacterFolder}\\{WebConstants.AvatarFileName}";
+            //    if (File.Exists(outFilePath))
+            //        File.Delete(outFilePath);
 
-                File.Copy(oldestFile, outFilePath);
-            }
+            //    File.Copy(oldestFile, outFilePath);
+            //}
 
             // Set the main avatar for each outfit
             foreach (var outfit in Enum.GetValues(typeof(ClothingStateOfDress)))

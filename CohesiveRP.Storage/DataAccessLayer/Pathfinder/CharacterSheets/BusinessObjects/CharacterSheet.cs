@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using CohesiveRP.Common;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheets.BusinessObjects;
@@ -137,6 +136,15 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
 
         [JsonPropertyName("longTermGoals")]
         public string[] LongTermGoals { get; set; }// e.g:  Daphne wants to recruits a loyal informant, healer, and a political figure bound to her by mutual benefit and quiet favors.
+
+        [JsonPropertyName("magicalEffects")]
+        public CharacterStatusEffect[] MagicalEffects { get; set; }// e.g: magical ailments, buffs, curses, afflictions, tattoos, item effects, compulsions, mental alterations
+
+        [JsonPropertyName("bodyStatus")]
+        public CharacterStatusEffect[] BodyStatus { get; set; }// e.g: poisons, non-magical afflictions, malnutrition, sicknesses, drug effects, corrosive effects, anesthesia, cancers, alcohol effects
+
+        [JsonPropertyName("wounds")]
+        public CharacterStatusEffect[] Wounds { get; set; }// e.g: maiming (PERMANENT) and other unhealed physical wounds
 
         [JsonPropertyName("pathfinderAttributes")]
         public PathfinderAttribute[] PathfinderAttributesValues { get; set; } = [

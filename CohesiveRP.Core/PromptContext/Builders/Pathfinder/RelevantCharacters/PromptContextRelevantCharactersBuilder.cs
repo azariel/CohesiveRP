@@ -234,7 +234,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                         }
                     }
 
-                    foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(2))// TODO: make the limit configurable
+                    foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(3))// TODO: make the limit configurable
                     {
                         str.AppendLine($"  <{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
                         AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
@@ -258,7 +258,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                         }
                     }
 
-                    foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(2))// TODO: make the limit configurable
+                    foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(3))// TODO: make the limit configurable
                     {
                         str.AppendLine($"  <{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
                         AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);

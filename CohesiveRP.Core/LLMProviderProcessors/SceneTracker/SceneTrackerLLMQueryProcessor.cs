@@ -3,6 +3,7 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
+using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Directive;
@@ -17,6 +18,7 @@ using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.SceneTracker;
 
@@ -62,12 +64,10 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
             var chunkOfMessagesToUpdate = hotMessages.Take(indexOfUserMessageToCutChunk + 1).ToList();
 
-            // Deserialize the sceneTracker to find out the inRoleplay datetime
             var deserializedSceneTracker = JsonCommonSerializer.DeserializeFromString<BasicInformationSceneTracker>(sceneTracker.Content);
             if (deserializedSceneTracker?.CurrentDateTime == null)
                 return;
 
-            // Parse the date
             if (!DateTime.TryParse(deserializedSceneTracker.CurrentDateTime, out DateTime sceneTrackerParsedDate))
                 return;
 
@@ -94,7 +94,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 return false;
             }
 
-            // Deserialize the generic content into a valid Scene Tracker
             try
             {
                 LLMApiResponseMessage LLMmessage = messages.LastOrDefault();
@@ -107,7 +106,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
                 string sceneTrackerJson = LLMResponseParser.ParseOnlyJson(messages.First().Content);
 
-                // Replace the scene tracker tied to this chat with the new one
                 string linkedMessageId = shareableContextLink.Value as string;
                 CreateSceneTrackerQueryModel queryModel = new()
                 {
@@ -124,11 +122,12 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                     return false;
                 }
 
-                // Update the time tracker of the messages
                 await UpdateMessagesTimeTrackerAsync(sceneTrackerDbModel);
 
-                // Analyze the scene to extract new Characters / NPCs
                 await CreateNewCharactersWhenRequired(sceneTrackerDbModel);
+
+                var sceneTrackerModelForPresence = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerDbModel.Content);
+                await UpdateCharacterScenePresenceAndQueueStatusUpdatesAsync(sceneTrackerDbModel, sceneTrackerModelForPresence, linkedMessageId);
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
@@ -155,12 +154,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
             return selectedCharacterSheetInstance;
         }
 
-        /// <summary>
-        /// Analyze the scene to extract new Characters / NPCs
-        /// Try to match those characters to existing ones.
-        /// If no match is found, create queries to send to the User to ask him if we should trigger the creation of a new character based on the extracted one.
-        /// If so, then create the new character based on the extracted one, linking it to the scene and to the chat.
-        /// </summary>
         private async Task CreateNewCharactersWhenRequired(SceneTrackerDbModel sceneTrackerDbModel)
         {
             var charactersInScene = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerDbModel.Content);
@@ -178,12 +171,10 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
                 var characterSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstances?.CharacterSheetInstances, characterName);
 
-                // Ok, at this point, we need to scan our storage to find a character tied to the current chat with that name
                 if (characterSheetInstances?.CharacterSheetInstances == null || characterSheetInstances.CharacterSheetInstances.Count <= 0 || characterSheetInstance == null)
                 {
                     if (allCurrentInteractiveUserInputQueries == null || allCurrentInteractiveUserInputQueries.Length <= 0 || allCurrentInteractiveUserInputQueries.All(a => a == null || !string.IsNullOrWhiteSpace(a.Metadata) && !a.Metadata.ToLowerInvariant().Trim().Contains(characterName.ToLowerInvariant().Trim())))
                     {
-                        // There is no linked character sheet to the chat, we can directly consider that this is a new character
                         await storageService.AddInteractiveUserInputQueryAsync(new InteractiveUserInputDbModel
                         {
                             ChatId = sceneTrackerDbModel.ChatId,
@@ -195,6 +186,129 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                     }
                 }
             }
+        }
+
+        private async Task UpdateCharacterScenePresenceAndQueueStatusUpdatesAsync(SceneTrackerDbModel sceneTrackerDbModel, VisualSceneTracker sceneTrackerModel, string currentMessageId)
+        {
+            if (sceneTrackerDbModel == null)
+                return;
+
+            var characterSheetInstancesObj = await storageService.GetCharacterSheetsInstanceByChatIdAsync(sceneTrackerDbModel.ChatId);
+            if (characterSheetInstancesObj?.CharacterSheetInstances == null || characterSheetInstancesObj.CharacterSheetInstances.Count <= 0)
+                return;
+
+            // Needed to evaluate the message-count threshold against the SAME "stable" (non-mutable-tail) boundary
+            // the builder itself will use, instead of approximating it with a per-cycle counter alone.
+            var hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(sceneTrackerDbModel.ChatId);
+            List<IMessageDbModel> orderedMessages = hotMessagesDbModel?.Messages?
+                .Cast<IMessageDbModel>()
+                .OrderBy(o => o.CreatedAtUtc)
+                .ToList() ?? new();
+
+            int stableMessageCount = Math.Max(0, orderedMessages.Count - CharacterStatusUpdateConstants.RECENT_ACTIVITY_STABILITY_WINDOW);
+            int ResolveIndex(string messageId) => string.IsNullOrWhiteSpace(messageId) ? -1 : orderedMessages.FindIndex(f => f.MessageId == messageId);
+
+            var namesInScene = sceneTrackerModel?.CharactersAnalysis?.Select(s => s.Name).Where(w => !string.IsNullOrWhiteSpace(w)).ToArray() ?? [];
+            List<CharacterStatusUpdateTarget> targetsNeedingUpdate = new();
+            bool anyChange = false;
+
+            foreach (var instance in characterSheetInstancesObj.CharacterSheetInstances.Where(w => w.CharacterSheet != null))
+            {
+                bool inScene = namesInScene.Any(n => FindCharacterSheetInstanceFromCharacterName(new List<CharacterSheetInstance> { instance }, n) != null);
+
+                if (inScene)
+                {
+                    instance.ConsecutiveMessagesAbsentFromScene = 0;
+                    instance.ConsecutiveMessagesInScene++;
+                    anyChange = true;
+
+                    // The cycle counter is just an outer "don't bother checking yet" gate — a cycle can bundle a
+                    // variable number of raw messages, so once the gate opens we verify against the REAL stable
+                    // message count since checkpoint. This guarantees the builder's window won't come back empty
+                    // (still fully inside the tail buffer), and avoids wasting an LLM call that couldn't advance
+                    // the checkpoint anyway.
+                    if (instance.ConsecutiveMessagesInScene >= CharacterStatusUpdateConstants.CHARACTER_STATUS_UPDATE_MESSAGE_THRESHOLD)
+                    {
+                        int checkpointIndex = Math.Max(ResolveIndex(instance.LastStatusCheckMessageId), ResolveIndex(instance.LastConfirmedAbsentMessageId));
+                        int newStableMessagesSinceCheckpoint = stableMessageCount - (checkpointIndex + 1);
+
+                        if (newStableMessagesSinceCheckpoint > 0)
+                        {
+                            targetsNeedingUpdate.Add(new CharacterStatusUpdateTarget
+                            {
+                                CharacterSheetInstanceId = instance.CharacterSheetInstanceId,
+                                LastStatusCheckMessageId = instance.LastStatusCheckMessageId,
+                                LastConfirmedAbsentMessageId = instance.LastConfirmedAbsentMessageId,
+                            });
+                            instance.ConsecutiveMessagesInScene = 0;
+                        }
+                        // else: the buffer hasn't released any new stable content yet — leave the counter elevated
+                        // and re-check next cycle instead of restarting a fresh wait.
+                    }
+                } else if (instance.ConsecutiveMessagesInScene > 0)
+                {
+                    // The sceneTracker only tracks its most important characters per cycle, so one missed cycle is
+                    // expected flicker, not a real exit. Require a run of consecutive absent cycles before
+                    // finalizing this as a genuine departure.
+                    instance.ConsecutiveMessagesAbsentFromScene++;
+                    anyChange = true;
+
+                    if (instance.ConsecutiveMessagesAbsentFromScene >= CharacterStatusUpdateConstants.RECENT_ACTIVITY_STABILITY_WINDOW)
+                    {
+                        int checkpointIndex = Math.Max(ResolveIndex(instance.LastStatusCheckMessageId), ResolveIndex(instance.LastConfirmedAbsentMessageId));
+                        int newStableMessagesSinceCheckpoint = stableMessageCount - (checkpointIndex + 1);
+
+                        if (newStableMessagesSinceCheckpoint > 0)
+                        {
+                            targetsNeedingUpdate.Add(new CharacterStatusUpdateTarget
+                            {
+                                CharacterSheetInstanceId = instance.CharacterSheetInstanceId,
+                                LastStatusCheckMessageId = instance.LastStatusCheckMessageId,
+                                LastConfirmedAbsentMessageId = instance.LastConfirmedAbsentMessageId,
+                            });
+                        }
+                        // else: rare — the character's entire presence session was still inside the tail buffer at
+                        // the moment departure got confirmed. Nothing to analyze; still finalize the departure below.
+
+                        instance.ConsecutiveMessagesInScene = 0;
+                        instance.ConsecutiveMessagesAbsentFromScene = 0;
+                        instance.LastConfirmedAbsentMessageId = currentMessageId;
+                    }
+                } else if (instance.ConsecutiveMessagesAbsentFromScene == 0)
+                {
+                    // Steady-state absence: keep the checkpoint fresh so a future return doesn't pull in messages
+                    // from a scene (possibly hundreds of messages back) this character wasn't part of.
+                    instance.LastConfirmedAbsentMessageId = currentMessageId;
+                    anyChange = true;
+                }
+            }
+
+            if (anyChange)
+            {
+                await storageService.UpdateCharacterSheetsInstanceAsync(characterSheetInstancesObj);
+            }
+
+            if (targetsNeedingUpdate.Count > 0)
+            {
+                await QueueCharacterStatusUpdateAsync(sceneTrackerDbModel.ChatId, targetsNeedingUpdate);
+            }
+        }
+
+        private async Task QueueCharacterStatusUpdateAsync(string chatId, List<CharacterStatusUpdateTarget> targets)
+        {
+            CreateBackgroundQueryQueryModel queryModel = new()
+            {
+                ChatId = chatId,
+                Priority = BackgroundQueryPriority.Lowest,
+                LinkedId = JsonCommonSerializer.SerializeToString(new CharacterStatusUpdateLinks { Targets = targets }),
+                Tags = [BackgroundQuerySystemTags.characterStatusUpdate.ToString()],
+                DependenciesTags = Enum.GetValues<BackgroundQuerySystemTags>()
+                    .Where(w => w != BackgroundQuerySystemTags.characterStatusUpdate)
+                    .Select(s => s.ToString())
+                    .ToList(),
+            };
+
+            await storageService.AddBackgroundQueryAsync(queryModel);
         }
     }
 }
