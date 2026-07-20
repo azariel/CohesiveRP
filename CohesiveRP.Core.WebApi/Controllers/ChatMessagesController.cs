@@ -78,7 +78,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
 
         // Swipe
         [HttpPost]
-        [Route("messages/swipe")]
+        [Route("messages/{messageId}/swipe")]
         public async Task<IActionResult> Swipe(GetSpecificMessageRequestDto requestDto)
         {
             return new JsonResult(await swipeMessageWorkflow.SwipeMessageAsync(requestDto));

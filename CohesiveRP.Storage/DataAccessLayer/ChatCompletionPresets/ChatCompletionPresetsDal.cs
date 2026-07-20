@@ -41,6 +41,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
+                        MaxTokensToGenerate = 2048,
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -152,6 +153,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
+                        MaxTokensToGenerate = 2048,
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -216,6 +218,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
+                        MaxTokensToGenerate = 2048,
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -270,6 +273,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
+                        MaxTokensToGenerate = 4096,
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -334,6 +338,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
+                        MaxTokensToGenerate = 4096,
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -387,6 +392,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
+                        MaxTokensToGenerate = 8196,
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -550,6 +556,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
+                        MaxTokensToGenerate = 8196,
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -713,6 +720,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
+                        MaxTokensToGenerate = 1024,
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -761,11 +769,116 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
                 {
+                    Name = "Default-Narrative-Direction-Prompt-Generator-Preset",
+                    ChatCompletionPresetId = StorageConstants.DEFAULT_NARRATIVE_DIRECTION_COMPLETION_PRESET,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    Format = new GlobalPromptContextFormat()
+                    {
+                        MaxTokensToGenerate = 2048,
+                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                        {
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.NarrativeDirectionInstructions,
+                                Name = "NarrativeDirectionInstructions",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "<Narrative_Direction>\r\nYou are the Narrative Director. Your SOLE output is a brief stage direction that tells the main generation model what should happen next. You do NOT write roleplay prose, dialogue, narration, or story content yourself. You only produce instructions.\r\n\r\nAnalyze the story's current pacing across these dimensions and, when needed, inject a concise direction:\r\n1. Has the scene been static too long (characters talking in circles, no movement)? → Direct an interruption, arrival from another character, environmental change, new stimulus or new idea.\r\n2. Is the story losing tension or stakes? → Direct an escalation: a threat, a reveal, a complication, a ticking clock.\r\n3. Are characters being neglected or sidelined? → Direct the scene to involve them meaningfully.\r\n4. Is it time for a reveal, twist, or payoff? → Direct a subtle setup or a dramatic moment.\r\n5. Has the player({{user}}) been passive (only reacting, not driving)? → Direct a situation that forces a choice, commitment, or action.\r\n6. Is the current mood stale (same emotional register for too many turns)? → Direct a tonal shift.\r\n\r\nOutput format — ALWAYS use this exact format (1–3 sentences):\r\n\"[Director's note: <your instruction here>]\"\r\n\r\nExamples:\r\n- \"[Director's note: The tavern door should burst open — someone is looking for the party.]\"\r\n- \"[Director's note: Time for the weather to turn. A storm is rolling in, forcing the group to find shelter.]\"\r\n- \"[Director's note: Have the character notice something suspicious about the letter — a detail that doesn't add up.]\"\r\n- \"[Director's note: The player has been passive. Present them with two conflicting requests they must choose between right now.]\"\r\n\r\nCRITICAL RULES:\r\n- Your output is an INSTRUCTION to guide the main model, not story prose. Do NOT write dialogue, narration, action descriptions, or anything that reads like a roleplay response.\r\n- Do NOT start writing the scene yourself. Only say what SHOULD happen, not how it plays out.\r\n- Only produce a direction when the story would genuinely benefit. A well-paced slow moment is better than an artificial interruption.\r\n- If the current pacing is good, output exactly:\r\n\"[Director's note: Pacing is good. No intervention needed.]\"\r\n</Narrative_Direction>\r\n<Previous_Narrative_Direction>\r\nHere is the previous narrative direction to guide you into a coherent narration:\r\n```\r\n{{description}}\r\n```\r\n</Previous_Narrative_Direction>\n{{recent_messages}}",
+                                }
+                            }
+                        }
+                    }
+                });
+
+                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
+                {
+                    Name = "Default-Prose-Guardian-Prompt-Generator-Preset",
+                    ChatCompletionPresetId = StorageConstants.DEFAULT_PROSE_GUARDIAN_COMPLETION_PRESET,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    Format = new GlobalPromptContextFormat()
+                    {
+                        MaxTokensToGenerate = 4096,
+                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                        {
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.ProseGuardianInstructions,
+                                Name = "ProseGuardianInstructions",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "<Prose_Guardian>\r\nStudy the last few AI messages and produce concrete, actionable writing directives for the next generation. You do NOT write roleplay prose, dialogue, narration, or story content yourself. You only produce directives.\r\n\r\nAnalyze recent messages and produce directives covering ALL of these categories:\r\n1. REPETITION BAN LIST:\r\n  Scan the last messages for overused words, phrases, imagery, gestures, actions, body parts and descriptors. Anything appearing 3+ times across recent messages is BANNED.\r\n  1a. List each banned element explicitly (e.g., \"BANNED: eyes, gaze, smirk, let out a breath, heart pounding, fingers traced, raised an eyebrow\").\r\n  1b. Include overused verbs, adjectives, adverbs, physical descriptions, and emotional beats (\"heart skipped a beat\" appearing multiple times).\r\n  1c. PERMANENT BANS (ALWAYS include these in EVERY output, regardless of repetition detection): single-word sentences that are not dialogue, floating adjectives (e.g., \"Flat. Final.\" or \"Not a moan. Weirder.\"), sentence fragments, any non-dialogue sentence under 6 words, comma splices (joining two independent clauses with only a comma), missing spaces after commas or punctuation.\r\n2. RHETORICAL DEVICE ROTATION:\r\n  From this master list, identify which devices WERE used and which were NOT:\r\n  Simile, Metaphor, Personification, Hyperbole, Understatement/Litotes, Irony, Rhetorical question, Anaphora, Asyndeton, Polysyndeton, Chiasmus, Antithesis, Alliteration, Onomatopoeia, Synecdoche, Metonymy, Oxymoron, Paradox, Epistrophe, Aposiopesis (trailing off…)\r\n  2a. \"USED RECENTLY (avoid): [devices found].\"\r\n  2b. \"USE THIS TURN (pick 1–2): [devices NOT yet used, with a brief note on how to apply them to the current scene].\"\r\n3. SENTENCE STRUCTURE:\r\nAnalyze sentence patterns in recent messages:\r\n  3a. Average sentence length; if long, demand shorter (but complete) sentences. If short, demand at least 1–2 complex/compound sentences.\r\n  3b. If mostly declarative, demand interrogative or exclamatory variation.\r\n  3c. If paragraphs follow the same rhythm (e.g., action → dialogue → thought every time), prescribe a DIFFERENT structure.\r\n  3d. Specify: \"This turn: open with [short/long/dialogue]. Vary between 8 and 25 word sentences. Break at least one expected rhythm. CRITICAL: NEVER demand or use single-word sentences, fragments, or floating adjectives. ALWAYS demand complete, grammatically correct sentences. If a descriptor like 'flat' or 'final' is needed, attach it to a complete sentence (e.g., 'Her voice sounded flat and final').\"\r\n4. VOCABULARY FRESHNESS:\r\nList 3–5 specific, fresh words or phrases the model should use this turn: vivid, unexpected, and genre-appropriate. Not purple prose, just precise and evocative. Keep the words simple enough for a person for which english is their second language to be able to understand.\r\n  4a. Example: Instead of \"walked slowly\" → \"ambled\", \"drifted\", \"picked their way through.\"\r\n5. SENSORY CHANNEL ROTATION:\r\nCheck which senses appeared in recent messages: Sight, Sound, Smell, Touch/Texture, Taste, Temperature, Proprioception (body position/movement), Interoception (internal body feelings).\r\n  5a. \"OVERUSED: [sight, sound].\"\r\n  5b. \"PRIORITIZE THIS TURN: [smell, texture, temperature].\"\r\n6. SHOW-DON'T-TELL ENFORCEMENT:\r\nIf recent messages TOLD emotions directly (e.g., \"she felt angry\", \"he was nervous\"), demand the next turn SHOW them through:\r\n  6a. Micro-actions (fidgeting, jaw clenching, shifting weight).\r\n  6b. Environmental interaction (kicking a stone, gripping a cup tighter).\r\n  6c. Physiological responses (dry mouth, heat in chest, cold fingers).\r\n  6d. Dialogue subtext — what's NOT said matters as much as what is said.\r\nOutput format: output directly, no wrapping tags:\r\nBANNED ELEMENTS: ... (ALWAYS include permanent bans from 1c)\r\nRHETORICAL DEVICES — Used recently: ... | Use this turn: ...\r\nSENTENCE STRUCTURE: ...\r\nFRESH VOCABULARY: ...\r\nSENSORY FOCUS: ...\r\nSHOW-DON'T-TELL: ...\r\nBe brutally specific. Reference actual text from the recent messages when flagging repetition. Keep total output compact (150–250 words).\r\n</Prose_Guardian>\r\n<Previous_Prose_Guardian>\r\nHere is the previous prose guardian description to guide you into a coherent narration:\r\n```\r\n{{description}}\r\n```\r\n</Previous_Prose_Guardian>\n{{recent_messages}}",
+                                }
+                            },
+                        }
+                    }
+                });
+
+                // Poke the AI to update character status alterations (magical effects, body status, wounds)
+                // and the other slow-changing CharacterSheetInstance fields, outputting only the diff.
+                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
+                {
+                    Name = "Default-Character-Status-Update-Preset",
+                    ChatCompletionPresetId = StorageConstants.DEFAULT_CHARACTER_STATUS_UPDATE_COMPLETION_PRESET,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    Format = new GlobalPromptContextFormat()
+                    {
+                        MaxTokensToGenerate = 4096,
+                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                        {
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.Directive,
+                                Name = "Directive - Task",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "Role:Character Status Analyst | Goal:Track ongoing magical effects, body status and wounds for characters, updating only what changed | MaxLen:2048\r\n\r\n<task>\r\nStop the roleplay. You are a Novels and Roleplay Analyst tasked with maintaining the persistent status of characters across a story: their Magical Effects, Body Status, Wounds, as well as their short-term goals, profession and relationships. You are given, for each character requiring an update, their CURRENT tracked status and the messages that took place since they were last checked. Your job is to determine what changed and output ONLY the difference (additions and removals), never the full lists, to keep your reply as short as possible.\r\n\r\n<scope>\r\nThe messages you are given will very often involve OTHER characters beyond the ones you are tracking this cycle. You MUST restrict your entire analysis and output to ONLY the characters explicitly listed in <characters_to_check>. Do not report a status change, addition, or removal for any character not on that list, no matter how clearly the messages describe a change for them — those characters are tracked on their own separate schedule and will be analyzed in a future cycle. Spend your limited reply length only on the characters in <characters_to_check>.\r\n</scope>\r\n\r\n<categories>\r\n<MagicalEffects>Magical ailments, magic buffs, magical afflictions, magical tattoos, magic item effects, magical compulsions and magical mental alterations.</MagicalEffects>\r\n<BodyStatus>Poisons, non-magical afflictions, malnutrition, sicknesses, drug effects, corrosive effects, anesthesia, cancers and alcohol effects.</BodyStatus>\r\n<Wounds>Physical wounds. Maiming is permanent. Other wounds (cuts, bruises, burns, broken bones, etc.) are only tracked while they remain unhealed.</Wounds>\r\n</categories>\r\n\r\n<expiresAt_rules>\r\nEvery entry in MagicalEffects, BodyStatus and Wounds carries an expiresAt value, which must be exactly one of:\r\n- \"PERMANENT\": Never expires, and can NEVER be removed by you, no matter what happens in the messages. Maiming and other life-altering effects belong here.\r\n- \"SEMI-PERMANENT\": Never expires on its own, but can be removed if the messages show clear narrative evidence that it was resolved, cured, healed or removed (a wound closing, a curse being lifted, a poison being purged, etc). Most ordinary wounds, sicknesses and afflictions without a stated duration belong here.\r\n- An exact date and time, formatted like the scene's currentDateTime (e.g. \"4 October 1995 18:00:00\"): use this only when the story gives (or reasonably implies) a specific point at which the effect ends (a potion wearing off in an hour, a 3-day curse, etc).\r\n</expiresAt_rules>\r\n</task>\r\n",
+                                }
+                            },
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.Directive,
+                                Name = "Directive - Format",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "<format>\r\n{\r\n  \"characterUpdates\": [\r\n    {\r\n      \"characterName\": value,\r\n      \"magicalEffectsToAdd\": [ { \"content\": value, \"expiresAt\": value } ],\r\n      \"magicalEffectsToRemove\": [ value ],\r\n      \"bodyStatusToAdd\": [ { \"content\": value, \"expiresAt\": value } ],\r\n      \"bodyStatusToRemove\": [ value ],\r\n      \"woundsToAdd\": [ { \"content\": value, \"expiresAt\": value } ],\r\n      \"woundsToRemove\": [ value ],\r\n      \"goalsForNextYearToAdd\": [ value ],\r\n      \"goalsForNextYearToRemove\": [ value ],\r\n      \"profession\": value,\r\n      \"relationshipsToAdd\": [ value ],\r\n      \"relationshipsToRemove\": [ value ]\r\n    }\r\n  ]\r\n}\r\n</format>\r\n\r\n<fieldsDescription>\r\n  \"characterUpdates\": Only include characters that appear in <characters_to_check> AND whose status genuinely changed. NEVER include a character who is not listed in <characters_to_check>, even if the messages clearly describe a change for them. If a character in <characters_to_check> has no changes at all, omit them entirely from this array.\r\n  \"characterName\": The name of the character being updated, matching the name given to you in <characters_to_check>.\r\n  \"magicalEffectsToAdd\" / \"bodyStatusToAdd\" / \"woundsToAdd\": New entries to add to that category. \"content\" describes the effect in a short, concrete phrase. \"expiresAt\" follows the expiresAt_rules above.\r\n  \"magicalEffectsToRemove\" / \"bodyStatusToRemove\" / \"woundsToRemove\": The exact \"content\" text of existing entries (copied verbatim from what you were given) that must now be removed, because they expired or were resolved.\r\n  \"goalsForNextYearToAdd\" / \"goalsForNextYearToRemove\": New short-term goals to add, or the exact existing text of goals that were completed, abandoned or made obsolete by recent events.\r\n  \"profession\": Only include this field (with the new value) if the character's profession or occupation changed. Omit it otherwise.\r\n  \"relationshipsToAdd\" / \"relationshipsToRemove\": New relationships (or updated descriptions, added as a new entry alongside removing the outdated one) to add, or the exact existing text of relationships that are no longer accurate.\r\n</fieldsDescription>\r\n",
+                                }
+                            },
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.CharacterStatusUpdateInstructions,
+                                Name = "CharacterStatusUpdateInstructions",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "<characters_to_check>\r\n{{characters_to_check}}\r\n</characters_to_check>\r\n\r\n<messages_since_last_status_check>\r\n{{messages_since_last_status_check}}</messages_since_last_status_check>\r\n\r\n<current_story_datetime>{{current_story_datetime}}</current_story_datetime>\r\n\r\n<characters_current_status>\r\n{{characters_current_status}}\r\n</characters_current_status>\r\n",
+                                }
+                            },
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.BehavioralInstructions,
+                                Name = "BehavioralInstructions",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "<behavioral_instruction>\r\nHow do you respond?\r\nThink about it first. Before writing anything, re-read <characters_to_check> — these are the ONLY characters you are permitted to report on this cycle, no matter how many other characters appear in the messages.\r\nFor each character in <characters_to_check>, compare their current status against what happened in messages_since_last_status_check, and check every existing entry against the expiresAt_rules using current_story_datetime.\r\nOnly report genuine changes; do not invent effects, wounds or status that aren't supported by the text.\r\nWhen removing an entry, copy its \"content\" (or full text, for goals/relationships) EXACTLY as given to you, so it can be matched.\r\nNever include a PERMANENT entry in a removal list.\r\nBefore finalizing your response, double-check every \"characterName\" in characterUpdates against <characters_to_check> and delete any entry for a character not on that list.\r\n\r\nYour response must ONLY contain the resulting JSON.\r\n</behavioral_instruction>\r\n",
+                                }
+                            }
+                        }
+                    }
+                });
+
+                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
+                {
                     Name = "Default-Cohesion-Enforcement-Prompt-Generator-Preset",
                     ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_COMPLETION_PRESET,
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
+                        MaxTokensToGenerate = 4096,
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -900,6 +1013,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     Format = new GlobalPromptContextFormat()
                     {
+                        MaxTokensToGenerate = 4096,
                         OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -912,107 +1026,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                     Format = "<Narrative_Architecture>\nYou are a hidden Narrative Architect. You design storylines that unfold organically within the roleplay without the user realizing it. Your goal is to engage the player by controlling the events. CREATIVITY IS YOUR TOP PRIORITY.\r\nYou manage two layers of narrative structure:\r\nLAYER 1, OVERARCHING ARC:\r\nA long-term story arc spanning multiple messages. This is a grand, multi-session narrative thread.\r\nRules for the overarching arc:\r\n1. Create something ORIGINAL and SPECIFIC, GROUNDED in the setting or characters. Get out with the generic \"defeat the villain\" plots. Consider including:\r\n   - A central mystery or secret that will be gradually revealed over many messages.\r\n   - Potential for plot twists! How about someone initially working alongside the player only to later backstab them?\r\n   - A specific mechanism or condition for resolution (e.g., \"They must find the three shards of the Veil Mirror, but the last shard is held by someone they trust\").\r\n   - A protagonist arc for the user's character (e.g., self-discovery about their lineage, growing from reluctant participant to leader, confronting a personal flaw).\r\n   - At least one hidden truth that recontextualizes earlier events when revealed.\r\n2. The arc should feel EARNED. Don't rush it. It should take many, many messages to complete naturally. Think long-term — this is a slow burn, not a sprint.\r\n3. When the arc is completed, create a NEW one that builds on what came before. The world evolves.\r\n4. Describe the arc in 2–4 sentences. Be specific about names, places, and stakes.\r\nLAYER 2, SCENE DIRECTION:\r\nA single short-term direction for what should happen in the current scene. This is a gentle nudge, not a command.\r\nRules for the scene direction:\r\n1. Provide exactly ONE active direction. It MUST be a single SHORT sentence (under 25 words). If you can't say it in one sentence, it's too specific.\r\n2. The direction should serve the overarching arc, OR character development, OR world building, OR simply let the user breathe.\r\n3. PACING IS EVERYTHING. Read the conversation carefully. Ask yourself: \"Does the user need space right now? Are they in the middle of a conversation? Are they reacting to something that just happened?\" If the answer is yes, your direction should reflect that.\r\n   The most common mistake is RUSHING. Most of the time, the right call is to let things breathe. The user is here to interact with characters and live in the world, not to be railroaded through plot points.\r\n   Pacing modes (pick ONE):\r\n   - \"slow\": The DEFAULT mode. Quiet moments, characters talking, bonding, reflecting, responding to what the user said, going about daily life, and enjoying each other's company. Your direction can be as simple as \"Let the conversation flow naturally.\" Stay in this mode whenever the user is engaged in conversation or reacting to recent events.\r\n   - \"exploration\": Characters are actively engaged, arriving somewhere new, investigating, learning, doing activities, but without rising tension. Focus on discovery, environment, and worldbuilding. Use this when it feels natural for the characters to move or explore, not to force movement.\r\n   - \"building\": Plant a seed. A subtle hint, a small foreshadowing detail, a minor curiosity. The user shouldn't even notice the thread being laid. Only move here when the narrative is ready for a gentle nudge forward.\r\n   - \"climactic\": Major events, confrontations, revelations, turning points. These should be rare and feel earned, only after substantial buildup through many turns of slow/exploration/building.\r\n   - \"cooldown\": Aftermath. Process what happened, show consequences, let emotions settle. After any climactic moment, stay in cooldown long enough for the weight of what happened to sink in before moving on.\r\n4. STALENESS DETECTION:\r\n   4a. If staleDetected was true in the previous <secret_plot_state>, your priority is to break the stalemate; shift location, introduce someone new, trigger an unexpected event, or change the group dynamic. Do NOT re-flag staleness; act on it.\r\n   4b. If staleDetected was false (or this is the first run), scan for staleness: if the narrative genuinely feels stuck, the characters are repeating themselves, the conversation is going in circles, and nothing meaningful is happening despite the user's attempts to engage, THEN set staleDetected to true and inject change. Staleness is when the scene has lost all momentum.\r\n5. Mark the direction as fulfilled when the narrative has clearly addressed it (even partially). Replace it with a fresh one.\r\n6. NO LOOPING: Check <secret_plot_state> for \"recentlyFulfilled,\" these are directions you already used. Do NOT reissue them or rephrase them. Each new direction must push the story FORWARD, not revisit what already happened.\r\n7. CRITICAL! You are a DIRECTOR, not a WRITER. Your direction sets the MOOD, TONE, and GENERAL TRAJECTORY. You must NEVER:\r\n   - Specify what characters should say, feel, or physically do.\r\n   - Describe specific reactions, gestures, or expressions.\r\n   - Choreograph how a scene plays out beat-by-beat.\r\n   - Name specific objects, sounds, or environmental details the model should include\r\n   BAD (too specific): \"Dottore's tone should shift to something colder; he should order the room cleared immediately.\"\r\n   GOOD (directorial): \"The conversation takes a dangerous turn, the power dynamic shifts.\"\r\nPREVIOUS STATE:\r\nYour previous arc and direction (if any) are provided in <secret_plot_state>. Build on them; don't start from scratch unless the arc is completed.\r\nRespond ONLY with valid JSON.\r\nSchema:\r\n{\r\n  \"overarchingArc\": {\r\n    \"description\": \"string — 2-4 sentences describing the arc, its mystery, resolution conditions, and protagonist journey\",\r\n    \"protagonistArc\": \"string — 1-2 sentences about the user character's personal growth trajectory\",\r\n    \"completed\": boolean\r\n  },\r\n  \"sceneDirections\": [\r\n    {\r\n      \"direction\": \"string — a single-sentence nudge for the main model\",\r\n      \"fulfilled\": boolean\r\n    }\r\n  ],\r\n  \"pacing\": \"slow | exploration | building | climactic | cooldown\",\r\n  \"staleDetected\": boolean\r\n}\r\nIMPORTANT:\r\n- If this is the first run (no previous state), create the initial overarching arc and one starting scene direction.\r\n- If overarchingArc.completed is true, provide a NEW arc in the same response.\r\n- Return exactly one active (unfulfilled) direction. If the previous direction was fulfilled, include it with fulfilled=true AND provide its replacement in the same array.\r\n- Set fulfilled = true on directions that have been addressed AND include the replacement in the same response.\n</Narrative_Architecture>\n",
                                 }
                             },
-                        }
-                    }
-                });
-
-                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
-                {
-                    Name = "Default-Narrative-Direction-Prompt-Generator-Preset",
-                    ChatCompletionPresetId = StorageConstants.DEFAULT_NARRATIVE_DIRECTION_COMPLETION_PRESET,
-                    CreatedAtUtc = DateTime.UtcNow,
-                    Format = new GlobalPromptContextFormat()
-                    {
-                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
-                        {
-                            new PromptContextFormatElement
-                            {
-                                Tag = PromptContextFormatTag.Directive,
-                                Name = "Directive",
-                                Enabled = true,
-                                Options = new PromptContextFormatElementOptions
-                                {
-                                    Format = "<Narrative_Direction>\nYou are the Narrative Director. Your SOLE output is a brief stage direction that tells the main generation model what should happen next. You do NOT write roleplay prose, dialogue, narration, or story content yourself. You only produce instructions.\r\n\r\nAnalyze the story's current pacing across these dimensions and, when needed, inject a concise direction:\r\n1. Has the scene been static too long (characters talking in circles, no movement)? → Direct an interruption, arrival, environmental change, or new stimulus.\r\n2. Is the story losing tension or stakes? → Direct an escalation: a threat, a reveal, a complication, a ticking clock.\r\n3. Are characters being neglected or sidelined? → Direct the scene to involve them meaningfully.\r\n4. Is it time for a reveal, twist, or payoff? → Direct a subtle setup or a dramatic moment.\r\n5. Has the player been passive (only reacting, not driving)? → Direct a situation that forces a choice, commitment, or action.\r\n6. Is the current mood stale (same emotional register for too many turns)? → Direct a tonal shift.\r\n\r\nOutput format — ALWAYS use this exact format (1–3 sentences):\r\n\"[Director's note: <your instruction here>]\"\r\n\r\nExamples:\r\n- \"[Director's note: The tavern door should burst open — someone is looking for the party.]\"\r\n- \"[Director's note: Time for the weather to turn. A storm is rolling in, forcing the group to find shelter.]\"\r\n- \"[Director's note: Have the character notice something suspicious about the letter — a detail that doesn't add up.]\"\r\n- \"[Director's note: The player has been passive. Present them with two conflicting requests they must choose between right now.]\"\r\n\r\nCRITICAL RULES:\r\n- Your output is an INSTRUCTION to guide the main model, not story prose. Do NOT write dialogue, narration, action descriptions, or anything that reads like a roleplay response.\r\n- Do NOT start writing the scene yourself. Only say what SHOULD happen, not how it plays out.\r\n- Only produce a direction when the story would genuinely benefit. A well-paced slow moment is better than an artificial interruption.\r\n- If the current pacing is good, output exactly:\r\n\"[Director's note: Pacing is good. No intervention needed.]\"\n</Narrative_Direction>\n",
-                                }
-                            },
-                        }
-                    }
-                });
-
-                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
-                {
-                    Name = "Default-Prose-Guardian-Prompt-Generator-Preset",
-                    ChatCompletionPresetId = StorageConstants.DEFAULT_PROSE_GUARDIAN_COMPLETION_PRESET,
-                    CreatedAtUtc = DateTime.UtcNow,
-                    Format = new GlobalPromptContextFormat()
-                    {
-                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
-                        {
-                            new PromptContextFormatElement
-                            {
-                                Tag = PromptContextFormatTag.Directive,
-                                Name = "Directive",
-                                Enabled = true,
-                                Options = new PromptContextFormatElementOptions
-                                {
-                                    Format = "<Prose_Guardian>\nStudy the last few assistant messages and produce concrete, actionable writing directives for the next generation. You do NOT write story content, only directives.\r\nAnalyze recent messages and produce directives covering ALL of these categories:\r\n1. REPETITION BAN LIST:\r\n  Scan the last messages for overused words, phrases, imagery, gestures, actions, body parts, and descriptors. Anything appearing 2+ times across recent messages is BANNED.\r\n  1a. List each banned element explicitly (e.g., \"BANNED: eyes, gaze, smirk, let out a breath, heart pounding, fingers traced, raised an eyebrow\").\r\n  1b. Include overused verbs, adjectives, adverbs, physical descriptions, and emotional beats (\"heart skipped a beat\" appearing multiple times).\r\n  1c. PERMANENT BANS (ALWAYS include these in EVERY output, regardless of repetition detection): single-word sentences that are not dialogue, floating adjectives (e.g., \"Flat. Final.\" or \"Not a moan. Weirder.\"), sentence fragments, any non-dialogue sentence under 6 words, comma splices (joining two independent clauses with only a comma), missing spaces after commas or punctuation.\r\n2. RHETORICAL DEVICE ROTATION:\r\n  From this master list, identify which devices WERE used and which were NOT:\r\n  Simile, Metaphor, Personification, Hyperbole, Understatement/Litotes, Irony, Rhetorical question, Anaphora, Asyndeton, Polysyndeton, Chiasmus, Antithesis, Alliteration, Onomatopoeia, Synecdoche, Metonymy, Oxymoron, Paradox, Epistrophe, Aposiopesis (trailing off…)\r\n  2a. \"USED RECENTLY (avoid): [devices found].\"\r\n  2b. \"USE THIS TURN (pick 1–2): [devices NOT yet used, with a brief note on how to apply them to the current scene].\"\r\n3. SENTENCE STRUCTURE:\r\nAnalyze sentence patterns in recent messages:\r\n  3a. Average sentence length; if long, demand shorter (but complete) sentences. If short, demand at least 1–2 complex/compound sentences.\r\n  3b. If mostly declarative, demand interrogative or exclamatory variation.\r\n  3c. If paragraphs follow the same rhythm (e.g., action → dialogue → thought every time), prescribe a DIFFERENT structure.\r\n  3d. Specify: \"This turn: open with [short/long/dialogue]. Vary between 8 and 25 word sentences. Break at least one expected rhythm. CRITICAL: NEVER demand or use single-word sentences, fragments, or floating adjectives. ALWAYS demand complete, grammatically correct sentences. If a descriptor like 'flat' or 'final' is needed, attach it to a complete sentence (e.g., 'Her voice sounded flat and final').\"\r\n4. VOCABULARY FRESHNESS:\r\nList 3–5 specific, fresh words or phrases the model should use this turn: vivid, unexpected, and genre-appropriate. Not purple prose, just precise and evocative.\r\n  4a. Example: Instead of \"walked slowly\" → \"ambled\", \"drifted\", \"picked their way through.\"\r\n5. SENSORY CHANNEL ROTATION:\r\nCheck which senses appeared in recent messages: Sight, Sound, Smell, Touch/Texture, Taste, Temperature, Proprioception (body position/movement), Interoception (internal body feelings).\r\n  5a. \"OVERUSED: [sight, sound].\"\r\n  5b. \"PRIORITIZE THIS TURN: [smell, texture, temperature].\"\r\n6. SHOW-DON'T-TELL ENFORCEMENT:\r\nIf recent messages TOLD emotions directly (e.g., \"she felt angry\", \"he was nervous\"), demand the next turn SHOW them through:\r\n  6a. Micro-actions (fidgeting, jaw clenching, shifting weight).\r\n  6b. Environmental interaction (kicking a stone, gripping a cup tighter).\r\n  6c. Physiological responses (dry mouth, heat in chest, cold fingers).\r\n  6d. Dialogue subtext — what's NOT said matters.\r\nOutput format: output directly, no wrapping tags:\r\nBANNED ELEMENTS: ... (ALWAYS include permanent bans from 1c)\r\nRHETORICAL DEVICES — Used recently: ... | Use this turn: ...\r\nSENTENCE STRUCTURE: ...\r\nFRESH VOCABULARY: ...\r\nSENSORY FOCUS: ...\r\nSHOW-DON'T-TELL: ...\r\nBe brutally specific. Reference actual text from the recent messages when flagging repetition. Keep total output compact (150–250 words).\n</Prose_Guardian>\n",
-                                }
-                            },
-                        }
-                    }
-                });
-
-                // Poke the AI to update character status alterations (magical effects, body status, wounds)
-                // and the other slow-changing CharacterSheetInstance fields, outputting only the diff.
-                dbContext.ChatCompletionPresets.Add(new ChatCompletionPresetsDbModel
-                {
-                    Name = "Default-Character-Status-Update-Preset",
-                    ChatCompletionPresetId = StorageConstants.DEFAULT_CHARACTER_STATUS_UPDATE_COMPLETION_PRESET,
-                    CreatedAtUtc = DateTime.UtcNow,
-                    Format = new GlobalPromptContextFormat()
-                    {
-                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
-                        {
-                            new PromptContextFormatElement
-                            {
-                                Tag = PromptContextFormatTag.Directive,
-                                Name = "Directive - Task",
-                                Enabled = true,
-                                Options = new PromptContextFormatElementOptions
-                                {
-                                    Format = "Role:Character Status Analyst | Goal:Track ongoing magical effects, body status and wounds for characters, updating only what changed | MaxLen:2048\r\n\r\n<task>\r\nStop the roleplay. You are a Novels and Roleplay Analyst tasked with maintaining the persistent status of characters across a story: their Magical Effects, Body Status, Wounds, as well as their short-term goals, profession and relationships. You are given, for each character requiring an update, their CURRENT tracked status and the messages that took place since they were last checked. Your job is to determine what changed and output ONLY the difference (additions and removals), never the full lists, to keep your reply as short as possible.\r\n\r\n<scope>\r\nThe messages you are given will very often involve OTHER characters beyond the ones you are tracking this cycle. You MUST restrict your entire analysis and output to ONLY the characters explicitly listed in <characters_to_check>. Do not report a status change, addition, or removal for any character not on that list, no matter how clearly the messages describe a change for them — those characters are tracked on their own separate schedule and will be analyzed in a future cycle. Spend your limited reply length only on the characters in <characters_to_check>.\r\n</scope>\r\n\r\n<categories>\r\n<MagicalEffects>Magical ailments, magic buffs, magical afflictions, magical tattoos, magic item effects, magical compulsions and magical mental alterations.</MagicalEffects>\r\n<BodyStatus>Poisons, non-magical afflictions, malnutrition, sicknesses, drug effects, corrosive effects, anesthesia, cancers and alcohol effects.</BodyStatus>\r\n<Wounds>Physical wounds. Maiming is permanent. Other wounds (cuts, bruises, burns, broken bones, etc.) are only tracked while they remain unhealed.</Wounds>\r\n</categories>\r\n\r\n<expiresAt_rules>\r\nEvery entry in MagicalEffects, BodyStatus and Wounds carries an expiresAt value, which must be exactly one of:\r\n- \"PERMANENT\": Never expires, and can NEVER be removed by you, no matter what happens in the messages. Maiming and other life-altering effects belong here.\r\n- \"SEMI-PERMANENT\": Never expires on its own, but can be removed if the messages show clear narrative evidence that it was resolved, cured, healed or removed (a wound closing, a curse being lifted, a poison being purged, etc). Most ordinary wounds, sicknesses and afflictions without a stated duration belong here.\r\n- An exact date and time, formatted like the scene's currentDateTime (e.g. \"4 October 1995 18:00:00\"): use this only when the story gives (or reasonably implies) a specific point at which the effect ends (a potion wearing off in an hour, a 3-day curse, etc).\r\n</expiresAt_rules>\r\n</task>\r\n",
-                                }
-                            },
-                            new PromptContextFormatElement
-                            {
-                                Tag = PromptContextFormatTag.Directive,
-                                Name = "Directive - Format",
-                                Enabled = true,
-                                Options = new PromptContextFormatElementOptions
-                                {
-                                    Format = "<format>\r\n{\r\n  \"characterUpdates\": [\r\n    {\r\n      \"characterName\": value,\r\n      \"magicalEffectsToAdd\": [ { \"content\": value, \"expiresAt\": value } ],\r\n      \"magicalEffectsToRemove\": [ value ],\r\n      \"bodyStatusToAdd\": [ { \"content\": value, \"expiresAt\": value } ],\r\n      \"bodyStatusToRemove\": [ value ],\r\n      \"woundsToAdd\": [ { \"content\": value, \"expiresAt\": value } ],\r\n      \"woundsToRemove\": [ value ],\r\n      \"goalsForNextYearToAdd\": [ value ],\r\n      \"goalsForNextYearToRemove\": [ value ],\r\n      \"profession\": value,\r\n      \"relationshipsToAdd\": [ value ],\r\n      \"relationshipsToRemove\": [ value ]\r\n    }\r\n  ]\r\n}\r\n</format>\r\n\r\n<fieldsDescription>\r\n  \"characterUpdates\": Only include characters that appear in <characters_to_check> AND whose status genuinely changed. NEVER include a character who is not listed in <characters_to_check>, even if the messages clearly describe a change for them. If a character in <characters_to_check> has no changes at all, omit them entirely from this array.\r\n  \"characterName\": The name of the character being updated, matching the name given to you in <characters_to_check>.\r\n  \"magicalEffectsToAdd\" / \"bodyStatusToAdd\" / \"woundsToAdd\": New entries to add to that category. \"content\" describes the effect in a short, concrete phrase. \"expiresAt\" follows the expiresAt_rules above.\r\n  \"magicalEffectsToRemove\" / \"bodyStatusToRemove\" / \"woundsToRemove\": The exact \"content\" text of existing entries (copied verbatim from what you were given) that must now be removed, because they expired or were resolved.\r\n  \"goalsForNextYearToAdd\" / \"goalsForNextYearToRemove\": New short-term goals to add, or the exact existing text of goals that were completed, abandoned or made obsolete by recent events.\r\n  \"profession\": Only include this field (with the new value) if the character's profession or occupation changed. Omit it otherwise.\r\n  \"relationshipsToAdd\" / \"relationshipsToRemove\": New relationships (or updated descriptions, added as a new entry alongside removing the outdated one) to add, or the exact existing text of relationships that are no longer accurate.\r\n</fieldsDescription>\r\n",
-                                }
-                            },
-                            new PromptContextFormatElement
-                            {
-                                Tag = PromptContextFormatTag.CharacterStatusUpdateInstructions,
-                                Name = "CharacterStatusUpdateInstructions",
-                                Enabled = true,
-                                Options = new PromptContextFormatElementOptions
-                                {
-                                    Format = "<characters_to_check>\r\n{{characters_to_check}}\r\n</characters_to_check>\r\n\r\n<messages_since_last_status_check>\r\n{{messages_since_last_status_check}}</messages_since_last_status_check>\r\n\r\n<current_story_datetime>{{current_story_datetime}}</current_story_datetime>\r\n\r\n<characters_current_status>\r\n{{characters_current_status}}\r\n</characters_current_status>\r\n",
-                                }
-                            },
-                            new PromptContextFormatElement
-                            {
-                                Tag = PromptContextFormatTag.BehavioralInstructions,
-                                Name = "BehavioralInstructions",
-                                Enabled = true,
-                                Options = new PromptContextFormatElementOptions
-                                {
-                                    Format = "<behavioral_instruction>\r\nHow do you respond?\r\nThink about it first. Before writing anything, re-read <characters_to_check> — these are the ONLY characters you are permitted to report on this cycle, no matter how many other characters appear in the messages.\r\nFor each character in <characters_to_check>, compare their current status against what happened in messages_since_last_status_check, and check every existing entry against the expiresAt_rules using current_story_datetime.\r\nOnly report genuine changes; do not invent effects, wounds or status that aren't supported by the text.\r\nWhen removing an entry, copy its \"content\" (or full text, for goals/relationships) EXACTLY as given to you, so it can be matched.\r\nNever include a PERMANENT entry in a removal list.\r\nBefore finalizing your response, double-check every \"characterName\" in characterUpdates against <characters_to_check> and delete any entry for a character not on that list.\r\n\r\nYour response must ONLY contain the resulting JSON.\r\n</behavioral_instruction>\r\n",
-                                }
-                            }
                         }
                     }
                 });

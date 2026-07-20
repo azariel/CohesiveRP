@@ -29,6 +29,7 @@ namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI
                 Model = providerConfig.Model,
                 Messages = ConvertPromptMessagesToOpenAICompatiblePromptMessages(promptContext.Messages),
                 Stream = providerConfig.Stream,
+                MaxTokens = promptContext.MaxTokensToGenerate ?? 2048,
             };
 
             var serializedModel = JsonCommonSerializer.SerializeToString(requestDto);

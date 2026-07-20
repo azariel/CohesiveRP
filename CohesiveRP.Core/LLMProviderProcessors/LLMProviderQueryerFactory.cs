@@ -109,8 +109,8 @@ namespace CohesiveRP.Core.LLMProviderManager
                     new MainLLMQueryProcessor(ChatCompletionPresetType.Main, BackgroundQuerySystemTags.main, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.sceneTracker =>
                     new SceneTrackerLLMQueryProcessor(ChatCompletionPresetType.SceneTracker, BackgroundQuerySystemTags.sceneTracker, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
-                BackgroundQuerySystemTags.sceneAnalyze =>
-                    new SceneAnalyzerLLMQueryProcessor(ChatCompletionPresetType.SceneAnalyze, BackgroundQuerySystemTags.sceneAnalyze, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                //BackgroundQuerySystemTags.sceneAnalyze =>
+                //    new SceneAnalyzerLLMQueryProcessor(ChatCompletionPresetType.SceneAnalyze, BackgroundQuerySystemTags.sceneAnalyze, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.shortSummary =>
                     new ShortSummaryLLMQueryProcessor(ChatCompletionPresetType.Summarize, BackgroundQuerySystemTags.shortSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.mediumSummary =>

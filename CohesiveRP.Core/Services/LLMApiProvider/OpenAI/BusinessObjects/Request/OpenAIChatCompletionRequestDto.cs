@@ -5,12 +5,15 @@ namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request
     public class OpenAIChatCompletionRequestDto
     {
         [JsonPropertyName("model")]
-        public string Model {get; set; }
+        public string Model { get; set; }
 
         [JsonPropertyName("messages")]
-        public OpenAIChatCompletionMessage[] Messages {get; set; }
+        public OpenAIChatCompletionMessage[] Messages { get; set; }
 
         [JsonPropertyName("stream")]
         public bool Stream { get; set; }
+
+        [JsonPropertyName("max_tokens")]
+        public int? MaxTokens { get; set; }
     }
 }
