@@ -45,7 +45,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             // Inject that short term summary
             string output = $"<summary_medium_term>{Environment.NewLine}Previous facts, events, speech and actions (Medium-Term){Environment.NewLine}";
-            foreach (ISummaryEntryDbModel summaryElement in summaryDbModel.MediumTermSummaries)
+            foreach (ISummaryEntryDbModel summaryElement in summaryDbModel.MediumTermSummaries.Where(w => !string.IsNullOrWhiteSpace(w.Content)))
             {
                 // TODO: add a notion of time?
                 string value = $"{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{summaryElement.Content}")}";

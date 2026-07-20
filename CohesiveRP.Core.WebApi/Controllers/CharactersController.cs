@@ -22,6 +22,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         private IRegenerateCharacterSheetWorkflow regenerateCharacterSheetWorkflow;
         private IExportCharacterCardWorkflow exportCharacterCardWorkflow;
         private IImportCharacterCardWorkflow importCharacterCardWorkflow;
+        private IDeleteCharacterAvatarWorkflow deleteCharacterAvatarWorkflow;
 
         public CharactersController(
             IGetAllCharactersWorkflow getAllCharactersWorkflow,
@@ -34,7 +35,8 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             IUpdateCharacterSheetWorkflow updateCharacterSheetWorkflow,
             IRegenerateCharacterSheetWorkflow regenerateCharacterSheetWorkflow,
             IExportCharacterCardWorkflow exportCharacterCardWorkflow,
-            IImportCharacterCardWorkflow importCharacterCardWorkflow)
+            IImportCharacterCardWorkflow importCharacterCardWorkflow,
+            IDeleteCharacterAvatarWorkflow deleteCharacterAvatarWorkflow)
         {
             this.getAllCharactersWorkflow = getAllCharactersWorkflow;
             this.getCharacterByIdWorkflow = getCharacterByIdWorkflow;
@@ -47,6 +49,7 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             this.regenerateCharacterSheetWorkflow = regenerateCharacterSheetWorkflow;
             this.exportCharacterCardWorkflow = exportCharacterCardWorkflow;
             this.importCharacterCardWorkflow = importCharacterCardWorkflow;
+            this.deleteCharacterAvatarWorkflow = deleteCharacterAvatarWorkflow;
         }
 
         [HttpGet]
@@ -153,6 +156,14 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         public async Task<IActionResult> ImportCharacterCard([FromRoute] string characterId, [FromForm] ImportNewCharacterRequestDto requestDto)
         {
             return new JsonResult(await importCharacterCardWorkflow.ImportCharacterAsync(characterId, requestDto));
+        }
+
+        // Avatars
+        [HttpDelete]
+        [Route("{characterId}/avatars/{avatarFileName}")]
+        public async Task<IActionResult> DeleteCharacterAvatar([FromRoute] string characterId, [FromRoute] string avatarFileName)
+        {
+            return new JsonResult(await deleteCharacterAvatarWorkflow.DeleteCharacterAvatarAsync(characterId, avatarFileName));
         }
     }
 }

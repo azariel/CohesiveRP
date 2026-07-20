@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
@@ -23,10 +24,14 @@ public class GetSpecificMessageByIdWorkflow : IGetSpecificMessageByIdWorkflow
     {
         IMessageDbModel message = await storageService.GetSpecificMessageAsync(requestDto.ChatId, requestDto.MessageId);
 
-        if(message == null)
+        if (message == null)
         {
             LoggingManager.LogToFile("52d724a4-a17a-4f4c-9ab1-6f79c02d5490", $"Couldn't get message from id [{requestDto.MessageId}] in chat [{requestDto.ChatId}]. Message was not found.");
-            return null;
+            return new WebApiException
+            {
+                HttpResultCode = System.Net.HttpStatusCode.NotFound,
+                Message = $"Message not found."
+            };
         }
 
         var chat = await storageService.GetChatAsync(requestDto.ChatId);

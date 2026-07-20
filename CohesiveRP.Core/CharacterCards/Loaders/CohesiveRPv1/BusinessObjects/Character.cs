@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using CohesiveRP.Storage.DataAccessLayer.Characters.BusinessObjects;
 
 namespace CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects
 {
@@ -24,5 +25,8 @@ namespace CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects
 
         [JsonPropertyName("alternateGreetings")]
         public List<string> AlternateGreetings { get; set; }
+
+        [JsonPropertyName("imageGenerationConfiguration")]
+        public CharacterImageGenerationConfiguration ImageGenerationConfiguration { get; set; }
     }
 }

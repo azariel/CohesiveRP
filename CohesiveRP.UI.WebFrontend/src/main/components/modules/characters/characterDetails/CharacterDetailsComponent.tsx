@@ -1,0 +1,477 @@
+import styles from "./CharacterDetailsComponent.module.css";
+import { useRef, useEffect, useState } from "react";
+import { AiOutlineDisconnect } from "react-icons/ai";
+
+/* Store */
+import { sharedContext } from '../../../../../store/AppSharedStoreContext';
+import { deleteFromServerApiAsync, getBlobFromServerApiAsync, getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
+import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+import type { CharacterResponseDto } from "../../../../../ResponsesDto/characters/CharacterResponseDto";
+import type { SharedContextCharacterType } from "../../../../../store/SharedContextCharacterType";
+import { GetAvatarPathFromCharacterName, GetAvatarPathFromChatId, GetFallbackEmpty } from "../../../../../utils/avatarUtils";
+import { ImSpinner2 } from "react-icons/im";
+import type { SelectableChatsResponseDto } from "../../../../../ResponsesDto/chatSelection/SelectableChatsResponseDto";
+import type { SelectableChatResponseDto } from "../../../../../ResponsesDto/chatSelection/SelectableChatResponseDto";
+import type { AddChatRequestDto } from "../../../../../RequestDto/chat/AddChatRequestDto";
+import { MdAddBox } from "react-icons/md";
+import { FormatDateTimeToMinutes } from "../../../../../utils/DateUtils";
+import type { SharedContextChatType } from "../../../../../store/SharedContextChatType";
+import type { SharedContextType } from "../../../../../store/SharedContextType";
+import CharacterSheetComponent from "../characterSheets/CharacterSheetComponent";
+import IllustrationComponent from "./illustration/IllustrationComponent";
+import type { IllustrationOutfitEntry } from "./illustration/IllustrationComponent";
+
+type DetailsTab = "info" | "sheet" | "illustration";
+
+export default function CharacterDetailsComponent() {
+  const { activeModule } = sharedContext<SharedContextCharacterType>();
+  const { navigateTo } = sharedContext();
+  const didComponentMountAlready = useRef(false);
+  const chatsContainerRef = useRef<HTMLDivElement>(null);
+  const importCharacterCardRef = useRef<HTMLInputElement>(null);
+  const [isNetworkDown, setIsNetworkDown] = useState(false);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [isLoadingCharacterDetails, setIsLoadingCharacterDetails] = useState(true);
+  const [isLoadingChatsDetails, setIsLoadingChatsDetails] = useState(true);
+  const [characterResponse, setCharacterResponse] = useState<CharacterResponseDto | null>(null);
+  const [chatsDetailsResponse, setChatsDetailsResponse] = useState<SelectableChatsResponseDto | null>(null);
+
+  // saving state
+  const [characterName, setCharacterName] = useState("");
+  const [creator, setCreator] = useState("");
+  const [creatorNotes, setCreatorNotes] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [firstMessage, setFirstMessage] = useState("");
+  const [alternateGreetings, setAlternateGreetings] = useState<string[]>([]);
+  const [characterDescription, setCharacterDescription] = useState("");
+  const [sheetKey, setSheetKey] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [operationError, setOperationError] = useState(false);
+  const [includeDescriptionInPrompt, setIncludeDescriptionInPrompt] = useState(true);
+
+  // illustration state — kept here so handleSave can include them in the PUT payload
+  const [illustratorTag, setIllustratorTag] = useState("");
+  const [illustrationMapOutfits, setIllustrationMapOutfits] = useState<IllustrationOutfitEntry[]>([]);
+
+  // tab state
+  const [activeTab, setActiveTab] = useState<DetailsTab>("info");
+
+  useEffect(() => {
+    const el = chatsContainerRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      const atStart = el.scrollLeft === 0;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
+      const scrollingLeft = e.deltaY < 0;
+      const scrollingRight = e.deltaY > 0;
+      if ((scrollingLeft && atStart) || (scrollingRight && atEnd)) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [isLoadingChatsDetails]);
+
+  useEffect(() => {
+    if (didComponentMountAlready.current) return;
+    didComponentMountAlready.current = true;
+    setIsLoadingCharacterDetails(true);
+
+    const fetchCharacterDetails = async () => {
+      try {
+        const response: CharacterResponseDto | null = await getFromServerApiAsync<CharacterResponseDto>(`api/characters/${activeModule.selectedCharacterId}`);
+        
+        let serverApiException = response as ServerApiExceptionResponseDto | null;
+        if (!response || response.code != 200 || serverApiException?.message) {
+          console.error(`Call to fetch characters details failed. [${JSON.stringify(serverApiException)}]`);
+          setIsNetworkDown(true);
+          setCharacterResponse({ code: -1, character: null });
+          return;
+        }
+
+        console.log(`Characters details fetched successfully.`);
+        setCharacterResponse(response);
+        setCharacterName(response?.character?.name ?? "");
+        setCreator(response?.character?.creator ?? "");
+        setCreatorNotes(response?.character?.creatorNotes ?? "");
+        setTags(response?.character?.tags ?? []);
+        setFirstMessage(response?.character?.firstMessage ?? "");
+        setAlternateGreetings(response?.character?.alternateGreetings ?? []);
+        setCharacterDescription(response?.character?.description ?? "");
+        setIncludeDescriptionInPrompt(response?.character?.includeDescriptionInPrompt ?? true);
+        setIllustratorTag(response?.character?.imageGenerationConfiguration?.illustratorTag ?? "");
+        setIllustrationMapOutfits(
+          (response?.character?.imageGenerationConfiguration?.illustrationMapOutfits ?? []).map((e) => ({
+            outfit: (e.outfit ?? "clothed") as IllustrationOutfitEntry["outfit"],
+            illustratorPromptInjection: e.illustratorPromptInjection ?? "",
+          }))
+        );
+      } catch (error) {
+        console.error("Fetch characters details error:", error);
+      } finally {
+        setIsLoadingCharacterDetails(false);
+      }
+    };
+
+    const fetchChatsDetails = async () => {
+      try {
+        let characterModule = activeModule as SharedContextCharacterType;
+        const response: SelectableChatsResponseDto | null = await getFromServerApiAsync<SelectableChatsResponseDto>(`api/chats?characterId=${characterModule.selectedCharacterId}`);
+        
+        let serverApiException = response as ServerApiExceptionResponseDto | null;
+        if (!response || response.code != 200 || serverApiException?.message) {
+          console.error(`Call to fetch chats details failed. [${JSON.stringify(serverApiException)}]`);
+          setIsNetworkDown(true);
+          setChatsDetailsResponse({ code: -1, chats: [] });
+          return;
+        }
+
+        console.log(`Chats details fetched successfully.`);
+        setChatsDetailsResponse(response);
+      } catch (error) {
+        console.error("Fetch chats details error:", error);
+      } finally {
+        setIsLoadingChatsDetails(false);
+      }
+    };
+
+    fetchCharacterDetails();
+    fetchChatsDetails();
+  }, []);
+
+  const handleSpecificChatClick = async (chat: SelectableChatResponseDto) => {
+    if (isLoadingChat) return;
+    setIsLoadingChat(true);
+    try {
+      const savedInput = localStorage.getItem(`chatInput_${chat.chatId}`) ?? "";
+      let selectedChat = {
+        chatId: chat.chatId,
+        moduleName: "chat",
+        currentUserInputValue: savedInput,
+      } as SharedContextChatType;
+      navigateTo(selectedChat);
+      console.log(`Chat selected -> Module [${JSON.stringify(selectedChat)}] selected.`);
+    } finally {
+      setIsLoadingChat(false);
+    }
+  };
+
+  const handleCreateNewChatClick = async () => {
+    if (isLoadingChat) return;
+    setIsLoadingChat(true);
+    try {
+      const payload: AddChatRequestDto = {
+        characterId: activeModule.selectedCharacterId,
+        lorebookIds: [],
+      };
+      const response: SelectableChatResponseDto | null = await postToServerApiAsync<SelectableChatResponseDto>("api/chats", payload);
+      if (response) {
+        setChatsDetailsResponse(previousCollection => {
+          if (!previousCollection) return { chats: [response] } as SelectableChatsResponseDto;
+          return { ...previousCollection, chats: [...(previousCollection.chats || []), response] };
+        });
+        console.log(`New chat created. Response: [${JSON.stringify(response)}].`);
+      } else {
+        console.error(`Failed to create a new chat. Response:[${response}] json: [${JSON.stringify(response)}].`);
+      }
+    } finally {
+      setIsLoadingChat(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!activeModule?.selectedCharacterId || isSaving) return;
+    setIsSaving(true);
+    setOperationError(false);
+    try {
+      const response = await putToServerApiAsync(`api/characters/${activeModule.selectedCharacterId}`, {
+        characterId: activeModule.selectedCharacterId,
+        characterDescription,
+        includeDescriptionInPrompt,
+        characterName,
+        creator,
+        creatorNotes,
+        firstMessage,
+        alternateGreetings,
+        tags,
+        imageGenerationConfiguration: {
+          illustratorTag: illustratorTag || null,
+          illustrationMapOutfits: illustrationMapOutfits.map((e) => ({
+            outfit: e.outfit,
+            illustratorPromptInjection: e.illustratorPromptInjection || null,
+          })),
+        },
+      });
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || serverApiException?.message) {
+        console.error(`Save failed. [${JSON.stringify(serverApiException)}]`);
+        setOperationError(true);
+      }
+    } catch (error) {
+      console.error("Save character error:", error);
+      setOperationError(true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleExportCharacterCard = async () => {
+    if (!activeModule?.selectedCharacterId || isSaving) return;
+    try {
+      const blob = await getBlobFromServerApiAsync(`api/characters/${activeModule.selectedCharacterId}/exportCharacterCard`);
+      if (!blob || blob.size === 0) { setOperationError(true); return; }
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${characterName || "character"}.png`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("CharacterCard export error:", error);
+      setOperationError(true);
+    }
+  };
+
+  const handleImportCharacterCard = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsSaving(true);
+    setOperationError(false);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response: CharacterResponseDto | null = await postToServerApiAsync<CharacterResponseDto>(
+        `api/characters/${activeModule.selectedCharacterId}/importCharacterCard`,
+        formData
+      );
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || response.code !== 200 || serverApiException?.message) {
+        console.error(`CharacterCard import failed. [${JSON.stringify(serverApiException)}]`);
+        setOperationError(true);
+        return;
+      }
+      const c = response.character;
+      setCharacterResponse(response);
+      setCharacterName(c?.name ?? "");
+      setCreator(c?.creator ?? "");
+      setCreatorNotes(c?.creatorNotes ?? "");
+      setTags(c?.tags ?? []);
+      setFirstMessage(c?.firstMessage ?? "");
+      setAlternateGreetings(c?.alternateGreetings ?? []);
+      setCharacterDescription(c?.description ?? "");
+      setIllustratorTag(c?.imageGenerationConfiguration?.illustratorTag ?? "");
+      setIllustrationMapOutfits(
+        (c?.imageGenerationConfiguration?.illustrationMapOutfits ?? []).map((e) => ({
+          outfit: (e.outfit ?? "clothed") as IllustrationOutfitEntry["outfit"],
+          illustratorPromptInjection: e.illustratorPromptInjection ?? "",
+        }))
+      );
+      setSheetKey(k => k + 1);
+    } catch (err) {
+      console.error("CharacterCard import error:", err);
+      setOperationError(true);
+    } finally {
+      setIsSaving(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!activeModule?.selectedCharacterId || isSaving) return;
+    setIsSaving(true);
+    setOperationError(false);
+    try {
+      const response = await deleteFromServerApiAsync(`api/characters/${activeModule.selectedCharacterId}`);
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || serverApiException?.message) {
+        console.error(`Deletion failed. [${JSON.stringify(serverApiException)}]`);
+        setOperationError(true);
+      } else {
+        navigateTo({ moduleName: "characters" } as SharedContextType);
+      }
+    } catch (error) {
+      console.error("Deletion character error:", error);
+      setOperationError(true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className={styles.characterDetailsComponent}>
+      {isNetworkDown ? (
+        <div className={styles.networkDownContainer}>
+          <AiOutlineDisconnect className={styles.networkDownIcon} />
+          <label>CohesiveRP backend is unreachable</label>
+        </div>
+      ) : (
+        isLoadingCharacterDetails ? (
+          <ImSpinner2 className={styles.loadingCharacterDetailsSpinner} />
+        ) : (
+          <div className={styles.characterDetailsWrapper}>
+            <div className={styles.characterDetailsContainer}>
+              <div className={styles.characterHeaderContainer}>
+                <div className={styles.characterAvatarContainer}>
+                  <img src={GetAvatarPathFromCharacterName(characterResponse?.character?.name ?? "")} alt="dev/Placeholder.png" onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = GetFallbackEmpty();
+                  }} />
+                </div>
+                <div className={styles.characterHeaderRightSideContainer}>
+                  <textarea
+                    className={styles.characterName}
+                    value={characterName}
+                    onChange={(e) => setCharacterName(e.target.value)}
+                  />
+                  <label className={styles.characterId}>{characterResponse?.character?.characterId ?? ""}</label>
+                  <div className={styles.characterChatsDetailsContainer}>
+                    <label className={styles.characterChatsDetailsChatsLabel}>Chats</label>
+                    {isLoadingChatsDetails ? (
+                      <ImSpinner2 className={styles.loadingChatsDetailsSpinner} />
+                    ) : (
+                      <div ref={chatsContainerRef} className={styles.chatsContainer}>
+                        <div className={styles.chatAddNewChatContainer} onClick={async () => await handleCreateNewChatClick()}>
+                          <MdAddBox className={styles.chatAddNewChatBtn} />
+                        </div>
+                        {chatsDetailsResponse?.chats?.map((chat, index) => (
+                          <div key={index} className={styles.chatItem}>
+                            <div className={styles.chatAvatarContainer} onClick={async () => await handleSpecificChatClick(chat)}>
+                              <img src={GetAvatarPathFromChatId(chat.chatId)} alt="Avatar" onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = GetFallbackEmpty();
+                              }} />
+                            </div>
+                            <label className={styles.chatFootLabel}>{FormatDateTimeToMinutes(chat.lastActivityDateTime) ?? ""}</label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Tab bar ── */}
+              <div className={styles.tabBar}>
+                <button
+                  className={`${styles.tabButton} ${activeTab === "info" ? styles.tabButtonActive : ""}`}
+                  onClick={() => setActiveTab("info")}
+                >
+                  Info
+                </button>
+                <button
+                  className={`${styles.tabButton} ${activeTab === "sheet" ? styles.tabButtonActive : ""}`}
+                  onClick={() => setActiveTab("sheet")}
+                >
+                  Character Sheet
+                </button>
+                <button
+                  className={`${styles.tabButton} ${activeTab === "illustration" ? styles.tabButtonActive : ""}`}
+                  onClick={() => setActiveTab("illustration")}
+                >
+                  Illustration
+                </button>
+              </div>
+
+              {/* ── Tab content ── */}
+              <div className={styles.characterDetailsBody}>
+                {activeTab === "info" && (
+                  <>
+                    {/* ── JSON export / import ── */}
+                    <div className={styles.jsonActionsContainer}>
+                      <button className={styles.jsonActionButton} onClick={handleExportCharacterCard} disabled={isSaving} title="Export CharacterCard">
+                        Export CharacterCard
+                      </button>
+                      <button className={styles.jsonActionButton} onClick={() => importCharacterCardRef.current?.click()} disabled={isSaving} title="Import CharacterCard (PNG)">
+                        Import CharacterCard
+                      </button>
+                      <input ref={importCharacterCardRef} type="file" accept="image/png,.png" className={styles.hiddenFileInput} onChange={handleImportCharacterCard} />
+                    </div>
+
+                    <div className={styles.characterDescriptionContainer}>
+                      <div className={styles.descriptionLabelRow}>
+                        <label className={styles.characterDescriptionLabel}>Description</label>
+                        <label className={styles.checkboxLabel}>
+                          <input
+                            type="checkbox"
+                            className={styles.arcaneCheckbox}
+                            checked={includeDescriptionInPrompt}
+                            onChange={(e) => setIncludeDescriptionInPrompt(e.target.checked)}
+                          />
+                          <span className={styles.checkboxCustom} />
+                          <span className={styles.checkboxText}>Include in prompt</span>
+                        </label>
+                      </div>
+                      <textarea
+                        className={styles.characterDescription}
+                        value={characterDescription}
+                        onChange={(e) => setCharacterDescription(e.target.value)}
+                      />
+                    </div>
+
+                    <div className={styles.characterTagsContainer}>
+                      <label className={styles.characterTagsLabel}>Tags</label>
+                      <textarea className={styles.characterTags} value={tags?.join(",")} onChange={(e) => setTags(e.target.value?.split(",")?.map(t => t.trim()))} />
+                    </div>
+
+                    <div className={styles.characterFirstMessageContainer}>
+                      <label className={styles.characterFirstMessageLabel}>First Message</label>
+                      <textarea className={styles.characterFirstMessage} value={firstMessage} onChange={(e) => setFirstMessage(e.target.value)} />
+                    </div>
+
+                    <div className={styles.characterCreatorContainer}>
+                      <label className={styles.characterCreatorLabel}>Creator</label>
+                      <textarea className={styles.characterCreator} value={creator} onChange={(e) => setCreator(e.target.value)} />
+                    </div>
+
+                    <div className={styles.characterCreatorNotesContainer}>
+                      <label className={styles.customLabel}>Creator Notes</label>
+                      <textarea className={styles.characterCreatorNotes} value={creatorNotes} onChange={(e) => setCreatorNotes(e.target.value)} />
+                    </div>
+                  </>
+                )}
+
+                {activeTab === "sheet" && (
+                  <CharacterSheetComponent key={sheetKey} characterId={activeModule.selectedCharacterId} personaId={null} />
+                )}
+
+                {activeTab === "illustration" && (
+                  <IllustrationComponent
+                    characterId={activeModule.selectedCharacterId}
+                    characterResponse={characterResponse}
+                    setCharacterResponse={setCharacterResponse}
+                    illustratorTag={illustratorTag}
+                    setIllustratorTag={setIllustratorTag}
+                    illustrationMapOutfits={illustrationMapOutfits}
+                    setIllustrationMapOutfits={setIllustrationMapOutfits}
+                    setOperationError={setOperationError}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Save / Delete shown on info and illustration tabs */}
+            {(activeTab === "info" || activeTab === "illustration") && (
+              <>
+                <div className={styles.operationsButtons}>
+                  {activeTab === "info" && (
+                    <button className={styles.deleteButton} onClick={handleDelete} disabled={isSaving}>
+                      {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Delete"}
+                    </button>
+                  )}
+                  <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? <ImSpinner2 className={styles.saveSpinner} /> : "Save"}
+                  </button>
+                </div>
+                {operationError && (
+                  <label className={styles.saveErrorLabel}>Failed to save/delete. Please try again.</label>
+                )}
+              </>
+            )}
+          </div>
+        )
+      )}
+    </div>
+  );
+}

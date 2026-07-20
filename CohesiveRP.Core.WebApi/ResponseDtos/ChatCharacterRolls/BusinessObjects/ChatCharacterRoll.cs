@@ -9,8 +9,14 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.ChatCharacterRolls.BusinessObjects
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public PathfinderSkills ActionCategory { get; set; }
 
+        [JsonPropertyName("charactersWhoCanResist")]
+        public List<string> CharactersWhoCanResist { get; set; }
+
         [JsonPropertyName("reasonings")]
         public List<string> Reasonings { get; set; }
+
+        [JsonPropertyName("bonus")]
+        public int Bonus { get; set; }
 
         // Roll value
         [JsonPropertyName("value")]

@@ -12,5 +12,13 @@
         overflowSummary = 7,
         skillChecksInitiator = 8,
         sceneAnalyze = 9,
+        dynamicCharacterCreation = 10,
+        dynamicCharacterSheetCreation = 11,
+        illustrationPromptInjectionForCharacterAvatar = 12,
+        cohesionEnforcement = 13,
+        narrativeArchitecture = 14,
+        narrativeDirection = 15,
+        proseGuardian = 16,
+        characterStatusUpdate = 17,
     }
 }

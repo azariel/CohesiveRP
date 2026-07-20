@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CohesiveRP.Storage.DataAccessLayer.Characters.BusinessObjects;
 using CohesiveRP.Storage.JsonConverters;
 using CohesiveRP.Storage.Sqlite;
 
@@ -31,6 +32,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         [MaxLength(16384)]
         public string Description { get; set; }
 
+        public bool IncludeDescriptionInPrompt { get; set; }
+
         [JsonValueConverter]
         public List<string> Tags { get; set; }
 
@@ -43,5 +46,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         public DateTime LastActivityAtUtc { get; set; }
 
         public List<string> InherentLorebookIds { get; set; }
+
+        [JsonValueConverter]
+        public CharacterImageGenerationConfiguration ImageGenerationConfiguration { get; set; }
     }
 }

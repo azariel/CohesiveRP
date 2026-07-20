@@ -34,6 +34,12 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.
         [JsonPropertyName("characterName")]
         public string CharacterName { get; set; }
 
+        [JsonPropertyName("charactersWhoCanResist")]
+        public List<string> CharactersWhoCanResist { get; set; }
+
+        [JsonPropertyName("bonus")]
+        public int Bonus { get; set; }
+
         [JsonPropertyName("actionCategory")]
         public string ActionCategory { get; set; }// TODO: enum?
 

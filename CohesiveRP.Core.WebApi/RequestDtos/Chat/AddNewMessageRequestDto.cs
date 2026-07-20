@@ -13,5 +13,7 @@ namespace CohesiveRP.Core.WebApi.RequestDtos.Chat
         [FromBody]
         [JsonPropertyName("message")]
         public MessageRequestDto Message { get; set; }
+
+        public bool QueueDependentBackgroundTasks { get; set; } = true;
     }
 }

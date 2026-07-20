@@ -13,7 +13,7 @@ import type { LorebookResponseDto } from "../../../../ResponsesDto/lorebooks/Lor
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextLorebookType } from "../../../../store/SharedContextLorebookType";
-import { GetAvatarPathFromLorebookId } from "../../../../utils/avatarUtils";
+import { GetAvatarPathFromLorebookId, GetFallbackEmpty } from "../../../../utils/avatarUtils";
 import { GetLorebookNameFontSize } from "../../../../utils/fontSizeUtils";
 import { MdAddBox } from "react-icons/md";
 import type { SharedContextType } from "../../../../store/SharedContextType";
@@ -192,7 +192,10 @@ const handleAddLorebookClick = () => {
             <div key={index} className={styles.lorebookCard}>
               <label className={styles.lorebookCharNameLabel} style={{ fontSize: GetLorebookNameFontSize(element?.name ?? "") }}>{element?.name}</label>
               <div className={styles.lorebookAvatarContainer} onClick={async () => await handleSpecificLorebookClick(element)}>
-                <img src={GetAvatarPathFromLorebookId(element?.lorebookId)} alt="Avatar" />
+                <img src={GetAvatarPathFromLorebookId(element?.lorebookId)} alt="Avatar" onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = GetFallbackEmpty();
+                  }} />
               </div>
               <label className={styles.lorebookFootLabel}>{element?.lastActivityDateTime?.toDateString() ?? ""}</label>
             </div>

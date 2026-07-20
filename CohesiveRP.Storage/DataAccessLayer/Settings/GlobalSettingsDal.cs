@@ -16,6 +16,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
     /// <summary>
     /// DataAccessLayer around Global Settings.
+    /// 
+    /// Pre-Main: SceneTracker, SkillChecksInitiator, ProseGuardian, NarrativeDirection
+    /// Main: Main
+    /// After-Main: CohesionEnforcement
+    /// Downtime: Summarize, SummariesMerge, NarrativeArchitecture
     /// </summary>
     public class GlobalSettingsDal : StorageDal, IGlobalSettingsDal
     {
@@ -55,7 +60,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Main],
+                            Tags = [
+                                ChatCompletionPresetType.Main,
+                            ],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -85,14 +92,19 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         new LLMProviderConfig
                         {
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_2,
-                            Name = "IntenseRP-V2-DS-Chat",
-                            Model = "deepseek-chat",
+                            Name = "IntenseRP-V2-DS-Think",
+                            Model = "deepseek-reasoner",
                             Stream = true,
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.SkillChecksInitiator, ChatCompletionPresetType.SceneTracker, ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration],
+                            Tags = [
+                                ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
+                                ChatCompletionPresetType.DynamicCharacterCreation,
+                                ChatCompletionPresetType.DynamicCharacterSheetCreation,
+                                ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration
+                            ],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -111,19 +123,27 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                   ErrorsTresholdBelowXToAllowFallback = 3,
                                   ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_3,
                               },
+                              new FallbackStrategy()
+                              {
+                                  // After 2 errors, but after this preceding fallback (if concurrrency is too high for ex), fallback to second backup provider
+                                  ErrorsTreshold = 2,
+                                  ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_1,
+                              },
                             ]
                         },
                         new LLMProviderConfig
                         {
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_3,
-                            Name = "IntenseRP-V2-KIMI-Chat",
-                            Model = "moonshot-chat",
+                            Name = "IntenseRP-V2-KIMI-Think",
+                            Model = "moonshot-reasoner",
                             Stream = true,
                             ApiUrl = "http://127.0.0.1:7777/v1/chat/completions",
                             Type = LLMProviderType.OpenAICustom,
                             Priority = LLMProviderPriority.Standard,
                             ConcurrencyLimit = 1,
-                            Tags = [ChatCompletionPresetType.Summarize, ChatCompletionPresetType.SummariesMerge, ChatCompletionPresetType.SceneAnalyze],
+                            Tags = [
+                                ChatCompletionPresetType.SceneAnalyze
+                            ],
                             TimeoutStrategy = new TimeoutStrategy
                             {
                                 Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
@@ -141,6 +161,135 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                   ErrorsTreshold = 3,
                                   ErrorsTresholdBelowXToAllowFallback = 3,
                                   ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_2,
+                              },
+                              new FallbackStrategy()
+                              {
+                                  // After 2 errors, but after this preceding fallback (if concurrrency is too high for ex), fallback to second backup provider
+                                  ErrorsTreshold = 2,
+                                  ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_1,
+                              },
+                            ]
+                        },
+                        new LLMProviderConfig
+                        {
+                            ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_4,
+                            Name = "IntenseRP-V2-GLM-Chat",
+                            Model = "glm-chat",
+                            Stream = true,
+                            ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
+                            Type = LLMProviderType.OpenAICustom,
+                            Priority = LLMProviderPriority.Standard,
+                            ConcurrencyLimit = 1,
+                            Tags = [
+                                ChatCompletionPresetType.SkillChecksInitiator,// PRE
+                                ChatCompletionPresetType.NarrativeArchitecture,// POST++ (secretPlot)
+                            ],
+                            TimeoutStrategy = new TimeoutStrategy
+                            {
+                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                                Retries = 3,
+                            },
+                            ErrorsBehavior = 
+                            {
+                                NbErrorsBeforeTimeout = 3,
+                                TimeoutInSeconds = 300,
+                            },
+                            FallbackStrategies = [
+                              new FallbackStrategy()
+                              {
+                                  // After 2 errors, fallback to backup provider
+                                  ErrorsTreshold = 2,
+                                  ErrorsTresholdBelowXToAllowFallback = 3,
+                                  ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_5,
+                              },    
+                              new FallbackStrategy()
+                              {
+                                  // After 2 errors, but after this preceding fallback (if concurrrency is too high for ex), fallback to second backup provider
+                                  ErrorsTreshold = 2,
+                                  ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_6,
+                              },
+                            ]
+                        },
+                        new LLMProviderConfig
+                        {
+                            ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_5,
+                            Name = "IntenseRP-V2-DS-Chat",
+                            Model = "deepseek-chat",
+                            Stream = true,
+                            ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
+                            Type = LLMProviderType.OpenAICustom,
+                            Priority = LLMProviderPriority.Standard,
+                            ConcurrencyLimit = 1,
+                            Tags = [
+                                ChatCompletionPresetType.SceneTracker,// PRE
+                                ChatCompletionPresetType.ProseGuardian,// PRE
+                                ChatCompletionPresetType.CharacterStatusUpdate,// POST
+                                ChatCompletionPresetType.CohesionEnforcement,// POST
+                            ],
+                            TimeoutStrategy = new TimeoutStrategy
+                            {
+                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                                Retries = 1,
+                            },
+                            ErrorsBehavior = 
+                            {
+                                NbErrorsBeforeTimeout = 3,
+                                TimeoutInSeconds = 300,
+                            },
+                            FallbackStrategies = [
+                              new FallbackStrategy()
+                              {
+                                  // After 3 errors, fallback to backup provider
+                                  ErrorsTreshold = 3,
+                                  ErrorsTresholdBelowXToAllowFallback = 3,
+                                  ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_6,
+                              },
+                              new FallbackStrategy()
+                              {
+                                  // After 2 errors, but after this preceding fallback (if concurrrency is too high for ex), fallback to second backup provider
+                                  ErrorsTreshold = 2,
+                                  ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_4,
+                              },
+                            ]
+                        },
+                        new LLMProviderConfig
+                        {
+                            ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_6,
+                            Name = "IntenseRP-V2-KIMI-Chat",
+                            Model = "moonshot-chat",
+                            Stream = true,
+                            ApiUrl = "http://127.0.0.1:7778/v1/chat/completions",
+                            Type = LLMProviderType.OpenAICustom,
+                            Priority = LLMProviderPriority.Standard,
+                            ConcurrencyLimit = 1,
+                            Tags = [
+                                ChatCompletionPresetType.NarrativeDirection,// PRE
+                                ChatCompletionPresetType.Summarize,// POST++
+                                ChatCompletionPresetType.SummariesMerge,// POST++
+                            ],
+                            TimeoutStrategy = new TimeoutStrategy
+                            {
+                                Type = LLMProviderTimeoutStrategyType.RetryXtimesThenGiveUp,
+                                Retries = 3,
+                            },
+                            ErrorsBehavior = 
+                            {
+                                NbErrorsBeforeTimeout = 3,
+                                TimeoutInSeconds = 300,
+                            },
+                            FallbackStrategies = [
+                              new FallbackStrategy()
+                              {
+                                  // After 3 errors, fallback to backup provider
+                                  ErrorsTreshold = 3,
+                                  ErrorsTresholdBelowXToAllowFallback = 3,
+                                  ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_5,
+                              },
+                              new FallbackStrategy()
+                              {
+                                  // After 2 errors, but after this preceding fallback (if concurrrency is too high for ex), fallback to second backup provider
+                                  ErrorsTreshold = 2,
+                                  ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_4,
                               },
                             ]
                         },
@@ -186,11 +335,59 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_ANALYZE_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.DynamicCharacterCreation,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_DYNAMIC_CHARACTER_CREATION_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.DynamicCharacterSheetCreation,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_DYNAMIC_CHARACTER_SHEET_CREATION_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_ILLUSTRATION_PROMPT_INJECTION_FOR_CHARACTER_AVATAR_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.CohesionEnforcement,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.NarrativeArchitecture,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_NARRATIVE_ARCHITECTURE_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.NarrativeDirection,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_NARRATIVE_DIRECTION_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.ProseGuardian,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_PROSE_GUARDIAN_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.CharacterStatusUpdate,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_CHARACTER_STATUS_UPDATE_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
                         }
                     },
                     Summary = new SummarySettings()
                     {
-                        NbRawMessagesToKeepInContext = 5,
+                        NbRawMessagesToKeepInContext = 10,
                         HotMessagesAmountLimit = 30,
                         ColdMessagesAmountLimit = 500,
                         Short = new ShortSummaryConfig

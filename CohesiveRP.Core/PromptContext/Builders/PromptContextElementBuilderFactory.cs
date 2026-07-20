@@ -1,5 +1,7 @@
 ﻿using CohesiveRP.Core.PromptContext.Builders.Directive;
+using CohesiveRP.Core.PromptContext.Builders.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.PromptContext.Builders.Pathfinder;
+using CohesiveRP.Core.PromptContext.Builders.Pathfinder.CharactersMutations;
 using CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
@@ -63,7 +65,7 @@ namespace CohesiveRP.Core.PromptContext.Builders
                 case PromptContextFormatTag.BehavioralInstructions:
                     return new PromptContextBehavioralInstructionsBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.LastXMessagesToSummarize:
-                    return new PromptContextLastXMessagesToSummarizeBuilder(storageService, contextElement, settings, chatDbModel, backgroundQuery.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                    return new PromptContextLastXMessagesToSummarizeBuilder(storageService, contextElement, settings, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.LastUnsummarizedMessages:
                     return new PromptContextLastUnsummarizedMessagesBuilder(storageService, contextElement, settings, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.OverflowingSummariesToSummarize:
@@ -72,6 +74,20 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new SkillChecksInitiatorBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.PathfinderSkillChecksResults:// Add the skillChecks result to the end prompt
                     return new SkillChecksResultsBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.CharacterCreation:
+                    return new PromptContextCharacterCreationBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.CharacterSheetCreation:
+                    return new PromptContextCharacterSheetCreationBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.IllustrationPromptInjectionForCharacterAvatar:
+                    return new PromptContextPromptInjectionForCharacterAvatarBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.NarrativeArchitecture:
+                    return new PromptContextNarrativeArchitectureBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.NarrativeDirection:
+                    return new PromptContextNarrativeDirectionBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.ProseGuardian:
+                    return new PromptContextProseGuardianBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.CharacterStatusUpdateInstructions:
+                    return new PromptContextCharacterStatusUpdateBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 default:
                     throw new Exception($"Unhandled [{contextElement.Tag}].");
             }

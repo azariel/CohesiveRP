@@ -8,6 +8,12 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.
         [JsonPropertyName("actionCategory")]
         public PathfinderSkills ActionCategory { get; set; }
 
+        [JsonPropertyName("charactersWhoCanResist")]
+        public List<string> CharactersWhoCanResist { get; set; }
+
+        [JsonPropertyName("bonus")]
+        public int Bonus { get; set; }
+
         [JsonPropertyName("reasonings")]
         public List<string> Reasonings { get; set; }
     }

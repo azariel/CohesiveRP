@@ -38,7 +38,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             {
                 var character = characters.FirstOrDefault(f => f.CharacterId == characterId);
 
-                if(!string.IsNullOrWhiteSpace(character?.Description))
+                if(character.IncludeDescriptionInPrompt && !string.IsNullOrWhiteSpace(character?.Description))
                 {
                     str += promptContextFormatElement?.Options?.Format?
                         .Replace("{{character_name}}", character.Name)

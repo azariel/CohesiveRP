@@ -266,6 +266,123 @@
   font-style: italic;
 }
 
+.footerIconBtn {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.footerIconBtn:hover {
+  color: #3484e0;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalBox {
+  background: rgb(27, 27, 27);
+  border: 1px solid #2e2e2e;
+  border-radius: 14px;
+  width: min(90vw, 640px);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75em 1em;
+  border-bottom: 1px solid #2e2e2e;
+}
+
+.modalTitle {
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #3484e0;
+}
+
+.modalCloseBtn {
+  all: unset;
+  cursor: pointer;
+  font-size: 1em;
+  color: #696969;
+  line-height: 1;
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.modalCloseBtn:hover {
+  color: #d3d3ca;
+  background-color: #2e2e2e;
+}
+
+.modalBody {
+  flex: 1;
+  overflow: hidden;
+  padding: 0.75em 1em;
+  display: flex;
+}
+
+.modalLoading {
+  font-size: 0.85em;
+  color: #696969;
+  align-self: center;
+}
+
+.modalTextarea {
+  all: unset;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  max-height: 55vh;
+  resize: none;
+  font-family: inherit;
+  font-size: 0.85em;
+  color: #d3d3ca;
+  line-height: 1.6;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  cursor: default;
+  box-sizing: border-box;
+}
+
+.modalFooter {
+  padding: 0.75em 1em;
+  border-top: 1px solid #2e2e2e;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modalCopyBtn {
+  all: unset;
+  cursor: pointer;
+  font-size: 0.8em;
+  padding: 0.4em 1em;
+  border: 1px solid #3484e0;
+  border-radius: 8px;
+  color: #3484e0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.modalCopyBtn:hover:not(:disabled) {
+  background-color: #3484e0;
+  color: #fff;
+}
+
+.modalCopyBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

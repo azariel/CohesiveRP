@@ -1,7 +1,6 @@
 ﻿using System.Net.Security;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Exceptions;
 
@@ -156,7 +155,7 @@ namespace CohesiveRP.Common.HttpClient
                 if (line is null)
                     break;
 
-                if(line.Contains($"data: [DONE]"))
+                if (line.Contains($"data: [DONE]"))
                     break;
 
                 yield return line;
@@ -186,6 +185,59 @@ namespace CohesiveRP.Common.HttpClient
             }
 
             throw new Exception($"[{nameof(HttpRestClient)}.{nameof(PatchAsync)}] Unhandled exception when querying [{url}].");// TODO: wrap error
+        }
+
+        public async Task<byte[]> GetBytesAsync(string url, CancellationToken cancellationToken)
+        {
+            HttpResponseMessage response = null;
+
+            try
+            {
+                response = await httpClient.GetAsync(url, cancellationToken);
+
+                if (response.IsSuccessStatusCode)
+                    return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            } catch (OperationCanceledException)
+            {
+                LoggingManager.LogToFile("a067c217-9055-47e8-b89a-f3541c3a97f3", $"[{nameof(HttpRestClient)}.{nameof(GetBytesAsync)}] cancelled.");
+                throw;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("24f9195f-8b77-438e-aad0-cdc1a1fd515e", $"[{nameof(HttpRestClient)}.{nameof(GetBytesAsync)}] failed.", ex);
+                throw;
+            }
+
+            throw new ApiException(response!.StatusCode, $"[{nameof(HttpRestClient)}.{nameof(GetBytesAsync)}] failed for [{url}]. Error: [{await response.Content.ReadAsStringAsync()}].");
+        }
+
+        public async Task<string> PostMultipartAsync(string url, MultipartFormDataContent content, CancellationToken cancellationToken)
+        {
+            try
+            {
+                HttpResponseMessage response = await httpClient.PostAsync(url, content, cancellationToken);
+                string responseMessageContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                    return responseMessageContent;
+
+                string errorMessage = $"Couldn't post multipart to dependent service. Url = [{url}]. HTTP Response Code = [{response.StatusCode}]. Response Message = [{responseMessageContent}].";
+                LoggingManager.LogToFile("c3a1f82e-4d57-4b9a-bf23-7e8d1f905c12", errorMessage);
+                throw new Exception(errorMessage);
+            } catch (OperationCanceledException)
+            {
+                LoggingManager.LogToFile("bfb7ae77-0fb2-4daa-b274-f939e5950382", $"[{nameof(HttpRestClient)}.{nameof(PostMultipartAsync)}] failed due to cancellationToken reaching its time limit.");
+                throw;
+            } catch (AggregateException aggregateException) when (aggregateException.InnerExceptions.Any(a => a.GetType() == typeof(HttpRequestException)))
+            {
+                LoggingManager.LogToFile("321614c3-6cda-4d04-be45-ae198378d599", $"[{nameof(HttpRestClient)}.{nameof(PostMultipartAsync)}] failed.", aggregateException);
+                throw;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("d2fa01b5-a998-459e-a1fc-2effeb454970", $"Unhandled exception. [{nameof(HttpRestClient)}.{nameof(PostMultipartAsync)}] failed.", ex);
+                throw;
+            }
+
+            throw new Exception($"[{nameof(HttpRestClient)}.{nameof(PostMultipartAsync)}] Unhandled exception when querying [{url}].");
         }
     }
 }

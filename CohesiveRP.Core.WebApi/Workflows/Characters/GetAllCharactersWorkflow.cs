@@ -1,9 +1,13 @@
 ﻿using CohesiveRP.Common.WebApi;
+using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Storage.DataAccessLayer.Characters.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -20,6 +24,15 @@ public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
     {
         CharacterDbModel[] characters = await storageService.GetCharactersAsync();
 
+        if (characters == null || characters.Length <= 0)
+        {
+            return new CharactersResponseDto
+            {
+                HttpResultCode = System.Net.HttpStatusCode.OK,
+                Characters = new List<CharacterResponse>()
+            };
+        }
+
         // Convert DbModel to an acceptable web model (without sensitive information)
         var responseDto = new CharactersResponseDto
         {
@@ -29,13 +42,26 @@ public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
             {
                 CharacterId = s.CharacterId,
                 Name = s.Name,
+                CreatedAtUtc = s.CreatedAtUtc,
                 Creator = s.Creator,
                 CreatorNotes = s.CreatorNotes,
                 Description = s.Description,
+                IncludeDescriptionInPrompt = s.IncludeDescriptionInPrompt,
                 Tags = s.Tags,
                 FirstMessage = s.FirstMessage,
                 AlternateGreetings = s.AlternateGreetings,
                 LastActivityAtUtc = s.LastActivityAtUtc,
+                ImageGenerationConfiguration = new CharacterImageGenerationConfiguration()
+                {
+                    IllustratorTag = s.ImageGenerationConfiguration?.IllustratorTag,
+                    IllustrationMapOutfits = s.ImageGenerationConfiguration?.IllustrationMapOutfits?.Select(imo => new IllustrationMapOutfit
+                    {
+                        IllustratorPromptInjection = imo?.IllustratorPromptInjection,
+                        Outfit = imo?.Outfit ?? ClothingStateOfDress.Clothed,
+                        SourceAvatars = CharacterAvatarsUtils.GetCharacterSourceAvatars(s, imo?.Outfit ?? ClothingStateOfDress.Clothed),
+                        ExpressionAvatars = CharacterAvatarsUtils.GetCharacterExpressionAvatars(s, imo?.Outfit ?? ClothingStateOfDress.Clothed),
+                    }).ToList()
+                },
             }).OrderByDescending(o => o.LastActivityAtUtc).ToList()
         };
 

@@ -2,7 +2,7 @@ import styles from "./ChatComponent.module.css";
 import { Fragment, useEffect, useRef } from "react";
 import ChatMessageComponent from "./message/ChatMessageComponent";
 import UserInputComponent from "./userInput/UserInputComponent";
-import { deleteFromServerApiAsync, getFromServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
+import { deleteFromServerApiAsync, getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { ChatMessagesResponseDto } from "../../../../ResponsesDto/chat/ChatMessagesResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 /* Store */
@@ -11,6 +11,8 @@ import type { SharedContextChatType } from "../../../../store/SharedContextChatT
 import { useChatMessages } from "../../../../store/MessagesStoreContext";
 import SceneTrackerComponent from "./sceneTracker/SceneTrackerComponent";
 import ChatRollsComponent from "./chatRolls/ChatRollsComponent";
+import InteractiveUserInputComponent from "./interactiveUserInput/InteractiveUserInputComponent";
+import MobileAvatarBannerComponent from "./mobileAvatarBanner/MobileAvatarBannerComponent";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -40,7 +42,8 @@ export default function ChatComponent() {
         }
 
         setMessages(() => response.messages ?? []);
-        setActiveModule((prev) => prev ? { ...prev, nbColdMessages: response.nbColdMessages } : prev);
+        setActiveModule((prev) => prev ? { ...prev, nbColdMessages: response.nbColdMessages, hotMessagesLoaded: true } : prev);
+
         console.log(`Specific chat messages fetched successfully.`);
         setTimeout(() => {
           if (messagesRef?.current)
@@ -57,7 +60,9 @@ export default function ChatComponent() {
 
   useEffect(() => {
     if (messagesRef?.current)
+    {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
   }, []);
 
   const handleSaveMessage = async (messageId: string, newContent: string) => {
@@ -79,17 +84,28 @@ export default function ChatComponent() {
     }
   };
 
-  const handleDeleteMessage = async (messageId: string) => {
-    // Optimistic removal from local store
-    setMessages((prev) => prev.filter((m) => m.messageId !== messageId));
+  const handleSwipeMessage = async (chatId: string, messageId: string) => {
+    // Swipe on backend
+    const payload = { chatId, messageId};
+    const response = await postToServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}/swipe`, payload);
+    const serverApiException = response as ServerApiExceptionResponseDto | null;
+    if (!response || serverApiException?.message) {
+      console.error(`Deleting message failed. [${JSON.stringify(serverApiException)}]`);
+    } else {
+      // Removal from local store
+      setMessages((prev) => prev.filter((m) => m.messageId !== messageId));
+    }
+  };
 
+  const handleDeleteMessage = async (messageId: string) => {
     // Delete on backend
     const response = await deleteFromServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}`);
     const serverApiException = response as ServerApiExceptionResponseDto | null;
     if (!response || serverApiException?.message) {
       console.error(`Deleting message failed. [${JSON.stringify(serverApiException)}]`);
-
-      // roll back optimistic removal on failure
+    } else {
+      // Removal from local store
+      setMessages((prev) => prev.filter((m) => m.messageId !== messageId));
     }
   };
 
@@ -102,7 +118,13 @@ export default function ChatComponent() {
 
             return (
               <Fragment key={message.messageId}>
-                {messages.length > 1 && isLastMessage && <SceneTrackerComponent />} 
+                {messages.length > 1 && isLastMessage && (
+                  <>
+                    {/* Mobile-only avatar banner — mirrors MainRightComponent on small screens */}
+                    <MobileAvatarBannerComponent />
+                    <SceneTrackerComponent />
+                  </>
+                )}
 
                 <ChatMessageComponent
                   message={message}
@@ -111,6 +133,7 @@ export default function ChatComponent() {
                   enableSwipeBtn={isLastMessage}
                   isEditable={!message.summarized && index >= messages.length - 3}
                   onSave={handleSaveMessage}
+                  onSwipe={handleSwipeMessage}
                   onDelete={handleDeleteMessage}
                 />
               </Fragment>
@@ -121,6 +144,11 @@ export default function ChatComponent() {
         )}
         {activeModule?.chatId ? (
         <div className={styles.userInputContainer}>
+          {/* ── Interactive prompts shown after each AI response ── */}
+          <InteractiveUserInputComponent
+            chatId={activeModule.chatId}
+            refreshToken={activeModule?.interactiveInputRefreshToken}
+          />
           <ChatRollsComponent sceneTrackerRefreshToken={activeModule?.sceneTrackerRefreshToken} />
           <UserInputComponent messagesRef={messagesRef} />
         </div>

@@ -3,7 +3,6 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
-using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.Personas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -16,10 +15,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
     public class PersonasDal : StorageDal, IPersonasDal
     {
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
+        private readonly ICharacterSheetsDal characterSheetsDal;
 
-        public PersonasDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
+        public PersonasDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory, ICharacterSheetsDal characterSheetsDal) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
+            this.characterSheetsDal = characterSheetsDal;
 
             using var dbContext = contextFactory.CreateDbContext();
             dbContext.Database.EnsureCreated();
@@ -205,6 +206,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return false;
                 }
 
+                await characterSheetsDal.DeleteCharacterSheetFromPersonaAsync(personaDbModel);
                 await dbContext.SaveChangesAsync();
                 return true;
             } catch (Exception ex)

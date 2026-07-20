@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using CohesiveRP.Common.Configuration;
 using CohesiveRP.Core.BackgroundServices.BackgroundQueries;
+using CohesiveRP.Core.ComfyUI.Client;
 using CohesiveRP.Core.DtoConverters;
 using CohesiveRP.Core.DtoConverters.Abstractions;
 using CohesiveRP.Core.LLMProviderManager;
@@ -10,6 +12,7 @@ using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
+using CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharactersCreator;
 using CohesiveRP.Core.WebApi.Workflows.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
@@ -21,6 +24,10 @@ using CohesiveRP.Core.WebApi.Workflows.ChatCharacterRolls.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.ChatCompletionPresets.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Chats;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.IllustrationQueries;
+using CohesiveRP.Core.WebApi.Workflows.IllustrationQueries.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.InteractiveUserInputQueries;
+using CohesiveRP.Core.WebApi.Workflows.InteractiveUserInputQueries.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Lorebooks.Abstractions;
 using CohesiveRP.Core.WebApi.Workflows.Messages;
 using CohesiveRP.Core.WebApi.Workflows.Messages.Abstractions;
@@ -30,7 +37,13 @@ using CohesiveRP.Core.WebApi.Workflows.Settings;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.IllustrationQueries;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.SceneAnalyzer;
@@ -58,6 +71,11 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IGetSpecificMessageByIdWorkflow, GetSpecificMessageByIdWorkflow>();
             services.AddSingleton<IPatchSpecificMessageByIdWorkflow, PatchSpecificMessageByIdWorkflow>();
             services.AddSingleton<IDeleteSpecificMessageByIdWorkflow, DeleteSpecificMessageByIdWorkflow>();
+            services.AddSingleton<ISwipeMessageWorkflow, SwipeMessageWorkflow>();
+            services.AddSingleton<IGetPromptByChatIdWorkflow, GetPromptByChatIdWorkflow>();
+
+            // Workflows.ChatCharacterRolls
+            services.AddSingleton<IChatCharacterRollsWorkflow, GetChatCharacterRollsWorkflow>();
 
             // Workflows.Characters
             services.AddSingleton<IGetAllCharactersWorkflow, GetAllCharactersWorkflow>();
@@ -71,6 +89,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IRegenerateCharacterSheetWorkflow, RegenerateCharacterSheetWorkflow>();
             services.AddSingleton<IExportCharacterCardWorkflow, ExportCharacterCardWorkflow>();
             services.AddSingleton<IImportCharacterCardWorkflow, ImportCharacterCardWorkflow>();
+            services.AddSingleton<IDeleteCharacterAvatarWorkflow, DeleteCharacterAvatarWorkflow>();
 
             // Workflows.Personas
             services.AddSingleton<IGetAllPersonasWorkflow, GetAllPersonasWorkflow>();
@@ -110,6 +129,15 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IUpdateChatCompletionPresetWorkflow, UpdateChatCompletionPresetWorkflow>();
             services.AddSingleton<IDeleteChatCompletionPresetWorkflow, DeleteChatCompletionPresetWorkflow>();
 
+            // Workflows.InteractiveUserInputQueries
+            services.AddSingleton<IGetInteractiveUserInputQueriesFromChatIdWorkflow, GetInteractiveUserInputQueriesFromChatIdWorkflow>();
+            services.AddSingleton<IPutInteractiveUserInputQueryWorkflow, PutInteractiveUserInputQueryWorkflow>();
+
+            // Workflows.IllustrationQueries
+            services.AddSingleton<IGetIllustrationQueriesWorkflow, GetIllustrationQueriesWorkflow>();
+            services.AddSingleton<IAddIllustrationQueryWorkflow, AddIllustrationQueryWorkflow>();
+            services.AddSingleton<IGeneratePromptInjectionForMainCharacterAvatarWorkflow, GeneratePromptInjectionForMainCharacterAvatarWorkflow>();
+
             // DtoConverters
             services.AddSingleton<ILorebookDtoConverter, LorebookDtoConverter>();
 
@@ -126,8 +154,8 @@ namespace CohesiveRP.Core.WebApi
 
             // DataAccessLayers
             services.AddDbContextFactory<StorageDbContext>();
-            //services.AddSingleton<IUsersDal, UsersDal>();
             // Those must be injected into StorageService ctor to make sure their CTOR is called upon service startup and thus default values are injected into storage at startup
+            //services.AddSingleton<IUsersDal, UsersDal>();
             services.AddSingleton<IChatsDal, ChatsDal>();
             services.AddSingleton<ICharactersDal, CharactersDal>();
             services.AddSingleton<IPersonasDal, PersonasDal>();
@@ -144,7 +172,21 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<ICharacterSheetsDal, CharacterSheetsDal>();
             services.AddSingleton<ICharacterSheetInstancesDal, CharacterSheetInstancesDal>();
             services.AddSingleton<IChatCharactersRollsDal, ChatCharactersRollsDal>();
-            services.AddSingleton<IChatCharacterRollsWorkflow, GetChatCharacterRollsWorkflow>();
+            services.AddSingleton<IInteractiveUserInputDal, InteractiveUserInputDal>();
+            services.AddSingleton<IIllustrationQueryDal, IllustrationQueryDal>();
+            services.AddSingleton<ICohesionEnforcementsDal, CohesionEnforcementDal>();
+            services.AddSingleton<INarrativeArchitecturesDal, NarrativeArchitectureDal>();
+            services.AddSingleton<INarrativeDirectionsDal, NarrativeDirectionDal>();
+            services.AddSingleton<IProseGuardiansDal, ProseGuardianDal>();
+
+            //// Load the API-format workflow from embedded resources or disk
+            //string templateJson = File.ReadAllText("Workflows/CohesiveRP-MainAvatarGenerator-v1.0.api.json");
+
+            //services.AddSingleton<ComfyUiEndpointConfig>(/* from appsettings */);
+            //services.AddSingleton<IWorkflowInjector>(_ => new MainAvatarWorkflowInjector(templateJson));
+            services.AddSingleton<ComfyUiEndpointConfig>(new ComfyUiEndpointConfig { BaseUrl = "http://192.168.0.237:8188" });
+            services.AddSingleton<IComfyUiClient, ComfyUiClient>();
+            //services.AddSingleton<IComfyUiAvatarService, ComfyUiAvatarService>();
 
             // Default Json options
             services.AddSingleton(new JsonSerializerOptions()
@@ -154,7 +196,9 @@ namespace CohesiveRP.Core.WebApi
             });
 
             // Add background services
-            services.AddHostedService<BackgroundQueriesWorker>();
+            services.AddHostedService<BackgroundQueriesWorker>();// run background queries, usually against an LLM Api
+            services.AddHostedService<DynamicCharactersCreatorWorker>();// When an interactive query is completed and is of type DynamicCharacterCreation, queue a backgroundQuery to generate that character using an LLM Api
+            services.AddHostedService<IllustratorMainAvatarsQueriesWorker>();// Parse the queued illustration images requests one by one and run them against an image provider such as ComfyUI to generate the image and move it to the right location for fluid usage by CohesiveRp backend and frontend.
 
             services.AddControllers().AddJsonOptions(option =>
             {

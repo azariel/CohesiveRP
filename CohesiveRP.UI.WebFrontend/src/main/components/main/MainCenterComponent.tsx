@@ -4,7 +4,7 @@ import styles from "./MainCenterComponent.module.css";
 import ChatComponent from '../modules/chat/ChatComponent';
 import ChatSelectionComponent from "../modules/chatsSelection/ChatSelectionComponent";
 import CharactersComponent from "../modules/charactersSelection/CharactersSelectionComponent";
-import CharacterDetailsComponent from "../modules/characterDetails/CharacterDetailsComponent";
+import CharacterDetailsComponent from "../modules/characters/characterDetails/CharacterDetailsComponent";
 import SettingsComponent from "../modules/settings/SettingsComponent";
 
 /* Store */
@@ -13,7 +13,7 @@ import PersonasSelectionComponent from "../modules/personasSelection/PersonasSel
 import PersonaDetailsComponent from "../modules/personaDetails/PersonaDetailsComponent";
 import LorebookSelectionComponent from "../modules/lorebooksSelection/LorebookSelectionComponent";
 import LorebookDetailsComponent from "../modules/lorebookDetails/LorebookDetailsComponent";
-import ChatDetailsComponent from "../modules/chatDetails/chatDetailsComponent";
+import ChatDetailsComponent from "../modules/chat/chatDetails/chatDetailsComponent";
 import ChatCompletionPresetsComponent from "../modules/chatCompletionPresets/ChatCompletionPresetsComponent";
 
 export default function MainCenterComponent() {

@@ -5,7 +5,7 @@ namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects
     public record CCv3CharacterData
 {
     [JsonPropertyName("name")]
-    public string Name { get; init; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     [JsonPropertyName("description")]
     public string Description { get; init; } = string.Empty;

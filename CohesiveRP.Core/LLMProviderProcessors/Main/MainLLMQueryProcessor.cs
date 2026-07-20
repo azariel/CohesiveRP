@@ -1,8 +1,6 @@
-﻿using System.Xml.Linq;
-using CohesiveRP.Common.BusinessObjects;
+﻿using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Utils.Parsers;
-using CohesiveRP.Core.LLMProviderProcessors.Main.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Directive;
@@ -162,6 +160,11 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
             // Check if the character has an assets folder in this chat
             var characterDbModel = await storageService.GetCharacterByIdAsync(targetCharacterSheet.CharacterId);
+            if (characterDbModel == null)
+            {
+                return avatar;
+            }
+
             string characterFolderPath = Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name.ToLowerInvariant());
             if (!Directory.Exists(WebConstants.CharactersAvatarFilePath))
             {
@@ -176,13 +179,18 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 FilePath = Path.Combine(characterFolderPath, WebConstants.AvatarFileName)?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant(),
             };
 
+            if(targetCharacter.ClothingStateOfDress == null)
+            {
+                return avatar;
+            }
+
             string outfit = targetCharacter.ClothingStateOfDress.ToLowerInvariant();
-            string currentOutfitFolderPath = Path.Combine(characterFolderPath, outfit);
+            string currentOutfitFolderPath = Path.Combine(characterFolderPath, WebConstants.ExpressiveAvatarFolder, outfit);
             if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
             {
                 // Try to default back to 'clothed'
                 outfit = ClothingStateOfDress.Clothed.ToString().ToLowerInvariant();
-                currentOutfitFolderPath = Path.Combine(characterFolderPath, outfit);
+                currentOutfitFolderPath = Path.Combine(characterFolderPath, WebConstants.ExpressiveAvatarFolder, outfit);
 
                 if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
                 {
@@ -267,12 +275,12 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             };
 
             string outfit = sceneTracker.PlayerAnalysis.ClothingStateOfDress.ToLowerInvariant();
-            string currentOutfitFolderPath = Path.Combine(personaFolderPath, outfit);
+            string currentOutfitFolderPath = Path.Combine(personaFolderPath, WebConstants.ExpressiveAvatarFolder, outfit);
             if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
             {
                 // Try to default back to 'clothed'
                 outfit = ClothingStateOfDress.Clothed.ToString().ToLowerInvariant();
-                currentOutfitFolderPath = Path.Combine(personaFolderPath, outfit);
+                currentOutfitFolderPath = Path.Combine(personaFolderPath, WebConstants.ExpressiveAvatarFolder, outfit);
 
                 if (!Directory.Exists(currentOutfitFolderPath) || Directory.EnumerateFiles(currentOutfitFolderPath, "*", SearchOption.AllDirectories).ToArray().Length <= 0)
                 {
@@ -313,8 +321,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 {
                     string choosenFile = availableAvatarsWithTheRightExpressionAndClothes[new Random(DateTime.Now.Millisecond).Next(0, availableAvatarsWithTheRightExpressionAndClothes.Length - 1)];
 
-                    if(File.Exists(choosenFile))
-                    avatar.FilePath = choosenFile?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
+                    if (File.Exists(choosenFile))
+                        avatar.FilePath = choosenFile?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
                 }
             }
 
@@ -451,6 +459,12 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             try
             {
                 var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
+                if (chat == null)
+                {
+                    backgroundQueryDbModel.Content = null;
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                    return false;
+                }
 
                 LLMApiResponseMessage message = messages.LastOrDefault();
 
@@ -513,6 +527,13 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 // Scene Analyzer
                 //await QueueSceneAnalyzeAsync(chat);
 
+                // Cohesive Enforcement
+                // TODO: we need to be able to update the content of the message afterwards. That part is fine, but the UI would not reflect that change since the main backgroundQuery is set as completed..
+                //await QueueCohesionEnforcementAsync(chat);
+
+                // Narrative Architect (Secret Plot)
+                //await QueueNarrativeArchitectureAsync(chat);
+
                 // Prebuild the images to show in the UI according to context
                 var sceneTracker = await storageService.GetSceneTrackerAsync(backgroundQueryDbModel.ChatId);
 
@@ -536,14 +557,30 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             }
         }
 
-        private async Task<bool> QueueSceneAnalyzeAsync(ChatDbModel chat)
+        private async Task<bool> QueueCohesionEnforcementAsync(ChatDbModel chat)
         {
             var backgroundQueryModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chat.ChatId,
                 Priority = BackgroundQueryPriority.Highest,// User is waiting!
                 DependenciesTags = [],// No dependencies at all
-                Tags = [BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                Tags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],
+            };
+
+            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+                return false;
+
+            return true;
+        }
+
+        private async Task<bool> QueueNarrativeArchitectureAsync(ChatDbModel chat)
+        {
+            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+            {
+                ChatId = chat.ChatId,
+                Priority = BackgroundQueryPriority.VeryLow,// user is not waiting, we're simply generation and iterating over secret plots and narrative arcs in the background, so we can set it to very low priority
+                DependenciesTags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],// Run after cohesionEnforcement
+                Tags = [BackgroundQuerySystemTags.narrativeArchitecture.ToString()],
             };
 
             if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)

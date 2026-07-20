@@ -209,7 +209,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 if (queries == null || queries.Length <= 0)
                 {
-                    LoggingManager.LogToFile("7d9a336d-6810-4808-b0e5-d5e73989c63b", $"BackgroundQueries [{string.Join(",", dbModels.Select(s => s.BackgroundQueryId))}] to update weren't found in storage.");
+                    //LoggingManager.LogToFile("7d9a336d-6810-4808-b0e5-d5e73989c63b", $"BackgroundQueries [{string.Join(",", dbModels.Select(s => s.BackgroundQueryId))}] to update weren't found in storage.");
                     return false;
                 }
 

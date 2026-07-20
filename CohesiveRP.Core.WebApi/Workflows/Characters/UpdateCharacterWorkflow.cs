@@ -1,12 +1,11 @@
-﻿using System.Xml.Linq;
-using CohesiveRP.Common.Exceptions;
+﻿using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -37,13 +36,16 @@ public class UpdateCharacterWorkflow : IUpdateCharacterWorkflow
             };
         }
 
+        string oldCharacterName = currentCharacter.Name;
         currentCharacter.Name = requestDto.CharacterName;
         currentCharacter.Creator = requestDto.Creator;
         currentCharacter.CreatorNotes = requestDto.CreatorNotes;
         currentCharacter.FirstMessage = requestDto.FirstMessage;
         currentCharacter.Description = requestDto.CharacterDescription;
+        currentCharacter.IncludeDescriptionInPrompt = requestDto.IncludeDescriptionInPrompt;
         currentCharacter.Tags = requestDto.Tags?.ToList();
         currentCharacter.AlternateGreetings = requestDto.AlternateGreetings?.ToList();
+        currentCharacter.ImageGenerationConfiguration = requestDto.ImageGenerationConfiguration;
 
         bool result = await storageService.UpdateCharacterAsync(currentCharacter);
         if (!result)
@@ -53,6 +55,14 @@ public class UpdateCharacterWorkflow : IUpdateCharacterWorkflow
                 HttpResultCode = System.Net.HttpStatusCode.InternalServerError,
                 Message = $"Character [{requestDto.CharacterId}] update failed."
             };
+        }
+
+        CharacterUtils.CreateCharacterAssets(currentCharacter.Name);
+
+        // Move public assets folder if the character name was changed
+        if(oldCharacterName != currentCharacter.Name)
+        {
+            CharacterUtils.MovePublicAssetsFolder(oldCharacterName, currentCharacter.Name);
         }
 
         var responseDto = new CharacterResponseDto

@@ -24,5 +24,12 @@
         PathfinderSkillChecksInitiator = 19,
         PathfinderSkillChecksResults = 20,
         SceneAnalyze = 21,
+        CharacterCreation = 22,
+        CharacterSheetCreation = 23,
+        IllustrationPromptInjectionForCharacterAvatar = 24,
+        NarrativeArchitecture = 25,
+        NarrativeDirection = 26,
+        ProseGuardian = 27,
+        CharacterStatusUpdateInstructions = 28,
     }
 }

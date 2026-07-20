@@ -15,8 +15,17 @@ namespace CohesiveRP.Core.CharacterCards.Loaders
             if(characterCard != null)
                 return characterCard;
 
-            // Try to load it as CCv3, a way more supported format, but with way less information
+            // Try to load a more standadized format, but embedding less information for CohesiveRP backend, but more for other backends, and with a better support in general
+
+            // Try to load it as CCv3
             characterCard = CCv3CharacterCardLoader.TryLoadCharacterCard(image);
+            if(characterCard != null)
+                return characterCard;
+
+            // Try to load it as Chara
+            characterCard = CharaCharacterCardLoader.TryLoadCharacterCard(image);
+            if(characterCard != null)
+                return characterCard;
 
             return characterCard;
         }

@@ -7,6 +7,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonPropertyName("characterSheetInstanceId")]
         public string CharacterSheetInstanceId { get; set; }
 
+        [JsonPropertyName("characterName")]
+        public string CharacterName { get; set; }
+
         [JsonPropertyName("characterInSceneCounterRoll")]
         public CharacterInSceneCounterRoll CharacterInSceneCounterRoll { get; set; }
     }

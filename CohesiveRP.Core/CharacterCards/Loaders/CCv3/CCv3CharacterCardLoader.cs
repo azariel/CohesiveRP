@@ -25,13 +25,18 @@ namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3
                     return null;
 
                 var json = Decode(ccv3Chunk.Value.Value);
-                return JsonSerializer.Deserialize<CCv3CharacterCard>(json, new JsonSerializerOptions
+                var model = JsonSerializer.Deserialize<CCv3CharacterCard>(json, new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true
+                    PropertyNameCaseInsensitive = false
                 });
+
+                if(model?.Data == null || string.IsNullOrWhiteSpace(model.Data.Name))
+                    return null;
+
+                return model;
             } catch (Exception ex)
             {
-                LoggingManager.LogToFile("59cfbe7d-faa2-44b5-8bd0-38ab738c991b", $"Something went wrong when reading CCv3 image.", ex);
+                LoggingManager.LogToFile("41dd0e05-a7c2-48a1-b76f-38b0ed214758", $"Something went wrong when reading CCv3 image.", ex);
                 return null;
             }
         }
@@ -45,11 +50,6 @@ namespace CohesiveRP.Core.CharacterCards.Loaders.CCv3
 
             ICharacterCard card = null;
             card = TryLoadCCv3Format(image);
-
-            //if (card == null)
-            //{
-            //    card = TryLoadCharaFormat(image);
-            //}
 
             return card;
         }

@@ -73,8 +73,11 @@ export default function UserInputComponent({ messagesRef }: Props) {
     };
   }, [messagesRef]);
 
-  useEffect(() => {
-    if (!activeModule?.chatId)
+useEffect(() => {
+    // Wait for ChatComponent's "/messages/hot" fetch to land. Otherwise this
+    // can resolve on either side of it, and whichever runs second fights the
+    // other for control of `messages`.
+    if (!activeModule?.chatId || !activeModule?.hotMessagesLoaded)
       return;
 
     const abortController = new AbortController();
@@ -110,30 +113,35 @@ export default function UserInputComponent({ messagesRef }: Props) {
           prev ? { ...prev, mainQueryId: mainQuery.backgroundQueryId } : prev
         );
 
-        setMessages((prev) => [
-          ...prev,
-          {
-            messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
-            content: "...",
-            thinkingContent: "",
-            createdAtUtc: null,
-            sourceType: 1,
-            messageIndex: (activeModule.nbColdMessages ?? 0) + messages.length + 1,
-            summarized: false,
-            characterAvatars: [],
-            characterId: null,
-            characterName: "",
-            personaId: null,
-            personaName: "",
-          },// Add a fake AI message at the bottom. We'll update this message as the generation go and we'll replace that whole message once the generation is done
-        ]);
+        setMessages((prev) => {
+          if (prev.some((m) => m.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY))
+            return prev;
+
+          return [
+            ...prev,
+            {
+              messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
+              content: "...",
+              thinkingContent: "",
+              createdAtUtc: null,
+              sourceType: 1,
+              messageIndex: (activeModule.nbColdMessages ?? 0) + prev.length + 1,
+              summarized: false,
+              characterAvatars: [],
+              characterId: null,
+              characterName: "",
+              personaId: null,
+              personaName: "",
+            },
+          ];
+        });
       }
     };
 
     fetchBackgroundQueries();
     return () => abortController.abort();
 
-  }, [activeModule?.chatId]);
+  }, [activeModule?.chatId, activeModule?.hotMessagesLoaded]);
 
 const adjustTextareaHeight = () => {
     const el = textareaRef.current;
@@ -292,7 +300,12 @@ const adjustTextareaHeight = () => {
         // nested inside another component's state update logic
         setIsInputBlockedDueToServer(false);
         setSendMessageQueryStatus(response?.status ?? "");
-        setActiveModule((prev) => prev ? { ...prev, mainQueryId: null } : prev);
+        setActiveModule((prev) => prev ? {
+          ...prev,
+          mainQueryId: null,
+          // ── Trigger InteractiveUserInputComponent to fetch new pending queries ──
+          interactiveInputRefreshToken: (prev.interactiveInputRefreshToken ?? 0) + 1,
+        } : prev);
         
         if (messagesRef?.current) {
           setTimeout(() => {

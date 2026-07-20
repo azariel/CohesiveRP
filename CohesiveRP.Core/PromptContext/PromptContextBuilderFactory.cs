@@ -34,6 +34,22 @@ namespace CohesiveRP.Core.PromptContext
                     return new PromptContextBuilder(ChatCompletionPresetType.SummariesMerge, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.skillChecksInitiator:
                     return new PromptContextBuilder(ChatCompletionPresetType.SkillChecksInitiator, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.dynamicCharacterCreation:
+                    return new PromptContextBuilder(ChatCompletionPresetType.DynamicCharacterCreation, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.dynamicCharacterSheetCreation:
+                    return new PromptContextBuilder(ChatCompletionPresetType.DynamicCharacterSheetCreation, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar:
+                    return new PromptContextBuilder(ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.cohesionEnforcement:
+                    return new PromptContextBuilder(ChatCompletionPresetType.CohesionEnforcement, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.narrativeArchitecture:
+                    return new PromptContextBuilder(ChatCompletionPresetType.NarrativeArchitecture, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.narrativeDirection:
+                    return new PromptContextBuilder(ChatCompletionPresetType.NarrativeDirection, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.proseGuardian:
+                    return new PromptContextBuilder(ChatCompletionPresetType.ProseGuardian, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.characterStatusUpdate:
+                    return new PromptContextBuilder(ChatCompletionPresetType.CharacterStatusUpdate, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.custom:
                     return null;
                 default:

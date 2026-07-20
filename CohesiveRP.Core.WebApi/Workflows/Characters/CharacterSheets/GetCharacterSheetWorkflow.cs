@@ -39,6 +39,7 @@ public class GetCharacterSheetWorkflow : IGetCharacterSheetWorkflow
             CharacterSheet = new CharacterSheet
             {
                 AgeGroup = characterSheet.CharacterSheet.AgeGroup,
+                AgeGroupAppearance = characterSheet.CharacterSheet.AgeGroupAppearance,
                 Attractiveness = characterSheet.CharacterSheet.Attractiveness,
                 Behavior = characterSheet.CharacterSheet.Behavior,
                 BirthdayDate = characterSheet.CharacterSheet.BirthdayDate,
@@ -109,6 +110,7 @@ public class GetCharacterSheetWorkflow : IGetCharacterSheetWorkflow
             CharacterSheet = new CharacterSheet
             {
                 AgeGroup = characterSheet.CharacterSheet.AgeGroup,
+                AgeGroupAppearance = characterSheet.CharacterSheet.AgeGroupAppearance,
                 Attractiveness = characterSheet.CharacterSheet.Attractiveness,
                 Behavior = characterSheet.CharacterSheet.Behavior,
                 BirthdayDate = characterSheet.CharacterSheet.BirthdayDate,

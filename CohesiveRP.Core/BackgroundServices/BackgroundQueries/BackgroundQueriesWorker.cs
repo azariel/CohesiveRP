@@ -55,7 +55,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
 
             // Register the task in the main thread to avoid desyncs
             string queryId = Guid.NewGuid().ToString();
-            var queryProcessor = llmProviderQueryerFactory.Generate(selectedQuery);
+            var queryProcessor = await llmProviderQueryerFactory.GenerateAsync(selectedQuery);
 
             if (queryProcessor == null)
             {

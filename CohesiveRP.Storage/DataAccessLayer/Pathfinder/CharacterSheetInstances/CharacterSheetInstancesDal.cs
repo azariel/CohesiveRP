@@ -154,5 +154,68 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 return false;
             }
         }
+
+        public async Task<bool> DeleteCharacterSheetsInstanceAsync(Func<CharacterSheetInstancesDbModel, bool> func)
+        {
+            if (func == null)
+            {
+                return true;
+            }
+
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var characterSheetInstances = await dbContext.CharacterSheetInstances.AsAsyncEnumerable().Where(func.Invoke).ToArrayAsync();
+
+                if (characterSheetInstances == null || characterSheetInstances.Length <= 0)
+                {
+                    LoggingManager.LogToFile("9406fb67-34d4-4e9a-83cd-b172d3141639", $"CharacterSheetsInstance using Func [{func}] to delete weren't found in storage.");
+                    return false;
+                }
+
+                foreach (var characterSheetInstance in characterSheetInstances)
+                {
+                    var result = dbContext.CharacterSheetInstances.Remove(characterSheetInstance);
+                    if (result.State != EntityState.Deleted)
+                    {
+                        // Delete what we can
+                        LoggingManager.LogToFile("69a7183e-4cf3-4046-960d-9c6fc1c47e1a", $"Error when deleting specific CharacterSheetsInstances. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(characterSheetInstance)}].");
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("376c254a-4f88-4324-99ff-6e24a83eff2c", $"Error when querying pending queries on table CharacterSheetInstances.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteCharacterSheetInstancesFromCharacterSheetAsync(CharacterSheetDbModel dbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var characterSheetInstances = dbContext.CharacterSheetInstances.AsNoTracking().AsEnumerable().Where(w => w.CharacterSheetInstances.Any(c => c != null && c.CharacterSheetId == dbModel.CharacterSheetId));
+
+                if (characterSheetInstances == null || !characterSheetInstances.Any())
+                {
+                    return false;
+                }
+
+                foreach (var characterSheetInstance in characterSheetInstances)
+                {
+                    characterSheetInstance.CharacterSheetInstances.RemoveAll(c => c == null || c.CharacterSheetId == dbModel.CharacterSheetId);
+                    return await UpdateCharacterSheetsInstanceAsync(characterSheetInstance);
+                }
+
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("b18d171b-f3bd-4514-a2a2-7ef2db8322f1", $"Error when querying pending queries on table CharacterSheetInstances.", ex);
+                return false;
+            }
+        }
     }
 }

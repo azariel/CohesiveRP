@@ -3,6 +3,7 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -14,13 +15,117 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
     public class CharacterSheetsDal : StorageDal, ICharacterSheetsDal
     {
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
+        private readonly ICharacterSheetInstancesDal characterSheetInstancesDal;
 
-        public CharacterSheetsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
+        public CharacterSheetsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory, ICharacterSheetInstancesDal characterSheetInstancesDal) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
+            this.characterSheetInstancesDal = characterSheetInstancesDal;
 
             using var dbContext = contextFactory.CreateDbContext();
             dbContext.Database.EnsureCreated();
+        }
+
+        private async Task<bool> UpdateCharacterSheetInstancesAsync(CharacterSheetDbModel dbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var characterSheetInstancesObjs = dbContext.CharacterSheetInstances;
+                if (characterSheetInstancesObjs == null || !characterSheetInstancesObjs.Any())
+                {
+                    return false;
+                }
+
+                foreach (var characterSheetInstancesObj in characterSheetInstancesObjs)
+                {
+                    if (characterSheetInstancesObj.CharacterSheetInstances == null || characterSheetInstancesObj.CharacterSheetInstances.Count <= 0)
+                    {
+                        continue;
+                    }
+
+                    var matchingInstances = characterSheetInstancesObj.CharacterSheetInstances.Where(w => w.CharacterId == dbModel.CharacterId && !w.IsDirty).ToArray();
+
+                    if (matchingInstances.Length <= 0)
+                    {
+                        continue;
+                    }
+
+                    foreach (var instance in matchingInstances)
+                    {
+                        instance.CharacterSheet = new CharacterSheet
+                        {
+                            AgeGroup = dbModel.CharacterSheet.AgeGroup,
+                            AgeGroupAppearance = dbModel.CharacterSheet.AgeGroupAppearance,
+                            Attractiveness = dbModel.CharacterSheet.Attractiveness,
+                            Behavior = dbModel.CharacterSheet.Behavior,
+                            BirthdayDate = dbModel.CharacterSheet.BirthdayDate,
+                            BodyType = dbModel.CharacterSheet.BodyType,
+                            BreastsSize = dbModel.CharacterSheet.BreastsSize,
+                            ClothesPreference = dbModel.CharacterSheet.ClothesPreference,
+                            CombatAffinityAttack = dbModel.CharacterSheet.CombatAffinityAttack,
+                            CombatAffinityDefense = dbModel.CharacterSheet.CombatAffinityDefense,
+                            Dislikes = dbModel.CharacterSheet.Dislikes,
+                            EarShape = dbModel.CharacterSheet.EarShape,
+                            EyeColor = dbModel.CharacterSheet.EyeColor,
+                            Fears = dbModel.CharacterSheet.Fears,
+                            FirstName = dbModel.CharacterSheet.FirstName,
+                            Gender = dbModel.CharacterSheet.Gender,
+                            Genitals = dbModel.CharacterSheet.Genitals,
+                            PenisSize = dbModel.CharacterSheet.PenisSize,
+                            GoalsForNextYear = dbModel.CharacterSheet.GoalsForNextYear,
+                            HairColor = dbModel.CharacterSheet.HairColor,
+                            HairStyle = dbModel.CharacterSheet.HairStyle,
+                            Height = dbModel.CharacterSheet.Height,
+                            Kinks = dbModel.CharacterSheet.Kinks,
+                            LastName = dbModel.CharacterSheet.LastName,
+                            Likes = dbModel.CharacterSheet.Likes,
+                            LongTermGoals = dbModel.CharacterSheet.LongTermGoals,
+                            MagicalEffects = dbModel.CharacterSheet.MagicalEffects,
+                            BodyStatus = dbModel.CharacterSheet.BodyStatus,
+                            Wounds = dbModel.CharacterSheet.Wounds,
+                            Mannerisms = dbModel.CharacterSheet.Mannerisms,
+                            PathfinderAttributesValues = dbModel.CharacterSheet.PathfinderAttributesValues,
+                            PathfinderSkillsValues = dbModel.CharacterSheet.PathfinderSkillsValues,
+                            PersonalityTraits = dbModel.CharacterSheet.PersonalityTraits,
+                            PreferredCombatStyle = dbModel.CharacterSheet.PreferredCombatStyle,
+                            Profession = dbModel.CharacterSheet.Profession,
+                            Race = dbModel.CharacterSheet.Race,
+                            Relationships = dbModel.CharacterSheet.Relationships,
+                            Reputation = dbModel.CharacterSheet.Reputation,
+                            SecretKinks = dbModel.CharacterSheet.SecretKinks,
+                            Secrets = dbModel.CharacterSheet.Secrets,
+                            Sexuality = dbModel.CharacterSheet.Sexuality,
+                            Skills = dbModel.CharacterSheet.Skills,
+                            SkinColor = dbModel.CharacterSheet.SkinColor,
+                            SocialAnxiety = dbModel.CharacterSheet.SocialAnxiety,
+                            SpeechImpairment = dbModel.CharacterSheet.SpeechImpairment,
+                            SpeechPattern = dbModel.CharacterSheet.SpeechPattern,
+                            Weaknesses = dbModel.CharacterSheet.Weaknesses,
+                            WeaponsProficiency = dbModel.CharacterSheet.WeaponsProficiency,
+                        };
+
+                        instance.CharacterSheetId = dbModel.CharacterSheetId;
+                    }
+
+                    // System fields
+                    characterSheetInstancesObj.LastActivityAtUtc = DateTime.UtcNow;
+                    var result = dbContext.CharacterSheetInstances.Update(characterSheetInstancesObj);
+                    if (result.State != EntityState.Modified)
+                    {
+                        LoggingManager.LogToFile("6b45ca46-206c-4a5d-9b65-b879d4b260c6", $"Error when updating a CharacterSheetInstancesObj. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");
+                        return false;
+                    }
+
+                    await dbContext.SaveChangesAsync();
+                }
+
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("7cd0b4c2-27dd-4d80-a45c-aafbb2cc2392", $"Error when querying pending queries on table CharacterSheetInstances.", ex);
+                return false;
+            }
         }
 
         // ********************************************************************
@@ -84,6 +189,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 }
 
                 await dbContext.SaveChangesAsync();
+
+                // In a second time, update the characterSheetInstances related to this characterSheet ONLY if the instance isn't 'dirty' aka was updated by the backend with chat updates
+                await UpdateCharacterSheetInstancesAsync(dbModel);
+
                 return result.Entity;
             } catch (Exception ex)
             {
@@ -119,6 +228,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 }
 
                 await dbContext.SaveChangesAsync();
+
+                // In a second time, update the characterSheetInstances related to this characterSheet ONLY if the instance isn't 'dirty' aka was updated by the backend with chat updates
+                await UpdateCharacterSheetInstancesAsync(dbModel);
+
                 return true;
             } catch (Exception ex)
             {
@@ -136,7 +249,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 if (character == null)
                 {
-                    LoggingManager.LogToFile("7b264625-86f3-4c45-9015-ad715bf99f31", $"CharacterSheet tethered to characterId [{dbModel.CharacterSheetId}] to delete wasn't found in storage.");
+                    LoggingManager.LogToFile("7b264625-86f3-4c45-9015-ad715bf99f31", $"CharacterSheet tethered to CharacterSheetId [{dbModel.CharacterSheetId}] to delete wasn't found in storage.");
                     return false;
                 }
 
@@ -147,11 +260,60 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return false;
                 }
 
+                await characterSheetInstancesDal.DeleteCharacterSheetInstancesFromCharacterSheetAsync(dbModel);
                 await dbContext.SaveChangesAsync();
                 return true;
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("da1c5163-4a45-4022-95f7-4815a8eb33e2", $"Error when querying pending queries on table CharacterSheets.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteCharacterSheetFromPersonaAsync(PersonaDbModel personaDbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var characterSheets = dbContext.CharacterSheets.AsNoTracking().Where(w => w.PersonaId == personaDbModel.PersonaId);
+                if (!characterSheets.Any())
+                {
+                    return false;
+                }
+
+                foreach (var characterSheet in characterSheets)
+                {
+                    return await DeleteCharacterSheetAsync(characterSheet);
+                }
+
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("6f8766c5-50ac-4f7c-b1bc-d9d4f61e971b", $"Error when querying pending queries on table CharacterSheets.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteCharacterSheetFromCharacterAsync(CharacterDbModel characterDbModel)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var characterSheets = dbContext.CharacterSheets.AsNoTracking().Where(w => w.CharacterId == characterDbModel.CharacterId);
+                if (!characterSheets.Any())
+                {
+                    return false;
+                }
+
+                foreach (var characterSheet in characterSheets)
+                {
+                    return await DeleteCharacterSheetAsync(characterSheet);
+                }
+
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("27007af0-e3d1-47e9-b21f-b51031a41f90", $"Error when querying pending queries on table CharacterSheets.", ex);
                 return false;
             }
         }

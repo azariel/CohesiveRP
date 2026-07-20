@@ -5,6 +5,10 @@ import { extractFromBody } from "./response/HttpResponseUtils";
 // Avoid CORS batshit mistmatches TODO: doesn't work..?
 const ServerApiUrlPrefix = `http://${window.location.hostname}:7081/`;
 
+function isAbortError(err: unknown): boolean {
+  return err instanceof DOMException && err.name === "AbortError";
+}
+
 export async function getFromServerApiAsync<T extends ServerApiResponseDto>(url:string, signal?: AbortSignal): Promise<T | null> {
     try {
       const response = await fetch(`${ServerApiUrlPrefix}${url}`, {
@@ -26,6 +30,7 @@ export async function getFromServerApiAsync<T extends ServerApiResponseDto>(url:
       console.log(`${JSON.stringify(result)}`);
       return result;
     } catch (err) {
+      if (isAbortError(err)) return null;
       console.error(`Unhandled error on getFromServerApiAsync function in HttpRequestHelper. err=[${err}].`);
     }
 
@@ -47,6 +52,7 @@ export async function getBlobFromServerApiAsync(url: string, signal?: AbortSigna
     console.log(`GET (blob) [${url}] HttpRequest to CohesiveRP backend Webapi was successful.`);
     return await response.blob();
   } catch (err) {
+    if (isAbortError(err)) return null;
     console.error(`Unhandled error on getBlobFromServerApiAsync function in HttpRequestHelper. err=[${err}].`);
   }
 
@@ -75,6 +81,7 @@ export async function postToServerApiAsync<T extends ServerApiResponseDto>(url:s
       console.log(`${JSON.stringify(result)}`);
       return result;
     } catch (err) {
+      if (isAbortError(err)) return null;
       console.error(`Unhandled error on postToServerApiAsync function in HttpRequestHelper. err=[${err}].`);
     }
 
@@ -102,6 +109,7 @@ export async function putToServerApiAsync<T extends ServerApiResponseDto>(url:st
       console.log(`${JSON.stringify(result)}`);
       return result;
     } catch (err) {
+      if (isAbortError(err)) return null;
       console.error(`Unhandled error on putToServerApiAsync function in HttpRequestHelper. err=[${err}].`);
     }
 
@@ -127,6 +135,7 @@ export async function deleteFromServerApiAsync<T extends ServerApiResponseDto>(u
       console.log(`${JSON.stringify(result)}`);
       return result;
     } catch (err) {
+      if (isAbortError(err)) return null;
       console.error(`Unhandled error on deleteToServerApiAsync function in HttpRequestHelper. err=[${err}].`);
     }
 

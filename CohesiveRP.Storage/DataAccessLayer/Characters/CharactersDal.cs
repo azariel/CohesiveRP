@@ -15,10 +15,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
     public class CharactersDal : StorageDal, ICharactersDal
     {
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
+        private readonly ICharacterSheetsDal characterSheetsDal;
 
-        public CharactersDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
+        public CharactersDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory, ICharacterSheetsDal characterSheetsDal) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
+            this.characterSheetsDal = characterSheetsDal;
 
             using var dbContext = contextFactory.CreateDbContext();
             dbContext.Database.EnsureCreated();
@@ -68,10 +70,13 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     Creator = queryModel.Creator,
                     CreatorNotes = queryModel.CreatorNotes,
                     Description = queryModel.Description,
+                    IncludeDescriptionInPrompt = queryModel.IncludeDescriptionInPrompt,
                     Tags = queryModel.Tags,
                     FirstMessage = queryModel.FirstMessage,
                     AlternateGreetings = queryModel.AlternateGreetings,
                     LastActivityAtUtc = DateTime.UtcNow,
+                    InherentLorebookIds = queryModel.InherentLorebookIds,
+                    ImageGenerationConfiguration = queryModel.ImageGenerationConfiguration,
                 };
 
                 EntityEntry<CharacterDbModel> result = await dbContext.Characters.AddAsync(CharacterDbModel);
@@ -106,6 +111,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 // Update only the overridable fields
                 character.Description = characterDbModel.Description;
+                character.IncludeDescriptionInPrompt = characterDbModel.IncludeDescriptionInPrompt;
                 character.Creator = characterDbModel.Creator;
                 character.CreatorNotes = characterDbModel.CreatorNotes;
                 character.AlternateGreetings = characterDbModel.AlternateGreetings;
@@ -113,6 +119,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 character.Name = characterDbModel.Name;
                 character.Tags = characterDbModel.Tags;
                 character.InherentLorebookIds = characterDbModel.InherentLorebookIds;
+                character.ImageGenerationConfiguration = characterDbModel.ImageGenerationConfiguration;
 
                 EntityEntry<CharacterDbModel> result = dbContext.Characters.Update(character);
                 if (result.State != EntityState.Modified)
@@ -150,6 +157,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return false;
                 }
 
+                await characterSheetsDal.DeleteCharacterSheetFromCharacterAsync(characterDbModel);
                 await dbContext.SaveChangesAsync();
                 return true;
             } catch (Exception ex)

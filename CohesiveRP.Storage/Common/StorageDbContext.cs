@@ -1,6 +1,11 @@
 ﻿using System.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
@@ -108,6 +113,17 @@ namespace CohesiveRP.Storage.Common
         public DbSet<LorebookDbModel> Lorebooks { get; set; }
 
         public DbSet<LorebookInstanceDbModel> LorebookInstances { get; set; }
+        
+        public DbSet<InteractiveUserInputDbModel> InteractiveUserInputQueries { get; set; }
+
+        public DbSet<IllustrationQueryDbModel> IllustrationQueries { get; set; }
+
+        // Chat Additions
+         public DbSet<CohesionEnforcementDbModel> CohesionEnforcements { get; set; }
+         public DbSet<ProseGuardianDbModel> ProseGuardians { get; set; }
+         public DbSet<NarrativeDirectionDbModel> NarrativeDirections { get; set; }
+         public DbSet<NarrativeArchitectureDbModel> NarrativeArchitectures { get; set; }
+        // --------------
 
         // Pathfinder
         public DbSet<CharacterSheetDbModel> CharacterSheets { get; set; }

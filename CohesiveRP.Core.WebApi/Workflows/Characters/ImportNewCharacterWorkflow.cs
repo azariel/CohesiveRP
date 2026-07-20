@@ -1,11 +1,14 @@
 ﻿using CohesiveRP.Common.Exceptions;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.CharacterCards;
 using CohesiveRP.Core.CharacterCards.Loaders;
 using CohesiveRP.Core.CharacterCards.Loaders.CCv3.BusinessObjects;
+using CohesiveRP.Core.CharacterCards.Loaders.Chara.BusinessObjects;
 using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.DtoConverters.Abstractions;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
@@ -45,8 +48,9 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         var characterCardCCv3 = characterCard as CCv3CharacterCard;
+        var characterCardCharaJanitorAI = characterCard as CharaCharacterCard;
         var characterCardCRPv1 = characterCard as CohesiveRPv1CharacterCard;
-        if (characterCardCCv3 == null && characterCardCRPv1 == null)
+        if (characterCardCCv3 == null && characterCardCRPv1 == null && characterCardCharaJanitorAI == null)
         {
             return new WebApiException
             {
@@ -56,15 +60,33 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         }
 
         // Validate that the character doesn't already exists
-        string characterName = characterCardCRPv1?.Data?.Character?.Name ?? characterCardCCv3?.Data?.Name ?? "[Unknown]";
+        string characterName = characterCardCRPv1?.Data?.Character?.Name ?? characterCardCCv3?.Data?.Name ?? characterCardCharaJanitorAI?.Name ?? "[Unknown]";
         var allCharacters = await storageService.GetCharactersAsync();
         if (allCharacters.Any(a => a.Name == characterName))
         {
-            return new WebApiException
+            if (characterCardCRPv1?.Data?.Character?.Name != null)
             {
-                HttpResultCode = System.Net.HttpStatusCode.BadRequest,
-                Message = $"Found character with name [{characterName}], but this character is already present in storage. Please remove that character before re-importing it."
-            };
+                characterCardCRPv1.Data.Character.Name = $"{characterCardCRPv1.Data.Character.Name}_{Guid.NewGuid().ToString()}";
+            } else if (characterCardCCv3?.Data?.Name != null)
+            {
+                characterCardCCv3.Data.Name = $"{characterCardCCv3.Data.Name}_{Guid.NewGuid().ToString()}";
+            } else if (characterCardCharaJanitorAI?.Name != null)
+            {
+                characterCardCharaJanitorAI.Name = $"{characterCardCharaJanitorAI.Name}_{Guid.NewGuid().ToString()}";
+            } else
+            {
+                return new WebApiException
+                {
+                    HttpResultCode = System.Net.HttpStatusCode.InternalServerError,
+                    Message = $"Unsupported format. Character card was found, but format is unsupported at the moment."
+                };
+            }
+
+            //return new WebApiException
+            //{
+            //    HttpResultCode = System.Net.HttpStatusCode.BadRequest,
+            //    Message = $"Found character with name [{characterName}], but this character is already present in storage. Please remove that character before re-importing it."
+            //};
         }
 
         // Add the character
@@ -74,29 +96,75 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         {
             queryModel = new()
             {
-                Name = characterCardCRPv1.Data.Character.Name.Trim(),
+                Name = FileUtils.SanitizeNameForWindowsPath(characterCardCRPv1.Data.Character.Name.Trim()),
                 Creator = characterCardCRPv1.Data.Character.Creator,
                 CreatorNotes = characterCardCRPv1.Data.Character.CreatorNotes,
                 Description = characterCardCRPv1.Data.Character.Description,
+                IncludeDescriptionInPrompt = true,
                 Tags = characterCardCRPv1.Data.Character.Tags,
                 FirstMessage = characterCardCRPv1.Data.Character.FirstMessage,
                 AlternateGreetings = characterCardCRPv1.Data.Character.AlternateGreetings,
+                ImageGenerationConfiguration = characterCardCRPv1.Data.Character.ImageGenerationConfiguration,
             };
+
         } else if (characterCardCCv3?.Data != null)
         {
             queryModel = new()
             {
-                Name = characterCardCCv3.Data.Name.Trim(),
+                Name = FileUtils.SanitizeNameForWindowsPath(characterCardCCv3.Data.Name.Trim()),
                 Creator = characterCardCCv3.Data.Creator,
                 CreatorNotes = characterCardCCv3.Data.CreatorNotes,
                 Description = characterCardCCv3.Data.Description,
+                IncludeDescriptionInPrompt = true,
                 Tags = characterCardCCv3.Data.Tags,
                 FirstMessage = characterCardCCv3.Data.FirstMessage,
                 AlternateGreetings = characterCardCCv3.Data.AlternateGreetings,
+                ImageGenerationConfiguration = new(),
             };
+
+            if (!string.IsNullOrWhiteSpace(characterCardCCv3.Data.Personality))
+            {
+                queryModel.Description += $"{Environment.NewLine}{Environment.NewLine}[Personality]{Environment.NewLine}{characterCardCCv3.Data.Personality}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(characterCardCCv3.Data.Scenario))
+            {
+                queryModel.FirstMessage += $"{Environment.NewLine}{Environment.NewLine}[Scenario]{Environment.NewLine}{characterCardCCv3.Data.Scenario}";
+            }
+
+        } else if (characterCardCharaJanitorAI != null)
+        {
+            var charName = FileUtils.SanitizeNameForWindowsPath(characterCardCharaJanitorAI.Name.Trim());
+
+            queryModel = new()
+            {
+                Name = charName,
+                Creator = "",
+                CreatorNotes = "",
+                Description = string.Empty,// Defined below
+                IncludeDescriptionInPrompt = true,
+                Tags = [],
+                FirstMessage = string.Empty,// Defined below,
+                AlternateGreetings = null,
+                ImageGenerationConfiguration = new(),
+            };
+
+            if (!string.IsNullOrWhiteSpace(characterCardCharaJanitorAI.Personality))
+            {
+                queryModel.Description += $"[{charName} Personality]{Environment.NewLine}{characterCardCharaJanitorAI.Personality}{Environment.NewLine}{Environment.NewLine}[{charName} Description]{Environment.NewLine}";
+            }
+
+            queryModel.Description += characterCardCharaJanitorAI.Description;
+
+            if (!string.IsNullOrWhiteSpace(characterCardCharaJanitorAI.Scenario))
+            {
+                queryModel.FirstMessage += $"[Scenario]{Environment.NewLine}{characterCardCharaJanitorAI.Scenario}{Environment.NewLine}{Environment.NewLine}[First Message]{Environment.NewLine}";
+            }
+
+            queryModel.FirstMessage += characterCardCharaJanitorAI.FirstMessage;
         }
 
-        CharacterDbModel importCharacterResult = await storageService.ImportNewCharacterAsync(queryModel);
+        CharacterDbModel importCharacterResult = await storageService.AddCharacterAsync(queryModel);
         if (importCharacterResult == null)
         {
             return new WebApiException
@@ -128,6 +196,8 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
                 await storageService.UpdateCharacterSheetAsync(existingCharacterSheet);
             }
         }
+
+        CharacterUtils.CreateCharacterAssets(importCharacterResult.Name);
 
         // Save the image (avatar) on disk
         string directoryCharacter = Path.Combine(WebConstants.CharactersAvatarFilePath, importCharacterResult.Name.ToLowerInvariant().Trim());
@@ -182,11 +252,13 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
                 Creator = importCharacterResult.Creator,
                 CreatorNotes = importCharacterResult.CreatorNotes,
                 Description = importCharacterResult.Description,
+                IncludeDescriptionInPrompt = importCharacterResult.IncludeDescriptionInPrompt,
                 Tags = importCharacterResult.Tags,
                 FirstMessage = importCharacterResult.FirstMessage,
                 AlternateGreetings = importCharacterResult.AlternateGreetings,
                 LastActivityAtUtc = importCharacterResult.LastActivityAtUtc,
                 CreatedAtUtc = importCharacterResult.CreatedAtUtc,
+                ImageGenerationConfiguration = importCharacterResult.ImageGenerationConfiguration,
             }
         };
 

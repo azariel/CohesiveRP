@@ -74,6 +74,7 @@ public class ExportCharacterCardWorkflow : IExportCharacterCardWorkflow
                     FirstMessage = character.FirstMessage,
                     AlternateGreetings = character.AlternateGreetings,
                     Description = character.Description,
+                    ImageGenerationConfiguration = character.ImageGenerationConfiguration,
                 },
                 CharacterSheet = null,
             }
@@ -84,6 +85,7 @@ public class ExportCharacterCardWorkflow : IExportCharacterCardWorkflow
             characterCardToSaveCRPv1.Data.CharacterSheet = new CharacterSheet()
             {
                 AgeGroup = characterSheet.CharacterSheet.AgeGroup,
+                AgeGroupAppearance = characterSheet.CharacterSheet.AgeGroupAppearance,
                 Attractiveness = characterSheet.CharacterSheet.Attractiveness,
                 Behavior = characterSheet.CharacterSheet.Behavior,
                 BirthdayDate = characterSheet.CharacterSheet.BirthdayDate,
