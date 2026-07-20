@@ -12,7 +12,9 @@ import type { CharacterSheetRequestDto } from "../../../../../RequestDto/charact
 const GENDER_OPTIONS = ["", "Male", "Female"];
 const AGE_GROUP_OPTIONS = ["", "Infant", "Toddler", "Children", "Teenager", "YoungAdult", "Adult", "Elderly"];
 const GENITALS_OPTIONS = ["", "Male", "Female", "Both", "None"];
-const BREASTS_SIZE_OPTIONS = ["", "Flat", "Small", "Average", "Large", "ExtraLarge"];
+const BREASTS_SIZE_OPTIONS = ["", "Flat", "Small", "Average", "Large", "ExtraLarge", "Enormous"];
+const AREOLAS_SIZE_OPTIONS = ["", "Tiny", "Small", "Average", "Large", "Enormous"];
+const AREOLAS_DETAILS_OPTIONS = ["", "Normal", "Puffy", "Oval", "Inverted", "Asymmetrical", "Darker", "Lighter"];
 
 const PATHFINDER_ATTR_KEYS = [
   "Fortitude", "Reflex", "Willpower", "Stamina",
@@ -199,6 +201,8 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
   const [skinColor, setSkinColor] = useState("");
   const [genitals, setGenitals] = useState("");
   const [breastsSize, setBreastsSize] = useState("");
+  const [areolasSize, setAreolasSize] = useState("");
+  const [areolasDetails, setAreolasDetails] = useState("");
   const [penisSize, setPenisSize] = useState("");
   const [sexuality, setSexuality] = useState("");
   const [attractiveness, setAttractiveness] = useState("");
@@ -263,6 +267,8 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
     setSkinColor(s.characterSheet?.skinColor ?? "");
     setGenitals(s.characterSheet?.genitals ?? "");
     setBreastsSize(s.characterSheet?.breastsSize ?? "");
+    setAreolasSize(s.characterSheet?.areolasSize ?? "");
+    setAreolasDetails(s.characterSheet?.areolasDetails ?? "");
     setPenisSize(s.characterSheet?.penisSize ?? "");
     setSexuality(s.characterSheet?.sexuality ?? "");
     setAttractiveness(s.characterSheet?.attractiveness ?? "");
@@ -423,6 +429,8 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           skinColor,
           genitals: genitals || null,
           breastsSize: breastsSize || null,
+          areolasSize: areolasSize || null,
+          areolasDetails: areolasDetails || null,
           penisSize: penisSize || null,
           sexuality: sexuality || null,
           attractiveness,
@@ -516,6 +524,8 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         skinColor,
         genitals: genitals || null,
         breastsSize: breastsSize || null,
+        areolasSize: areolasSize || null,
+        areolasDetails: areolasDetails || null,
         sexuality: sexuality || null,
         relationships,
         profession,
@@ -585,6 +595,8 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         setSkinColor(s.skinColor ?? "");
         setGenitals(s.genitals ?? "");
         setBreastsSize(s.breastsSize ?? "");
+        setAreolasSize(s.areolasSize ?? "");
+        setAreolasDetails(s.areolasDetails ?? "");
         setSexuality(s.sexuality ?? "");
         setAttractiveness(s.attractiveness ?? "");
         setSpeechPattern(s.speechPattern ?? "");
@@ -779,10 +791,18 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
             <SheetSelect value={genitals} onChange={setGenitals} options={GENITALS_OPTIONS} />
           </Field>
         </div>
-        <div className={styles.twoCol}>
+        <div className={styles.threeCol}>
           <Field label="Breasts Size">
             <SheetSelect value={breastsSize} onChange={setBreastsSize} options={BREASTS_SIZE_OPTIONS} />
           </Field>
+          <Field label="Areolas Size">
+            <SheetSelect value={areolasSize} onChange={setAreolasSize} options={AREOLAS_SIZE_OPTIONS} />
+          </Field>
+          <Field label="Areolas Details">
+            <SheetSelect value={areolasDetails} onChange={setAreolasDetails} options={AREOLAS_DETAILS_OPTIONS} />
+          </Field>
+        </div>
+        <div className={styles.oneCol}>
           <Field label="Penis Size">
             <SheetInput value={penisSize} onChange={setPenisSize} placeholder="Average (5 inches)" />
           </Field>

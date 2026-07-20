@@ -205,11 +205,13 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             if (File.Exists(Path.Combine(currentOutfitFolderPath, WebConstants.AvatarFileName)))
                 avatar.FilePath = Path.Combine(currentOutfitFolderPath, WebConstants.AvatarFileName)?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
 
+            avatar.Expression = targetCharacter.FacialExpression.ToLowerInvariant();
+
             // use 'neutral' folder and default to an image within that folder by default, so that if the right expression isn't found or doesn't have any image, we'll default to neutral expression
             string neutralAvatarsFolderPath = Path.Combine(currentOutfitFolderPath, MappedFacialExpression.Neutral.ToString().ToLowerInvariant());
             if (Directory.Exists(neutralAvatarsFolderPath) && Directory.EnumerateFiles(neutralAvatarsFolderPath).Count() > 0)
             {
-                avatar.Expression = MappedFacialExpression.Neutral.ToString().ToLowerInvariant();
+                //avatar.Expression = MappedFacialExpression.Neutral.ToString().ToLowerInvariant();
 
                 if (File.Exists(Path.Combine(neutralAvatarsFolderPath, WebConstants.AvatarFileName)))
                     avatar.FilePath = Path.Combine(neutralAvatarsFolderPath, WebConstants.AvatarFileName)?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
@@ -218,11 +220,13 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             // TODO: check semen folder here as it's more important that the facial expression
             // TODO: check for body position
 
+
             // Lastly, if there's an avatar matching the current facial expression, let's prioritize it over the neutral one
             string expressionAvatarFolderPath = Path.Combine(currentOutfitFolderPath, targetCharacter.FacialExpression?.ToLowerInvariant());
             if (Directory.Exists(expressionAvatarFolderPath) && Directory.EnumerateFiles(expressionAvatarFolderPath).Count() > 0)
             {
-                avatar.Expression = targetCharacter.FacialExpression.ToLowerInvariant();
+                // Note: yeah, actually, we always want what the expression SHOULD be, even if there's no avatar for it, so that the UI can reflect the right expression even if the avatar is neutral
+                //avatar.Expression = targetCharacter.FacialExpression.ToLowerInvariant();
 
                 // Get a random file within that folder, if any
                 string[] availableAvatarsWithTheRightExpressionAndClothes = Directory.GetFiles(expressionAvatarFolderPath, "*.*", SearchOption.AllDirectories);
@@ -295,11 +299,13 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             if (File.Exists(Path.Combine(currentOutfitFolderPath, WebConstants.AvatarFileName)))
                 avatar.FilePath = Path.Combine(currentOutfitFolderPath, WebConstants.AvatarFileName)?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
 
+            avatar.Expression = sceneTracker.PlayerAnalysis.FacialExpression.ToLowerInvariant();
+
             // use 'neutral' folder and default to avatar.png if not found
             string avatarWithNeutralExpressionFilePath = Path.Combine(currentOutfitFolderPath, WebConstants.AvatarFileName);
             if (File.Exists(avatarWithNeutralExpressionFilePath))
             {
-                avatar.Expression = MappedFacialExpression.Neutral.ToString().ToLowerInvariant();
+                //avatar.Expression = MappedFacialExpression.Neutral.ToString().ToLowerInvariant();
 
                 if (File.Exists(Path.Combine(currentOutfitFolderPath, WebConstants.AvatarFileName)))
                     avatar.FilePath = avatarWithNeutralExpressionFilePath?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant();
@@ -312,7 +318,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             string expressionAvatarFolderPath = Path.Combine(currentOutfitFolderPath, sceneTracker.PlayerAnalysis.FacialExpression?.ToLowerInvariant());
             if (Directory.Exists(expressionAvatarFolderPath) && Directory.EnumerateFiles(expressionAvatarFolderPath).Count() > 0)
             {
-                avatar.Expression = sceneTracker.PlayerAnalysis.FacialExpression.ToLowerInvariant();
+                //avatar.Expression = sceneTracker.PlayerAnalysis.FacialExpression.ToLowerInvariant();
 
                 // Get a random file within that folder, if any
                 string[] availableAvatarsWithTheRightExpressionAndClothes = Directory.GetFiles(expressionAvatarFolderPath, "*.*", SearchOption.AllDirectories);

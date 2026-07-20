@@ -64,6 +64,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonPropertyName("breastsSize")]
         public string BreastsSize { get; set; }// e.g: small
 
+        [JsonPropertyName("areolasSize")]
+        public string AreolasSize { get; set; }// e.g: small
+
+        [JsonPropertyName("areolasDetails")]
+        public string AreolasDetails { get; set; }// e.g: puffy
+
         [JsonPropertyName("sexuality")]
         public string Sexuality { get; set; }// e.g: bisexual
 

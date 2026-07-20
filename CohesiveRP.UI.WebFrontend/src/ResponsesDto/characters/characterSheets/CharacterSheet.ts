@@ -17,6 +17,8 @@ interface CharacterSheet {
   skinColor?: string;
   genitals?: string | null;
   breastsSize?: string | null;
+  areolasSize?: string | null;
+  areolasDetails?: string | null;
   penisSize?: string | null;
   sexuality?: string | null;
   relationships?: string[];

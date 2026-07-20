@@ -120,7 +120,7 @@ export default function ChatComponent() {
               <Fragment key={message.messageId}>
                 {messages.length > 1 && isLastMessage && (
                   <>
-                    {/* Mobile-only avatar banner — mirrors MainRightComponent on small screens */}
+                    {/* Mobile-only avatar banner which mirrors MainRightComponent on small screens */}
                     <MobileAvatarBannerComponent />
                     <SceneTrackerComponent />
                   </>

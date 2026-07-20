@@ -3,6 +3,7 @@ import type { SharedContextType } from "./SharedContextType";
 
 interface SharedContextChatType extends SharedContextType {
   isSceneTrackerOpened: boolean | null;
+  isCharactersRollsOpened: boolean | null;
   chatId: string;
   lastPlayerMessageId: string;
   currentUserInputValue: string;
@@ -12,6 +13,7 @@ interface SharedContextChatType extends SharedContextType {
   sceneTrackerRefreshing: boolean;// sceneTracker is currently refreshing
   interactiveInputRefreshToken?: number;
   hotMessagesLoaded?: boolean;
+  hideAvatars: boolean | null;
 };
 
 export type {

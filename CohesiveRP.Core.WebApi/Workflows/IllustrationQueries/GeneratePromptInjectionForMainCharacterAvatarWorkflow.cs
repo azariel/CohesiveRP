@@ -121,6 +121,8 @@ namespace CohesiveRP.Core.WebApi.Workflows.IllustrationQueries
                     .Replace("{{character_hairStyle}}", characterSheet.CharacterSheet.HairStyle)
                     .Replace("{{character_earShape}}", characterSheet.CharacterSheet.EarShape)
                     .Replace("{{character_breastsSize}}", characterSheet.CharacterSheet.BreastsSize)
+                    .Replace("{{character_areolasSize}}", characterSheet.CharacterSheet.AreolasSize)
+                    .Replace("{{character_areolasDetails}}", characterSheet.CharacterSheet.AreolasDetails)
                     .Replace("{{character_penisSize}}", characterSheet.CharacterSheet.PenisSize)
                     .Replace("{{character_clothesPreferences}}", characterSheet.CharacterSheet.ClothesPreference);
                 str.AppendLine(value);

@@ -146,6 +146,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                         BirthdayDate = characterSheetFromLLMApiResponse.BirthdayDate,
                         BodyType = characterSheetFromLLMApiResponse.BodyType,
                         BreastsSize = characterSheetFromLLMApiResponse.BreastsSize,
+                        AreolasSize = characterSheetFromLLMApiResponse.AreolasSize,
+                        AreolasDetails = characterSheetFromLLMApiResponse.AreolasDetails,
                         ClothesPreference = characterSheetFromLLMApiResponse.ClothesPreference,
                         CombatAffinityAttack = characterSheetFromLLMApiResponse.CombatAffinityAttack,
                         CombatAffinityDefense = characterSheetFromLLMApiResponse.CombatAffinityDefense,

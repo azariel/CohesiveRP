@@ -25,6 +25,8 @@ export const AppSharedStoreProvider = ({ children }: { children: ReactNode }) =>
             ...window.history.state,
             currentUserInputValue: parsedSaved.currentUserInputValue ?? "",
             isSceneTrackerOpened: parsedSaved.isSceneTrackerOpened ?? null,
+            isCharactersRollsOpened: parsedSaved.isCharactersRollsOpened ?? null,
+            hideAvatars: true,// For debug purpose TODO: find a good place for this configuration :thinking: ..
           };
         }
 
@@ -42,6 +44,7 @@ export const AppSharedStoreProvider = ({ children }: { children: ReactNode }) =>
 
       if (pathModule)
         return { moduleName: pathModule };
+
       return parsedSaved ?? { moduleName: "chats" };
     } catch {
       return { moduleName: "chats" };
@@ -75,14 +78,28 @@ export const AppSharedStoreProvider = ({ children }: { children: ReactNode }) =>
     try {
       const saved = localStorage.getItem("activeModule");
       const parsedSaved = saved ? JSON.parse(saved) : null;
+
       if (parsedSaved?.moduleName === module.moduleName) {
         setActiveModule({
           ...module,
           currentUserInputValue: parsedSaved.currentUserInputValue ?? "",
           isSceneTrackerOpened: parsedSaved.isSceneTrackerOpened ?? null,
+          isCharactersRollsOpened: parsedSaved.isCharactersRollsOpened ?? null,
+          hideAvatars: parsedSaved.hideAvatars ?? null,
         } as SharedContextType);
         return;
       }
+
+      // Different module (e.g. picking a chat from the selection carousel): the
+      // per-input draft is module-specific and doesn't carry over, but the panel
+      // open/closed toggles are global UI preferences and should persist regardless.
+      setActiveModule({
+        ...module,
+        isSceneTrackerOpened: parsedSaved?.isSceneTrackerOpened ?? null,
+        isCharactersRollsOpened: parsedSaved?.isCharactersRollsOpened ?? null,
+        hideAvatars: parsedSaved?.hideAvatars ?? null,
+      } as SharedContextType);
+      return;
     } catch { /* ignore */ }
 
     setActiveModule(module as any);

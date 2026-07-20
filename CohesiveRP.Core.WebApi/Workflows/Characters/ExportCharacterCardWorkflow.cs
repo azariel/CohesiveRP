@@ -91,6 +91,8 @@ public class ExportCharacterCardWorkflow : IExportCharacterCardWorkflow
                 BirthdayDate = characterSheet.CharacterSheet.BirthdayDate,
                 BodyType = characterSheet.CharacterSheet.BodyType,
                 BreastsSize = characterSheet.CharacterSheet.BreastsSize,
+                AreolasSize = characterSheet.CharacterSheet.AreolasSize,
+                AreolasDetails = characterSheet.CharacterSheet.AreolasDetails,
                 ClothesPreference = characterSheet.CharacterSheet.ClothesPreference,
                 CombatAffinityAttack = characterSheet.CharacterSheet.CombatAffinityAttack,
                 CombatAffinityDefense = characterSheet.CharacterSheet.CombatAffinityDefense,

@@ -11,6 +11,8 @@ import { FaEnvelope, FaTrashAlt } from "react-icons/fa";
 import { getFromServerApiAsync } from "../../../../../utils/http/HttpRequestHelper";
 import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { PromptResponseDto } from "../../../../../ResponsesDto/chat/PromptResponseDto";
+import { sharedContext } from "../../../../../store/AppSharedStoreContext";
+import type { SharedContextChatType } from "../../../../../store/SharedContextChatType";
 
 interface Props {
   message?: ChatMessage;
@@ -24,6 +26,7 @@ interface Props {
 }
 
 export default function ChatMessageComponent({ message, chatId, enableSwipeBtn = false, enableDeleteBtn = false, isEditable = false, onSave, onSwipe, onDelete }: Props) {
+  const { activeModule } = sharedContext<SharedContextChatType>();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
   const [isThinkingExpanded, setIsThinkingExpanded] = useState(false);
@@ -154,53 +157,55 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
   return (
     <main className={styles.chatMessageComponent}>
       <div className={styles.container}>
-        <div className={styles.leftMessageContainer}>
-          <div className={styles.messageAvatarContainer}>
+        {activeModule?.hideAvatars !== true && (
+          <div className={styles.leftMessageContainer}>
             <div className={styles.messageAvatarContainer}>
-              {(() => {
-                const avatarPath = message?.characterAvatars?.[0];
+              <div className={styles.messageAvatarContainer}>
+                {(() => {
+                  const avatarPath = message?.characterAvatars?.[0];
 
-                const src =
-                  message?.sourceType === 0
-                    ? avatarPath && avatarPath.expression !== null
-                      ? getAvatarPathFromCharacterAvatarDefinition(avatarPath)
-                      : GetAvatarPathFromPersonaId(message?.personaId ?? "")
-                    : avatarPath && avatarPath.name !== null          // ← was: expression !== null
-                      ? getAvatarPathFromCharacterAvatarDefinition(avatarPath)
-                      : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar");
+                  const src =
+                    message?.sourceType === 0
+                      ? avatarPath && avatarPath.expression !== null
+                        ? getAvatarPathFromCharacterAvatarDefinition(avatarPath)
+                        : GetAvatarPathFromPersonaId(message?.personaId ?? "")
+                      : avatarPath && avatarPath.name !== null          // ← was: expression !== null
+                        ? getAvatarPathFromCharacterAvatarDefinition(avatarPath)
+                        : GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar");
 
-                return (
-                  <img
-                    src={src}
-                    alt="Avatar"
-                    onError={(e) => {
-                      const el = e.currentTarget;
+                  return (
+                    <img
+                      src={src}
+                      alt="Avatar"
+                      onError={(e) => {
+                        const el = e.currentTarget;
 
-                      if (message?.sourceType === 0) {
-                        // Persona: single-step fallback
-                        el.onerror = null;
-                        el.src = GetFallbackEmpty();
-                      } else {
-                        // AI character: two-step fallback matching MainRightComponent
-                        el.onerror = () => {
+                        if (message?.sourceType === 0) {
+                          // Persona: single-step fallback
                           el.onerror = null;
                           el.src = GetFallbackEmpty();
-                        };
-                        el.src = GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar");
-                      }
-                    }}
-                  />
-                );
-              })()}
+                        } else {
+                          // AI character: two-step fallback matching MainRightComponent
+                          el.onerror = () => {
+                            el.onerror = null;
+                            el.src = GetFallbackEmpty();
+                          };
+                          el.src = GetAvatarPathFromChatIdAndAvatarId(chatId, "avatar");
+                        }
+                      }}
+                    />
+                  );
+                })()}
+              </div>
+            </div>
+            <div className={styles.messageInfoContainer}>
+              <div title="messageId">{!message?.messageIndex ? "-" : "# " + message.messageIndex}</div>
+              <div className={styles.messageHeaderContentModel}>
+                <label>{FormatDateTimeDurationMinutesAndSeconds(totalDurationMs) ?? "-"} ({FormatDateTimeDurationMinutesAndSeconds(durationMs) ?? "-"})</label>
+              </div>
             </div>
           </div>
-          <div className={styles.messageInfoContainer}>
-            <div title="messageId">{!message?.messageIndex ? "-" : "# " + message.messageIndex}</div>
-            <div className={styles.messageHeaderContentModel}>
-              <label>{FormatDateTimeDurationMinutesAndSeconds(totalDurationMs) ?? "-"} ({FormatDateTimeDurationMinutesAndSeconds(durationMs) ?? "-"})</label>
-            </div>
-          </div>
-        </div>
+        )}
         <div className={styles.messageContent}>
           <div className={styles.messageHeaderContent}>
             <div className={styles.messageHeaderContentName}>

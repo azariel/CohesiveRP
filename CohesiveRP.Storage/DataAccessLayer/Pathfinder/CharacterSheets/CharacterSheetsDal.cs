@@ -62,6 +62,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             BirthdayDate = dbModel.CharacterSheet.BirthdayDate,
                             BodyType = dbModel.CharacterSheet.BodyType,
                             BreastsSize = dbModel.CharacterSheet.BreastsSize,
+                            AreolasSize = dbModel.CharacterSheet.AreolasSize,
+                            AreolasDetails = dbModel.CharacterSheet.AreolasDetails,
                             ClothesPreference = dbModel.CharacterSheet.ClothesPreference,
                             CombatAffinityAttack = dbModel.CharacterSheet.CombatAffinityAttack,
                             CombatAffinityDefense = dbModel.CharacterSheet.CombatAffinityDefense,

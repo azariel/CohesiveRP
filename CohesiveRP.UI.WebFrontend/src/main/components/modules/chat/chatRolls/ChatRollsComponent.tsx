@@ -103,9 +103,9 @@ interface Props {
 }
 
 export default function ChatRollsComponent({ sceneTrackerRefreshToken }: Props) {
-  const { activeModule } = sharedContext<SharedContextChatType>();
+  const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
   const didFetchOnce = useRef(false);
-  const [isOpen,    setIsOpen]    = useState(true);
+  const isOpen = activeModule?.isCharactersRollsOpened ?? false;
   const [isLoading, setIsLoading] = useState(false);
   const [rolls, setRolls]         = useState<ChatCharacterRollResponse[]>([]);
 
@@ -152,7 +152,11 @@ export default function ChatRollsComponent({ sceneTrackerRefreshToken }: Props) 
       <div className={styles.rollsContainer}>
 
         {/* Header / toggle */}
-        <button className={styles.header} onClick={() => setIsOpen(p => !p)}>
+        <button className={styles.header} onClick={() =>
+            setActiveModule((prev) =>
+              prev ? { ...prev, isCharactersRollsOpened: !isOpen } : prev
+            )
+          }>
           {isLoading
             ? <ImSpinner2 className={`${styles.diceIcon} ${styles.spinner}`} />
             : <GiDiceTwentyFacesTwenty className={styles.diceIcon} />
