@@ -26,21 +26,21 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
     {
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
 
-        //// Dev-01
-        //// --- Local
+        // Dev-01
+        // --- Local
         //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "http://192.168.0.237:5001/v1/chat/completions";
         //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "http://127.0.0.1:5001/v1/chat/completions";
-        
+
         //private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
         //[
-        //    ChatCompletionPresetType.NarrativeDirection,// PRE
-        //    ChatCompletionPresetType.Summarize,// POST++
-        //    ChatCompletionPresetType.SummariesMerge,// POST++
+        //    ChatCompletionPresetType.ProseGuardian,// PRE ~50s
+        //    ChatCompletionPresetType.NarrativeDirection,// PRE ~15s
+        //    ChatCompletionPresetType.Summarize,// POST++ ~45s
+        //    ChatCompletionPresetType.SummariesMerge,// POST++ ~50s
         //];
 
         //private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets =
         //[
-        //    ChatCompletionPresetType.ProseGuardian,// PRE
         //];
 
         //// --- IntenseRP
@@ -51,6 +51,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
         //private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets =
         //[
+        //    ChatCompletionPresetType.CharacterStatusUpdate,// POST++
         //    ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
         //    ChatCompletionPresetType.DynamicCharacterCreation,
         //    ChatCompletionPresetType.DynamicCharacterSheetCreation,
@@ -68,7 +69,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         //private readonly List<ChatCompletionPresetType> DSchatCompletionPresets =
         //[
         //    ChatCompletionPresetType.SceneTracker,// PRE
-        //    ChatCompletionPresetType.CharacterStatusUpdate,// POST
         //    //ChatCompletionPresetType.CohesionEnforcement,// POST NOT WORKING YET
         //];
 
@@ -102,6 +102,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets = [];
         private readonly List<ChatCompletionPresetType> DSchatCompletionPresets = [];
         private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
+        // -----------
 
         public GlobalSettingsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
         {
@@ -130,7 +131,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         new LLMProviderConfig
                         {
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_7,
-                            Name = "localInferenceServerMainMachineCompletionPresets",
+                            Name = "Local-Inference-Server-Main",
                             Model = "gemma-4-26b-a4b-heretic-styletune-v2-head.i1-Q4_K_M",
                             Stream = true,
                             ApiUrl = LOCAL_MAIN_INFERENCE_SERVER_URL,
@@ -167,7 +168,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         new LLMProviderConfig
                         {
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_8,
-                            Name = "localInferenceServerSecondaryMachineCompletionPresets",
+                            Name = "Local-Inference-Server-Secondary",
                             Model = "gemma-4-26b-a4b-heretic-styletune-v2-head.i1-Q4_K_M",
                             Stream = true,
                             ApiUrl = LOCAL_SECONDARY_INFERENCE_SERVER_URL,

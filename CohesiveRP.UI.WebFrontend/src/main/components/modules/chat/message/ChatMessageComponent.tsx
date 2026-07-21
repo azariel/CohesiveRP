@@ -157,8 +157,8 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
   return (
     <main className={styles.chatMessageComponent}>
       <div className={styles.container}>
-        {activeModule?.hideAvatars !== true && (
           <div className={styles.leftMessageContainer}>
+            {activeModule?.hideAvatars !== true && (
             <div className={styles.messageAvatarContainer}>
               <div className={styles.messageAvatarContainer}>
                 {(() => {
@@ -198,6 +198,7 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
                 })()}
               </div>
             </div>
+            )}
             <div className={styles.messageInfoContainer}>
               <div title="messageId">{!message?.messageIndex ? "-" : "# " + message.messageIndex}</div>
               <div className={styles.messageHeaderContentModel}>
@@ -205,7 +206,6 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
               </div>
             </div>
           </div>
-        )}
         <div className={styles.messageContent}>
           <div className={styles.messageHeaderContent}>
             <div className={styles.messageHeaderContentName}>

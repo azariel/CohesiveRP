@@ -13,17 +13,17 @@ Dark Arcane Editorial theme (Dark cyan)
 ## Backend
 The backend is made using c# 10. It exposes many routes. When we receive a new message from the User (typically from the UI), the backend queue two background tasks.
 
-One to update the sceneTracker, which tracks the main themes of the scene (such as Romance, Combat, etc), nestedThemes, currentDateTime (in the roleplay), location, characters (name, mood, facialExpression, outfit, underwear, stateOfDress(partially dressed, fully dressed), exposedBodyParts, clothingStateOfDress, hairStyle, posture, semenOnBodyLocation, bodyPosition, personalGainInScene, relevantKinksInScene, relevantSecretKinksInScene, relevantPersonalityTraits, innerThoughtsOrMonologue, nextActionsAccordingToPersonality).
+One to update the sceneTracker(sceneDirector), which tracks the main themes of the scene (such as Romance, Combat, etc), nestedThemes, currentDateTime (in the roleplay), location, characters (name, mood, facialExpression, outfit, underwear, stateOfDress(partially dressed, fully dressed), exposedBodyParts, clothingStateOfDress, hairStyle, posture, semenOnBodyLocation, bodyPosition, personalGainInScene, relevantKinksInScene, relevantSecretKinksInScene, relevantPersonalityTraits, innerThoughtsOrMonologue, nextActionsAccordingToPersonality).
 
 The second background task is to update the SkillCheckInitiator, which will analyse the scene and infer what Attributes or Skills may be in play. The backend will then roll dices, using the characterSheets attributes and skills to infer their success or failures in the scene.
 
 The third background task is to give a narrative direction. The role of this step is to find out and guide what should happen next.
 
-the fourth background task is to enforce the prose. It analyzes the last messages and produce concrete, actionable writing directives for the next generation.
-
-After those four tasks, the main task is queued. The main task will query the main LLM with the context, characters in scene, rolls, etc.
+After those three tasks, the main task is queued. The main task will query the main LLM with the context, characters in scene, rolls, etc.
 
 After this main task, the backend will queue summarization background tasks to summarize the messages between the User and AI and to summarize the summaries to shrink the space required in the context.
+
+The backend will also queue a prose guardian to enforce the next AI reply prose. It analyzes the last messages and produce concrete, actionable writing directives for the next generation.
 
 ### Character Sheet
 A character sheet represents the information about a character that helps the AI impersonate it. The information include first name, last name, birthday, age group, age group appearance (when the character looks younger than their age for instance), gender, sexuality (hetero, bisexual, etc), race/species, profession, body type, height, eye color, skin color, hair color, hair style, ear shape, genitals, breasts size, penis size, attractiveness, clothes preference, speech pattern, speedch impairment, mannerisms, social anxiety, behavior(personality), personality traits, likes, dislikes, fears, secrets, skills, weaknesses, reputation, relationships, preferred combat style, weapons proficiency, combat affinity (attack), combat affinity (defense), goals for the next year, long-term goals, kinks, secret kinks, pathfinder attributes (sort of DnD attributes), pathfinder skills (sort of DnD skills).

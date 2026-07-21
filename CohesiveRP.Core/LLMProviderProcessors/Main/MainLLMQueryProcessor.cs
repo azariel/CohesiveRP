@@ -46,29 +46,6 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
         {
         }
 
-        //private string[] GetAvatarsFilePathFromCharactersInScene(VisualSceneTracker sceneTracker, CharacterSheetInstancesDbModel characterSheetInstances)
-        //{
-        //    List<string> characterAvatars = new();
-
-        //    foreach (VisualCharacterAnalysis characterAnalysis in sceneTracker.CharactersAnalysis.Where(w => !string.IsNullOrWhiteSpace(w.Name)))
-        //    {
-        //        string targetCharacterName = characterAnalysis.Name.ToLowerInvariant().Trim();
-        //        CharacterSheetInstance targetCharacterSheet = characterSheetInstances.CharacterSheetInstances.FirstOrDefault(w =>
-        //            targetCharacterName.Equals(w.CharacterSheet.FirstName, StringComparison.InvariantCultureIgnoreCase) ||
-        //            targetCharacterName.Equals(w.CharacterSheet.LastName, StringComparison.InvariantCultureIgnoreCase) ||
-        //            targetCharacterName == $"{w.CharacterSheet.FirstName.ToLowerInvariant()} {w.CharacterSheet.LastName?.ToLowerInvariant()}");
-
-        //        if (targetCharacterSheet == null)
-        //        {
-        //            continue;
-        //        }
-
-
-        //    }
-
-        //    return characterAvatars.ToArray();
-        //}
-
         private async Task<List<CharacterAvatarDefinition>> GetAvatarsFromSceneAnalysisFilePathAsync(ChatDbModel chatDbModel, SceneTrackerDbModel dbModel)
         {
             List<CharacterAvatarDefinition> finalAvatarSelection = new();
@@ -530,6 +507,9 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 var allMessages = hotMessages.Messages.OrderByDescending(o => o.CreatedAtUtc).ToArray();
                 var lastPlayerMessage = allMessages.FirstOrDefault(f => f.SourceType == MessageSourceType.User);
 
+                // Queue the prose guardian
+                await QueueProseGuardianBackgroundQueryAsync(chat);
+
                 // Scene Analyzer
                 //await QueueSceneAnalyzeAsync(chat);
 
@@ -562,6 +542,22 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 return false;
             }
         }
+
+        private async Task<bool> QueueProseGuardianBackgroundQueryAsync(ChatDbModel chat)
+    {
+        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+        {
+            ChatId = chat.ChatId,
+            Priority = BackgroundQueryPriority.High,// will block the next 'main'
+            DependenciesTags = [],// No dependencies at all
+            Tags = [BackgroundQuerySystemTags.proseGuardian.ToString()],
+        };
+
+        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+            return false;
+
+        return true;
+    }
 
         private async Task<bool> QueueCohesionEnforcementAsync(ChatDbModel chat)
         {

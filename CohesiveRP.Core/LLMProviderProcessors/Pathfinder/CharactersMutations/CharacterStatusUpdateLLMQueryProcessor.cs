@@ -141,7 +141,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                     .Where(w => linkValue.CharacterSheetInstanceIds.Contains(w.CharacterSheetInstanceId) && w.CharacterSheet != null)
                     .ToList();
 
-                // Visibility only — confirms the matching below already discards these safely; this just tells us
+                // Visibility only -> confirms the matching below already discards these safely; this just tells us
                 // how often the model still ignores the <characters_to_check> scope restriction in the prompt.
                 int outOfScopeCount = response?.CharacterUpdates?.Count(u => !checkedInstances.Any(ci => FindInstanceByName(new List<CharacterSheetInstance> { ci }, u.CharacterName) != null)) ?? 0;
                 if (outOfScopeCount > 0)

@@ -4,7 +4,6 @@ using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator;
 using CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator;
-using CohesiveRP.Core.LLMProviderProcessors.SceneAnalyzer;
 using CohesiveRP.Core.LLMProviderProcessors.SceneTracker;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
@@ -24,6 +23,10 @@ namespace CohesiveRP.Core.LLMProviderManager
         private IHttpLLMApiProviderService httpLLMApiProviderService;
         private ISummaryService summaryService;
 
+        private static readonly BackgroundQuerySystemTags[] RunningTagPriority = Enum.GetValues<BackgroundQuerySystemTags>()
+            .Where(tag => tag != BackgroundQuerySystemTags.custom)
+            .ToArray();
+
         public LLMProviderQueryerFactory(
             IPromptContextBuilderFactory promptContextBuilderFactory,
             IPromptContextElementBuilderFactory promptContextElementBuilderFactory,
@@ -40,56 +43,13 @@ namespace CohesiveRP.Core.LLMProviderManager
 
         private BackgroundQuerySystemTags GetRunningTagFromTags(List<string> tags)
         {
-            if (tags.Contains(BackgroundQuerySystemTags.main.ToString()))
-                return BackgroundQuerySystemTags.main;
+            var tagSet = new HashSet<string>(tags);
 
-            if (tags.Contains(BackgroundQuerySystemTags.sceneTracker.ToString()))
-                return BackgroundQuerySystemTags.sceneTracker;
-
-            if (tags.Contains(BackgroundQuerySystemTags.sceneAnalyze.ToString()))
-                return BackgroundQuerySystemTags.sceneAnalyze;
-
-            if (tags.Contains(BackgroundQuerySystemTags.shortSummary.ToString()))
-                return BackgroundQuerySystemTags.shortSummary;
-
-            if (tags.Contains(BackgroundQuerySystemTags.mediumSummary.ToString()))
-                return BackgroundQuerySystemTags.mediumSummary;
-
-            if (tags.Contains(BackgroundQuerySystemTags.longSummary.ToString()))
-                return BackgroundQuerySystemTags.longSummary;
-
-            if (tags.Contains(BackgroundQuerySystemTags.extraSummary.ToString()))
-                return BackgroundQuerySystemTags.extraSummary;
-
-            if (tags.Contains(BackgroundQuerySystemTags.overflowSummary.ToString()))
-                return BackgroundQuerySystemTags.overflowSummary;
-
-            if (tags.Contains(BackgroundQuerySystemTags.skillChecksInitiator.ToString()))
-                return BackgroundQuerySystemTags.skillChecksInitiator;
-
-            if (tags.Contains(BackgroundQuerySystemTags.dynamicCharacterCreation.ToString()))
-                return BackgroundQuerySystemTags.dynamicCharacterCreation;
-
-            if (tags.Contains(BackgroundQuerySystemTags.dynamicCharacterSheetCreation.ToString()))
-                return BackgroundQuerySystemTags.dynamicCharacterSheetCreation;
-
-            if (tags.Contains(BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar.ToString()))
-                return BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar;
-
-            if (tags.Contains(BackgroundQuerySystemTags.cohesionEnforcement.ToString()))
-                return BackgroundQuerySystemTags.cohesionEnforcement;
-
-            if (tags.Contains(BackgroundQuerySystemTags.narrativeArchitecture.ToString()))
-                return BackgroundQuerySystemTags.narrativeArchitecture;
-
-            if (tags.Contains(BackgroundQuerySystemTags.narrativeDirection.ToString()))
-                return BackgroundQuerySystemTags.narrativeDirection;
-
-            if (tags.Contains(BackgroundQuerySystemTags.proseGuardian.ToString()))
-                return BackgroundQuerySystemTags.proseGuardian;
-
-            if (tags.Contains(BackgroundQuerySystemTags.characterStatusUpdate.ToString()))
-                return BackgroundQuerySystemTags.characterStatusUpdate;
+            foreach (var candidate in RunningTagPriority)
+            {
+                if (tagSet.Contains(candidate.ToString()))
+                    return candidate;
+            }
 
             return BackgroundQuerySystemTags.custom;
         }

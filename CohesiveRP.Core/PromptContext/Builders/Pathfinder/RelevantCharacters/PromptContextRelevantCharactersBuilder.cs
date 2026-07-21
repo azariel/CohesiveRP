@@ -83,7 +83,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                     if (tagName == "pathfinderAttributes" ||
                         tagName == "pathfinderSkills" ||
                         tagName == "kinks" ||
-                        tagName == "secretKinks")
+                        tagName == "secretKinks" ||
+                        tagName == "magicalEffects" ||
+                        tagName == "bodyStatus" ||
+                        tagName == "wounds")
                         continue;
 
                     object value = property.GetValue(characterSheet);
@@ -138,6 +141,57 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 }
 
                 str.AppendLine($"    </secretKinks>");
+            }
+
+            if (characterSheet.MagicalEffects != null)
+            {
+                str.AppendLine($"    <magicalEffects>");
+                foreach (var magicalEffectValue in characterSheet.MagicalEffects)
+                {
+                    string lowerExpiration = magicalEffectValue.ExpiresAt?.ToLowerInvariant()?.Trim();
+                    if (string.IsNullOrWhiteSpace(lowerExpiration) || lowerExpiration == "unknown")
+                        str.AppendLine($"      - {magicalEffectValue.Content} (expiration unknown)");
+                    else if (lowerExpiration == "permanent" || lowerExpiration == "semi-permanent")
+                        str.AppendLine($"      - {magicalEffectValue.Content} (status is {magicalEffectValue.ExpiresAt})");
+                    else
+                        str.AppendLine($"      - {magicalEffectValue.Content} (expires at {magicalEffectValue.ExpiresAt})");
+                }
+
+                str.AppendLine($"    </magicalEffects>");
+            }
+
+            if (characterSheet.BodyStatus != null)
+            {
+                str.AppendLine($"    <bodyStatus>");
+                foreach (var bodyStatusValue in characterSheet.BodyStatus)
+                {
+                    string lowerExpiration = bodyStatusValue.ExpiresAt?.ToLowerInvariant()?.Trim();
+                    if (string.IsNullOrWhiteSpace(lowerExpiration) || lowerExpiration == "unknown")
+                        str.AppendLine($"      - {bodyStatusValue.Content} (expiration unknown)");
+                    else if (lowerExpiration == "permanent" || lowerExpiration == "semi-permanent")
+                        str.AppendLine($"      - {bodyStatusValue.Content} (status is {bodyStatusValue.ExpiresAt})");
+                    else
+                        str.AppendLine($"      - {bodyStatusValue.Content} (expires at {bodyStatusValue.ExpiresAt})");
+                }
+
+                str.AppendLine($"    </bodyStatus>");
+            }
+
+            if (characterSheet.Wounds != null)
+            {
+                str.AppendLine($"    <wounds>");
+                foreach (var woundValue in characterSheet.Wounds)
+                {
+                    string lowerExpiration = woundValue.ExpiresAt?.ToLowerInvariant()?.Trim();
+                    if (string.IsNullOrWhiteSpace(lowerExpiration) || lowerExpiration == "unknown")
+                        str.AppendLine($"      - {woundValue.Content} (expiration unknown)");
+                    else if (lowerExpiration == "permanent" || lowerExpiration == "semi-permanent")
+                        str.AppendLine($"      - {woundValue.Content} (status is {woundValue.ExpiresAt})");
+                    else
+                        str.AppendLine($"      - {woundValue.Content} (expires at {woundValue.ExpiresAt})");
+                }
+
+                str.AppendLine($"    </wounds>");
             }
 
             // Handle the Pathfinder special properties

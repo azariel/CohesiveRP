@@ -30,6 +30,19 @@ namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI
                 Messages = ConvertPromptMessagesToOpenAICompatiblePromptMessages(promptContext.Messages),
                 Stream = providerConfig.Stream,
                 MaxTokens = promptContext.MaxTokensToGenerate ?? 2048,
+                Temperature = providerConfig.SamplingSettings.Temperature,
+                MinP = providerConfig.SamplingSettings.MinP,
+                DryMultiplier = providerConfig.SamplingSettings.DryMultiplier,
+                DryBase = providerConfig.SamplingSettings.DryBase,
+                DryAllowedLength = providerConfig.SamplingSettings.DryAllowedLength,
+                DrySequenceBreakers = providerConfig.SamplingSettings.DrySequenceBreakers,
+                XTCProbability = providerConfig.SamplingSettings.XTCProbability,
+                XTCTreshold = providerConfig.SamplingSettings.XTCTreshold,
+                TopP = providerConfig.SamplingSettings.TopP,
+                TopK = providerConfig.SamplingSettings.TopK,
+                //PresencePenalty = providerConfig.SamplingSettings.PresencePenalty,
+                //FrequencyPenalty = providerConfig.SamplingSettings.FrequencyPenalty,
+                //Stop = providerConfig.SamplingSettings.StopSequences,
             };
 
             var serializedModel = JsonCommonSerializer.SerializeToString(requestDto);
