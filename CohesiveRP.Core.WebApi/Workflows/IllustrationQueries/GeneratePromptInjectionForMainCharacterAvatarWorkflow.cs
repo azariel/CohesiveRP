@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
@@ -13,7 +12,6 @@ using CohesiveRP.Core.WebApi.ResponseDtos.IllustrationQueries;
 using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
 using CohesiveRP.Core.WebApi.Workflows.IllustrationQueries.Abstractions;
 using CohesiveRP.Storage;
-using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
 using CohesiveRP.Storage.QueryModels.Chat;
@@ -117,6 +115,11 @@ namespace CohesiveRP.Core.WebApi.Workflows.IllustrationQueries
                     .Replace("{{character_height}}", characterSheet.CharacterSheet.Height)
                     .Replace("{{character_eyeColor}}", characterSheet.CharacterSheet.EyeColor)
                     .Replace("{{character_skinColor}}", characterSheet.CharacterSheet.SkinColor)
+                    .Replace("{{character_teethColor}}", characterSheet.CharacterSheet.TeethColor)
+                    .Replace("{{character_nailsColor}}", characterSheet.CharacterSheet.NailsColor)
+                    .Replace("{{character_nailsDetails}}", characterSheet.CharacterSheet.NailsDetails)
+                    .Replace("{{character_lips}}", characterSheet.CharacterSheet.Lips)
+                    .Replace("{{character_eyebrows}}", characterSheet.CharacterSheet.Eyebrows)
                     .Replace("{{character_hairColor}}", characterSheet.CharacterSheet.HairColor)
                     .Replace("{{character_hairStyle}}", characterSheet.CharacterSheet.HairStyle)
                     .Replace("{{character_earShape}}", characterSheet.CharacterSheet.EarShape)

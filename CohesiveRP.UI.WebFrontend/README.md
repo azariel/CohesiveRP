@@ -95,7 +95,8 @@
 │   │   ├── characters/
 │   │   │   ├── characterSheets/
 │   │   │   │   ├── CharacterSheet.ts
-│   │   │   │   └── CharacterSheetResponseDto.ts
+│   │   │   │   ├── CharacterSheetResponseDto.ts
+│   │   │   │   └── CharacterStatusEffect.ts
 │   │   │   ├── AvatarPath.ts
 │   │   │   ├── CharacterResponse.ts
 │   │   │   ├── CharacterResponseDto.ts

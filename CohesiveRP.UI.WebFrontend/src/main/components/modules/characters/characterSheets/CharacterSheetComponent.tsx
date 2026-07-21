@@ -6,6 +6,7 @@ import type { ServerApiExceptionResponseDto } from "../../../../../ResponsesDto/
 import type { CharacterSheetResponseDto } from "../../../../../ResponsesDto/characters/characterSheets/CharacterSheetResponseDto";
 import type { ServerApiResponseDto } from "../../../../../ResponsesDto/ServerApiResponseDto";
 import type { CharacterSheetRequestDto } from "../../../../../RequestDto/characters/characterSheets/CharacterSheetRequestDto";
+import type { CharacterStatusEffect } from "../../../../../ResponsesDto/characters/characterSheets/CharacterStatusEffect";
 
 /* ─────────────────────────── Constants ─────────────────────── */
 
@@ -121,6 +122,76 @@ function SheetSelect({
   );
 }
 
+function StatusEffectListField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: CharacterStatusEffect[];
+  onChange: (v: CharacterStatusEffect[]) => void;
+}) {
+  const handleContentChange = (index: number, content: string) => {
+    const next = [...value];
+    next[index] = { ...next[index], content };
+    onChange(next);
+  };
+
+  const handleExpiresAtChange = (index: number, expiresAt: string) => {
+    const next = [...value];
+    next[index] = { ...next[index], expiresAt };
+    onChange(next);
+  };
+
+  const handleRemove = (index: number) => {
+    onChange(value.filter((_, i) => i !== index));
+  };
+
+  const handleAdd = () => {
+    onChange([...value, { content: "", expiresAt: "SEMI-PERMANENT" }]);
+  };
+
+  return (
+    <Field label={label}>
+      <div className={styles.statusEffectList}>
+        {value.length === 0 && (
+          <span className={styles.statusEffectEmpty}>None currently active.</span>
+        )}
+        {value.map((effect, index) => (
+          <div key={index} className={styles.statusEffectRow}>
+            <textarea
+              className={styles.sheetTextarea}
+              style={{ minHeight: "3.5em" }}
+              value={effect.content ?? ""}
+              onChange={(e) => handleContentChange(index, e.target.value)}
+              placeholder="e.g. Deep laceration on left forearm"
+            />
+            <div className={styles.statusEffectMeta}>
+              <input
+                className={styles.sheetInput}
+                value={effect.expiresAt ?? ""}
+                onChange={(e) => handleExpiresAtChange(index, e.target.value)}
+                placeholder="PERMANENT, SEMI-PERMANENT, UNKNOWN or exact datetime"
+              />
+              <button
+                type="button"
+                className={styles.statusEffectRemoveBtn}
+                onClick={() => handleRemove(index)}
+                title="Remove entry"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ))}
+        <button type="button" className={styles.statusEffectAddBtn} onClick={handleAdd}>
+          + Add entry
+        </button>
+      </div>
+    </Field>
+  );
+}
+
 function ArrayField({
   label,
   value,
@@ -206,6 +277,11 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
   const [penisSize, setPenisSize] = useState("");
   const [sexuality, setSexuality] = useState("");
   const [attractiveness, setAttractiveness] = useState("");
+  const [teethColor, setTeethColor] = useState("");
+  const [lips, setLips] = useState("");
+  const [eyebrows, setEyebrows] = useState("");
+  const [nailsColor, setNailsColor] = useState("");
+  const [nailsDetails, setNailsDetails] = useState("");
 
   /* ── voice & manner ── */
   const [speechPattern, setSpeechPattern] = useState("");
@@ -239,6 +315,11 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
   const [goalsForNextYear, setGoalsForNextYear] = useState<string[]>([]);
   const [longTermGoals, setLongTermGoals] = useState<string[]>([]);
 
+  /* ── dynamic ── */
+  const [magicalEffects, setMagicalEffects] = useState<CharacterStatusEffect[]>([]);
+  const [bodyStatus, setBodyStatus] = useState<CharacterStatusEffect[]>([]);
+  const [wounds, setWounds] = useState<CharacterStatusEffect[]>([]);
+
   /* ── adult ── */
   const [kinks, setKinks] = useState<string[]>([]);
   const [secretKinks, setSecretKinks] = useState<string[]>([]);
@@ -265,6 +346,11 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
     setEyeColor(s.characterSheet?.eyeColor ?? "");
     setEarShape(s.characterSheet?.earShape ?? "");
     setSkinColor(s.characterSheet?.skinColor ?? "");
+    setTeethColor(s.characterSheet?.teethColor ?? "");
+    setLips(s.characterSheet?.lips ?? "");
+    setEyebrows(s.characterSheet?.eyebrows ?? "");
+    setNailsColor(s.characterSheet?.nailsColor ?? "");
+    setNailsDetails(s.characterSheet?.nailsDetails ?? "");
     setGenitals(s.characterSheet?.genitals ?? "");
     setBreastsSize(s.characterSheet?.breastsSize ?? "");
     setAreolasSize(s.characterSheet?.areolasSize ?? "");
@@ -296,6 +382,9 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
     setLongTermGoals(s.characterSheet?.longTermGoals ?? []);
     setKinks(s.characterSheet?.kinks ?? []);
     setSecretKinks(s.characterSheet?.secretKinks ?? []);
+    setMagicalEffects(s.characterSheet?.magicalEffects ?? []);
+    setBodyStatus(s.characterSheet?.bodyStatus ?? []);
+    setWounds(s.characterSheet?.wounds ?? []);
 
     if (s.characterSheet?.pathfinderAttributes?.length) {
       const map = { ...defaultAttrMap() };
@@ -427,6 +516,11 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           eyeColor,
           earShape,
           skinColor,
+          teethColor,
+          lips,
+          eyebrows,
+          nailsColor,
+          nailsDetails,
           genitals: genitals || null,
           breastsSize: breastsSize || null,
           areolasSize: areolasSize || null,
@@ -458,6 +552,9 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           longTermGoals,
           kinks,
           secretKinks,
+          magicalEffects,
+          bodyStatus,
+          wounds,
           pathfinderAttributes: PATHFINDER_ATTR_KEYS.map((k) => ({
             attributeType: k,
             value: attrMap[k] ?? 10,
@@ -522,6 +619,11 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         eyeColor,
         earShape,
         skinColor,
+        teethColor,
+        lips,
+        eyebrows,
+        nailsColor,
+        nailsDetails,
         genitals: genitals || null,
         breastsSize: breastsSize || null,
         areolasSize: areolasSize || null,
@@ -550,6 +652,9 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         personalityTraits,
         goalsForNextYear,
         longTermGoals,
+        magicalEffects,
+        bodyStatus,
+        wounds,
         pathfinderAttributes: PATHFINDER_ATTR_KEYS.map((k) => ({ attributeType: k, value: attrMap[k] ?? 10 })),
         pathfinderSkills: PATHFINDER_SKILL_KEYS.map((k) => ({ skillType: k, value: skillMap[k] ?? 10 })),
     };
@@ -593,6 +698,11 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         setEyeColor(s.eyeColor ?? "");
         setEarShape(s.earShape ?? "");
         setSkinColor(s.skinColor ?? "");
+        setTeethColor(s.teethColor ?? "");
+        setLips(s.lips ?? "");
+        setEyebrows(s.eyebrows ?? "");
+        setNailsColor(s.nailsColor ?? "");
+        setNailsDetails(s.nailsDetails ?? "");
         setGenitals(s.genitals ?? "");
         setBreastsSize(s.breastsSize ?? "");
         setAreolasSize(s.areolasSize ?? "");
@@ -623,6 +733,9 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         setLongTermGoals(s.longTermGoals ?? []);
         setKinks(s.kinks ?? []);
         setSecretKinks(s.secretKinks ?? []);
+        setMagicalEffects(s.magicalEffects ?? []);
+        setBodyStatus(s.bodyStatus ?? []);
+        setWounds(s.wounds ?? []);
 
         if (s.pathfinderAttributes?.length) {
           const map = { ...defaultAttrMap() };
@@ -730,7 +843,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
             <SheetInput value={lastName} onChange={setLastName} placeholder="Greengrass" />
           </Field>
         </div>
-        <div className={styles.twoCol}>
+        <div className={styles.threeCol}>
           <Field label="Birthday">
             <SheetInput value={birthday} onChange={setBirthday} placeholder="01 March 1990" />
           </Field>
@@ -741,7 +854,10 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
             <SheetSelect value={ageGroupAppearance} onChange={setAgeGroupAppearance} options={AGE_GROUP_OPTIONS} />
           </Field>
         </div>
-        <div className={styles.twoCol}>
+        <div className={styles.threeCol}>
+          <Field label="Race / Species">
+            <SheetInput value={race} onChange={setRace} placeholder="Human (Pure-blood witch)" />
+          </Field>
           <Field label="Gender">
             <SheetSelect value={gender} onChange={setGender} options={GENDER_OPTIONS} />
           </Field>
@@ -749,9 +865,6 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
             <SheetInput value={sexuality} onChange={setSexuality} placeholder="Heterosexual" />
           </Field>
         </div>
-        <Field label="Race / Species">
-          <SheetInput value={race} onChange={setRace} placeholder="Human (Pure-blood witch)" />
-        </Field>
         <Field label="Profession">
           <SheetInput value={profession} onChange={setProfession} placeholder="Hogwarts student (Slytherin)" />
         </Field>
@@ -775,20 +888,36 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
             <SheetInput value={skinColor} onChange={setSkinColor} placeholder="Very pale" />
           </Field>
         </div>
-        <div className={styles.twoCol}>
+        <div className={styles.oneCol}>
           <Field label="Hair Color">
             <SheetInput value={hairColor} onChange={setHairColor} placeholder="Platinum blonde" />
           </Field>
+        </div>
+        <div className={styles.oneCol}>
           <Field label="Hair Style">
             <SheetInput value={hairStyle} onChange={setHairStyle} placeholder="Long, straight, slicked back" />
           </Field>
         </div>
-        <div className={styles.twoCol}>
+        <div className={styles.threeCol}>
+          <Field label="Teeth Color">
+            <SheetInput value={teethColor} onChange={setTeethColor} placeholder="White" />
+          </Field>
+          <Field label="Lips">
+            <SheetInput value={lips} onChange={setLips} placeholder="Full, naturally pink" />
+          </Field>
+          <Field label="Eyebrows">
+            <SheetInput value={eyebrows} onChange={setEyebrows} placeholder="Thin, arched" />
+          </Field>
+        </div>
+        <div className={styles.threeCol}>
+          <Field label="Nails Color">
+            <SheetInput value={nailsColor} onChange={setNailsColor} placeholder="Pale pink" />
+          </Field>
+          <Field label="Nails Details">
+            <SheetInput value={nailsDetails} onChange={setNailsDetails} placeholder="Short, neatly filed" />
+          </Field>
           <Field label="Ear Shape">
             <SheetInput value={earShape} onChange={setEarShape} placeholder="Normal" />
-          </Field>
-          <Field label="Genitals">
-            <SheetSelect value={genitals} onChange={setGenitals} options={GENITALS_OPTIONS} />
           </Field>
         </div>
         <div className={styles.threeCol}>
@@ -802,7 +931,10 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
             <SheetSelect value={areolasDetails} onChange={setAreolasDetails} options={AREOLAS_DETAILS_OPTIONS} />
           </Field>
         </div>
-        <div className={styles.oneCol}>
+        <div className={styles.twoCol}>
+          <Field label="Genitals">
+            <SheetSelect value={genitals} onChange={setGenitals} options={GENITALS_OPTIONS} />
+          </Field>
           <Field label="Penis Size">
             <SheetInput value={penisSize} onChange={setPenisSize} placeholder="Average (5 inches)" />
           </Field>
@@ -881,6 +1013,13 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
       <Section title="Private">
         <ArrayField label="Kinks" value={kinks} onChange={setKinks} minHeight="20em" />
         <ArrayField label="Secret Kinks" value={secretKinks} onChange={setSecretKinks} minHeight="20em" />
+      </Section>
+
+      {/* ── Status Effects ── */}
+      <Section title="Status Effects">
+        <StatusEffectListField label="Magical Effects" value={magicalEffects} onChange={setMagicalEffects} />
+        <StatusEffectListField label="Body Status" value={bodyStatus} onChange={setBodyStatus} />
+        <StatusEffectListField label="Wounds" value={wounds} onChange={setWounds} />
       </Section>
 
       {/* ── Pathfinder Attributes ── */}

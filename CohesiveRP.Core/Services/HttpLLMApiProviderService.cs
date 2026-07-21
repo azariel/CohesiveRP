@@ -246,7 +246,13 @@ namespace CohesiveRP.Core.Services
             string payload = llmApiQueryPayloadBuilder.BuildPayload(promptContext, selectedLLMApiQueryDbModel);
 
             // We're going to log this
-            LoggingManager.LogToFile("c20461c3-99a8-4c1f-8721-4e13feeb7ca2", $"LLM Api Query payload: [{payload}].", logFilePath: $"logs\\prompts\\{FileUtils.SanitizeNameForWindowsPath(selectedLLMApiQueryDbModel.Name.ToLowerInvariant())}\\{FileUtils.SanitizeNameForWindowsPath(string.Join("_", backgroundQueryDbModel.Tags))}.log");
+            string logFileName = "UnlinkedQueries.log";
+            if(backgroundQueryDbModel != null)
+            { 
+                logFileName = $"{FileUtils.SanitizeNameForWindowsPath(string.Join("_", backgroundQueryDbModel.Tags))}.log";
+            }
+
+            LoggingManager.LogToFile("c20461c3-99a8-4c1f-8721-4e13feeb7ca2", $"LLM Api Query payload: [{payload}].", logFilePath: $"logs\\prompts\\{FileUtils.SanitizeNameForWindowsPath(selectedLLMApiQueryDbModel.Name.ToLowerInvariant())}\\{logFileName}");
 
             try
             {
