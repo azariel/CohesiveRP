@@ -148,6 +148,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                         BreastsSize = characterSheetFromLLMApiResponse.BreastsSize,
                         AreolasSize = characterSheetFromLLMApiResponse.AreolasSize,
                         AreolasDetails = characterSheetFromLLMApiResponse.AreolasDetails,
+                        AreolasColor = characterSheetFromLLMApiResponse.AreolasColor,
                         ClothesPreference = characterSheetFromLLMApiResponse.ClothesPreference,
                         CombatAffinityAttack = characterSheetFromLLMApiResponse.CombatAffinityAttack,
                         CombatAffinityDefense = characterSheetFromLLMApiResponse.CombatAffinityDefense,

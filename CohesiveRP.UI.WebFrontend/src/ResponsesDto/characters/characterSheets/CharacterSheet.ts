@@ -17,8 +17,8 @@ interface CharacterSheet {
   eyeColor?: string;
   earShape?: string;
   skinColor?: string;
-  teethColor?: string;
-  lips?: string;
+  teethDetails?: string;
+  lipsDetails?: string;
   eyebrows?: string;
   nailsColor?: string;
   nailsDetails?: string;
@@ -26,6 +26,7 @@ interface CharacterSheet {
   breastsSize?: string | null;
   areolasSize?: string | null;
   areolasDetails?: string | null;
+  areolasColor?: string | null;
   penisSize?: string | null;
   sexuality?: string | null;
   relationships?: string[];

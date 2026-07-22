@@ -69,6 +69,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Illustrator.MainCharacterAvatar
                     .Replace("{{character_breastsSize}}", characterSheetInstance.CharacterSheet.BreastsSize)
                     .Replace("{{character_areolasSize}}", characterSheetInstance.CharacterSheet.AreolasSize)
                     .Replace("{{character_areolasDetails}}", characterSheetInstance.CharacterSheet.AreolasDetails)
+                    .Replace("{{character_areolasColor}}", characterSheetInstance.CharacterSheet.AreolasColor)
                     .Replace("{{character_penisSize}}", !string.IsNullOrWhiteSpace(characterSheetInstance.CharacterSheet.PenisSize) ? characterSheetInstance.CharacterSheet.PenisSize : "None")
                     .Replace("{{character_clothesPreferences}}", characterSheetInstance.CharacterSheet.ClothesPreference)
                     .InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}",

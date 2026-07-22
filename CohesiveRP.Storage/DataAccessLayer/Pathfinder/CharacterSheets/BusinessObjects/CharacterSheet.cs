@@ -55,8 +55,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonPropertyName("skinColor")]
         public string SkinColor { get; set; }// e.g: very pale
 
-        [JsonPropertyName("teethColor")]
-        public string TeethColor { get; set; }// e.g: normal, white, yellow, blackened
+        [JsonPropertyName("teethDetails")]
+        public string TeethDetails { get; set; }// e.g: normal, white, yellow, blackened, sharp fangs, etc
 
         [JsonPropertyName("nailsColor")]
         public string NailsColor { get; set; }// e.g: normal, pink, blue, black, etc. AKA nails polish.
@@ -64,8 +64,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonPropertyName("nailsDetails")]
         public string NailsDetails { get; set; }// e.g: normal, French nails, long nails, short nails, etc.
 
-        [JsonPropertyName("lips")]
-        public string Lips { get; set; }// e.g: normal, full, big, fine, etc.
+        [JsonPropertyName("lipsDetails")]
+        public string LipsDetails { get; set; }// e.g: normal, full, big, fine, etc.
 
         [JsonPropertyName("eyebrows")]
         public string Eyebrows { get; set; }// e.g: normal, fine, messy, bulky, etc.
@@ -84,6 +84,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
 
         [JsonPropertyName("areolasDetails")]
         public string AreolasDetails { get; set; }// e.g: puffy
+
+        [JsonPropertyName("areolasColor")]
+        public string AreolasColor { get; set; }// e.g: dark pink, brown, etc
 
         [JsonPropertyName("sexuality")]
         public string Sexuality { get; set; }// e.g: bisexual

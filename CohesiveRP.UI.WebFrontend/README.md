@@ -7,7 +7,6 @@
 │   ├── main/
 │   │   ├── components/
 │   │   │   ├── header/
-│   │   │   │   ├── subHeader/
 │   │   │   │   ├── MainHeaderComponent.module.css
 │   │   │   │   └── MainHeaderComponent.tsx
 │   │   │   ├── main/

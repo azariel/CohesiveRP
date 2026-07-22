@@ -14,8 +14,6 @@ const GENDER_OPTIONS = ["", "Male", "Female"];
 const AGE_GROUP_OPTIONS = ["", "Infant", "Toddler", "Children", "Teenager", "YoungAdult", "Adult", "Elderly"];
 const GENITALS_OPTIONS = ["", "Male", "Female", "Both", "None"];
 const BREASTS_SIZE_OPTIONS = ["", "Flat", "Small", "Average", "Large", "ExtraLarge", "Enormous"];
-const AREOLAS_SIZE_OPTIONS = ["", "Tiny", "Small", "Average", "Large", "Enormous"];
-const AREOLAS_DETAILS_OPTIONS = ["", "Normal", "Puffy", "Oval", "Inverted", "Asymmetrical", "Darker", "Lighter"];
 
 const PATHFINDER_ATTR_KEYS = [
   "Fortitude", "Reflex", "Willpower", "Stamina",
@@ -274,11 +272,12 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
   const [breastsSize, setBreastsSize] = useState("");
   const [areolasSize, setAreolasSize] = useState("");
   const [areolasDetails, setAreolasDetails] = useState("");
+  const [areolasColor, setAreolasColor] = useState("");
   const [penisSize, setPenisSize] = useState("");
   const [sexuality, setSexuality] = useState("");
   const [attractiveness, setAttractiveness] = useState("");
-  const [teethColor, setTeethColor] = useState("");
-  const [lips, setLips] = useState("");
+  const [teethDetails, setTeethDetails] = useState("");
+  const [lipsDetails, setLipsDetails] = useState("");
   const [eyebrows, setEyebrows] = useState("");
   const [nailsColor, setNailsColor] = useState("");
   const [nailsDetails, setNailsDetails] = useState("");
@@ -346,8 +345,8 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
     setEyeColor(s.characterSheet?.eyeColor ?? "");
     setEarShape(s.characterSheet?.earShape ?? "");
     setSkinColor(s.characterSheet?.skinColor ?? "");
-    setTeethColor(s.characterSheet?.teethColor ?? "");
-    setLips(s.characterSheet?.lips ?? "");
+    setTeethDetails(s.characterSheet?.teethDetails ?? "");
+    setLipsDetails(s.characterSheet?.lipsDetails ?? "");
     setEyebrows(s.characterSheet?.eyebrows ?? "");
     setNailsColor(s.characterSheet?.nailsColor ?? "");
     setNailsDetails(s.characterSheet?.nailsDetails ?? "");
@@ -355,6 +354,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
     setBreastsSize(s.characterSheet?.breastsSize ?? "");
     setAreolasSize(s.characterSheet?.areolasSize ?? "");
     setAreolasDetails(s.characterSheet?.areolasDetails ?? "");
+    setAreolasColor(s.characterSheet?.areolasColor ?? "");
     setPenisSize(s.characterSheet?.penisSize ?? "");
     setSexuality(s.characterSheet?.sexuality ?? "");
     setAttractiveness(s.characterSheet?.attractiveness ?? "");
@@ -516,8 +516,8 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           eyeColor,
           earShape,
           skinColor,
-          teethColor,
-          lips,
+          teethDetails,
+          lipsDetails,
           eyebrows,
           nailsColor,
           nailsDetails,
@@ -525,6 +525,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           breastsSize: breastsSize || null,
           areolasSize: areolasSize || null,
           areolasDetails: areolasDetails || null,
+          areolasColor: areolasColor || null,
           penisSize: penisSize || null,
           sexuality: sexuality || null,
           attractiveness,
@@ -619,8 +620,8 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         eyeColor,
         earShape,
         skinColor,
-        teethColor,
-        lips,
+        teethDetails,
+        lipsDetails,
         eyebrows,
         nailsColor,
         nailsDetails,
@@ -628,6 +629,8 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         breastsSize: breastsSize || null,
         areolasSize: areolasSize || null,
         areolasDetails: areolasDetails || null,
+        areolasColor: areolasColor || null,
+        penisSize: penisSize || null,
         sexuality: sexuality || null,
         relationships,
         profession,
@@ -698,8 +701,8 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         setEyeColor(s.eyeColor ?? "");
         setEarShape(s.earShape ?? "");
         setSkinColor(s.skinColor ?? "");
-        setTeethColor(s.teethColor ?? "");
-        setLips(s.lips ?? "");
+        setTeethDetails(s.teethDetails ?? "");
+        setLipsDetails(s.lipsDetails ?? "");
         setEyebrows(s.eyebrows ?? "");
         setNailsColor(s.nailsColor ?? "");
         setNailsDetails(s.nailsDetails ?? "");
@@ -707,6 +710,7 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
         setBreastsSize(s.breastsSize ?? "");
         setAreolasSize(s.areolasSize ?? "");
         setAreolasDetails(s.areolasDetails ?? "");
+        setAreolasColor(s.areolasColor ?? "");
         setSexuality(s.sexuality ?? "");
         setAttractiveness(s.attractiveness ?? "");
         setSpeechPattern(s.speechPattern ?? "");
@@ -899,11 +903,11 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           </Field>
         </div>
         <div className={styles.threeCol}>
-          <Field label="Teeth Color">
-            <SheetInput value={teethColor} onChange={setTeethColor} placeholder="White" />
+          <Field label="Teeth Details">
+            <SheetInput value={teethDetails} onChange={setTeethDetails} placeholder="White" />
           </Field>
-          <Field label="Lips">
-            <SheetInput value={lips} onChange={setLips} placeholder="Full, naturally pink" />
+          <Field label="Lips Details">
+            <SheetInput value={lipsDetails} onChange={setLipsDetails} placeholder="Full, naturally pink" />
           </Field>
           <Field label="Eyebrows">
             <SheetInput value={eyebrows} onChange={setEyebrows} placeholder="Thin, arched" />
@@ -924,19 +928,22 @@ export default function CharacterSheetComponent({ characterId, personaId }: Prop
           <Field label="Breasts Size">
             <SheetSelect value={breastsSize} onChange={setBreastsSize} options={BREASTS_SIZE_OPTIONS} />
           </Field>
-          <Field label="Areolas Size">
-            <SheetSelect value={areolasSize} onChange={setAreolasSize} options={AREOLAS_SIZE_OPTIONS} />
-          </Field>
-          <Field label="Areolas Details">
-            <SheetSelect value={areolasDetails} onChange={setAreolasDetails} options={AREOLAS_DETAILS_OPTIONS} />
-          </Field>
-        </div>
-        <div className={styles.twoCol}>
           <Field label="Genitals">
             <SheetSelect value={genitals} onChange={setGenitals} options={GENITALS_OPTIONS} />
           </Field>
           <Field label="Penis Size">
             <SheetInput value={penisSize} onChange={setPenisSize} placeholder="Average (5 inches)" />
+          </Field>
+        </div>
+        <div className={styles.threeCol}>
+          <Field label="Areolas Color">
+            <SheetInput value={areolasColor} onChange={setAreolasColor} placeholder="pink" />
+          </Field>
+          <Field label="Areolas Size">
+            <SheetInput value={areolasSize} onChange={setAreolasSize} />
+          </Field>
+          <Field label="Areolas Details">
+            <SheetInput value={areolasDetails} onChange={setAreolasDetails} />
           </Field>
         </div>
         <div className={styles.oneCol}>

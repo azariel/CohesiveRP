@@ -115,10 +115,10 @@ namespace CohesiveRP.Core.WebApi.Workflows.IllustrationQueries
                     .Replace("{{character_height}}", characterSheet.CharacterSheet.Height)
                     .Replace("{{character_eyeColor}}", characterSheet.CharacterSheet.EyeColor)
                     .Replace("{{character_skinColor}}", characterSheet.CharacterSheet.SkinColor)
-                    .Replace("{{character_teethColor}}", characterSheet.CharacterSheet.TeethColor)
+                    .Replace("{{character_teethDetails}}", characterSheet.CharacterSheet.TeethDetails)
                     .Replace("{{character_nailsColor}}", characterSheet.CharacterSheet.NailsColor)
                     .Replace("{{character_nailsDetails}}", characterSheet.CharacterSheet.NailsDetails)
-                    .Replace("{{character_lips}}", characterSheet.CharacterSheet.Lips)
+                    .Replace("{{character_lipsDetails}}", characterSheet.CharacterSheet.LipsDetails)
                     .Replace("{{character_eyebrows}}", characterSheet.CharacterSheet.Eyebrows)
                     .Replace("{{character_hairColor}}", characterSheet.CharacterSheet.HairColor)
                     .Replace("{{character_hairStyle}}", characterSheet.CharacterSheet.HairStyle)
@@ -126,6 +126,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.IllustrationQueries
                     .Replace("{{character_breastsSize}}", characterSheet.CharacterSheet.BreastsSize)
                     .Replace("{{character_areolasSize}}", characterSheet.CharacterSheet.AreolasSize)
                     .Replace("{{character_areolasDetails}}", characterSheet.CharacterSheet.AreolasDetails)
+                    .Replace("{{character_areolasColor}}", characterSheet.CharacterSheet.AreolasColor)
                     .Replace("{{character_penisSize}}", characterSheet.CharacterSheet.PenisSize)
                     .Replace("{{character_clothesPreferences}}", characterSheet.CharacterSheet.ClothesPreference);
                 str.AppendLine(value);
