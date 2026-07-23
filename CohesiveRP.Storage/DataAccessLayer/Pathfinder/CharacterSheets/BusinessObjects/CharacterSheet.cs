@@ -170,6 +170,15 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonPropertyName("wounds")]
         public CharacterStatusEffect[] Wounds { get; set; }// e.g: maiming (PERMANENT) and other unhealed physical wounds
 
+        [JsonPropertyName("latentMoodForNextInteractionWithPlayer")]
+        public string LatentMoodForNextInteractionWithPlayer { get; set; }
+
+        [JsonPropertyName("lastInteractionWithPlayer")]
+        public string LastInteractionWithPlayer { get; set; }
+
+        [JsonPropertyName("recentImportantEvents")]
+        public string[] RecentImportantEvents { get; set; }
+
         [JsonPropertyName("pathfinderAttributes")]
         public PathfinderAttribute[] PathfinderAttributesValues { get; set; } = [
             // Default is AVERAGE human male attributes AKA 10 everywhere

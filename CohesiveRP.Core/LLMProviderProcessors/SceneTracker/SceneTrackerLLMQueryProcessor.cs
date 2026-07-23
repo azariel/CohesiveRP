@@ -16,6 +16,7 @@ using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
@@ -154,21 +155,34 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
             return selectedCharacterSheetInstance;
         }
 
+        private List<string> GetAllCharacterNamesFromSceneTracker(VisualSceneTracker visualSceneTracker)
+        {
+            var everyCharacterNames = new List<string>();
+
+            var allCharactersInScene = visualSceneTracker?.AllCharacterNamesActiveInScene?.Where(w => !string.IsNullOrWhiteSpace(w));
+            if (allCharactersInScene != null && allCharactersInScene.Any())
+                everyCharacterNames.AddRange(allCharactersInScene);
+
+            var allDetailedCharactersInScene = visualSceneTracker?.CharactersAnalysis?.Select(s => s.Name).Where(w => !string.IsNullOrWhiteSpace(w) && everyCharacterNames.All(a => a.ToLowerInvariant().Trim() != w.ToLowerInvariant().Trim()));
+            if (allDetailedCharactersInScene != null && allDetailedCharactersInScene.Any())
+                everyCharacterNames.AddRange(allDetailedCharactersInScene);
+
+            return everyCharacterNames;
+        }
+
         private async Task CreateNewCharactersWhenRequired(SceneTrackerDbModel sceneTrackerDbModel)
         {
-            var charactersInScene = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerDbModel.Content);
-            if (charactersInScene?.CharactersAnalysis == null || charactersInScene.CharactersAnalysis.Length <= 0)
+            var visualSceneTracker = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerDbModel.Content);
+            if ((visualSceneTracker?.AllCharacterNamesActiveInScene == null || visualSceneTracker.AllCharacterNamesActiveInScene.Length <= 0) && 
+                (visualSceneTracker?.CharactersAnalysis == null || visualSceneTracker.CharactersAnalysis.Length <= 0))
                 return;
 
             var characterSheetInstances = await storageService.GetCharacterSheetsInstanceByChatIdAsync(sceneTrackerDbModel.ChatId);
             var allCurrentInteractiveUserInputQueries = await storageService.GetInteractiveUserInputQueriesAsync(c => c.ChatId == sceneTrackerDbModel.ChatId);
-            foreach (VisualCharacterAnalysis characterAnalysis in charactersInScene.CharactersAnalysis)
+            var everyCharacterNames = GetAllCharacterNamesFromSceneTracker(visualSceneTracker);
+
+            foreach (string characterName in everyCharacterNames)
             {
-                string characterName = characterAnalysis.Name;
-
-                if (string.IsNullOrWhiteSpace(characterName))
-                    continue;
-
                 var characterSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstances?.CharacterSheetInstances, characterName);
 
                 if (characterSheetInstances?.CharacterSheetInstances == null || characterSheetInstances.CharacterSheetInstances.Count <= 0 || characterSheetInstance == null)
@@ -200,15 +214,13 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
             // Needed to evaluate the message-count threshold against the SAME "stable" (non-mutable-tail) boundary
             // the builder itself will use, instead of approximating it with a per-cycle counter alone.
             var hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(sceneTrackerDbModel.ChatId);
-            List<IMessageDbModel> orderedMessages = hotMessagesDbModel?.Messages?
-                .Cast<IMessageDbModel>()
-                .OrderBy(o => o.CreatedAtUtc)
-                .ToList() ?? new();
+            List<IMessageDbModel> orderedMessages = hotMessagesDbModel?.Messages?.Cast<IMessageDbModel>().OrderBy(o => o.CreatedAtUtc).ToList() ?? new();
 
             int stableMessageCount = Math.Max(0, orderedMessages.Count - CharacterStatusUpdateConstants.RECENT_ACTIVITY_STABILITY_WINDOW);
             int ResolveIndex(string messageId) => string.IsNullOrWhiteSpace(messageId) ? -1 : orderedMessages.FindIndex(f => f.MessageId == messageId);
 
-            var namesInScene = sceneTrackerModel?.CharactersAnalysis?.Select(s => s.Name).Where(w => !string.IsNullOrWhiteSpace(w)).ToArray() ?? [];
+            var visualSceneTracker = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerDbModel.Content);
+            var namesInScene = GetAllCharacterNamesFromSceneTracker(visualSceneTracker);
             List<CharacterStatusUpdateTarget> targetsNeedingUpdate = new();
             bool anyChange = false;
 

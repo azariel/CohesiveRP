@@ -38,9 +38,13 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
             string recentMessagesContent = await GetRecentMessagesContentAsync();
 
+            string previousNarrativeDirection = currentValueFromStorage.Content?.Content;
+            if(string.IsNullOrWhiteSpace(previousNarrativeDirection))
+                previousNarrativeDirection = "No previous narrative direction. Generate a new one from the story context.";
+
             string formatted = promptContextFormatElement?.Options?.Format?
                 .InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)
-                .Replace("{{description}}", currentValueFromStorage.Content?.Content)
+                .Replace("{{description}}", previousNarrativeDirection)
                 .Replace("{{recent_messages}}", recentMessagesContent);
 
             return ($"{Environment.NewLine}{formatted}", new ShareableContextLink { LinkedBuilder = this });

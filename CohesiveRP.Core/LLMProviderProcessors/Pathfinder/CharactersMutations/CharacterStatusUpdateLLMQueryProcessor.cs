@@ -165,6 +165,21 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                         {
                             instance.CharacterSheet.Profession = update.Profession;
                         }
+
+                        if (!string.IsNullOrWhiteSpace(update.LastInteractionWithPlayer))
+                        {
+                            instance.CharacterSheet.LastInteractionWithPlayer = update.LastInteractionWithPlayer;
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(update.LatentMoodForNextInteractionWithPlayer))
+                        {
+                            instance.CharacterSheet.LatentMoodForNextInteractionWithPlayer = update.LatentMoodForNextInteractionWithPlayer;
+                        }
+
+                        if (update.RecentImportantEventsToAdd.Length > 0 || update.RecentImportantEventsToRemove.Length > 0)
+                        {
+                            instance.CharacterSheet.RecentImportantEvents = ApplyStringListDiff(instance.CharacterSheet.RecentImportantEvents, update.RecentImportantEventsToAdd, update.RecentImportantEventsToRemove);
+                        }
                     }
 
                     // Whether or not this character had changes, it was checked this cycle: advance its checkpoint and protect it from blueprint overwrite

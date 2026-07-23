@@ -64,9 +64,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             });
         }
 
-        private void AppendCharacterSheetToPromptContext(StringBuilder str, CharacterSheet characterSheet)
+        private void AppendCharacterSheetToPromptContext(StringBuilder str, CharacterSheetInstance sheetInstance)
         {
-            if (str == null || characterSheet == null)
+            if (str == null || sheetInstance?.CharacterSheet == null)
             {
                 return;
             }
@@ -86,10 +86,12 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                         tagName == "secretKinks" ||
                         tagName == "magicalEffects" ||
                         tagName == "bodyStatus" ||
-                        tagName == "wounds")
+                        tagName == "wounds" || 
+                        tagName == "latentMoodForNextInteractionWithPlayer" ||
+                        tagName == "lastInteractionWithPlayer")
                         continue;
 
-                    object value = property.GetValue(characterSheet);
+                    object value = property.GetValue(sheetInstance.CharacterSheet);
                     string formattedValue = FormatPropertyValue(value);
 
                     if (string.IsNullOrWhiteSpace(formattedValue))
@@ -103,10 +105,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             }
 
             // Handle kinks in a way that is more segregated from other information
-            if (characterSheet.Kinks != null)
+            if (sheetInstance.CharacterSheet.Kinks != null)
             {
                 str.AppendLine($"    <kinks>");
-                foreach (var kinkValue in characterSheet.Kinks)
+                foreach (var kinkValue in sheetInstance.CharacterSheet.Kinks)
                 {
                     // If standard (key:value), handle it differently
                     string[] splitValue = kinkValue.Split(':');
@@ -123,10 +125,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 str.AppendLine($"    </kinks>");
             }
 
-            if (characterSheet.SecretKinks != null)
+            if (sheetInstance.CharacterSheet.SecretKinks != null)
             {
                 str.AppendLine($"    <secretKinks>");
-                foreach (var kinkValue in characterSheet.SecretKinks)
+                foreach (var kinkValue in sheetInstance.CharacterSheet.SecretKinks)
                 {
                     // If standard (key:value), handle it differently
                     string[] splitValue = kinkValue.Split(':');
@@ -143,10 +145,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 str.AppendLine($"    </secretKinks>");
             }
 
-            if (characterSheet.MagicalEffects != null)
+            if (sheetInstance.CharacterSheet.MagicalEffects != null)
             {
                 str.AppendLine($"    <magicalEffects>");
-                foreach (var magicalEffectValue in characterSheet.MagicalEffects)
+                foreach (var magicalEffectValue in sheetInstance.CharacterSheet.MagicalEffects)
                 {
                     string lowerExpiration = magicalEffectValue.ExpiresAt?.ToLowerInvariant()?.Trim();
                     if (string.IsNullOrWhiteSpace(lowerExpiration) || lowerExpiration == "unknown")
@@ -160,10 +162,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 str.AppendLine($"    </magicalEffects>");
             }
 
-            if (characterSheet.BodyStatus != null)
+            if (sheetInstance.CharacterSheet.BodyStatus != null)
             {
                 str.AppendLine($"    <bodyStatus>");
-                foreach (var bodyStatusValue in characterSheet.BodyStatus)
+                foreach (var bodyStatusValue in sheetInstance.CharacterSheet.BodyStatus)
                 {
                     string lowerExpiration = bodyStatusValue.ExpiresAt?.ToLowerInvariant()?.Trim();
                     if (string.IsNullOrWhiteSpace(lowerExpiration) || lowerExpiration == "unknown")
@@ -177,10 +179,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 str.AppendLine($"    </bodyStatus>");
             }
 
-            if (characterSheet.Wounds != null)
+            if (sheetInstance.CharacterSheet.Wounds != null)
             {
                 str.AppendLine($"    <wounds>");
-                foreach (var woundValue in characterSheet.Wounds)
+                foreach (var woundValue in sheetInstance.CharacterSheet.Wounds)
                 {
                     string lowerExpiration = woundValue.ExpiresAt?.ToLowerInvariant()?.Trim();
                     if (string.IsNullOrWhiteSpace(lowerExpiration) || lowerExpiration == "unknown")
@@ -194,16 +196,30 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 str.AppendLine($"    </wounds>");
             }
 
+            // Only inject on the first messages after a character entered the scene, and then it will be cleared. This is to avoid the AI from being too repetitive in its responses.
+            if(sheetInstance?.ConsecutiveMessagesInScene <= 3)
+            {
+                if(!string.IsNullOrWhiteSpace(sheetInstance.CharacterSheet.LatentMoodForNextInteractionWithPlayer))
+                {
+                    str.AppendLine($"      <latentMoodForNextInteractionWithPlayer>{sheetInstance.CharacterSheet.LatentMoodForNextInteractionWithPlayer}</latentMoodForNextInteractionWithPlayer>");
+                }
+
+                if(!string.IsNullOrWhiteSpace(sheetInstance.CharacterSheet.LastInteractionWithPlayer))
+                {
+                    str.AppendLine($"      <lastInteractionWithPlayer>{sheetInstance.CharacterSheet.LastInteractionWithPlayer}</lastInteractionWithPlayer>");
+                }
+            }
+
             // Handle the Pathfinder special properties
             str.AppendLine($"    <attributes>");
-            foreach (PathfinderAttribute attribute in characterSheet.PathfinderAttributesValues)
+            foreach (PathfinderAttribute attribute in sheetInstance.CharacterSheet.PathfinderAttributesValues)
             {
                 str.AppendLine($"      <{attribute.AttributeType}>{attribute.Value}</{attribute.AttributeType}>");
             }
 
             str.AppendLine($"    </attributes>");
             str.AppendLine($"    <skills>");
-            foreach (PathfinderSkillAttributes skill in characterSheet.PathfinderSkillsValues)
+            foreach (PathfinderSkillAttributes skill in sheetInstance.CharacterSheet.PathfinderSkillsValues)
             {
                 str.AppendLine($"      <{skill.SkillType}>{skill.Value}</{skill.SkillType}>");
             }
@@ -249,6 +265,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             }
 
             // refine the characters to include to only include those IN the scene
+            // TODO: we're using the characterRools here. Probably not the best way to handle this. We need a proper way to infer the characters in the scene! The sceneTracker limits the amount whereas the checkRolls does not, so we need to think about this..
             var characterRolls = await storageService.GetChatCharactersRollsByIdAsync(chatDbModel.ChatId);
 
             StringBuilder str = new();
@@ -262,7 +279,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 if (personaCharacterSheet != null)
                 {
                     str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName}_(player)>");
-                    AppendCharacterSheetToPromptContext(str, personaCharacterSheet.CharacterSheet);
+                    AppendCharacterSheetToPromptContext(str, personaCharacterSheet);
                     str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName}_(player)>");
                 }
             }
@@ -291,7 +308,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                     foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(3))// TODO: make the limit configurable
                     {
                         str.AppendLine($"  <{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
-                        AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
+                        AppendCharacterSheetToPromptContext(str, characterSheetInstance);
                         str.AppendLine($"  </{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
                     }
                 }
@@ -315,7 +332,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                     foreach (CharacterSheetInstance characterSheetInstance in orderedInstances.Take(3))// TODO: make the limit configurable
                     {
                         str.AppendLine($"  <{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
-                        AppendCharacterSheetToPromptContext(str, characterSheetInstance.CharacterSheet);
+                        AppendCharacterSheetToPromptContext(str, characterSheetInstance);
                         str.AppendLine($"  </{GetCharacterFullName(characterSheetInstance.CharacterSheet.FirstName, characterSheetInstance.CharacterSheet.LastName, "_")}>");
                     }
                 }

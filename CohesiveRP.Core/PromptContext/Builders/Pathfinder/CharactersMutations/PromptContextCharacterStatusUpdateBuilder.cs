@@ -38,6 +38,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.CharactersMutations
             public string CharacterName { get; set; }
             public string Profession { get; set; }
             public string[] Relationships { get; set; }
+            public string LastInteractionWithPlayer { get; set; }
+            public string LatentMoodForNextInteractionWithPlayer { get; set; }
+            public string[] RecentImportantEvents { get; set; }
             public string[] GoalsForNextYear { get; set; }
             public CharacterStatusEffect[] MagicalEffects { get; set; }
             public CharacterStatusEffect[] BodyStatus { get; set; }
@@ -78,6 +81,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.CharactersMutations
             {
                 CharacterName = GetCharacterFullName(s.CharacterSheet.FirstName, s.CharacterSheet.LastName),
                 Profession = s.CharacterSheet.Profession,
+                LatentMoodForNextInteractionWithPlayer = s.CharacterSheet.LatentMoodForNextInteractionWithPlayer,
+                LastInteractionWithPlayer = s.CharacterSheet.LastInteractionWithPlayer,
+                RecentImportantEvents = s.CharacterSheet.RecentImportantEvents,
                 Relationships = s.CharacterSheet.Relationships,
                 GoalsForNextYear = s.CharacterSheet.GoalsForNextYear,
                 MagicalEffects = s.CharacterSheet.MagicalEffects,

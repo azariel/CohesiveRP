@@ -46,5 +46,17 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations.B
 
         [JsonPropertyName("relationshipsToRemove")]
         public string[] RelationshipsToRemove { get; set; }
+
+        [JsonPropertyName("latentMoodForNextInteractionWithPlayer")]
+        public string LatentMoodForNextInteractionWithPlayer { get; set; }
+
+        [JsonPropertyName("lastInteractionWithPlayer")]
+        public string LastInteractionWithPlayer { get; set; }
+
+        [JsonPropertyName("recentImportantEventsToAdd")]
+        public string[] RecentImportantEventsToAdd { get; set; }
+
+        [JsonPropertyName("recentImportantEventsToRemove")]
+        public string[] RecentImportantEventsToRemove { get; set; }
     }
 }
