@@ -1,3 +1,5 @@
+import type { CharacterStatusEffect } from "./CharacterStatusEffect";
+
 interface CharacterSheet {
   firstName?: string;
   lastName?: string;
@@ -15,8 +17,16 @@ interface CharacterSheet {
   eyeColor?: string;
   earShape?: string;
   skinColor?: string;
+  teethDetails?: string;
+  lipsDetails?: string;
+  eyebrows?: string;
+  nailsColor?: string;
+  nailsDetails?: string;
   genitals?: string | null;
   breastsSize?: string | null;
+  areolasSize?: string | null;
+  areolasDetails?: string | null;
+  areolasColor?: string | null;
   penisSize?: string | null;
   sexuality?: string | null;
   relationships?: string[];
@@ -42,6 +52,9 @@ interface CharacterSheet {
   personalityTraits?: string[];
   goalsForNextYear?: string[];
   longTermGoals?: string[];
+  magicalEffects?: CharacterStatusEffect[];
+  bodyStatus?: CharacterStatusEffect[];
+  wounds?: CharacterStatusEffect[];
   pathfinderAttributes?: PathfinderAttributeDto[];
   pathfinderSkills?: PathfinderSkillAttributeDto[];
 }

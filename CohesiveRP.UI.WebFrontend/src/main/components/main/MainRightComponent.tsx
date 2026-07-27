@@ -33,7 +33,7 @@ export default function MainRightComponent() {
   return (
     <main className={styles.body}>
       <div className={styles.centerModule}>
-        {avatarSrc && (
+        {avatarSrc && activeModule?.hideAvatars !== true && (
           <>
             <div className={styles.avatarContainer}>
               <img src={avatarSrc} alt="Character avatar" className={styles.avatar} 

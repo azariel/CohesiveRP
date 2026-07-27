@@ -24,5 +24,7 @@
         public const string DEFAULT_LLM_PROVIDER_CONFIG_ID_4 = "e177d0ab-dfcc-42eb-972e-8b36c26223c8";
         public const string DEFAULT_LLM_PROVIDER_CONFIG_ID_5 = "c5ea32d7-32e5-419a-abee-5576fff945f4";
         public const string DEFAULT_LLM_PROVIDER_CONFIG_ID_6 = "bd63a466-bd46-423b-b2a3-9a600f69b9fe";
+        public const string DEFAULT_LLM_PROVIDER_CONFIG_ID_7 = "c0e9b170-d5a8-4818-9dee-80516b9b2f99";
+        public const string DEFAULT_LLM_PROVIDER_CONFIG_ID_8 = "baa0967d-92ad-41ac-b3af-aeeb8f827014";
     }
 }

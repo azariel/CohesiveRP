@@ -13,9 +13,15 @@ const AVATAR_W = 832;
 const AVATAR_H = 1216;
 
 export default function MobileAvatarBannerComponent() {
+  
   const { activeModule } = sharedContext<SharedContextChatType>();
-  const [messages] = useChatMessages(activeModule?.chatId);
 
+  if (activeModule?.hideAvatars === true) {
+    return null;
+  }
+
+  const [messages] = useChatMessages(activeModule?.chatId);
+  
   const lastAiMessage = [...messages]
     .reverse()
     .find(

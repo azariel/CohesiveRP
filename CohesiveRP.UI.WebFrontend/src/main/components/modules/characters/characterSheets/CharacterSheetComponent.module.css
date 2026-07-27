@@ -306,6 +306,84 @@
   cursor: not-allowed;
 }
 
+/* ── Status effects ── */
+
+.statusEffectList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+
+.statusEffectEmpty {
+  font-size: 0.82em;
+  color: rgba(140, 140, 185, 0.5);
+  font-style: italic;
+}
+
+.statusEffectRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  background: rgba(5, 5, 16, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 0.6em;
+  transition: border-color 0.2s ease;
+}
+
+.statusEffectRow:hover {
+  border-color: rgba(246, 145, 29, 0.18);
+}
+
+.statusEffectMeta {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+  align-items: center;
+}
+
+.statusEffectMeta .sheetInput {
+  flex: 1;
+}
+
+.statusEffectRemoveBtn {
+  background: rgba(255, 80, 80, 0.08);
+  color: rgba(255, 130, 130, 0.85);
+  border: 1px solid rgba(255, 80, 80, 0.25);
+  border-radius: 6px;
+  padding: 0.35em 0.75em;
+  font-size: 0.75em;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.statusEffectRemoveBtn:hover {
+  color: #ff9494;
+  border-color: rgba(255, 80, 80, 0.5);
+  background: rgba(255, 80, 80, 0.14);
+}
+
+.statusEffectAddBtn {
+  align-self: flex-start;
+  background: rgba(51, 174, 231, 0.06);
+  color: rgba(51, 174, 231, 0.85);
+  border: 1px dashed rgba(51, 174, 231, 0.3);
+  border-radius: 6px;
+  padding: 0.4em 0.9em;
+  font-size: 0.78em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.statusEffectAddBtn:hover {
+  color: #80d4f8;
+  border-color: rgba(51, 174, 231, 0.55);
+  background: rgba(51, 174, 231, 0.1);
+}
+
 /* ── Save bar ── */
 
 .saveBar {

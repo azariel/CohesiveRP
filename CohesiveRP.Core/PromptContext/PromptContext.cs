@@ -11,5 +11,6 @@ namespace CohesiveRP.Core.PromptContext
 
         public IPromptMessage[] Messages { get; set; }
         public List<IShareableContextLink> ShareableContextLinks { get; set; } = new();
-    }
+        public int? MaxTokensToGenerate { get; set; }
+        }
 }

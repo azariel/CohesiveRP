@@ -2,6 +2,7 @@
 using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.HttpClient;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Core.HttpLLMApiProvider;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services.ErrorHandlers;
@@ -243,6 +244,15 @@ namespace CohesiveRP.Core.Services
 
             ILLMApiQueryPayloadBuilder llmApiQueryPayloadBuilder = llmApiQueryPayloadBuilderFactory.Create(selectedLLMApiQueryDbModel.Type);
             string payload = llmApiQueryPayloadBuilder.BuildPayload(promptContext, selectedLLMApiQueryDbModel);
+
+            // We're going to log this
+            string logFileName = "UnlinkedQueries.log";
+            if(backgroundQueryDbModel != null)
+            { 
+                logFileName = $"{FileUtils.SanitizeNameForWindowsPath(string.Join("_", backgroundQueryDbModel.Tags))}.log";
+            }
+
+            LoggingManager.LogToFile("c20461c3-99a8-4c1f-8721-4e13feeb7ca2", $"LLM Api Query payload: [{payload}].", logFilePath: $"logs\\prompts\\{FileUtils.SanitizeNameForWindowsPath(selectedLLMApiQueryDbModel.Name.ToLowerInvariant())}\\{logFileName}");
 
             try
             {
