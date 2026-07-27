@@ -61,17 +61,18 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             string sceneTrackerMessagesContent = "";
             foreach (var message in messagesToInclude)
             {
-                sceneTrackerMessagesContent += $"- {message.Content}{Environment.NewLine}";
+                sceneTrackerMessagesContent += $"<message>{message.Content}</message>{Environment.NewLine}";
             }
 
             // TODO: if it's stale, what should we do? cut it? may lead to inconsistencies... hm
             var lastSceneTracker = await storageService.GetSceneTrackerAsync(chatDbModel.ChatId);
 
             // Also inject the Scene Analyzer relevant information
-            var sceneAnalysis = await storageService.GetSceneAnalyzerAsync(chatDbModel.ChatId);
-            StringBuilder sceneAnalysisInjection = new();
+            //var sceneAnalysis = await storageService.GetSceneAnalyzerAsync(chatDbModel.ChatId);
+            //StringBuilder sceneAnalysisInjection = new();
 
-            return ($"<last_scene_analysis>{Environment.NewLine}{sceneAnalysisInjection.ToString().InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</last_scene_analysis>{Environment.NewLine}{Environment.NewLine}<scene_tracker>{Environment.NewLine}Details on the current scene in the story{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+            //<last_scene_analysis>{Environment.NewLine}{sceneAnalysisInjection.ToString().InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</last_scene_analysis>
+            return ($"{Environment.NewLine}{Environment.NewLine}<scene_tracker>{Environment.NewLine}Details on the current scene in the story{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{messages_after_last_scene_tracker}}", sceneTrackerMessagesContent)
                 .Replace("{{last_scene_tracker}}", lastSceneTracker?.Content ?? "Empty. Generate a new scene tracker.")}{Environment.NewLine}</scene_tracker>{Environment.NewLine}{Environment.NewLine}",
                 new ShareableContextLink

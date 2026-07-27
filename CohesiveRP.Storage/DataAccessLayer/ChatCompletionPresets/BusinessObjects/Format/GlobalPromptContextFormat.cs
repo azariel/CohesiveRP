@@ -19,5 +19,6 @@
          * */
         public List<PromptContextFormatElement> OrderedElementsWithinTheGlobalPromptContext { get; set; } = new();
         //public PromptContextSettings Settings { get; set; } = new();
+        public int MaxTokensToGenerate { get; set; } = 2048;
     }
 }

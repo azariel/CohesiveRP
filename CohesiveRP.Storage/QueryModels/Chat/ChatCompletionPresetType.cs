@@ -8,7 +8,7 @@
         SceneTracker = 3,
         SkillChecksInitiator = 4,
         SPECIAL_CharacterSheetGeneration = 5,
-        SceneAnalyze = 6,
+        //SceneAnalyze = 6,
         DynamicCharacterCreation = 7,
         DynamicCharacterSheetCreation = 8,
         IllustrationPromptInjectionForCharacterAvatar = 9,

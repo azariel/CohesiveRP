@@ -7,5 +7,6 @@ namespace CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets
         public string Value { get; set; }
         public IPromptMessage[] Messages { get; set; }
         public List<IShareableContextLink> ShareableContextLinks { get; set; }
+        public int? MaxTokensToGenerate { get; set; }
     }
 }

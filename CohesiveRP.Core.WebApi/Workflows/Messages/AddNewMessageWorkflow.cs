@@ -83,7 +83,6 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         if (requestDto.QueueDependentBackgroundTasks)
         {
             await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
-            await AddProseGuardianBackgroundQueryAsync(chat);
             await AddNarrativeDirectionBackgroundQueryAsync(chat);
         }
 
@@ -216,22 +215,6 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             Priority = BackgroundQueryPriority.Highest,// User is waiting!
             DependenciesTags = [],// No dependencies at all
             Tags = [BackgroundQuerySystemTags.skillChecksInitiator.ToString()],
-        };
-
-        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-            return false;
-
-        return true;
-    }
-
-    private async Task<bool> AddProseGuardianBackgroundQueryAsync(ChatDbModel chat)
-    {
-        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-        {
-            ChatId = chat.ChatId,
-            Priority = BackgroundQueryPriority.Highest,// User is waiting!
-            DependenciesTags = [],// No dependencies at all
-            Tags = [BackgroundQuerySystemTags.proseGuardian.ToString()],
         };
 
         if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)

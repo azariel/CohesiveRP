@@ -55,6 +55,21 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonPropertyName("skinColor")]
         public string SkinColor { get; set; }// e.g: very pale
 
+        [JsonPropertyName("teethDetails")]
+        public string TeethDetails { get; set; }// e.g: normal, white, yellow, blackened, sharp fangs, etc
+
+        [JsonPropertyName("nailsColor")]
+        public string NailsColor { get; set; }// e.g: normal, pink, blue, black, etc. AKA nails polish.
+
+        [JsonPropertyName("nailsDetails")]
+        public string NailsDetails { get; set; }// e.g: normal, French nails, long nails, short nails, etc.
+
+        [JsonPropertyName("lipsDetails")]
+        public string LipsDetails { get; set; }// e.g: normal, full, big, fine, etc.
+
+        [JsonPropertyName("eyebrows")]
+        public string Eyebrows { get; set; }// e.g: normal, fine, messy, bulky, etc.
+
         [JsonPropertyName("genitals")]
         public string Genitals { get; set; }// e.g: female
 
@@ -63,6 +78,15 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
 
         [JsonPropertyName("breastsSize")]
         public string BreastsSize { get; set; }// e.g: small
+
+        [JsonPropertyName("areolasSize")]
+        public string AreolasSize { get; set; }// e.g: small
+
+        [JsonPropertyName("areolasDetails")]
+        public string AreolasDetails { get; set; }// e.g: puffy
+
+        [JsonPropertyName("areolasColor")]
+        public string AreolasColor { get; set; }// e.g: dark pink, brown, etc
 
         [JsonPropertyName("sexuality")]
         public string Sexuality { get; set; }// e.g: bisexual
@@ -145,6 +169,15 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
 
         [JsonPropertyName("wounds")]
         public CharacterStatusEffect[] Wounds { get; set; }// e.g: maiming (PERMANENT) and other unhealed physical wounds
+
+        [JsonPropertyName("latentMoodForNextInteractionWithPlayer")]
+        public string LatentMoodForNextInteractionWithPlayer { get; set; }
+
+        [JsonPropertyName("lastInteractionWithPlayer")]
+        public string LastInteractionWithPlayer { get; set; }
+
+        [JsonPropertyName("recentImportantEvents")]
+        public string[] RecentImportantEvents { get; set; }
 
         [JsonPropertyName("pathfinderAttributes")]
         public PathfinderAttribute[] PathfinderAttributesValues { get; set; } = [

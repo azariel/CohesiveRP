@@ -27,7 +27,8 @@ namespace CohesiveRP.Common.Utils.Parsers
                 .Replace("‘", "'")
                 .Replace("‚", "'")
                 .Replace("‛", "'")
-                .Replace("—", ",");
+                .Replace("—", ",")
+                .Replace(" ,", ",");
 
             // 
 
