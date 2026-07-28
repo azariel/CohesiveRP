@@ -10,8 +10,10 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheets.BusinessObjects;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
@@ -197,6 +199,13 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                     return false;
                 }
 
+                var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
+                if (chat != null)
+                {
+                    await QueueNarrativeArchitectureAsync(chat);
+                }
+
+                
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
@@ -208,6 +217,25 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                 backgroundQueryDbModel.RetryCount++;
                 return false;
             }
+        }
+
+        private async Task<bool> QueueNarrativeArchitectureAsync(ChatDbModel chat)
+        {
+            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+            {
+                ChatId = chat.ChatId,
+                Priority = BackgroundQueryPriority.VeryLow,// user is not waiting, we're simply generation and iterating over secret plots and narrative arcs in the background, so we can set it to very low priority
+                DependenciesTags = Enum.GetValues<BackgroundQuerySystemTags>()// this one is blocked by basically ANYTHING except the same type
+                    .Where(w => w != BackgroundQuerySystemTags.narrativeArchitecture)
+                    .Select(s => s.ToString())
+                    .ToList(),
+                Tags = [BackgroundQuerySystemTags.narrativeArchitecture.ToString()],
+            };
+
+            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+                return false;
+
+            return true;
         }
     }
 }

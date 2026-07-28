@@ -574,21 +574,5 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
             return true;
         }
-
-        private async Task<bool> QueueNarrativeArchitectureAsync(ChatDbModel chat)
-        {
-            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-            {
-                ChatId = chat.ChatId,
-                Priority = BackgroundQueryPriority.VeryLow,// user is not waiting, we're simply generation and iterating over secret plots and narrative arcs in the background, so we can set it to very low priority
-                DependenciesTags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],// Run after cohesionEnforcement
-                Tags = [BackgroundQuerySystemTags.narrativeArchitecture.ToString()],
-            };
-
-            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-                return false;
-
-            return true;
-        }
     }
 }

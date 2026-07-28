@@ -87,7 +87,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             ChatCompletionPresetType.SceneTracker,// PRE
             ChatCompletionPresetType.CharacterStatusUpdate,// POST
             //ChatCompletionPresetType.CohesionEnforcement,// POST NOT WORKING YET
-            //ChatCompletionPresetType.NarrativeArchitecture,// POST++ (secretPlot) NOT WORKING YET
+            ChatCompletionPresetType.NarrativeArchitecture,// POST (secretPlot)
             ChatCompletionPresetType.Summarize,// POST++
             ChatCompletionPresetType.SummariesMerge,// POST++
             ChatCompletionPresetType.Main,
