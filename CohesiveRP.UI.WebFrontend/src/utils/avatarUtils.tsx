@@ -28,9 +28,9 @@ const GetAvatarPathFromPersonaId = (personaId: string): string => {
   }
 };
 
-const GetAvatarPathFromLorebookId = (lorebookId: string): string => {
+const GetAvatarPathFromLorebookId = (lorebookId: string, hideAvatars: boolean = false): string => {
     try {
-      if(lorebookId === "") {
+      if(hideAvatars || lorebookId === "") {
         return `./assets/empty-avatar.svg`;
       }
       
@@ -40,9 +40,9 @@ const GetAvatarPathFromLorebookId = (lorebookId: string): string => {
   }
 };
 
-const GetAvatarPathFromChatId = (chatId: string): string => {
+const GetAvatarPathFromChatId = (chatId: string, hideAvatars: boolean = false): string => {
     try {
-      if(chatId === "") {
+      if(hideAvatars || chatId === "") {
         return `./assets/empty-avatar.svg`;
       }
       

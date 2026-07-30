@@ -145,7 +145,12 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                         if (existingQuery != null)
                         {
                             // Simply add the reasoning to the list and that's it
-                            existingQuery.Reasonings.Add(element.Reasoning);
+                            existingQuery.Guides.Add(new SkillCheckReasoningGuide
+                            {
+                                Reasoning = element.Reasoning,
+                                ReactionFromOtherCharactersWhenFailingSkillCheck = element.ReactionFromOtherCharactersWhenFailingSkillCheck,
+                                ReactionFromOtherCharactersWhenSucceedingSkillCheck = element.ReactionFromOtherCharactersWhenSucceedingSkillCheck
+                            });
                             existingQuery.CharactersWhoCanResist.AddRange(element.CharactersWhoCanResist);
                             continue;
                         }
@@ -155,7 +160,12 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                             ActionCategory = actionCategory,
                             CharactersWhoCanResist = element.CharactersWhoCanResist,
                             Bonus = element.Bonus,
-                            Reasonings = [element.Reasoning],
+                            Guides = [new SkillCheckReasoningGuide
+                            {
+                                Reasoning = element.Reasoning,
+                                ReactionFromOtherCharactersWhenFailingSkillCheck = element.ReactionFromOtherCharactersWhenFailingSkillCheck,
+                                ReactionFromOtherCharactersWhenSucceedingSkillCheck = element.ReactionFromOtherCharactersWhenSucceedingSkillCheck
+                            }],
                         });
                     }
 
@@ -428,7 +438,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     roll = new ChatCharacterRoll
                     {
                         ActionCategory = query.ActionCategory,
-                        Reasonings = query.Reasonings,
+                        Guides = query.Guides,
                         NbRemainingInjectionTurns = 1,
                         NbRemainingRollFreeze = 3,
                         CharactersInScene = FilterCharactersInScene(characterSheetInstancesInScene.ToArray(), selectedCharacterSheetInstance.CharacterSheetInstanceId),
@@ -446,13 +456,13 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 // Update existing roll
                 if (roll.NbRemainingInjectionTurns > 0)
                 {
-                    // Roll older reasoning, inject new one(s)
-                    roll.Reasonings = RemoveOldestXReasonings(roll.Reasonings, query.Reasonings.Count);
-                    roll.Reasonings.AddRange(query.Reasonings);
+                    // Roll older guides, inject new one(s)
+                    roll.Guides = RemoveOldestXGuides(roll.Guides, query.Guides.Count);
+                    roll.Guides.AddRange(query.Guides);
                 } else
                 {
-                    roll.Reasonings.Clear();
-                    roll.Reasonings.AddRange(query.Reasonings);
+                    roll.Guides.Clear();
+                    roll.Guides.AddRange(query.Guides);
                     roll.NbRemainingInjectionTurns = 1;
                 }
 
@@ -538,14 +548,14 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             return input?.Select(s => new CharacterInScene { CharacterSheetInstanceId = s.CharacterSheetInstanceId, CharacterName = s.CharacterSheet?.FirstName }).Where(w => w.CharacterSheetInstanceId != characterToIgnore).ToArray() ?? [];
         }
 
-        private List<string> RemoveOldestXReasonings(List<string> reasonings, int nbReasoningsToRemove)
+        private List<SkillCheckReasoningGuide> RemoveOldestXGuides(List<SkillCheckReasoningGuide> guides, int nbGuidesToRemove)
         {
-            if (reasonings.Count < 5 - nbReasoningsToRemove)
+            if (guides.Count < 5 - nbGuidesToRemove)
             {
-                return reasonings;// There's still space
+                return guides;// There's still space
             }
 
-            var outValue = reasonings.Skip(nbReasoningsToRemove).ToList();
+            var outValue = guides.Skip(nbGuidesToRemove).ToList();
             return outValue;
         }
 

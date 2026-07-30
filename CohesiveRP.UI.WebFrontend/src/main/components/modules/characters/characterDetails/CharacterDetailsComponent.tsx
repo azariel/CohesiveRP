@@ -25,6 +25,7 @@ type DetailsTab = "info" | "sheet" | "illustration";
 
 export default function CharacterDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextCharacterType>();
+  const activeChatModule = sharedContext<SharedContextChatType>();
   const { navigateTo } = sharedContext();
   const didComponentMountAlready = useRef(false);
   const chatsContainerRef = useRef<HTMLDivElement>(null);
@@ -313,12 +314,14 @@ export default function CharacterDetailsComponent() {
           <div className={styles.characterDetailsWrapper}>
             <div className={styles.characterDetailsContainer}>
               <div className={styles.characterHeaderContainer}>
-                <div className={styles.characterAvatarContainer}>
-                  <img src={GetAvatarPathFromCharacterName(characterResponse?.character?.name ?? "")} alt="dev/Placeholder.png" onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = GetFallbackEmpty();
-                  }} />
-                </div>
+                {activeChatModule?.activeModule?.hideAvatars !== true && (
+                  <div className={styles.characterAvatarContainer}>
+                    <img src={GetAvatarPathFromCharacterName(characterResponse?.character?.name ?? "")} alt="dev/Placeholder.png" onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = GetFallbackEmpty();
+                    }} />
+                  </div>
+                )}
                 <div className={styles.characterHeaderRightSideContainer}>
                   <textarea
                     className={styles.characterName}
@@ -338,7 +341,7 @@ export default function CharacterDetailsComponent() {
                         {chatsDetailsResponse?.chats?.map((chat, index) => (
                           <div key={index} className={styles.chatItem}>
                             <div className={styles.chatAvatarContainer} onClick={async () => await handleSpecificChatClick(chat)}>
-                              <img src={GetAvatarPathFromChatId(chat.chatId)} alt="Avatar" onError={(e) => {
+                              <img src={GetAvatarPathFromChatId(chat.chatId, activeChatModule?.activeModule?.hideAvatars ?? false)} alt="Avatar" onError={(e) => {
                                 e.currentTarget.onerror = null;
                                 e.currentTarget.src = GetFallbackEmpty();
                               }} />
@@ -366,12 +369,14 @@ export default function CharacterDetailsComponent() {
                 >
                   Character Sheet
                 </button>
-                <button
-                  className={`${styles.tabButton} ${activeTab === "illustration" ? styles.tabButtonActive : ""}`}
-                  onClick={() => setActiveTab("illustration")}
-                >
-                  Illustration
-                </button>
+                {activeChatModule?.activeModule?.hideAvatars !== true && (
+                  <button
+                    className={`${styles.tabButton} ${activeTab === "illustration" ? styles.tabButtonActive : ""}`}
+                    onClick={() => setActiveTab("illustration")}
+                  >
+                    Illustration
+                  </button>
+                )}
               </div>
 
               {/* ── Tab content ── */}
@@ -436,7 +441,7 @@ export default function CharacterDetailsComponent() {
                   <CharacterSheetComponent key={sheetKey} characterId={activeModule.selectedCharacterId} personaId={null} />
                 )}
 
-                {activeTab === "illustration" && (
+                {activeTab === "illustration" && activeChatModule?.activeModule?.hideAvatars !== true && (
                   <IllustrationComponent
                     characterId={activeModule.selectedCharacterId}
                     characterResponse={characterResponse}

@@ -45,5 +45,11 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.
 
         [JsonPropertyName("reasoning")]
         public string Reasoning { get; set; }
+
+        [JsonPropertyName("reactionFromOtherCharactersWhenFailingSkillCheck")]
+        public string ReactionFromOtherCharactersWhenFailingSkillCheck { get; set; }
+
+        [JsonPropertyName("reactionFromOtherCharactersWhenSucceedingSkillCheck")]
+        public string ReactionFromOtherCharactersWhenSucceedingSkillCheck { get; set; }
     }
 }

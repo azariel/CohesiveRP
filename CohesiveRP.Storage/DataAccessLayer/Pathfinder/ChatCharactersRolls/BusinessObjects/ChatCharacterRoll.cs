@@ -9,8 +9,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public PathfinderSkills ActionCategory { get; set; }
 
-        [JsonPropertyName("reasonings")]
-        public List<string> Reasonings { get; set; }
+        [JsonPropertyName("guides")]
+        public List<SkillCheckReasoningGuide> Guides { get; set; }
 
         // Roll value
         [JsonPropertyName("value")]

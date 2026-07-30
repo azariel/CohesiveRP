@@ -169,12 +169,20 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
             return everyCharacterNames;
         }
 
+        /// <summary>
+        /// Analyze the characters found in the sceneTracker and infer characters that don't already have a CharacterSheet. It'll then queue an InteractiveUserInputQuery for each of those characters, so the user can decide if we should analyze the story to create a new CharacterSheet for them or not.
+        /// The issue here and the reason why we ask the player to decide is that the sceneTracker can track irregular or temporary characters such as 'the woman', 'the guard', etc. CharacterSheets are specific to ONE individual.
+        /// </summary>
+        /// <param name="sceneTrackerDbModel"></param>
+        /// <returns></returns>
         private async Task CreateNewCharactersWhenRequired(SceneTrackerDbModel sceneTrackerDbModel)
         {
             var visualSceneTracker = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerDbModel.Content);
-            if ((visualSceneTracker?.AllCharacterNamesActiveInScene == null || visualSceneTracker.AllCharacterNamesActiveInScene.Length <= 0) && 
+            if ((visualSceneTracker?.AllCharacterNamesActiveInScene == null || visualSceneTracker.AllCharacterNamesActiveInScene.Length <= 0) &&
                 (visualSceneTracker?.CharactersAnalysis == null || visualSceneTracker.CharactersAnalysis.Length <= 0))
+            {
                 return;
+            }
 
             var characterSheetInstances = await storageService.GetCharacterSheetsInstanceByChatIdAsync(sceneTrackerDbModel.ChatId);
             var allCurrentInteractiveUserInputQueries = await storageService.GetInteractiveUserInputQueriesAsync(c => c.ChatId == sceneTrackerDbModel.ChatId);

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.BusinessObjects
 {
@@ -14,7 +15,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.
         [JsonPropertyName("bonus")]
         public int Bonus { get; set; }
 
-        [JsonPropertyName("reasonings")]
-        public List<string> Reasonings { get; set; }
+        [JsonPropertyName("guides")]
+        public List<SkillCheckReasoningGuide> Guides { get; set; }
     }
 }

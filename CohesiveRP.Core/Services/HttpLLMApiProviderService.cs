@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.HttpClient;
 using CohesiveRP.Common.Utils;
@@ -66,8 +68,8 @@ namespace CohesiveRP.Core.Services
             {
                 var selectedLLmApiProviderErrorState = llmApiProviderErrorStates.FirstOrDefault(f => f.ProviderConfigId == config.ProviderConfigId);
                 var maximalAmountOfErrorsAllowedInMainPath = 100;
-                
-                if(config.FallbackStrategies != null && config.FallbackStrategies.Count > 0)
+
+                if (config.FallbackStrategies != null && config.FallbackStrategies.Count > 0)
                     maximalAmountOfErrorsAllowedInMainPath = config.FallbackStrategies.Min(o => o.ErrorsTreshold);
 
                 if (selectedLLmApiProviderErrorState?.TimeoutUntilDateTimeUtc != null && selectedLLmApiProviderErrorState.TimeoutUntilDateTimeUtc <= DateTime.UtcNow)
@@ -247,13 +249,15 @@ namespace CohesiveRP.Core.Services
 
             // We're going to log this
             string logFileName = "UnlinkedQueries.log";
-            if(backgroundQueryDbModel != null)
-            { 
+            if (backgroundQueryDbModel != null)
+            {
                 logFileName = $"{FileUtils.SanitizeNameForWindowsPath(string.Join("_", backgroundQueryDbModel.Tags))}.log";
             }
 
-            LoggingManager.LogToFile("c20461c3-99a8-4c1f-8721-4e13feeb7ca2", $"LLM Api Query payload: [{payload}].", logFilePath: $"logs\\prompts\\{FileUtils.SanitizeNameForWindowsPath(selectedLLMApiQueryDbModel.Name.ToLowerInvariant())}\\{logFileName}");
+            var escapedPayloadForLogs = Regex.Unescape(payload);
+            LoggingManager.LogToFile("c20461c3-99a8-4c1f-8721-4e13feeb7ca2", $"LLM Api Query payload: [{escapedPayloadForLogs}].", logFilePath: $"logs\\prompts\\{FileUtils.SanitizeNameForWindowsPath(selectedLLMApiQueryDbModel.Name.ToLowerInvariant())}\\{logFileName}");
 
+            string response = string.Empty;
             try
             {
                 if (selectedLLMApiQueryDbModel.Stream)
@@ -271,6 +275,7 @@ namespace CohesiveRP.Core.Services
                         }
                     }
 
+                    response = str.ToString();
                     IHttpLLMApiQueryResponseDto httpLLMApiQueryResponseDto = new DirectMessagesResponseDto()
                     {
                         HttpResultCode = System.Net.HttpStatusCode.OK,
@@ -278,15 +283,15 @@ namespace CohesiveRP.Core.Services
                            new OpenAIChatCompletionMessage
                            {
                                Role = OpenAIChatCompletionRole.assistant,
-                               Content = str.ToString(),
+                               Content = response,
                            }
                         ],
                     };
                     return httpLLMApiQueryResponseDto;
                 } else
                 {
-                    string rawResponse = await httpClient.PostAsync(selectedLLMApiQueryDbModel.ApiUrl, payload, token);
-                    IHttpLLMApiQueryResponseDto httpLLMApiQueryResponseDto = LLMApiQueryResponseDtoConverter.Convert(selectedLLMApiQueryDbModel.Type, rawResponse);
+                    response = await httpClient.PostAsync(selectedLLMApiQueryDbModel.ApiUrl, payload, token);
+                    IHttpLLMApiQueryResponseDto httpLLMApiQueryResponseDto = LLMApiQueryResponseDtoConverter.Convert(selectedLLMApiQueryDbModel.Type, response);
                     return httpLLMApiQueryResponseDto;
                 }
 
@@ -306,6 +311,10 @@ namespace CohesiveRP.Core.Services
                 LoggingManager.LogToFile("dd346c77-ea60-463b-8dda-ed7c95d62757", $"LLM query failed. Exception:[{e.Message}].");
 
                 return null;
+            } finally
+            {
+                //var escapedResponseForLogs = Regex.Unescape(response);
+                LoggingManager.LogToFile("bf02d437-6553-4e78-bb72-688bc0b29dde", $"LLM Api Query response: [{response}].", logFilePath: $"logs\\prompts\\{FileUtils.SanitizeNameForWindowsPath(selectedLLMApiQueryDbModel.Name.ToLowerInvariant())}\\{logFileName}");
             }
         }
 

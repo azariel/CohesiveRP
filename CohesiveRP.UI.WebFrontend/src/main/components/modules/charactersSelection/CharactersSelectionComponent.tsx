@@ -14,6 +14,7 @@ import type { CharactersResponseDto } from "../../../../ResponsesDto/characters/
 import { GetAvatarPathFromCharacterName, GetFallbackEmpty } from "../../../../utils/avatarUtils";
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
 import { ImSpinner2 } from "react-icons/im";
+import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 
 type SortOption = 'createdNewest' | 'createdOldest' | 'nameAZ' | 'nameZA';
 
@@ -28,6 +29,7 @@ const safeTime = (d?: string | null): number => {
 
 export default function CharactersSelectionComponent() {
   const { navigateTo } = sharedContext<SharedContextCharacterType>();
+  const { activeModule } = sharedContext<SharedContextChatType>();
   const didComponentMountAlready = useRef(false);
   const newCharacterFileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -324,16 +326,18 @@ export default function CharactersSelectionComponent() {
                   className={styles.characterContainer}
                   onClick={() => handleSpecificCharacterClick(character.characterId)}
                 >
-                  <div className={styles.characterAvatarContainer}>
-                    <img
-                      src={GetAvatarPathFromCharacterName(character.name)}
-                      alt="Avatar"
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = GetFallbackEmpty();
-                      }}
-                    />
-                  </div>
+                  {activeModule?.hideAvatars !== true && (
+                    <div className={styles.characterAvatarContainer}>
+                      <img
+                        src={GetAvatarPathFromCharacterName(character.name)}
+                        alt="Avatar"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = GetFallbackEmpty();
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className={styles.characterInfoPanel}>
                     <label className={styles.characterCharNameLabel}>{character.name}</label>
                     <label className={styles.characterTagsLabel}>

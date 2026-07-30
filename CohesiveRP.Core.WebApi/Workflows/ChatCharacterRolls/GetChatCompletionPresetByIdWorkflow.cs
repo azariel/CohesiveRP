@@ -56,7 +56,7 @@ public class GetChatCharacterRollsWorkflow : IChatCharacterRollsWorkflow
                     var newRoll = new ChatCharacterRoll
                     {
                         Value = roll.Value,
-                        Reasonings = roll.Reasonings,
+                        Guides = roll.Guides,
                         ActionCategory = roll.ActionCategory,
                         Bonus = roll.Bonus,
                         CharactersWhoCanResist = roll.CharactersInScene?.Select(s => s.CharacterName).ToList(),

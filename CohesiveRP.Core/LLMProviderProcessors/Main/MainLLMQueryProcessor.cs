@@ -156,7 +156,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 FilePath = Path.Combine(characterFolderPath, WebConstants.AvatarFileName)?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant(),
             };
 
-            if(targetCharacter.ClothingStateOfDress == null)
+            if (targetCharacter.ClothingStateOfDress == null)
             {
                 return avatar;
             }
@@ -517,9 +517,6 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 // TODO: we need to be able to update the content of the message afterwards. That part is fine, but the UI would not reflect that change since the main backgroundQuery is set as completed..
                 //await QueueCohesionEnforcementAsync(chat);
 
-                // Narrative Architect (Secret Plot)
-                //await QueueNarrativeArchitectureAsync(chat);
-
                 // Prebuild the images to show in the UI according to context
                 var sceneTracker = await storageService.GetSceneTrackerAsync(backgroundQueryDbModel.ChatId);
 
@@ -544,29 +541,13 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
         }
 
         private async Task<bool> QueueProseGuardianBackgroundQueryAsync(ChatDbModel chat)
-    {
-        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-        {
-            ChatId = chat.ChatId,
-            Priority = BackgroundQueryPriority.High,// will block the next 'main'
-            DependenciesTags = [],// No dependencies at all
-            Tags = [BackgroundQuerySystemTags.proseGuardian.ToString()],
-        };
-
-        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-            return false;
-
-        return true;
-    }
-
-        private async Task<bool> QueueCohesionEnforcementAsync(ChatDbModel chat)
         {
             var backgroundQueryModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chat.ChatId,
-                Priority = BackgroundQueryPriority.Highest,// User is waiting!
+                Priority = BackgroundQueryPriority.High,// will block the next 'main'
                 DependenciesTags = [],// No dependencies at all
-                Tags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],
+                Tags = [BackgroundQuerySystemTags.proseGuardian.ToString()],
             };
 
             if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
@@ -574,5 +555,21 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
             return true;
         }
+
+        //private async Task<bool> QueueCohesionEnforcementAsync(ChatDbModel chat)
+        //{
+        //    var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+        //    {
+        //        ChatId = chat.ChatId,
+        //        Priority = BackgroundQueryPriority.Highest,// User is waiting!
+        //        DependenciesTags = [],// No dependencies at all
+        //        Tags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],
+        //    };
+
+        //    if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+        //        return false;
+
+        //    return true;
+        //}
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 
 namespace CohesiveRP.Core.WebApi.ResponseDtos.ChatCharacterRolls.BusinessObjects
 {
@@ -12,8 +13,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.ChatCharacterRolls.BusinessObjects
         [JsonPropertyName("charactersWhoCanResist")]
         public List<string> CharactersWhoCanResist { get; set; }
 
-        [JsonPropertyName("reasonings")]
-        public List<string> Reasonings { get; set; }
+        [JsonPropertyName("guides")]
+        public List<SkillCheckReasoningGuide> Guides { get; set; }
 
         [JsonPropertyName("bonus")]
         public int Bonus { get; set; }

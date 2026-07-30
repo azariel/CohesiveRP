@@ -1,6 +1,5 @@
 import type { ServerApiResponseDto } from "./ServerApiResponseDto";
 
-
 // ── Business objects ──────────────────────────────────────────────────────────
 
 export interface CharacterInSceneCounterRoll {
@@ -14,9 +13,17 @@ export interface ChatCharacterInSceneCounterRolls {
   characterInSceneCounterRoll: CharacterInSceneCounterRoll;
 }
 
+export interface SkillCheckReasoningGuide {
+  reasoning: string;
+  reactionFromOtherCharactersWhenFailingSkillCheck: string;
+  reactionFromOtherCharactersWhenSucceedingSkillCheck: string;
+}
+
 export interface ChatCharacterRoll {
   actionCategory: string;
-  reasonings: string[];
+  charactersWhoCanResist: string[];
+  guides: SkillCheckReasoningGuide[];
+  bonus: number;
   value: number;
   charactersInSceneWithCounterRolls: ChatCharacterInSceneCounterRolls[];
 }

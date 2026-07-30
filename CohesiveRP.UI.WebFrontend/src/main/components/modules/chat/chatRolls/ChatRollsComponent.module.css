@@ -206,10 +206,18 @@
   line-height: 1.4;
 }
 
+.reasoningItemSuccess {
+  color: #216126;
+}
+
+.reasoningItemFailure {
+  color: #782727;
+}
+
 /* ── value colour tiers (shared between action + counter pills) ── */
-.tier-critical      { background: rgba(255,200,50, 0.12); border-color: rgba(255,200,50, 0.35); color: #ffc83c; }
-.tier-high          { background: rgba(80, 200,120, 0.10); border-color: rgba(80, 200,120, 0.30); color: #50c878; }
-.tier-mid           { background: rgba(52, 132,224, 0.10); border-color: rgba(52, 132,224, 0.28); color: #3484e0; }
+.tier-critical      { background: rgba(255,200,50, 0.12); border-color: rgba(6, 255, 2, 0.35); color: #02ff28; }
+.tier-high          { background: rgba(80, 200,120, 0.10); border-color: rgba(52, 170, 92, 0.3); color: #078f35; }
+.tier-mid           { background: rgba(52, 132,224, 0.10); border-color: rgba(170, 155, 56, 0.28); color: #dde405; }
 .tier-low           { background: rgba(200,140,50, 0.10); border-color: rgba(200,140,50, 0.28); color: #c88c32; }
 .tier-critical-fail { background: rgba(210, 60, 60, 0.10); border-color: rgba(210, 60, 60, 0.30); color: #d23c3c; }
 
