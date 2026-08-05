@@ -1,6 +1,6 @@
 ﻿using CohesiveRP.Common.Diagnostics;
-using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
+using CohesiveRP.Core.LLMProviderProcessors.Queue;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
@@ -15,6 +15,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
 {
     public class ProseGuardianLLMQueryProcessor : LLMQueryProcessor
     {
+        ILLMProviderProcessorQueuer LLMProviderProcessorQueuer;
+
         public ProseGuardianLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
@@ -23,6 +25,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
             IPromptContextElementBuilderFactory promptContextElementBuilderFactory,
             IStorageService storageService,
             IHttpLLMApiProviderService httpLLMApiProviderService,
+            ILLMProviderProcessorQueuer LLMProviderProcessorQueuer,
             ISummaryService summaryService) : base(
                 completionPresetType,
                 tag,
@@ -32,7 +35,9 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                 storageService,
                 httpLLMApiProviderService,
                 summaryService)
-        { }
+        {
+            this.LLMProviderProcessorQueuer = LLMProviderProcessorQueuer;
+        }
 
         public override async Task<bool> ProcessCompletedQueryAsync()
         {
@@ -72,6 +77,12 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                     };
 
                     await storageService.UpdateProseGuardianAsync(currentDbModel);
+                }
+
+                var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
+                if (chat != null)
+                {
+                    await LLMProviderProcessorQueuer.QueueProcessorsOnAfterPostGeneration(chat);
                 }
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;

@@ -16,8 +16,17 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
 
         internal async Task<bool> QueueAll(ChatDbModel chat)
         {
-            bool operationResult = true;
-            operationResult &= await QueueNarrativeArchitectureAsync(chat);
+          bool operationResult = true;
+
+            var hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
+            var currentNarrativeArchitectures = await storageService.GetNarrativeArchitecturesAsync(s => s.ChatId == chat.ChatId);
+            if ((currentNarrativeArchitectures == null || !currentNarrativeArchitectures.Any()) && hotMessagesDbModel?.Messages?.Count > 50)
+            {
+                operationResult &= await QueueNarrativeArchitectureAsync(chat);
+            } else if (currentNarrativeArchitectures != null && currentNarrativeArchitectures.Any() && currentNarrativeArchitectures.First().RefreshCooldown <= 0)
+            {
+                operationResult &= await QueueNarrativeArchitectureAsync(chat);
+            }
 
             return operationResult;
         }

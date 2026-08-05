@@ -76,6 +76,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                     currentDbModel = new NarrativeArchitectureDbModel
                     {
                         ChatId = backgroundQueryDbModel.ChatId,
+                        RefreshCooldown = 10,
                         Content = new NarrativeArchitectureElement
                         {
                             Content = finalContent,
@@ -85,6 +86,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                     await storageService.AddNarrativeArchitectureAsync(currentDbModel);
                 } else
                 {
+                    currentDbModel.RefreshCooldown = 10;
                     currentDbModel.Content = new NarrativeArchitectureElement
                     {
                         Content = finalContent,

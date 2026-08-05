@@ -17,10 +17,8 @@ using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
 {
-    internal class CharacterStatusUpdateLLMQueryProcessor : LLMQueryProcessor
+    public class CharacterStatusUpdateLLMQueryProcessor : LLMQueryProcessor
     {
-        ILLMProviderProcessorQueuer LLMProviderProcessorQueuer;
-
         public CharacterStatusUpdateLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
@@ -29,7 +27,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
             IPromptContextElementBuilderFactory promptContextElementBuilderFactory,
             IStorageService storageService,
             IHttpLLMApiProviderService httpLLMApiProviderService,
-            ILLMProviderProcessorQueuer LLMProviderProcessorQueuer,
             ISummaryService summaryService) : base(
                 completionPresetType,
                 tag,
@@ -40,7 +37,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                 httpLLMApiProviderService,
                 summaryService)
         {
-            this.LLMProviderProcessorQueuer = LLMProviderProcessorQueuer;
         }
 
         // TODO: generalize into a shared utility (duplicated from SceneTrackerLLMQueryProcessor)
@@ -172,6 +168,11 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                             instance.CharacterSheet.Profession = update.Profession;
                         }
 
+                        if (update.Arousal != null && update.Arousal >= 0 && update.Arousal <= 100)
+                        {
+                            instance.CharacterSheet.Arousal = update.Arousal.Value;
+                        }
+
                         if (!string.IsNullOrWhiteSpace(update.LastInteractionWithPlayer))
                         {
                             instance.CharacterSheet.LastInteractionWithPlayer = update.LastInteractionWithPlayer;
@@ -201,12 +202,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
                     backgroundQueryDbModel.RetryCount++;
                     return false;
-                }
-
-                var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
-                if (chat != null)
-                {
-                    await LLMProviderProcessorQueuer.QueueProcessorsOnAfterPostGeneration(chat);
                 }
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;

@@ -27,7 +27,16 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
             }
 
             operationResult &= await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
-            operationResult &= await AddNarrativeDirectionBackgroundQueryAsync(chat);
+
+
+            var currentNarrativeDirections = await storageService.GetNarrativeDirectionsAsync(s => s.ChatId == chat.ChatId);
+            if ((currentNarrativeDirections == null || !currentNarrativeDirections.Any()) && hotMessagesDbModel?.Messages?.Count > 5)
+            {
+                operationResult &= await AddNarrativeDirectionBackgroundQueryAsync(chat);
+            } else if (currentNarrativeDirections != null && currentNarrativeDirections.Any() && currentNarrativeDirections.First().RefreshCooldown <= 0)
+            {
+                operationResult &= await AddNarrativeDirectionBackgroundQueryAsync(chat);
+            }
 
             return operationResult;
         }

@@ -5,6 +5,7 @@ import UserInputComponent from "./userInput/UserInputComponent";
 import { deleteFromServerApiAsync, getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { ChatMessagesResponseDto } from "../../../../ResponsesDto/chat/ChatMessagesResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
@@ -13,6 +14,9 @@ import SceneTrackerComponent from "./sceneTracker/SceneTrackerComponent";
 import ChatRollsComponent from "./chatRolls/ChatRollsComponent";
 import InteractiveUserInputComponent from "./interactiveUserInput/InteractiveUserInputComponent";
 import MobileAvatarBannerComponent from "./mobileAvatarBanner/MobileAvatarBannerComponent";
+
+import type { ChatMessageResponseDto } from "../../../../ResponsesDto/chat/ChatMessageResponseDto";
+import { TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY } from "../../../Constants";
 
 export default function ChatComponent() {
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -85,17 +89,49 @@ export default function ChatComponent() {
   };
 
   const handleSwipeMessage = async (chatId: string, messageId: string) => {
-    // Swipe on backend
-    const payload = { chatId, messageId};
-    const response = await postToServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}/swipe`, payload);
-    const serverApiException = response as ServerApiExceptionResponseDto | null;
-    if (!response || serverApiException?.message) {
-      console.error(`Deleting message failed. [${JSON.stringify(serverApiException)}]`);
-    } else {
-      // Removal from local store
-      setMessages((prev) => prev.filter((m) => m.messageId !== messageId));
-    }
-  };
+  const targetMessage = messages.find((m) => m.messageId === messageId);
+  if (!targetMessage)
+    return;
+
+  // Swipe = delete the last AI message + re-queue a new "main" generation on the backend.
+  const payload = { chatId, messageId };
+  const response = await postToServerApiAsync<ChatMessageResponseDto>(`api/chat/${activeModule.chatId}/messages/${messageId}/swipe`, payload);
+
+  const serverApiException = response as ServerApiExceptionResponseDto | null;
+  if (!response || response.code !== 200 || serverApiException?.message) {
+    console.error(`Swiping message failed. [${JSON.stringify(serverApiException)}]`);
+    return;
+  }
+
+  // Swap the swiped message for the same "generating" placeholder used on send,
+  // so the UI reflects that it's being regenerated (mirrors delete + regenerate).
+  setMessages((prev) =>
+    prev.map((m) =>
+      m.messageId === messageId
+        ? {
+            messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
+            content: "...",
+            thinkingContent: "",
+            createdAtUtc: null,
+            sourceType: 1,
+            messageIndex: targetMessage.messageIndex,
+            summarized: false,
+            characterAvatars: [],
+            characterId: null,
+            characterName: "",
+            personaId: null,
+            personaName: "",
+          }
+        : m
+    )
+  );
+
+  // Track the new main query — UserInputComponent's existing polling effect will
+  // pick this up, poll for completion, and swap the placeholder for the real message.
+  setActiveModule((prev) =>
+    prev ? { ...prev, mainQueryId: response.mainQueryId } : prev
+  );
+};
 
   const handleDeleteMessage = async (messageId: string) => {
     // Delete on backend
@@ -129,8 +165,8 @@ export default function ChatComponent() {
                 <ChatMessageComponent
                   message={message}
                   chatId={activeModule?.chatId}
-                  enableDeleteBtn={isLastMessage} 
-                  enableSwipeBtn={isLastMessage}
+                  enableDeleteBtn={isLastMessage && message.messageId !== TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY}
+                  enableSwipeBtn={isLastMessage && message.messageId !== TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY}
                   isEditable={!message.summarized && index >= messages.length - 3}
                   onSave={handleSaveMessage}
                   onSwipe={handleSwipeMessage}

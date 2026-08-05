@@ -179,6 +179,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonPropertyName("recentImportantEvents")]
         public string[] RecentImportantEvents { get; set; }
 
+        [JsonPropertyName("arousal")]
+        public int Arousal { get; set; }
+
         [JsonPropertyName("pathfinderAttributes")]
         public PathfinderAttribute[] PathfinderAttributesValues { get; set; } = [
             // Default is AVERAGE human male attributes AKA 10 everywhere

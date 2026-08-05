@@ -73,6 +73,12 @@ export default function UserInputComponent({ messagesRef }: Props) {
     };
   }, [messagesRef]);
 
+  useEffect(() => {
+  if (activeModule?.mainQueryId) {
+    setIsInputBlockedDueToServer(true);
+  }
+}, [activeModule?.mainQueryId]);
+
 useEffect(() => {
     // Wait for ChatComponent's "/messages/hot" fetch to land. Otherwise this
     // can resolve on either side of it, and whichever runs second fights the

@@ -23,5 +23,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture
         
         [JsonValueConverter]
         public NarrativeArchitectureElement Content { get; set; }
+
+        [Required]
+        public int RefreshCooldown { get; set; }
     }
 }

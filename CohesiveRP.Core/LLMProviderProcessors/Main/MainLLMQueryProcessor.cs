@@ -526,6 +526,25 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 // Summary
                 _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, globalSettings);
 
+                // Handle NarrativeDirection
+                var currentNarrativeDirections = await storageService.GetNarrativeDirectionsAsync(s => s.ChatId == chat.ChatId);
+                if(currentNarrativeDirections != null && currentNarrativeDirections.Any())
+                {
+                    var currentNarrativeDirection = currentNarrativeDirections.First();
+                    currentNarrativeDirection.InjectInMainPrompt = false;
+                    currentNarrativeDirection.RefreshCooldown--;
+                    await storageService.UpdateNarrativeDirectionAsync(currentNarrativeDirection);
+                }
+
+                // Handle NarrativeArchitecture
+                var currentNarrativeArchitectures = await storageService.GetNarrativeArchitecturesAsync(s => s.ChatId == chat.ChatId);
+                if(currentNarrativeArchitectures != null && currentNarrativeArchitectures.Any())
+                {
+                    var currentNarrativeArchitecture = currentNarrativeArchitectures.First();
+                    currentNarrativeArchitecture.RefreshCooldown--;
+                    await storageService.UpdateNarrativeArchitectureAsync(currentNarrativeArchitecture);
+                }
+
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
             } catch (Exception e)

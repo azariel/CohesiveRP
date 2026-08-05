@@ -23,5 +23,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection
         
         [JsonValueConverter]
         public NarrativeDirectionElement Content { get; set; }
+
+        [Required]
+        public int RefreshCooldown { get; set; }
+
+        [Required]
+        public bool InjectInMainPrompt { get; set; }
     }
 }

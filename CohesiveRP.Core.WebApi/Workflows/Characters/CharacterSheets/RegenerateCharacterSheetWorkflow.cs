@@ -93,6 +93,7 @@ public class RegenerateCharacterSheetWorkflow : IRegenerateCharacterSheetWorkflo
         var promptContext = new CharacterSheetRegenerationPromptContext
         {
             Value = null,
+            MaxTokensToGenerate = preset.Format.MaxTokensToGenerate,
             Messages =
                 [
                     new OpenAIChatCompletionMessage

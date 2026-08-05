@@ -56,6 +56,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                     currentDbModel = new NarrativeDirectionDbModel
                     {
                         ChatId = backgroundQueryDbModel.ChatId,
+                        InjectInMainPrompt = true,
+                        RefreshCooldown = new Random(DateTime.UtcNow.Millisecond).Next(3, 15),
                         Content = new NarrativeDirectionElement
                         {
                             Content = LLMMessageResult,
@@ -65,6 +67,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                     await storageService.AddNarrativeDirectionAsync(currentDbModel);
                 } else
                 {
+                    currentDbModel.RefreshCooldown = new Random(DateTime.UtcNow.Millisecond).Next(3, 15);
+                    currentDbModel.InjectInMainPrompt = true;
                     currentDbModel.Content = new NarrativeDirectionElement
                     {
                         Content = LLMMessageResult,
