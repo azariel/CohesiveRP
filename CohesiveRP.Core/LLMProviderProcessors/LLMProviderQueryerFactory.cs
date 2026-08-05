@@ -4,6 +4,7 @@ using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator;
 using CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator;
+using CohesiveRP.Core.LLMProviderProcessors.Queue;
 using CohesiveRP.Core.LLMProviderProcessors.SceneTracker;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
@@ -21,6 +22,7 @@ namespace CohesiveRP.Core.LLMProviderManager
         private IPromptContextElementBuilderFactory promptContextElementBuilderFactory;
         private IStorageService storageService;
         private IHttpLLMApiProviderService httpLLMApiProviderService;
+        ILLMProviderProcessorQueuer LLMProviderProcessorQueuer;
         private ISummaryService summaryService;
 
         private static readonly BackgroundQuerySystemTags[] RunningTagPriority = Enum.GetValues<BackgroundQuerySystemTags>()
@@ -32,11 +34,13 @@ namespace CohesiveRP.Core.LLMProviderManager
             IPromptContextElementBuilderFactory promptContextElementBuilderFactory,
             IStorageService storageService,
             IHttpLLMApiProviderService httpLLMApiProviderService,
+            ILLMProviderProcessorQueuer LLMProviderProcessorQueuer,
             ISummaryService summaryService)
         {
             this.promptContextBuilderFactory = promptContextBuilderFactory;
             this.promptContextElementBuilderFactory = promptContextElementBuilderFactory;
             this.storageService = storageService;
+            this.LLMProviderProcessorQueuer = LLMProviderProcessorQueuer;
             this.httpLLMApiProviderService = httpLLMApiProviderService;
             this.summaryService = summaryService;
         }
@@ -66,7 +70,7 @@ namespace CohesiveRP.Core.LLMProviderManager
             ILLMQueryProcessor processor = runningTag switch
             {
                 BackgroundQuerySystemTags.main =>
-                    new MainLLMQueryProcessor(ChatCompletionPresetType.Main, BackgroundQuerySystemTags.main, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                    new MainLLMQueryProcessor(ChatCompletionPresetType.Main, BackgroundQuerySystemTags.main, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, LLMProviderProcessorQueuer, summaryService),
                 BackgroundQuerySystemTags.sceneTracker =>
                     new SceneTrackerLLMQueryProcessor(ChatCompletionPresetType.SceneTracker, BackgroundQuerySystemTags.sceneTracker, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 //BackgroundQuerySystemTags.sceneAnalyze =>
@@ -99,7 +103,7 @@ namespace CohesiveRP.Core.LLMProviderManager
                 BackgroundQuerySystemTags.proseGuardian =>
                     new ProseGuardianLLMQueryProcessor(ChatCompletionPresetType.ProseGuardian, BackgroundQuerySystemTags.proseGuardian, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.characterStatusUpdate =>
-                    new CharacterStatusUpdateLLMQueryProcessor(ChatCompletionPresetType.CharacterStatusUpdate, BackgroundQuerySystemTags.characterStatusUpdate, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                    new CharacterStatusUpdateLLMQueryProcessor(ChatCompletionPresetType.CharacterStatusUpdate, BackgroundQuerySystemTags.characterStatusUpdate, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, LLMProviderProcessorQueuer, summaryService),
                 _ => null
             };
 

@@ -2,6 +2,7 @@
 using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
+using CohesiveRP.Core.LLMProviderProcessors.Queue;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
@@ -22,11 +23,13 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
 {
     private IStorageService storageService;
     private ISummaryService summaryService;
+    private ILLMProviderProcessorQueuer LLMProviderProcessorQueuer;
 
-    public AddNewMessageWorkflow(IStorageService storageService, ISummaryService summaryService)
+    public AddNewMessageWorkflow(IStorageService storageService, ISummaryService summaryService, ILLMProviderProcessorQueuer LLMProviderProcessorQueuer)
     {
         this.storageService = storageService;
         this.summaryService = summaryService;
+        this.LLMProviderProcessorQueuer = LLMProviderProcessorQueuer;
     }
 
     public async Task<IWebApiResponseDto> AddNewMessageAsync(AddNewMessageRequestDto requestDto)
@@ -72,18 +75,10 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
         await AseptisePreviousMessageIfRequiredAsync(chat, persona, characters, hotMessagesDbModel);
 
-        // Add a background query to generate the sceneTracker first and foremost
-        // Note: we're not checking up on if the function was successful as this is a soft dependency on the chat roleplay
-        if (requestDto.QueueDependentBackgroundTasks && (hotMessagesDbModel != null && hotMessagesDbModel.Messages.Count > 4))
-        {
-            await AddSceneTrackerBackgroundQueryAsync(chat);
-        }
-
-        // Also query the dependent queries
+        // Queue backgroundQueries that must be completed before the main query generation
         if (requestDto.QueueDependentBackgroundTasks)
         {
-            await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
-            await AddNarrativeDirectionBackgroundQueryAsync(chat);
+            await LLMProviderProcessorQueuer.QueueProcessorsOnBeforeMainGeneration(chat);
         }
 
         IMessageDbModel message = null;
@@ -189,53 +184,5 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             message.Content = message.Content.ReplacePromptBasicPlaceholders(characters.FirstOrDefault(f => f.CharacterId == message.CharacterId)?.Name ?? "(the character)", persona?.Name ?? "User");
             await storageService.UpdateHotMessageAsync(chat.ChatId, message);
         }
-    }
-
-    private async Task<bool> AddSceneTrackerBackgroundQueryAsync(ChatDbModel chat)
-    {
-        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-        {
-            ChatId = chat.ChatId,
-            Priority = BackgroundQueryPriority.Highest,// User is waiting!
-            DependenciesTags = [],// No dependencies at all
-            Tags = [BackgroundQuerySystemTags.sceneTracker.ToString()],
-        };
-
-        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-            return false;
-
-        return true;
-    }
-
-    private async Task<bool> AddSkillChecksInitiatorBackgroundQueryAsync(ChatDbModel chat)
-    {
-        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-        {
-            ChatId = chat.ChatId,
-            Priority = BackgroundQueryPriority.Highest,// User is waiting!
-            DependenciesTags = [],// No dependencies at all
-            Tags = [BackgroundQuerySystemTags.skillChecksInitiator.ToString()],
-        };
-
-        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-            return false;
-
-        return true;
-    }
-
-    private async Task<bool> AddNarrativeDirectionBackgroundQueryAsync(ChatDbModel chat)
-    {
-        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-        {
-            ChatId = chat.ChatId,
-            Priority = BackgroundQueryPriority.Highest,// User is waiting!
-            DependenciesTags = [],// No dependencies at all
-            Tags = [BackgroundQuerySystemTags.narrativeDirection.ToString()],
-        };
-
-        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-            return false;
-
-        return true;
     }
 }

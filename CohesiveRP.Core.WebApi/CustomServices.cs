@@ -6,6 +6,7 @@ using CohesiveRP.Core.ComfyUI.Client;
 using CohesiveRP.Core.DtoConverters;
 using CohesiveRP.Core.DtoConverters.Abstractions;
 using CohesiveRP.Core.LLMProviderManager;
+using CohesiveRP.Core.LLMProviderProcessors.Queue;
 using CohesiveRP.Core.PromptContext;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
@@ -151,6 +152,9 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IPromptContextBuilderFactory, PromptContextBuilderFactory>();
             services.AddSingleton<IPromptContextElementBuilderFactory, PromptContextElementBuilderFactory>();
             services.AddSingleton<ILLMApiQueryPayloadBuilderFactory, LLMApiQueryPayloadBuilderFactory>();
+
+            // Processors
+            services.AddSingleton<ILLMProviderProcessorQueuer, LLMProviderProcessorQueuer>();
 
             // DataAccessLayers
             services.AddDbContextFactory<StorageDbContext>();

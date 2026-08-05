@@ -3,6 +3,7 @@ using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations.BusinessObjects;
+using CohesiveRP.Core.LLMProviderProcessors.Queue;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Pathfinder.CharactersMutations;
@@ -10,16 +11,16 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheets.BusinessObjects;
-using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
 {
     internal class CharacterStatusUpdateLLMQueryProcessor : LLMQueryProcessor
     {
+        ILLMProviderProcessorQueuer LLMProviderProcessorQueuer;
+
         public CharacterStatusUpdateLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
@@ -28,6 +29,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
             IPromptContextElementBuilderFactory promptContextElementBuilderFactory,
             IStorageService storageService,
             IHttpLLMApiProviderService httpLLMApiProviderService,
+            ILLMProviderProcessorQueuer LLMProviderProcessorQueuer,
             ISummaryService summaryService) : base(
                 completionPresetType,
                 tag,
@@ -37,7 +39,9 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                 storageService,
                 httpLLMApiProviderService,
                 summaryService)
-        { }
+        {
+            this.LLMProviderProcessorQueuer = LLMProviderProcessorQueuer;
+        }
 
         // TODO: generalize into a shared utility (duplicated from SceneTrackerLLMQueryProcessor)
         private CharacterSheetInstance FindInstanceByName(List<CharacterSheetInstance> instances, string characterName)
@@ -202,10 +206,9 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                 var chat = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
                 if (chat != null)
                 {
-                    await QueueNarrativeArchitectureAsync(chat);
+                    await LLMProviderProcessorQueuer.QueueProcessorsOnAfterPostGeneration(chat);
                 }
 
-                
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
@@ -217,25 +220,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                 backgroundQueryDbModel.RetryCount++;
                 return false;
             }
-        }
-
-        private async Task<bool> QueueNarrativeArchitectureAsync(ChatDbModel chat)
-        {
-            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-            {
-                ChatId = chat.ChatId,
-                Priority = BackgroundQueryPriority.VeryLow,// user is not waiting, we're simply generation and iterating over secret plots and narrative arcs in the background, so we can set it to very low priority
-                DependenciesTags = Enum.GetValues<BackgroundQuerySystemTags>()// this one is blocked by basically ANYTHING except the same type
-                    .Where(w => w != BackgroundQuerySystemTags.narrativeArchitecture)
-                    .Select(s => s.ToString())
-                    .ToList(),
-                Tags = [BackgroundQuerySystemTags.narrativeArchitecture.ToString()],
-            };
-
-            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-                return false;
-
-            return true;
         }
     }
 }
