@@ -157,7 +157,6 @@ namespace CohesiveRP.Core.Services
         // Pathfinder.CharacterSheets
         public async Task<CharacterSheetDbModel[]> GetCharacterSheetsAsync() => await characterSheetsDal.GetCharacterSheetsAsync();
         public async Task<CharacterSheetDbModel[]> GetCharacterSheetsByFuncAsync(Func<CharacterSheetDbModel, bool> func) => await characterSheetsDal.GetCharacterSheetsByFuncAsync(func);
-        //public async Task<CharacterSheetDbModel> GetCharacterSheetByFuncAsync(Func<CharacterSheetDbModel, bool> func) => throw new NotImplementedException();
         public async Task<CharacterSheetDbModel> GetCharacterSheetByCharacterIdAsync(string characterId) => await characterSheetsDal.GetCharacterSheetByCharacterIdAsync(characterId);
         public async Task<CharacterSheetDbModel> AddCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.AddCharacterSheetAsync(dbModel);
         public async Task<bool> UpdateCharacterSheetAsync(CharacterSheetDbModel dbModel) => await characterSheetsDal.UpdateCharacterSheetAsync(dbModel);
@@ -165,7 +164,7 @@ namespace CohesiveRP.Core.Services
 
         // Pathfinder.CharacterSheetInstances
         public async Task<CharacterSheetInstancesDbModel[]> GetCharacterSheetInstancesAsync() => await characterSheetInstancesDal.GetCharacterSheetInstancesAsync();
-        public async Task<CharacterSheetInstancesDbModel[]> GetCharacterSheetsInstanceByFuncAsync(Func<CharacterSheetInstancesDbModel, bool> func) => await characterSheetInstancesDal.GetCharacterSheetInstancesByFuncAsync(func);
+        public async Task<CharacterSheetInstancesDbModel[]> GetCharacterSheetInstancesByFuncAsync(Func<CharacterSheetInstancesDbModel, bool> func) => await characterSheetInstancesDal.GetCharacterSheetInstancesByFuncAsync(func);
         public async Task<CharacterSheetInstancesDbModel> GetCharacterSheetsInstanceByChatIdAsync(string chatId) => await characterSheetInstancesDal.GetCharacterSheetsInstanceByChatIdAsync(chatId);
         public async Task<CharacterSheetInstancesDbModel> AddCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.AddCharacterSheetsInstanceAsync(dbModel);
         public async Task<bool> UpdateCharacterSheetsInstanceAsync(CharacterSheetInstancesDbModel dbModel) => await characterSheetInstancesDal.UpdateCharacterSheetsInstanceAsync(dbModel);

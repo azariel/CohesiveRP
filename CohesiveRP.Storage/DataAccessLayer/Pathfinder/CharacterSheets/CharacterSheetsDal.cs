@@ -111,6 +111,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             SpeechPattern = dbModel.CharacterSheet.SpeechPattern,
                             Weaknesses = dbModel.CharacterSheet.Weaknesses,
                             WeaponsProficiency = dbModel.CharacterSheet.WeaponsProficiency,
+                            LastInteractionWithPlayer = dbModel.CharacterSheet.LastInteractionWithPlayer,
+                            LatentMoodForNextInteractionWithPlayer = dbModel.CharacterSheet.LatentMoodForNextInteractionWithPlayer,
+                            RecentImportantEvents = dbModel.CharacterSheet.RecentImportantEvents,
+                            Arousal = dbModel.CharacterSheet.Arousal
                         };
 
                         instance.CharacterSheetId = dbModel.CharacterSheetId;

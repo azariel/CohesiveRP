@@ -140,6 +140,10 @@ public class ExportCharacterCardWorkflow : IExportCharacterCardWorkflow
                 WeaponsProficiency = characterSheet.CharacterSheet.WeaponsProficiency,
                 PathfinderAttributesValues = characterSheet.CharacterSheet.PathfinderAttributesValues,
                 PathfinderSkillsValues = characterSheet.CharacterSheet.PathfinderSkillsValues,
+                LastInteractionWithPlayer = characterSheet.CharacterSheet.LastInteractionWithPlayer,
+                LatentMoodForNextInteractionWithPlayer = characterSheet.CharacterSheet.LatentMoodForNextInteractionWithPlayer,
+                RecentImportantEvents = characterSheet.CharacterSheet.RecentImportantEvents,
+                Arousal = characterSheet.CharacterSheet.Arousal
             };
         }
 

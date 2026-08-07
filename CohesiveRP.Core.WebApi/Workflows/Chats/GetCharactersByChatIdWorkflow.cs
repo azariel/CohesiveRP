@@ -1,30 +1,49 @@
-﻿using CohesiveRP.Common.WebApi;
+﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Exceptions;
+using CohesiveRP.Common.Utils;
+using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Utils.Characters;
+using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters.BusinessObjects;
-using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
+using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
+using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Characters.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 
-namespace CohesiveRP.Core.WebApi.Workflows.Chat;
+namespace CohesiveRP.Core.WebApi.Workflows.Chats;
 
-public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
+public class GetCharactersByChatIdWorkflow : IGetCharactersByChatIdWorkflow
 {
     private IStorageService storageService;
 
-    public GetAllCharactersWorkflow(IStorageService storageService)
+    public GetCharactersByChatIdWorkflow(IStorageService storageService)
     {
         this.storageService = storageService;
     }
 
-    public async Task<IWebApiResponseDto> GetAllCharactersAsync()
+    public async Task<IWebApiResponseDto> GetCharactersByChatIdAsync(string chatId)
     {
-        CharacterDbModel[] characters = await storageService.GetCharactersAsync();
+        var chat = await storageService.GetChatAsync(chatId);
 
-        if (characters == null || characters.Length <= 0)
+        if (chat == null)
+        {
+            LoggingManager.LogToFile("7b73209e-2153-44bf-b1eb-968e4d75724d", $"Couldn't get chat from id [{chatId}]. Chat was not found.");
+            return new WebApiException
+            {
+                HttpResultCode = System.Net.HttpStatusCode.NotFound,
+                Message = $"Chat not found."
+            };
+        }
+
+        var allCharacters = await storageService.GetCharactersAsync();
+        var charactersTiedToChat = allCharacters.Where(w => chat.CharacterIds != null && chat.CharacterIds.Contains(w.CharacterId)).ToList();
+
+        if (charactersTiedToChat == null || charactersTiedToChat.Count <= 0)
         {
             return new CharactersResponseDto
             {
@@ -33,12 +52,11 @@ public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
             };
         }
 
-        // Convert DbModel to an acceptable web model (without sensitive information)
         var responseDto = new CharactersResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
             // TODO: pagination instead of take(512)
-            Characters = characters.Take(512).Select(s => new CharacterResponse
+            Characters = charactersTiedToChat.Take(512).Select(s => new CharacterResponse
             {
                 CharacterId = s.CharacterId,
                 Name = s.Name,

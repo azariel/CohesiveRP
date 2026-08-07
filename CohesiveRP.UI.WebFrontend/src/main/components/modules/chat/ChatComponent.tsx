@@ -1,5 +1,5 @@
 import styles from "./ChatComponent.module.css";
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import ChatMessageComponent from "./message/ChatMessageComponent";
 import UserInputComponent from "./userInput/UserInputComponent";
 import { deleteFromServerApiAsync, getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
@@ -14,6 +14,8 @@ import SceneTrackerComponent from "./sceneTracker/SceneTrackerComponent";
 import ChatRollsComponent from "./chatRolls/ChatRollsComponent";
 import InteractiveUserInputComponent from "./interactiveUserInput/InteractiveUserInputComponent";
 import MobileAvatarBannerComponent from "./mobileAvatarBanner/MobileAvatarBannerComponent";
+import CharacterSheetInstancesSelectionComponent from "./characterSheetInstancesSelection/CharacterSheetInstancesSelectionComponent";
+import CharacterSheetInstanceComponent from "./characterSheetInstances/CharacterSheetInstanceComponent";
 
 import type { ChatMessageResponseDto } from "../../../../ResponsesDto/chat/ChatMessageResponseDto";
 import { TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY } from "../../../Constants";
@@ -23,6 +25,17 @@ export default function ChatComponent() {
   const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
   const [messages, setMessages] = useChatMessages(activeModule?.chatId);
   const didComponentMountAlready = useRef(false);
+
+  /* ── Which character's instance is open, when the header has switched us into
+     the character-sheets sub-view. Local state: doesn't need to survive
+     leaving the chat, and resets whenever the sub-view itself changes. ── */
+  const [selectedInstanceCharacter, setSelectedInstanceCharacter] = useState<{ characterId: string; characterName: string } | null>(null);
+
+  useEffect(() => {
+    if (activeModule?.chatSubView !== "characterSheetInstances") {
+      setSelectedInstanceCharacter(null);
+    }
+  }, [activeModule?.chatSubView]);
 
   useEffect(() => {
     if (didComponentMountAlready.current)
@@ -76,10 +89,8 @@ export default function ChatComponent() {
   
     const payload = { ...updatedMessage, content: newContent };
 
-    // Optimistic update
     setMessages((prev) => prev.map((m) => m.messageId === messageId ? payload : m));
 
-    // Save to backend
     updatedMessage.content = newContent;
     const response = await putToServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}`, updatedMessage);
     const serverApiException = response as ServerApiExceptionResponseDto | null;
@@ -93,7 +104,6 @@ export default function ChatComponent() {
   if (!targetMessage)
     return;
 
-  // Swipe = delete the last AI message + re-queue a new "main" generation on the backend.
   const payload = { chatId, messageId };
   const response = await postToServerApiAsync<ChatMessageResponseDto>(`api/chat/${activeModule.chatId}/messages/${messageId}/swipe`, payload);
 
@@ -103,8 +113,6 @@ export default function ChatComponent() {
     return;
   }
 
-  // Swap the swiped message for the same "generating" placeholder used on send,
-  // so the UI reflects that it's being regenerated (mirrors delete + regenerate).
   setMessages((prev) =>
     prev.map((m) =>
       m.messageId === messageId
@@ -126,72 +134,86 @@ export default function ChatComponent() {
     )
   );
 
-  // Track the new main query — UserInputComponent's existing polling effect will
-  // pick this up, poll for completion, and swap the placeholder for the real message.
   setActiveModule((prev) =>
     prev ? { ...prev, mainQueryId: response.mainQueryId } : prev
   );
 };
 
   const handleDeleteMessage = async (messageId: string) => {
-    // Delete on backend
     const response = await deleteFromServerApiAsync(`api/chat/${activeModule.chatId}/messages/${messageId}`);
     const serverApiException = response as ServerApiExceptionResponseDto | null;
     if (!response || serverApiException?.message) {
       console.error(`Deleting message failed. [${JSON.stringify(serverApiException)}]`);
     } else {
-      // Removal from local store
       setMessages((prev) => prev.filter((m) => m.messageId !== messageId));
     }
   };
 
   return (
     <main className={styles.chatComponent}>
-      <div className={styles.messagesContainer} ref={messagesRef}>
-        {messages.length > 0 ? (
-          messages.map((message, index) => {
-            const isLastMessage = index === messages.length - 1;
-
-            return (
-              <Fragment key={message.messageId}>
-                {messages.length > 1 && isLastMessage && (
-                  <>
-                    {/* Mobile-only avatar banner which mirrors MainRightComponent on small screens */}
-                    <MobileAvatarBannerComponent />
-                    <SceneTrackerComponent />
-                  </>
-                )}
-
-                <ChatMessageComponent
-                  message={message}
-                  chatId={activeModule?.chatId}
-                  enableDeleteBtn={isLastMessage && message.messageId !== TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY}
-                  enableSwipeBtn={isLastMessage && message.messageId !== TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY}
-                  isEditable={!message.summarized && index >= messages.length - 3}
-                  onSave={handleSaveMessage}
-                  onSwipe={handleSwipeMessage}
-                  onDelete={handleDeleteMessage}
-                />
-              </Fragment>
-            );
-          })
-        ) : (
-          <p />
-        )}
-        {activeModule?.chatId ? (
-        <div className={styles.userInputContainer}>
-          {/* ── Interactive prompts shown after each AI response ── */}
-          <InteractiveUserInputComponent
-            chatId={activeModule.chatId}
-            refreshToken={activeModule?.interactiveInputRefreshToken}
-          />
-          <ChatRollsComponent sceneTrackerRefreshToken={activeModule?.sceneTrackerRefreshToken} />
-          <UserInputComponent messagesRef={messagesRef} />
+      {activeModule?.chatSubView === "characterSheetInstances" && activeModule?.chatId ? (
+        <div className={styles.chatSubViewContainer}>
+          {selectedInstanceCharacter ? (
+            <CharacterSheetInstanceComponent
+              characterId={selectedInstanceCharacter.characterId}
+              chatId={activeModule.chatId}
+              characterName={selectedInstanceCharacter.characterName}
+              onBack={() => setSelectedInstanceCharacter(null)}
+            />
+          ) : (
+            <CharacterSheetInstancesSelectionComponent
+              chatId={activeModule.chatId}
+              onSelectCharacter={(characterId, characterName) =>
+                setSelectedInstanceCharacter({ characterId, characterName })
+              }
+            />
+          )}
         </div>
-        ):(
-          <p>Chat not found.</p>
-        )}
-      </div>
+      ) : (
+        <div className={styles.messagesContainer} ref={messagesRef}>
+          {messages.length > 0 ? (
+            messages.map((message, index) => {
+              const isLastMessage = index === messages.length - 1;
+
+              return (
+                <Fragment key={message.messageId}>
+                  {messages.length > 1 && isLastMessage && (
+                    <>
+                      <MobileAvatarBannerComponent />
+                      <SceneTrackerComponent />
+                    </>
+                  )}
+
+                  <ChatMessageComponent
+                    message={message}
+                    chatId={activeModule?.chatId}
+                    enableDeleteBtn={isLastMessage && message.messageId !== TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY}
+                    enableSwipeBtn={isLastMessage && message.messageId !== TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY}
+                    isEditable={!message.summarized && index >= messages.length - 3}
+                    onSave={handleSaveMessage}
+                    onSwipe={handleSwipeMessage}
+                    onDelete={handleDeleteMessage}
+                  />
+                </Fragment>
+              );
+            })
+          ) : (
+            <p />
+          )}
+          {activeModule?.chatId ? (
+          <div className={styles.userInputContainer}>
+            <InteractiveUserInputComponent
+              chatId={activeModule.chatId}
+              refreshToken={activeModule?.interactiveInputRefreshToken}
+            />
+            <ChatRollsComponent sceneTrackerRefreshToken={activeModule?.sceneTrackerRefreshToken} />
+            <UserInputComponent messagesRef={messagesRef} />
+          </div>
+          ):(
+            <p>Chat not found.</p>
+          )}
+        </div>
+      )}
     </main>
   );
 }

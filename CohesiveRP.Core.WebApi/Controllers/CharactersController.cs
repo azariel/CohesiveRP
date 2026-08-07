@@ -1,7 +1,9 @@
 using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
+using CohesiveRP.Core.WebApi.RequestDtos.Characters.CharacterSheetInstances;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
 using CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,6 +25,9 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         private IExportCharacterCardWorkflow exportCharacterCardWorkflow;
         private IImportCharacterCardWorkflow importCharacterCardWorkflow;
         private IDeleteCharacterAvatarWorkflow deleteCharacterAvatarWorkflow;
+        
+        private IGetCharacterSheetInstanceWorkflow getCharacterSheetInstanceWorkflow;
+        private IUpdateCharacterSheetInstanceWorkflow updateCharacterSheetInstanceWorkflow;
 
         public CharactersController(
             IGetAllCharactersWorkflow getAllCharactersWorkflow,
@@ -36,7 +41,9 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             IRegenerateCharacterSheetWorkflow regenerateCharacterSheetWorkflow,
             IExportCharacterCardWorkflow exportCharacterCardWorkflow,
             IImportCharacterCardWorkflow importCharacterCardWorkflow,
-            IDeleteCharacterAvatarWorkflow deleteCharacterAvatarWorkflow)
+            IDeleteCharacterAvatarWorkflow deleteCharacterAvatarWorkflow,
+            IGetCharacterSheetInstanceWorkflow getCharacterSheetInstanceWorkflow,
+            IUpdateCharacterSheetInstanceWorkflow updateCharacterSheetInstanceWorkflow)
         {
             this.getAllCharactersWorkflow = getAllCharactersWorkflow;
             this.getCharacterByIdWorkflow = getCharacterByIdWorkflow;
@@ -50,6 +57,8 @@ namespace CohesiveRP.Storage.WebApi.Controllers
             this.exportCharacterCardWorkflow = exportCharacterCardWorkflow;
             this.importCharacterCardWorkflow = importCharacterCardWorkflow;
             this.deleteCharacterAvatarWorkflow = deleteCharacterAvatarWorkflow;
+            this.getCharacterSheetInstanceWorkflow = getCharacterSheetInstanceWorkflow;
+            this.updateCharacterSheetInstanceWorkflow = updateCharacterSheetInstanceWorkflow;
         }
 
         [HttpGet]
@@ -132,6 +141,23 @@ namespace CohesiveRP.Storage.WebApi.Controllers
         {
             return new JsonResult(await updateCharacterSheetWorkflow.UpdateCharacterSheetAsync(requestDto));
         }
+
+        // ---------- Character Sheet Instance ----------
+        [HttpGet]
+        [Route("{characterId}/chats/{chatId}/charactersheetinstance")]
+        public async Task<IActionResult> GetCharacterSheetInstancesByChatId(string characterId, string chatId)
+        {
+            return new JsonResult(await getCharacterSheetInstanceWorkflow.GetCharacterSheetInstancesByChatId(chatId, characterId));
+        }
+
+        [HttpPut]
+        [Route("{characterId}/chats/{chatId}/charactersheetinstances/{characterSheetInstanceId}")]
+        public async Task<IActionResult> UpdateCharacterSheetInstance(UpdateCharacterSheetInstanceRequestDto requestDto)
+        {
+            return new JsonResult(await updateCharacterSheetInstanceWorkflow.UpdateCharacterSheetInstanceAsync(requestDto));
+        }
+
+        // ---------- Character Card ----------
 
         [HttpGet]
         [Route("{characterId}/exportCharacterCard")]

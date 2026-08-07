@@ -74,6 +74,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IDeleteSpecificMessageByIdWorkflow, DeleteSpecificMessageByIdWorkflow>();
             services.AddSingleton<ISwipeMessageWorkflow, SwipeMessageWorkflow>();
             services.AddSingleton<IGetPromptByChatIdWorkflow, GetPromptByChatIdWorkflow>();
+            services.AddSingleton<IGetCharactersByChatIdWorkflow, GetCharactersByChatIdWorkflow>();
 
             // Workflows.ChatCharacterRolls
             services.AddSingleton<IChatCharacterRollsWorkflow, GetChatCharacterRollsWorkflow>();
@@ -91,6 +92,8 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IExportCharacterCardWorkflow, ExportCharacterCardWorkflow>();
             services.AddSingleton<IImportCharacterCardWorkflow, ImportCharacterCardWorkflow>();
             services.AddSingleton<IDeleteCharacterAvatarWorkflow, DeleteCharacterAvatarWorkflow>();
+            services.AddSingleton<IGetCharacterSheetInstanceWorkflow, GetCharacterSheetInstanceWorkflow>();
+            services.AddSingleton<IUpdateCharacterSheetInstanceWorkflow, UpdateCharacterSheetInstanceWorkflow>();
 
             // Workflows.Personas
             services.AddSingleton<IGetAllPersonasWorkflow, GetAllPersonasWorkflow>();

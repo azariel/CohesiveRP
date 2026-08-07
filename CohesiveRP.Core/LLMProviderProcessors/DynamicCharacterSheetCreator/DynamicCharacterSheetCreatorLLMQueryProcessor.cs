@@ -187,6 +187,18 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                         SpeechPattern = characterSheetFromLLMApiResponse.SpeechPattern,
                         Weaknesses = characterSheetFromLLMApiResponse.Weaknesses,
                         WeaponsProficiency = characterSheetFromLLMApiResponse.WeaponsProficiency,
+                        TeethDetails = characterSheetFromLLMApiResponse.TeethDetails,
+                        NailsColor = characterSheetFromLLMApiResponse.NailsColor,
+                        NailsDetails = characterSheetFromLLMApiResponse.NailsDetails,
+                        Eyebrows = characterSheetFromLLMApiResponse.Eyebrows,
+                        LipsDetails = characterSheetFromLLMApiResponse.LipsDetails,
+                        MagicalEffects = characterSheetFromLLMApiResponse.MagicalEffects,
+                        BodyStatus = characterSheetFromLLMApiResponse.BodyStatus,
+                        Wounds = characterSheetFromLLMApiResponse.Wounds,
+                        LastInteractionWithPlayer = characterSheetFromLLMApiResponse.LastInteractionWithPlayer,
+                        LatentMoodForNextInteractionWithPlayer = characterSheetFromLLMApiResponse.LatentMoodForNextInteractionWithPlayer,
+                        RecentImportantEvents = characterSheetFromLLMApiResponse.RecentImportantEvents,
+                        Arousal = characterSheetFromLLMApiResponse.Arousal,
                     }
                 });
 

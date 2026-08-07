@@ -14,6 +14,7 @@ interface SharedContextChatType extends SharedContextType {
   interactiveInputRefreshToken?: number;
   hotMessagesLoaded?: boolean;
   hideAvatars: boolean | null;
+  chatSubView?: "chat" | "characterSheetInstances";
 };
 
 export type {

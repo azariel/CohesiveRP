@@ -57,6 +57,10 @@ interface CharacterSheet {
   wounds?: CharacterStatusEffect[];
   pathfinderAttributes?: PathfinderAttributeDto[];
   pathfinderSkills?: PathfinderSkillAttributeDto[];
+  lastInteractionWithPlayer?: string;
+  latentMoodForNextInteractionWithPlayer?: string;
+  recentImportantEvents?: string[];
+  arousal?: number;
 }
 
 interface PathfinderAttributeDto {
