@@ -21,6 +21,7 @@ using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.SceneTracker;
+using CohesiveRP.Storage.Utils.Characters;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 {
@@ -142,18 +143,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
             }
         }
 
-        // TODO: generalize into an utils
-        private CharacterSheetInstance FindCharacterSheetInstanceFromCharacterName(List<CharacterSheetInstance> characterSheetInstances, string characterName)
-        {
-            string characterNameLower = characterName.ToLowerInvariant().Trim();
-            var selectedCharacterSheetInstance = characterSheetInstances?.FirstOrDefault(f =>
-            f.CharacterSheet.FirstName?.ToLowerInvariant().Trim() == characterNameLower ||
-            f.CharacterSheet.LastName?.ToLowerInvariant().Trim() == characterNameLower ||
-            $"{f.CharacterSheet.FirstName?.ToLowerInvariant().Trim()} {f.CharacterSheet.LastName?.ToLowerInvariant().Trim()}" == characterNameLower);
-
-            return selectedCharacterSheetInstance;
-        }
-
         private List<string> GetAllCharacterNamesFromSceneTracker(VisualSceneTracker visualSceneTracker)
         {
             var everyCharacterNames = new List<string>();
@@ -190,7 +179,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
             foreach (string characterName in everyCharacterNames)
             {
-                var characterSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstances?.CharacterSheetInstances, characterName);
+                var characterSheetInstance = CharacterSheetInstanceHelper.FindCharacterSheetInstanceFromCharacterName(characterSheetInstances?.CharacterSheetInstances, characterName);
 
                 if (characterSheetInstances?.CharacterSheetInstances == null || characterSheetInstances.CharacterSheetInstances.Count <= 0 || characterSheetInstance == null)
                 {
@@ -233,7 +222,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
             foreach (var instance in characterSheetInstancesObj.CharacterSheetInstances.Where(w => w.CharacterSheet != null))
             {
-                bool inScene = namesInScene.Any(n => FindCharacterSheetInstanceFromCharacterName(new List<CharacterSheetInstance> { instance }, n) != null);
+                bool inScene = namesInScene.Any(n => CharacterSheetInstanceHelper.FindCharacterSheetInstanceFromCharacterName(new List<CharacterSheetInstance> { instance }, n) != null);
 
                 if (inScene)
                 {

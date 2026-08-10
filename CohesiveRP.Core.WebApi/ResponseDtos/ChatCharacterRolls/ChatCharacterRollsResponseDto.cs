@@ -13,5 +13,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.ChatCompletionPresets
 
         [JsonPropertyName("rolls")]
         public ChatCharacterRollResponse[] Rolls { get; set; }
+
+        [JsonPropertyName("playerDescription")]
+        public string PlayerDescription { get; set; }
     }
 }

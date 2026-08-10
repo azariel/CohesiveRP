@@ -36,4 +36,5 @@ export interface ChatCharacterRollResponse {
 
 export interface ChatCharacterRollsResponseDto extends ServerApiResponseDto {
   rolls: ChatCharacterRollResponse[];
+  playerDescription?: string;
 }

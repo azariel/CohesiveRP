@@ -33,8 +33,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
         //private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
         //[
-        //    ChatCompletionPresetType.ProseGuardian,// PRE ~50s
         //    ChatCompletionPresetType.NarrativeDirection,// PRE ~15s
+        //    ChatCompletionPresetType.SkillChecksDescriptor,// During Main
+        //    ChatCompletionPresetType.ProseGuardian,// POST ~50s
         //    ChatCompletionPresetType.Summarize,// POST++ ~45s
         //    ChatCompletionPresetType.SummariesMerge,// POST++ ~50s
         //];
@@ -82,7 +83,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
         [
             ChatCompletionPresetType.NarrativeDirection,// PRE
-            ChatCompletionPresetType.ProseGuardian,// PRE
+            ChatCompletionPresetType.ProseGuardian,// POST
             ChatCompletionPresetType.SkillChecksInitiator,// PRE
             ChatCompletionPresetType.SceneTracker,// PRE
             ChatCompletionPresetType.CharacterStatusUpdate,// POST
@@ -90,6 +91,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             ChatCompletionPresetType.NarrativeArchitecture,// POST (secretPlot)
             ChatCompletionPresetType.Summarize,// POST++
             ChatCompletionPresetType.SummariesMerge,// POST++
+            ChatCompletionPresetType.SkillChecksDescriptor,// During Main
             ChatCompletionPresetType.Main,
             ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
             ChatCompletionPresetType.DynamicCharacterCreation,
@@ -515,6 +517,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             {
                                 Type = ChatCompletionPresetType.NarrativeArchitecture,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_NARRATIVE_ARCHITECTURE_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.SkillChecksDescriptor,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_PATHFINDER_SKILLS_CHECKS_DESCRIPTOR_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                         }

@@ -14,6 +14,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 using CohesiveRP.Storage.QueryModels.Chat;
+using CohesiveRP.Storage.Utils.Characters;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 {
@@ -38,30 +39,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 summaryService)
         { }
 
-        /* Examples:
-        * [
-            {
-            "characterName": "Linota",
-            "actionCategory": "Performance",
-            "reasoning": "Linota is attempting to project calm and control despite visible signs of agitation like trembling fingers and a betraying tail swish, masking her intense emotions under a composed facade."
-            },
-            {
-            "characterName": "Linota",
-            "actionCategory": "Charisma",
-            "reasoning": "Linota is engaging in a persuasive and challenging dialogue, setting terms and gauging Edward's understanding, using her words to negotiate the intimacy of touching her horns."
-            },
-            {
-            "characterName": "Linota",
-            "actionCategory": "Sex",
-            "reasoning": "The scene is charged with sexual tension; the discussion about touching sensitive horns, her hunger, and the implied physical intimacy afterward fall under sensuality and sexual context."
-            },
-            {
-            "characterName": "Edward",
-            "actionCategory": "Charisma",
-            "reasoning": "Edward is responding to Linota's challenge with confident persuasion, asserting his capability to handle her intensity in a flirtatious, persuasive manner."
-            }
-        ]
-        * */
         private async Task<bool> HandlePathfinderSkillRollsAsync(string LLMrawResponse)
         {
             try
@@ -76,7 +53,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 try
                 {
                     CharactersSkillChecks = LLMResponseParser.ParseFromApiMessageContent<LLMPathfinderCharactersSkillChecksScene>(LLMrawResponse);
-                } catch (Exception ex)
+                } catch (Exception)
                 {
                     LoggingManager.LogToFile("8dae9f1a-2a6b-43b8-a2ad-c28776909dd6", $"The response from the LLM for the Pathfinder CharactersSkillChecksInitiator failed. The Json structure is incorrect. Ignoring.");
                     return false;
@@ -84,9 +61,27 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
                 ChatCharactersRollsDbModel chatCharactersRollsDbModel = await storageService.GetChatCharactersRollsByIdAsync(backgroundQueryDbModel.ChatId);
 
-                // Update the characters in scene from the ones found in the SceneTracker
-                chatCharactersRollsDbModel = await CreateOrUpdateCharactersInSceneAsync(chatCharactersRollsDbModel, CharactersSkillChecks?.AllCharactersByName, backgroundQueryDbModel.ChatId);
+                //var sceneTracker = await storageService.GetSceneTrackerAsync(backgroundQueryDbModel.ChatId);
+                //if (sceneTracker?.Content == null)
+                //{
+                //    LoggingManager.LogToFile("d6233e23-89e0-4fef-a47d-016708c2b3aa", $"SceneTracker tied to chat [{backgroundQueryDbModel.ChatId}] couldn't be found. Ignoring.");
+                //    return false;
+                //}
 
+                //VisualSceneTracker visualSceneTracker = null;
+                //try
+                //{
+                //    visualSceneTracker = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTracker.Content);
+                //} catch (Exception) { }
+
+                //if (visualSceneTracker == null)
+                //{
+                //    LoggingManager.LogToFile("78df2913-91e4-4aab-8e4b-77e827e7dcae", $"SceneTracker tied to chat [{backgroundQueryDbModel.ChatId}] was in an invalid JSON format. Ignoring.");
+                //    return false;
+                //}
+
+                // Update the characters in scene from the ones found in the SceneTracker response
+                chatCharactersRollsDbModel = await CreateOrUpdateCharactersInSceneAsync(chatCharactersRollsDbModel, CharactersSkillChecks?.AllCharactersByName, backgroundQueryDbModel.ChatId);
                 if (chatCharactersRollsDbModel == null)
                 {
                     LoggingManager.LogToFile("27331e02-10a1-4101-83c0-307fbaf1d99e", $"The CharactersRolls tied to this chat were empty.");
@@ -95,7 +90,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
                 // Get the list of characters known for this chat from characterSheetInstances
                 var chatDbModel = await storageService.GetChatAsync(backgroundQueryDbModel.ChatId);
-
                 if (chatDbModel == null)
                 {
                     LoggingManager.LogToFile("41d7828a-2bd4-4c7b-b9f2-e7c2e7e9f14f", $"The chat tied to the Id [{backgroundQueryDbModel.ChatId}] couldn't be found.");
@@ -103,10 +97,9 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 }
 
                 CharacterSheetInstancesDbModel characterSheetInstancesDbModel = await storageService.GetCharacterSheetsInstanceByChatIdAsync(backgroundQueryDbModel.ChatId);
-
                 if (characterSheetInstancesDbModel == null)
                 {
-                    // Create a basic one tied to this chat
+                    // Create an empty one tied to this chat
                     var newCharacterSheetsInstance = new CharacterSheetInstancesDbModel
                     {
                         ChatId = chatDbModel.ChatId,
@@ -173,10 +166,16 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     chatCharactersRollsDbModel = await ProcessSkillCheckQueriesAsync(chatDbModel, chatCharactersRollsDbModel, characterSheetInstancesDbModel, skillChecksByCharacter.Key, queries, CharactersSkillChecks.AllCharactersByName);
                 }
 
+                // reset the player description every time
+                chatCharactersRollsDbModel.PlayerDescription = null;
+
+                // Remove the character rolls for the characters that are NOT in the scene anymore to avoid confusing the LLM
+                chatCharactersRollsDbModel.ChatCharactersRolls = await RemoveSkillChecksFromCharactersNotInScene(chatCharactersRollsDbModel, chatDbModel.ChatId);
+
                 // Update the rolls tied to this character in this chat
                 if (!await storageService.UpdateChatCharactersRollsAsync(chatCharactersRollsDbModel))
                 {
-                    LoggingManager.LogToFile("f5125dad-002a-4466-b3d6-b72ecb7554b5", $"Couldn't Update the ChatCharactersRolls row for Chat [{chatDbModel?.ChatId}] in storage.");
+                    LoggingManager.LogToFile("f5125dad-002a-4466-b3d6-b72ecb7554b5", $"Couldn't Update the ChatCharactersRolls row for Chat [{chatDbModel.ChatId}] in storage.");
                     return false;
                 }
 
@@ -186,6 +185,37 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             {
                 return false;
             }
+        }
+
+        private async Task<List<ChatCharacterRolls>> RemoveSkillChecksFromCharactersNotInScene(ChatCharactersRollsDbModel chatCharactersRollsDbModel, string chatId)
+        {
+            if (chatCharactersRollsDbModel == null)
+            {
+                return null;
+            }
+
+            var characterSheetInstances = await storageService.GetCharacterSheetsInstanceByChatIdAsync(chatId);
+
+            List<ChatCharacterRolls> cleanedUpRolls = new();
+            foreach (var roll in chatCharactersRollsDbModel.ChatCharactersRolls)
+            {
+                var characterSheetInstance = characterSheetInstances.CharacterSheetInstances.FirstOrDefault(f => f.CharacterSheetInstanceId == roll.CharacterSheetInstanceId);
+                if (characterSheetInstance == null)
+                {
+                    // Invalid roll, the character don't have a characterSheetInstance
+                    continue;
+                }
+
+                if (!CharacterSheetInstanceHelper.IsCharacterSheetInScene(characterSheetInstance.CharacterSheet, chatCharactersRollsDbModel.CharacterNamesInScene?.ToArray()))
+                {
+                    // The NPC has left the scene, its roll becomes invalid
+                    continue;
+                }
+
+                cleanedUpRolls.Add(roll);
+            }
+
+            return cleanedUpRolls;
         }
 
         private async Task<ChatCharactersRollsDbModel> CreateOrUpdateCharactersInSceneAsync(ChatCharactersRollsDbModel chatCharactersRollsDbModel, string[] allCharactersByName, string chatId)
@@ -267,6 +297,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 {
                     // We DON'T have a blueprint, create an average characterSheet for this character
                     // TODO: queue a backgroundQuery to update this characterSheetInstance by scanning the persona information + chat ?
+                    // NOTE: removing this would break a few things as we expect ALL characters in a scene to own a characterSheetInstance. For example, we're removing the rolls from any characters without a characterSheetInstance every turn.
                     var character = await storageService.GetCharacterByIdAsync(characterIdLinkedToTheChat);
 
                     if (!string.IsNullOrWhiteSpace(character?.Name))
@@ -305,20 +336,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                             CharacterSheetInstanceId = Guid.NewGuid().ToString(),
                             CharacterSheetId = personaCharacterSheet.CharacterSheetId,
                             CharacterSheet = personaCharacterSheet.CharacterSheet,
-                        });
-                    } else
-                    {
-                        // We DON'T have a blueprint, create an average characterSheet for this persona
-                        // TODO: queue a backgroundQuery to update this characterSheetInstance by scanning the persona information + chat ?
-                        instancesToAdd.Add(new CharacterSheetInstance
-                        {
-                            PersonaId = persona.PersonaId,
-                            CharacterSheetInstanceId = Guid.NewGuid().ToString(),
-                            CharacterSheetId = null,
-                            CharacterSheet = new CharacterSheet()
-                            {
-                                FirstName = persona.Name,
-                            },
                         });
                     }
                 }
@@ -660,10 +677,11 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 LLMApiResponseMessage LLMmessage = messages.LastOrDefault();
 
                 // Delay the completion handling until we have a recent SceneTracker response. But limit it to 2 minutes of delay to avoid infinite wait.
+                BackgroundQueryDbModel[] processingTasks = null;
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 while (stopwatch.ElapsedMilliseconds < 120000)
                 {
-                    var processingTasks = await storageService.GetPendingOrProcessingBackgroundQueryAsync();
+                    processingTasks = await storageService.GetPendingOrProcessingBackgroundQueryAsync();
                     bool sceneTrackerBackgroundTaskInProcess = processingTasks.Any(t => t.Tags.Contains(BackgroundQuerySystemTags.sceneTracker.ToString()));
                     if (!sceneTrackerBackgroundTaskInProcess)
                         break;
@@ -673,12 +691,16 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
                 stopwatch.Stop();
 
-                if (!await HandlePathfinderSkillRollsAsync(LLMmessage.Content))
+                processingTasks = await storageService.GetPendingOrProcessingBackgroundQueryAsync();
+                if (processingTasks != null && !processingTasks.All(t => t.Tags.Contains(BackgroundQuerySystemTags.sceneTracker.ToString())))
                 {
-                    // Ignoring for now
-                    //backgroundQueryDbModel.Content = null;
-                    //backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
-                    //return;
+                    if (!await HandlePathfinderSkillRollsAsync(LLMmessage.Content))
+                    {
+                        // Ignoring for now
+                        //backgroundQueryDbModel.Content = null;
+                        //backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                        //return;
+                    }
                 }
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;

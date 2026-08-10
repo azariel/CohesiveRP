@@ -104,6 +104,8 @@ namespace CohesiveRP.Core.LLMProviderManager
                     new ProseGuardianLLMQueryProcessor(ChatCompletionPresetType.ProseGuardian, BackgroundQuerySystemTags.proseGuardian, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, LLMProviderProcessorQueuer, summaryService),
                 BackgroundQuerySystemTags.characterStatusUpdate =>
                     new CharacterStatusUpdateLLMQueryProcessor(ChatCompletionPresetType.CharacterStatusUpdate, BackgroundQuerySystemTags.characterStatusUpdate, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.skillChecksDescriptor =>
+                    new SkillChecksDescriptorLLMQueryProcessor(ChatCompletionPresetType.SkillChecksDescriptor, BackgroundQuerySystemTags.skillChecksDescriptor, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 _ => null
             };
 

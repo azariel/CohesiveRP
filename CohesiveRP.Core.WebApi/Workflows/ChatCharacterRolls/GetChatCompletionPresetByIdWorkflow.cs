@@ -93,6 +93,7 @@ public class GetChatCharacterRollsWorkflow : IChatCharacterRollsWorkflow
             }
         }
 
+        responseDto.PlayerDescription = rolls?.PlayerDescription;
         return responseDto;
     }
 }

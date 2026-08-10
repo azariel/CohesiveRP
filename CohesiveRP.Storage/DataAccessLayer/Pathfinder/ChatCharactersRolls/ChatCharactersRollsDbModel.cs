@@ -27,5 +27,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
 
         [JsonValueConverter]
         public List<ChatCharacterRolls> ChatCharactersRolls { get; set; }
+
+        public string PlayerDescription { get; set; }
     }
 }
