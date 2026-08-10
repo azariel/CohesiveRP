@@ -63,7 +63,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                 return;
             }
 
-            if(!await queryProcessor.QueueProcessAsync())
+            if (!await queryProcessor.QueueProcessAsync())
             {
                 LoggingManager.LogToFile("6bcabdd1-63e4-44dc-bebe-09481441edab", $"LLMProviderQueryerFactory failed to queue the process of the query [{selectedQuery.BackgroundQueryId}].");
                 return;
@@ -80,7 +80,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                     {
                         if (selectedQuery.Status == BackgroundQueryStatus.Completed || selectedQuery.Status == BackgroundQueryStatus.Error || selectedQuery.Status == BackgroundQueryStatus.ProcessingFinalInstruction)
                         {
-                            if(selectedQuery.Status == BackgroundQueryStatus.Error)
+                            if (selectedQuery.Status == BackgroundQueryStatus.Error)
                             {
                                 // Nothing to do, simly save the state and drop the query altogether
                                 break;
@@ -145,12 +145,16 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             {
                 if (query.DependenciesTags != null)
                 {
-                    if (query.DependenciesTags != null && allProcessingQueries.Any(a => query.DependenciesTags.Any(an => a.Tags.Contains(an))))
+                    if (query.DependenciesTags != null && allProcessingQueries.Any(a =>
+                        a.BackgroundQueryId != query.BackgroundQueryId && // Not the same query
+                        query.DependenciesTags.Any(an => a.Tags.Contains(an) && // The dependency tag is present in the other query dependant tags
+                        a.ChatId == query.ChatId)))// Same chat, same dependency tag, different query
                     {
-                        continue;
+                        continue;// Skip this query, it has dependencies that are still in progress
                     }
                 }
 
+                // Query is queuable
                 if (query.Status == BackgroundQueryStatus.Pending || query.Status == BackgroundQueryStatus.ProcessedWaitingForFinalInstruction)
                     validQueries.Add(query);
             }
@@ -160,7 +164,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             if (validQueries.Count > 1)
             {
                 // Filter by the tags allowed by the providers. Only the tags tied to idle providers (or provider with sufficient concurrency) are accepted
-                validQueries = validQueries.Where(w => tagsAllowedByIdleProviders.Any(a => w.Tags.Select(s=>s.ToLowerInvariant()).Contains(a))).ToList();
+                validQueries = validQueries.Where(w => tagsAllowedByIdleProviders.Any(a => w.Tags.Select(s => s.ToLowerInvariant()).Contains(a))).ToList();
 
                 if (validQueries.Count <= 0)
                 {
@@ -169,7 +173,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
 
                 // Select by priority
                 BackgroundQueryDbModel[] priorityQueries = validQueries.Where(w => w.Priority == validQueries.Max(m => m.Priority)).ToArray();
-                selectedQuery = priorityQueries?.OrderBy(o=>o.CreatedAtUtc).FirstOrDefault();
+                selectedQuery = priorityQueries?.OrderBy(o => o.CreatedAtUtc).FirstOrDefault();
 
                 if (selectedQuery == null)
                 {

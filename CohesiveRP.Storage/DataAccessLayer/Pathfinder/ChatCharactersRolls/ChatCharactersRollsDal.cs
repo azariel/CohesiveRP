@@ -108,6 +108,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 // Update only the overridable fields
                 rolls.ChatCharactersRolls = dbModel.ChatCharactersRolls;
+                rolls.PlayerDescription = dbModel.PlayerDescription;
                 rolls.CharacterNamesInScene = dbModel.CharacterNamesInScene;
 
                 var result = dbContext.ChatCharactersRolls.Update(rolls);

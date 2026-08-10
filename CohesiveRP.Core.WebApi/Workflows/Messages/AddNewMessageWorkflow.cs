@@ -79,7 +79,11 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         if (requestDto.QueueDependentBackgroundTasks)
         {
             await LLMProviderProcessorQueuer.QueueProcessorsOnBeforeMainGeneration(chat);
+        
+            // Also queue the ones that must generate alongside the main generation
+            await LLMProviderProcessorQueuer.QueueProcessorsOnDuringMainGeneration(chat);
         }
+
 
         IMessageDbModel message = null;
         if (!string.IsNullOrWhiteSpace(requestDto.Message.Content))
@@ -112,10 +116,10 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             ChatId = requestDto.ChatId,
             Priority = BackgroundQueryPriority.Highest,// User is waiting!
             DependenciesTags = [
-                BackgroundQuerySystemTags.sceneTracker.ToString(),
-                BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
-                BackgroundQuerySystemTags.proseGuardian.ToString(),
-                BackgroundQuerySystemTags.narrativeDirection.ToString(),
+                BackgroundQuerySystemTags.sceneTracker.ToString(),// before
+                BackgroundQuerySystemTags.skillChecksInitiator.ToString(),// before
+                BackgroundQuerySystemTags.narrativeDirection.ToString(),// before
+                BackgroundQuerySystemTags.proseGuardian.ToString(),// after++
             ],// Can't run as long as another one with one of these tag is running or pending
             Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'
         };

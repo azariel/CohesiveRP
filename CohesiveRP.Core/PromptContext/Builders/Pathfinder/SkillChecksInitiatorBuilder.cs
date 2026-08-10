@@ -46,7 +46,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             string lastMessage = string.Join($"{Environment.NewLine}", LastXMessagesforRequest.OrderBy(o => o.CreatedAtUtc).Select(s => $"<message>{s.Content.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}</message>"));
             return ($"<story_scene>{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{messages_for_context_on_scene}}", contextOnScene)
-                .Replace("{{scene_to_categorize}}", lastMessage)}{Environment.NewLine}</story_scene>",
+                .Replace("{{scene_to_categorize}}", lastMessage)}{Environment.NewLine}</story_scene>".InjectMacros(personaLinkedToChat?.Name, null),
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,
