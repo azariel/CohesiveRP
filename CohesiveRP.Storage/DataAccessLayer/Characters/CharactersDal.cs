@@ -16,11 +16,13 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
     {
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
         private readonly ICharacterSheetsDal characterSheetsDal;
+        private readonly IChatsDal chatsDal;
 
-        public CharactersDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory, ICharacterSheetsDal characterSheetsDal) : base(jsonSerializerOptions)
+        public CharactersDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory, ICharacterSheetsDal characterSheetsDal, IChatsDal chatsDal) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
             this.characterSheetsDal = characterSheetsDal;
+            this.chatsDal = chatsDal;
 
             using var dbContext = contextFactory.CreateDbContext();
             dbContext.Database.EnsureCreated();
@@ -157,7 +159,27 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return false;
                 }
 
+                // Delete orphans
                 await characterSheetsDal.DeleteCharacterSheetFromCharacterAsync(characterDbModel);
+
+                // Clean the chats that were referencing this CharacterId (remove the characterId from the list and if the Chat characterIds are now empty, delete that chat entirely)
+                var chatsToClean = await chatsDal.GetChatsAsync();
+                chatsToClean = [..chatsToClean.Where(w => w.CharacterIds != null && w.CharacterIds.Contains(character.CharacterId))];
+
+                foreach (var chatToClean in chatsToClean)
+                {
+                    chatToClean.CharacterIds = [..chatToClean.CharacterIds.Where(w => w != character.CharacterId)];
+
+                    //  if the Chat characterIds are now empty, delete that chat entirely
+                    if(chatToClean.CharacterIds == null || !chatToClean.CharacterIds.Any())
+                    {
+                        await chatsDal.DeleteChatAsync(chatToClean.ChatId);
+                        continue;
+                    }
+
+                    await chatsDal.UpdateChatAsync(chatToClean);
+                }
+
                 await dbContext.SaveChangesAsync();
                 return true;
             } catch (Exception ex)

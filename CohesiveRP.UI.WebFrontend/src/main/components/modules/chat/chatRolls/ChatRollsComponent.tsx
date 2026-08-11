@@ -123,7 +123,6 @@ export default function ChatRollsComponent({ sceneTrackerRefreshToken }: Props) 
     const abort = new AbortController();
 
     const fetchRolls = async () => {
-      console.error(`FETCHING`);
       setIsLoading(true);
 
       const response = await getFromServerApiAsync<ChatCharacterRollsResponseDto>(
@@ -142,6 +141,10 @@ export default function ChatRollsComponent({ sceneTrackerRefreshToken }: Props) 
 
       setRolls(response.rolls ?? []);
       setIsLoading(false);
+
+      setActiveModule((prev) =>
+        prev ? { ...prev, latestPlayerDescription: response.playerDescription } : prev
+      );
     };
 
     fetchRolls();

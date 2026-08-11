@@ -43,6 +43,8 @@ export default function ChatComponent() {
 
     didComponentMountAlready.current = true;
 
+    setActiveModule((prev) => prev ? { ...prev, latestPlayerDescription: undefined } : prev);
+
     const fetchData = async () => {
       try {
         if(!activeModule?.chatId) {
@@ -59,7 +61,7 @@ export default function ChatComponent() {
         }
 
         setMessages(() => response.messages ?? []);
-        setActiveModule((prev) => prev ? { ...prev, nbColdMessages: response.nbColdMessages, hotMessagesLoaded: true } : prev);
+        setActiveModule((prev) => prev ? { ...prev, nbColdMessages: response.nbColdMessages, hotMessagesLoaded: true, latestPlayerDescription: undefined } : prev);
 
         console.log(`Specific chat messages fetched successfully.`);
         setTimeout(() => {
@@ -135,7 +137,7 @@ export default function ChatComponent() {
   );
 
   setActiveModule((prev) =>
-    prev ? { ...prev, mainQueryId: response.mainQueryId } : prev
+    prev ? { ...prev, mainQueryId: response.mainQueryId, latestPlayerDescription: undefined } : prev
   );
 };
 
@@ -187,6 +189,7 @@ export default function ChatComponent() {
                   <ChatMessageComponent
                     message={message}
                     chatId={activeModule?.chatId}
+                    isLastMessage={isLastMessage}
                     enableDeleteBtn={isLastMessage && message.messageId !== TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY}
                     enableSwipeBtn={isLastMessage && message.messageId !== TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY}
                     isEditable={!message.summarized && index >= messages.length - 3}

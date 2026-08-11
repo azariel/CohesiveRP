@@ -37,10 +37,11 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
             {
                 ChatId = chat.ChatId,
                 Priority = BackgroundQueryPriority.VeryLow,// user is not waiting, we're simply generation and iterating over secret plots and narrative arcs in the background, so we can set it to very low priority
-                DependenciesTags = Enum.GetValues<BackgroundQuerySystemTags>()// this one is blocked by basically ANYTHING except the same type
-                    .Where(w => w != BackgroundQuerySystemTags.narrativeArchitecture)
-                    .Select(s => s.ToString())
-                    .ToList(),
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.main.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.sceneTracker.ToString()
+                ],
                 Tags = [BackgroundQuerySystemTags.narrativeArchitecture.ToString()],
             };
 

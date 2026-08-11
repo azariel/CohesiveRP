@@ -41,7 +41,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
             {
                 ChatId = chat.ChatId,
                 Priority = BackgroundQueryPriority.High,
-                DependenciesTags = [],// No dependencies at all
+                DependenciesTags = [BackgroundQuerySystemTags.skillChecksInitiator.ToString()],
                 Tags = [BackgroundQuerySystemTags.skillChecksDescriptor.ToString()],
             };
 

@@ -248,6 +248,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                                 LastStatusCheckMessageId = instance.LastStatusCheckMessageId,
                                 LastConfirmedAbsentMessageId = instance.LastConfirmedAbsentMessageId,
                             });
+
                             instance.ConsecutiveMessagesInScene = 0;
                         }
                         // else: the buffer hasn't released any new stable content yet — leave the counter elevated

@@ -451,13 +451,16 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
                 if (roll == null)
                 {
+                    // A roll for Charisma for example will stick for a few messages, to give a momentum
+                    var freezeValue = new Random(DateTime.Now.Millisecond).Next(1,4);
+
                     // Create a new roll
                     roll = new ChatCharacterRoll
                     {
                         ActionCategory = query.ActionCategory,
                         Guides = query.Guides,
                         NbRemainingInjectionTurns = 1,
-                        NbRemainingRollFreeze = 3,
+                        NbRemainingRollFreeze = freezeValue,
                         CharactersInScene = FilterCharactersInScene(characterSheetInstancesInScene.ToArray(), selectedCharacterSheetInstance.CharacterSheetInstanceId),
                         Value = await GenerateNewRollForCharacterForSkillCheckAsync(selectedCharacterSheetInstance, query.ActionCategory, query.Bonus),// Generate a new value using the character sheet (or average if no character sheet)
                         Bonus = query.Bonus
@@ -480,6 +483,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 {
                     roll.Guides.Clear();
                     roll.Guides.AddRange(query.Guides);
+                    roll.CharactersInScene = FilterCharactersInScene(characterSheetInstancesInScene.ToArray(), selectedCharacterSheetInstance.CharacterSheetInstanceId);
                     roll.NbRemainingInjectionTurns = 1;
                 }
 

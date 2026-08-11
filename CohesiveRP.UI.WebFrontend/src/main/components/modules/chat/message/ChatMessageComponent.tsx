@@ -17,6 +17,7 @@ import type { SharedContextChatType } from "../../../../../store/SharedContextCh
 interface Props {
   message?: ChatMessage;
   chatId: string;
+  isLastMessage?: boolean;
   enableDeleteBtn?: boolean;
   enableSwipeBtn?: boolean;
   isEditable?: boolean;
@@ -25,7 +26,7 @@ interface Props {
   onDelete?: (messageId: string) => Promise<void>;
 }
 
-export default function ChatMessageComponent({ message, chatId, enableSwipeBtn = false, enableDeleteBtn = false, isEditable = false, onSave, onSwipe, onDelete }: Props) {
+export default function ChatMessageComponent({ message, chatId, isLastMessage = false, enableSwipeBtn = false, enableDeleteBtn = false, isEditable = false, onSave, onSwipe, onDelete }: Props) {
   const { activeModule } = sharedContext<SharedContextChatType>();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message?.content ?? "");
@@ -217,6 +218,12 @@ export default function ChatMessageComponent({ message, chatId, enableSwipeBtn =
             </div>
           </div>
           <div className={styles.messageContentSeparator} />
+
+          {isLastMessage && message?.sourceType !== 0 && activeModule?.latestPlayerDescription && (
+            <div className={styles.playerDescriptionLabel}>
+              <HighlightedText text={activeModule.latestPlayerDescription} />
+            </div>
+          )}
 
           {message?.thinkingContent && (
             <div className={styles.thinkingContainer}>

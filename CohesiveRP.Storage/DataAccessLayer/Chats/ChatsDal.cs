@@ -2,7 +2,16 @@
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
+using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
+using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
+using CohesiveRP.Storage.DataAccessLayer.Summary.Short;
 using CohesiveRP.Storage.QueryModels.Chat;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -15,10 +24,39 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
     public class ChatsDal : StorageDal, IChatsDal
     {
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
+        private readonly IBackgroundQueriesDal backgroundQueriesDal;
+        private readonly IMessagesDal messagesDal;
+        private readonly IIllustrationQueryDal illustrationQueryDal;
+        private readonly IInteractiveUserInputDal interactiveUserInputDal;
+        private readonly ILorebookInstanceDal lorebookInstanceDal;
+        private readonly INarrativeArchitecturesDal narrativeArchitecturesDal;
+        private readonly INarrativeDirectionsDal narrativeDirectionsDal;
+        private readonly ICharacterSheetInstancesDal characterSheetInstancesDal;
+        private readonly IChatCharactersRollsDal chatCharactersRollsDal;
+        private readonly IProseGuardiansDal proseGuardiansDal;
+        private readonly ISceneTrackerDal sceneTrackerDal;
+        private readonly ISummaryDal summaryDal;
 
-        public ChatsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
+        public ChatsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory,
+            IBackgroundQueriesDal backgroundQueriesDal, IMessagesDal messagesDal, IIllustrationQueryDal illustrationQueryDal,
+            IInteractiveUserInputDal interactiveUserInputDal, ILorebookInstanceDal lorebookInstanceDal,
+            INarrativeArchitecturesDal narrativeArchitecturesDal, INarrativeDirectionsDal narrativeDirectionsDal,
+            ICharacterSheetInstancesDal characterSheetInstancesDal, IChatCharactersRollsDal chatCharactersRollsDal,
+            IProseGuardiansDal proseGuardiansDal, ISceneTrackerDal sceneTrackerDal, ISummaryDal summaryDal) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
+            this.backgroundQueriesDal = backgroundQueriesDal;
+            this.messagesDal = messagesDal;
+            this.illustrationQueryDal = illustrationQueryDal;
+            this.interactiveUserInputDal = interactiveUserInputDal;
+            this.lorebookInstanceDal = lorebookInstanceDal;
+            this.narrativeArchitecturesDal = narrativeArchitecturesDal;
+            this.narrativeDirectionsDal = narrativeDirectionsDal;
+            this.characterSheetInstancesDal = characterSheetInstancesDal;
+            this.chatCharactersRollsDal = chatCharactersRollsDal;
+            this.proseGuardiansDal = proseGuardiansDal;
+            this.sceneTrackerDal = sceneTrackerDal;
+            this.summaryDal = summaryDal;
 
             using var dbContext = contextFactory.CreateDbContext();
             dbContext.Database.EnsureCreated();
@@ -145,6 +183,118 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 {
                     LoggingManager.LogToFile("cbc84e32-b1ed-4c3d-8a4a-03810a0afddc", $"Error when deleting a specific Chat. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(chat)}].");
                     return false;
+                }
+
+                // Delete orphan objects in storage
+                // backgroundQueries
+                var BackgroundQueriesTiedToDeletedChat = await backgroundQueriesDal.GetBackgroundQueriesByChatIdAsync(chatId);
+
+                if (BackgroundQueriesTiedToDeletedChat != null && BackgroundQueriesTiedToDeletedChat.Length > 0)
+                {
+                    await backgroundQueriesDal.DeleteBackgroundQueriesByChatIdAsync(chatId);
+                }
+
+                // TODO CohesionEnforcements
+                // TODO SceneAnalyzers
+
+                // Hot Messages
+                var hotMessagesToDelete = await messagesDal.GetHotMessagesAsync(chatId);
+                if (hotMessagesToDelete != null && hotMessagesToDelete.Messages.Any())
+                {
+                    await messagesDal.DeleteHotMessageAsync(chatId);
+                }
+
+                // Cold Messages
+                var coldMessagesToDelete = await messagesDal.GetColdMessagesAsync(chatId);
+                if (coldMessagesToDelete != null && coldMessagesToDelete.Messages.Any())
+                {
+                    await messagesDal.DeleteColdMessageAsync(chatId);
+                }
+
+                // Illustration Queries
+                var illustrationQueriesToDelete = await illustrationQueryDal.GetIllustrationQueriesAsync(f => f.ChatId == chatId);
+                if (illustrationQueriesToDelete != null && illustrationQueriesToDelete.Any())
+                {
+                    foreach (var illustrationQueryToDelete in illustrationQueriesToDelete)
+                    {
+                        await illustrationQueryDal.DeleteIllustrationQueryAsync(illustrationQueryToDelete.IllustrationQueryId);
+                    }
+                }
+
+                // InteractiveUserInputQueries
+                var interactiveUserQueriesToDelete = await interactiveUserInputDal.GetInteractiveUserInputQueriesAsync(f => f.ChatId == chatId);
+                if (interactiveUserQueriesToDelete != null && interactiveUserQueriesToDelete.Any())
+                {
+                    foreach (var interactiveUserQueryToDelete in interactiveUserQueriesToDelete)
+                    {
+                        await interactiveUserInputDal.DeleteInteractiveUserInputQueryAsync(interactiveUserQueryToDelete.InteractiveUserInputQueryId);
+                    }
+                }
+
+                // LorebookInstances
+                var lorebookInstancesToDelete = await lorebookInstanceDal.GetLorebookInstancesAsync(f => f.ChatId == chatId);
+                if (lorebookInstancesToDelete != null && lorebookInstancesToDelete.Any())
+                {
+                    await lorebookInstanceDal.DeleteLorebookInstanceAsync(chatId);
+                }
+
+                // NarrativeArchitecture
+                var narrativeArchitecturesToDelete = await narrativeArchitecturesDal.GetNarrativeArchitecturesAsync(f => f.ChatId == chatId);
+                if (narrativeArchitecturesToDelete != null && narrativeArchitecturesToDelete.Any())
+                {
+                    foreach (var narrativeArchitectureToDelete in narrativeArchitecturesToDelete)
+                    {
+                        await narrativeArchitecturesDal.DeleteNarrativeArchitectureAsync(f => f.NarrativeArchitectureId == narrativeArchitectureToDelete.NarrativeArchitectureId);
+                    }
+                }
+
+                // NarrativeDirections
+                var narrativeDirectionsToDelete = await narrativeDirectionsDal.GetNarrativeDirectionsAsync(f => f.ChatId == chatId);
+                if (narrativeDirectionsToDelete != null && narrativeDirectionsToDelete.Any())
+                {
+                    foreach (var narrativeDirectionToDelete in narrativeDirectionsToDelete)
+                    {
+                        await narrativeDirectionsDal.DeleteNarrativeDirectionAsync(f => f.NarrativeDirectionId == narrativeDirectionToDelete.NarrativeDirectionId);
+                    }
+                }
+
+                // CharacterSheetInstances
+                var characterSheetInstancesToDelete = await characterSheetInstancesDal.GetCharacterSheetsInstanceByChatIdAsync(chatId);
+                if (characterSheetInstancesToDelete != null)
+                {
+                    await characterSheetInstancesDal.DeleteCharacterSheetsInstanceAsync(characterSheetInstancesToDelete);
+                }
+
+                // ChatCharactersRolls
+                var chatCharactersRollsToDelete = await chatCharactersRollsDal.GetChatCharactersRollsByFuncAsync(f => f.ChatId == chatId);
+                if (chatCharactersRollsToDelete != null)
+                {
+                    foreach (var chatCharactersRollToDelete in chatCharactersRollsToDelete)
+                    {
+                        await chatCharactersRollsDal.DeleteChatCharactersRollsAsync(chatCharactersRollToDelete);
+                    }
+                }
+
+                // ProseGuardians
+                var proseGuardiansToDelete = await proseGuardiansDal.GetProseGuardiansAsync(f => f.ChatId == chatId);
+                if (proseGuardiansToDelete != null)
+                {
+                    await proseGuardiansDal.DeleteProseGuardianAsync(f => f.ChatId == chatId);
+                }
+
+                // SceneTracker
+                var sceneTrackersToDelete = await sceneTrackerDal.GetSceneTrackerAsync(chatId);
+                if (sceneTrackersToDelete != null)
+                {
+                    await sceneTrackerDal.DeleteSceneTrackerAsync(chatId);
+                }
+
+                // Summaries
+                var summariesToDelete = await summaryDal.GetSummaryAsync(chatId);
+                if (summariesToDelete != null)
+                {
+                    // Delete the WHOLE summary, this includes short, medium, long, extraLong, etc.
+                    await summaryDal.DeleteSummaryFromChatIdAsync(chatId);
                 }
 
                 await dbContext.SaveChangesAsync();

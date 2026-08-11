@@ -25,12 +25,13 @@ namespace CohesiveRP.Common.Utils.Parsers
                 .Replace("‟", "\"")
                 .Replace("’", "'")
                 .Replace("‘", "'")
-                .Replace("‚", "'")
                 .Replace("‛", "'")
                 .Replace("—", ",")
+                .Replace(" ,", ",")
+                .Replace(",", " , ")// To be used in concert with the one below, replace "test,blabla" with "test, blabla"
+                .Replace(",  ", ", ")
+                .Replace("  ,", " ,")
                 .Replace(" ,", ",");
-
-            // 
 
             // convert double single-quotes to double quotes
             message = Regex.Replace(message, @"''", "\"");

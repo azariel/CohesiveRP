@@ -15,6 +15,7 @@ interface SharedContextChatType extends SharedContextType {
   hotMessagesLoaded?: boolean;
   hideAvatars: boolean | null;
   chatSubView?: "chat" | "characterSheetInstances";
+  latestPlayerDescription?: string;
 };
 
 export type {

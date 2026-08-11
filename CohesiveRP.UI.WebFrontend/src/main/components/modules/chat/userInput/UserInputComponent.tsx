@@ -49,7 +49,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
         localStorage.setItem(`chatInput_${activeModule.chatId}`, "");
       }
 
-      setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "" } : prev);
+      setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "", lastPlayerMessageId: "" } : prev);
     }
   }, [messages]);
 
@@ -371,7 +371,7 @@ const adjustTextareaHeight = () => {
     setSendMessageQueryStatus("Completed");
     setLocalInput(""); // clear immediately
     localStorage.setItem(`chatInput_${activeModule.chatId}`, "");
-    setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "" } : prev);
+    setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "", lastPlayerMessageId: "" } : prev);
     
     // reflect those messages in the UI!
     response.messageObj.messageIndex = (activeModule.nbColdMessages ?? 0) + messages.length + 1;
@@ -425,7 +425,8 @@ const adjustTextareaHeight = () => {
       ...prev,
       mainQueryId: response.mainQueryId,
       lastPlayerMessageId: response.messageObj?.messageId ?? null,
-      currentUserInputValue: "" 
+      currentUserInputValue: "",
+      latestPlayerDescription: ""
     } : prev);
 
     UpdateInputControlState();
