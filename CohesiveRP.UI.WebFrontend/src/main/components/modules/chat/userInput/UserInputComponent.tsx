@@ -311,6 +311,8 @@ const adjustTextareaHeight = () => {
           mainQueryId: null,
           // ── Trigger InteractiveUserInputComponent to fetch new pending queries ──
           interactiveInputRefreshToken: (prev.interactiveInputRefreshToken ?? 0) + 1,
+          // ── Trigger ChatRollsComponent to fetch the final rolls/player description ──
+         sceneTrackerRefreshToken: (prev.sceneTrackerRefreshToken ?? 0) + 1,
         } : prev);
         
         if (messagesRef?.current) {

@@ -61,7 +61,7 @@ export default function ChatComponent() {
         }
 
         setMessages(() => response.messages ?? []);
-        setActiveModule((prev) => prev ? { ...prev, nbColdMessages: response.nbColdMessages, hotMessagesLoaded: true, latestPlayerDescription: undefined } : prev);
+        setActiveModule((prev) => prev ? { ...prev, nbColdMessages: response.nbColdMessages, hotMessagesLoaded: true } : prev);
 
         console.log(`Specific chat messages fetched successfully.`);
         setTimeout(() => {

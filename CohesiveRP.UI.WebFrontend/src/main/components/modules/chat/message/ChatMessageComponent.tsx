@@ -219,12 +219,6 @@ export default function ChatMessageComponent({ message, chatId, isLastMessage = 
           </div>
           <div className={styles.messageContentSeparator} />
 
-          {isLastMessage && message?.sourceType !== 0 && activeModule?.latestPlayerDescription && (
-            <div className={styles.playerDescriptionLabel}>
-              <HighlightedText text={activeModule.latestPlayerDescription} />
-            </div>
-          )}
-
           {message?.thinkingContent && (
             <div className={styles.thinkingContainer}>
               <button
@@ -242,6 +236,12 @@ export default function ChatMessageComponent({ message, chatId, isLastMessage = 
                   <HighlightedText text={message.thinkingContent} />
                 </div>
               )}
+            </div>
+          )}
+
+          {isLastMessage && message?.sourceType !== 0 && activeModule?.latestPlayerDescription && (
+            <div className={styles.playerDescriptionLabel}>
+              <HighlightedText text={activeModule.latestPlayerDescription} />
             </div>
           )}
 
