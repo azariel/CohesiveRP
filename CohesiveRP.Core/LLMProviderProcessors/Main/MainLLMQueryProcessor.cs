@@ -485,10 +485,10 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 IMessageDbModel newMessageInStorage = await storageService.AddMessageAsync(messageQueryModel);
                 if (newMessageInStorage == null)
                 {
-                    LoggingManager.LogToFile("15b7b071-b3bb-4d36-9321-4353dd747797", $"Error. The message creation in storage failed. Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Task will be set to Pending status for re-generation.");
+                    LoggingManager.LogToFile("15b7b071-b3bb-4d36-9321-4353dd747797", $"Error. The message creation in storage failed. Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Task will be set to Error status.");
                     backgroundQueryDbModel.Content = null;
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
-                    return false; ;
+                    return false;
                 }
 
                 backgroundQueryDbModel.LinkedId = newMessageInStorage.MessageId;
@@ -504,6 +504,14 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 if (contextBuilder == null)
                 {
                     await BuildContextAsync(backgroundQueryDbModel);
+
+                    if (contextBuilder == null)
+                    {
+                        LoggingManager.LogToFile("d3329f5f-6b2f-4a22-bb09-6c2757c0b754", $"Error. Default ContextBuilder for the backgroundQuery [{backgroundQueryDbModel.BackgroundQueryId}] couldn't be found. BackgroundQuery will be set to Error.");
+                        backgroundQueryDbModel.Content = null;
+                        backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                        return false;
+                    }
                 }
 
                 GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
@@ -528,7 +536,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
                 // Handle NarrativeDirection
                 var currentNarrativeDirections = await storageService.GetNarrativeDirectionsAsync(s => s.ChatId == chat.ChatId);
-                if(currentNarrativeDirections != null && currentNarrativeDirections.Any())
+                if (currentNarrativeDirections != null && currentNarrativeDirections.Any())
                 {
                     var currentNarrativeDirection = currentNarrativeDirections.First();
                     currentNarrativeDirection.InjectInMainPrompt = false;
@@ -538,7 +546,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
                 // Handle NarrativeArchitecture
                 var currentNarrativeArchitectures = await storageService.GetNarrativeArchitecturesAsync(s => s.ChatId == chat.ChatId);
-                if(currentNarrativeArchitectures != null && currentNarrativeArchitectures.Any())
+                if (currentNarrativeArchitectures != null && currentNarrativeArchitectures.Any())
                 {
                     var currentNarrativeArchitecture = currentNarrativeArchitectures.First();
                     currentNarrativeArchitecture.RefreshCooldown--;

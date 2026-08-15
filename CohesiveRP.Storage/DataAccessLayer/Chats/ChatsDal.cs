@@ -11,6 +11,7 @@ using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Summary.Short;
 using CohesiveRP.Storage.QueryModels.Chat;
 using Microsoft.EntityFrameworkCore;
@@ -36,12 +37,13 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         private readonly IProseGuardiansDal proseGuardiansDal;
         private readonly ISceneTrackerDal sceneTrackerDal;
         private readonly ISummaryDal summaryDal;
+        private readonly IGlobalSettingsDal globalSettingsDal;
 
         public ChatsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory,
             IBackgroundQueriesDal backgroundQueriesDal, IMessagesDal messagesDal, IIllustrationQueryDal illustrationQueryDal,
             IInteractiveUserInputDal interactiveUserInputDal, ILorebookInstanceDal lorebookInstanceDal,
             INarrativeArchitecturesDal narrativeArchitecturesDal, INarrativeDirectionsDal narrativeDirectionsDal,
-            ICharacterSheetInstancesDal characterSheetInstancesDal, IChatCharactersRollsDal chatCharactersRollsDal,
+            ICharacterSheetInstancesDal characterSheetInstancesDal, IChatCharactersRollsDal chatCharactersRollsDal, IGlobalSettingsDal globalSettingsDal,
             IProseGuardiansDal proseGuardiansDal, ISceneTrackerDal sceneTrackerDal, ISummaryDal summaryDal) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
@@ -57,6 +59,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             this.proseGuardiansDal = proseGuardiansDal;
             this.sceneTrackerDal = sceneTrackerDal;
             this.summaryDal = summaryDal;
+            this.globalSettingsDal = globalSettingsDal;
 
             using var dbContext = contextFactory.CreateDbContext();
             dbContext.Database.EnsureCreated();
@@ -83,7 +86,29 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                return dbContext.Chats.FirstOrDefault(w => w.ChatId == id);
+
+                var selectedChat = dbContext.Chats.FirstOrDefault(w => w.ChatId == id);
+
+                // If selectedCompletionPresets field is null, re-generate it
+                if (selectedChat != null && (selectedChat.SelectedChatCompletionPresets == null || selectedChat.SelectedChatCompletionPresets.Count <= 0))
+                {
+                    //globalSettings.ChatCompletionPresetsMap.Map.Where(w => w.IsDefault).ToArray();
+                    var globalSettings = await globalSettingsDal.GetGlobalSettingsAsync();
+                    var defaultCompletionPresets = globalSettings?.ChatCompletionPresetsMap?.Map?.Where(w => w.IsDefault)?.ToArray();
+
+                    if (defaultCompletionPresets != null && defaultCompletionPresets.Length > 0)
+                    {
+                        selectedChat.SelectedChatCompletionPresets = [..defaultCompletionPresets.Select(s => new ChatCompletionPresetSelection()
+                        {
+                            Type = s.Type,
+                            ChatCompletionPresetId = s.ChatCompletionPresetId,
+                        })];
+
+                        await dbContext.SaveChangesAsync();
+                    }
+                }
+
+                return selectedChat;
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("ed1b481f-463b-4854-acac-222965ef3601", $"Error when querying Db on table Chat.", ex);

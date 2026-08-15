@@ -47,7 +47,7 @@ namespace CohesiveRP.Core.PromptContext.Summary
                     return null;
                 }
 
-                string chatCompletionPresetId = chat.SelectedChatCompletionPresets.FirstOrDefault(f => f.Type == presetType)?.ChatCompletionPresetId;
+                string chatCompletionPresetId = chat.SelectedChatCompletionPresets?.FirstOrDefault(f => f.Type == presetType)?.ChatCompletionPresetId;
 
                 if (chatCompletionPresetId == null)
                 {
