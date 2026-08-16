@@ -194,7 +194,7 @@ const handleAddLorebookClick = () => {
             <div key={index} className={styles.lorebookCard}>
               <label className={styles.lorebookCharNameLabel} style={{ fontSize: GetLorebookNameFontSize(element?.name ?? "") }}>{element?.name}</label>
                 <div className={styles.lorebookAvatarContainer} onClick={async () => await handleSpecificLorebookClick(element)}>
-                  <img src={GetAvatarPathFromLorebookId(element?.lorebookId, activeModule?.hideAvatars !== true)} alt="Avatar" onError={(e) => {
+                  <img src={GetAvatarPathFromLorebookId(element?.lorebookId, activeModule?.hideAvatars !== false)} alt="Avatar" onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = GetFallbackEmpty();
                     }} />

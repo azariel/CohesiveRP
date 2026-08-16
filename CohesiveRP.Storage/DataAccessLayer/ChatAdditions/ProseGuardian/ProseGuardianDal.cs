@@ -72,7 +72,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian
 
                 if (items == null || items.Length <= 0)
                 {
-                    LoggingManager.LogToFile("f3e6f2fc-2b16-4be8-a6c4-60b6b99daf97", $"ProseGuardians tied to Func [{func}] to delete weren't found in storage.");
+                    LoggingManager.LogToFile("f3e6f2fc-2b16-4be8-a6c4-60b6b99daf97", $"ProseGuardians tied to Func [{func?.Method}, {func?.Target}] to delete weren't found in storage.");
                     return false;
                 }
 
