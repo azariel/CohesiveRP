@@ -2,7 +2,6 @@
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
-using CohesiveRP.Core.LLMProviderProcessors.ChatAdditions.BusinessObjects.CohesionEnforcement;
 using CohesiveRP.Core.LLMProviderProcessors.ChatAdditions.BusinessObjects.NarrativeArchitecture;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
@@ -77,6 +76,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                     currentDbModel = new NarrativeArchitectureDbModel
                     {
                         ChatId = backgroundQueryDbModel.ChatId,
+                        RefreshCooldown = 10,
                         Content = new NarrativeArchitectureElement
                         {
                             Content = finalContent,
@@ -86,6 +86,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                     await storageService.AddNarrativeArchitectureAsync(currentDbModel);
                 } else
                 {
+                    currentDbModel.RefreshCooldown = 10;
                     currentDbModel.Content = new NarrativeArchitectureElement
                     {
                         Content = finalContent,

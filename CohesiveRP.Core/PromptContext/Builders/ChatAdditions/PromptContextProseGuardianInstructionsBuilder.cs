@@ -31,16 +31,17 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         {
             var currentValuesFromStorage = await storageService.GetProseGuardiansAsync(s => s.ChatId == chatDbModel.ChatId);
             var currentValueFromStorage = currentValuesFromStorage?.FirstOrDefault();
-            if (currentValueFromStorage == null || string.IsNullOrWhiteSpace(currentValueFromStorage?.Content?.Content))
+            var previousProseGuardian = "No previous prose guardian. Generate a new one from the story context.";
+            if (currentValueFromStorage != null && !string.IsNullOrWhiteSpace(currentValueFromStorage?.Content?.Content))
             {
-                return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
+                previousProseGuardian = currentValueFromStorage.Content?.Content;
             }
 
             string recentMessagesContent = await GetRecentMessagesContentAsync();
 
             string formatted = promptContextFormatElement?.Options?.Format?
                 .InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)
-                .Replace("{{description}}", currentValueFromStorage.Content?.Content)
+                .Replace("{{description}}", previousProseGuardian)
                 .Replace("{{recent_messages}}", recentMessagesContent);
 
             return ($"{Environment.NewLine}{formatted}", new ShareableContextLink { LinkedBuilder = this });

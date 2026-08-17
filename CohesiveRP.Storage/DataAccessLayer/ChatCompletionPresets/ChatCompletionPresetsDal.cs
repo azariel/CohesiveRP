@@ -63,6 +63,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 // and the other slow-changing CharacterSheetInstance fields, outputting only the diff.
                 dbContext.ChatCompletionPresets.Add(CharacterStatusUpdateCompletionPresetInjector.InjectPreset());
 
+                // Give a description in the chat about how the player reacts to the other characters rolls
+                dbContext.ChatCompletionPresets.Add(SkillChecksDescriptorCompletionPresetInjector.InjectPreset());
+
                 dbContext.SaveChanges();
                 return;
             }

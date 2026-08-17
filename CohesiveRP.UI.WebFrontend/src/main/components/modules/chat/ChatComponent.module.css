@@ -39,6 +39,26 @@
     scrollbar-gutter: stable;
 }
 
+.chatSubViewContainer {
+  flex: 1 1 auto;
+  min-height: 0;      /* critical: lets a flex child actually shrink and scroll */
+  overflow-y: auto;
+  padding-right: 0.8em;
+  margin-right: -0.6em;
+}
+
+.messagesContainer,
+.chatSubViewContainer {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+.messagesContainer::-webkit-scrollbar,
+.chatSubViewContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
 /* Chrome / Edge / Safari */
 .messagesContainer::-webkit-scrollbar {
   width: 8px;

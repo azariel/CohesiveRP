@@ -18,9 +18,11 @@ import { GetLorebookNameFontSize } from "../../../../utils/fontSizeUtils";
 import { MdAddBox } from "react-icons/md";
 import type { SharedContextType } from "../../../../store/SharedContextType";
 import type { Lorebook } from "../../../../ResponsesDto/lorebooks/BusinessObjects/Lorebook";
+import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 
 export default function LorebookSelectionComponent() {
   const { navigateTo } = sharedContext();
+  const { activeModule } = sharedContext<SharedContextChatType>();
   const [isLoading, setIsLoading] = useState(true);
   const didComponentMountAlready = useRef(false);
   const newLorebookFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -191,12 +193,12 @@ const handleAddLorebookClick = () => {
           lorebookDefinitions?.lorebooks?.map((element, index) => (
             <div key={index} className={styles.lorebookCard}>
               <label className={styles.lorebookCharNameLabel} style={{ fontSize: GetLorebookNameFontSize(element?.name ?? "") }}>{element?.name}</label>
-              <div className={styles.lorebookAvatarContainer} onClick={async () => await handleSpecificLorebookClick(element)}>
-                <img src={GetAvatarPathFromLorebookId(element?.lorebookId)} alt="Avatar" onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = GetFallbackEmpty();
-                  }} />
-              </div>
+                <div className={styles.lorebookAvatarContainer} onClick={async () => await handleSpecificLorebookClick(element)}>
+                  <img src={GetAvatarPathFromLorebookId(element?.lorebookId, activeModule?.hideAvatars !== false)} alt="Avatar" onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = GetFallbackEmpty();
+                    }} />
+                </div>
               <label className={styles.lorebookFootLabel}>{element?.lastActivityDateTime?.toDateString() ?? ""}</label>
             </div>
           ))

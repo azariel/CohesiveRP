@@ -1,6 +1,5 @@
 ﻿using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.WebApi;
-using CohesiveRP.Core.PromptContext;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
@@ -58,6 +57,15 @@ public class GetPromptByChatIdWorkflow : IGetPromptByChatIdWorkflow
         };
         IPromptContextBuilder contextBuilder = await contextBuilderFactory.GenerateAsync(outTag, promptContextElementBuilderFactory, storageService, backgroundQuery);
         var promptContext = await contextBuilder.BuildAsync(backgroundQuery.ChatId);
+
+        if (promptContext == null)
+        {
+            return new WebApiException
+            {
+                HttpResultCode = System.Net.HttpStatusCode.InternalServerError,
+                Message = $"PromptContext for chatId [{chatId}] and tag [{tag}] can't be found. Settings are invalid for outTag [{outTag}]."
+            };
+        }
 
         ILLMApiQueryPayloadBuilder llmApiQueryPayloadBuilder = llmApiQueryPayloadBuilderFactory.Create(LLMProviderType.OpenAICustom);
 

@@ -27,6 +27,7 @@ export const AppSharedStoreProvider = ({ children }: { children: ReactNode }) =>
             isSceneTrackerOpened: parsedSaved.isSceneTrackerOpened ?? null,
             isCharactersRollsOpened: parsedSaved.isCharactersRollsOpened ?? null,
             hideAvatars: true,// For debug purpose TODO: find a good place for this configuration :thinking: ..
+            latestPlayerDescription: parsedSaved.latestPlayerDescription ?? undefined,
           };
         }
 

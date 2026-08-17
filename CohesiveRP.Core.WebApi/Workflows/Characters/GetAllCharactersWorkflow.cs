@@ -37,8 +37,8 @@ public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
         var responseDto = new CharactersResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,
-            // TODO: pagination instead of take(256)
-            Characters = characters.Take(256).Select(s => new CharacterResponse
+            // TODO: pagination instead of take(512)
+            Characters = characters.Take(512).Select(s => new CharacterResponse
             {
                 CharacterId = s.CharacterId,
                 Name = s.Name,

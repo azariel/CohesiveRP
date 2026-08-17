@@ -16,12 +16,12 @@ using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.SceneTracker;
+using CohesiveRP.Storage.Utils.Characters;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 {
@@ -143,18 +143,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
             }
         }
 
-        // TODO: generalize into an utils
-        private CharacterSheetInstance FindCharacterSheetInstanceFromCharacterName(List<CharacterSheetInstance> characterSheetInstances, string characterName)
-        {
-            string characterNameLower = characterName.ToLowerInvariant().Trim();
-            var selectedCharacterSheetInstance = characterSheetInstances?.FirstOrDefault(f =>
-            f.CharacterSheet.FirstName?.ToLowerInvariant().Trim() == characterNameLower ||
-            f.CharacterSheet.LastName?.ToLowerInvariant().Trim() == characterNameLower ||
-            $"{f.CharacterSheet.FirstName?.ToLowerInvariant().Trim()} {f.CharacterSheet.LastName?.ToLowerInvariant().Trim()}" == characterNameLower);
-
-            return selectedCharacterSheetInstance;
-        }
-
         private List<string> GetAllCharacterNamesFromSceneTracker(VisualSceneTracker visualSceneTracker)
         {
             var everyCharacterNames = new List<string>();
@@ -170,12 +158,20 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
             return everyCharacterNames;
         }
 
+        /// <summary>
+        /// Analyze the characters found in the sceneTracker and infer characters that don't already have a CharacterSheet. It'll then queue an InteractiveUserInputQuery for each of those characters, so the user can decide if we should analyze the story to create a new CharacterSheet for them or not.
+        /// The issue here and the reason why we ask the player to decide is that the sceneTracker can track irregular or temporary characters such as 'the woman', 'the guard', etc. CharacterSheets are specific to ONE individual.
+        /// </summary>
+        /// <param name="sceneTrackerDbModel"></param>
+        /// <returns></returns>
         private async Task CreateNewCharactersWhenRequired(SceneTrackerDbModel sceneTrackerDbModel)
         {
             var visualSceneTracker = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerDbModel.Content);
-            if ((visualSceneTracker?.AllCharacterNamesActiveInScene == null || visualSceneTracker.AllCharacterNamesActiveInScene.Length <= 0) && 
+            if ((visualSceneTracker?.AllCharacterNamesActiveInScene == null || visualSceneTracker.AllCharacterNamesActiveInScene.Length <= 0) &&
                 (visualSceneTracker?.CharactersAnalysis == null || visualSceneTracker.CharactersAnalysis.Length <= 0))
+            {
                 return;
+            }
 
             var characterSheetInstances = await storageService.GetCharacterSheetsInstanceByChatIdAsync(sceneTrackerDbModel.ChatId);
             var allCurrentInteractiveUserInputQueries = await storageService.GetInteractiveUserInputQueriesAsync(c => c.ChatId == sceneTrackerDbModel.ChatId);
@@ -183,7 +179,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
             foreach (string characterName in everyCharacterNames)
             {
-                var characterSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstances?.CharacterSheetInstances, characterName);
+                var characterSheetInstance = CharacterSheetInstanceHelper.FindCharacterSheetInstanceFromCharacterName(characterSheetInstances?.CharacterSheetInstances, characterName);
 
                 if (characterSheetInstances?.CharacterSheetInstances == null || characterSheetInstances.CharacterSheetInstances.Count <= 0 || characterSheetInstance == null)
                 {
@@ -226,7 +222,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
             foreach (var instance in characterSheetInstancesObj.CharacterSheetInstances.Where(w => w.CharacterSheet != null))
             {
-                bool inScene = namesInScene.Any(n => FindCharacterSheetInstanceFromCharacterName(new List<CharacterSheetInstance> { instance }, n) != null);
+                bool inScene = namesInScene.Any(n => CharacterSheetInstanceHelper.FindCharacterSheetInstanceFromCharacterName(new List<CharacterSheetInstance> { instance }, n) != null);
 
                 if (inScene)
                 {
@@ -252,6 +248,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                                 LastStatusCheckMessageId = instance.LastStatusCheckMessageId,
                                 LastConfirmedAbsentMessageId = instance.LastConfirmedAbsentMessageId,
                             });
+
                             instance.ConsecutiveMessagesInScene = 0;
                         }
                         // else: the buffer hasn't released any new stable content yet — leave the counter elevated

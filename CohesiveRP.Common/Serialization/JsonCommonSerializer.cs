@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using CohesiveRP.Common.Diagnostics;
 
 namespace CohesiveRP.Common.Serialization
 {

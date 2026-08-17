@@ -33,6 +33,15 @@
     mask-size: 100% 100%;
 }
 
+.playerDescriptionLabel {
+  color: #cc6600;
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.35;
+  text-align: left;
+  padding-top: 1em;
+}
+
 .messageAvatarContainer img {
     width: clamp(5rem, 10dvw, 9rem);
     height: auto;
@@ -397,7 +406,7 @@
     }
 
     .messageHeaderContentModel {
-        display: none; /* duration info is noisy on small screens */
+        font-size: 0.7em;
     }
 
     .messageHeaderContentCreatedAt {

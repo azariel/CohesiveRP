@@ -33,5 +33,6 @@
         CharacterStatusUpdateInstructions = 28,
         NarrativeDirectionInstructions = 29,
         ProseGuardianInstructions = 30,
+        PathfinderSkillChecksDescriptor = 31,
     }
 }

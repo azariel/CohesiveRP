@@ -20,6 +20,7 @@ import { GetAvatarPathFromChatId, GetFallbackEmpty } from "../../../../utils/ava
 
 export default function ChatSelectionComponent() {
   const { navigateTo } = sharedContext();
+  const { activeModule } = sharedContext<SharedContextChatType>();
   const [isLoading, setIsLoading] = useState(true);
   const didComponentMountAlready = useRef(false);
   const [chatDefinitions, setChatDefinitions] = useState<SelectableChatsResponseDto>();
@@ -144,7 +145,7 @@ export default function ChatSelectionComponent() {
               </label>
 
               <div className={styles.chatAvatarContainer}>
-                <img src={GetAvatarPathFromChatId(chat.chatId)} alt="Avatar" onError={(e) => {
+                <img src={GetAvatarPathFromChatId(chat.chatId, activeModule?.hideAvatars ?? false)} alt="Avatar" onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = GetFallbackEmpty();
                   }} />

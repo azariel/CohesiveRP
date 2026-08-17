@@ -6,6 +6,7 @@ using CohesiveRP.Core.ComfyUI.Client;
 using CohesiveRP.Core.DtoConverters;
 using CohesiveRP.Core.DtoConverters.Abstractions;
 using CohesiveRP.Core.LLMProviderManager;
+using CohesiveRP.Core.LLMProviderProcessors.Queue;
 using CohesiveRP.Core.PromptContext;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
@@ -73,6 +74,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IDeleteSpecificMessageByIdWorkflow, DeleteSpecificMessageByIdWorkflow>();
             services.AddSingleton<ISwipeMessageWorkflow, SwipeMessageWorkflow>();
             services.AddSingleton<IGetPromptByChatIdWorkflow, GetPromptByChatIdWorkflow>();
+            services.AddSingleton<IGetCharactersByChatIdWorkflow, GetCharactersByChatIdWorkflow>();
 
             // Workflows.ChatCharacterRolls
             services.AddSingleton<IChatCharacterRollsWorkflow, GetChatCharacterRollsWorkflow>();
@@ -90,6 +92,8 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IExportCharacterCardWorkflow, ExportCharacterCardWorkflow>();
             services.AddSingleton<IImportCharacterCardWorkflow, ImportCharacterCardWorkflow>();
             services.AddSingleton<IDeleteCharacterAvatarWorkflow, DeleteCharacterAvatarWorkflow>();
+            services.AddSingleton<IGetCharacterSheetInstanceWorkflow, GetCharacterSheetInstanceWorkflow>();
+            services.AddSingleton<IUpdateCharacterSheetInstanceWorkflow, UpdateCharacterSheetInstanceWorkflow>();
 
             // Workflows.Personas
             services.AddSingleton<IGetAllPersonasWorkflow, GetAllPersonasWorkflow>();
@@ -152,6 +156,9 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IPromptContextElementBuilderFactory, PromptContextElementBuilderFactory>();
             services.AddSingleton<ILLMApiQueryPayloadBuilderFactory, LLMApiQueryPayloadBuilderFactory>();
 
+            // Processors
+            services.AddSingleton<ILLMProviderProcessorQueuer, LLMProviderProcessorQueuer>();
+
             // DataAccessLayers
             services.AddDbContextFactory<StorageDbContext>();
             // Those must be injected into StorageService ctor to make sure their CTOR is called upon service startup and thus default values are injected into storage at startup
@@ -184,7 +191,7 @@ namespace CohesiveRP.Core.WebApi
 
             //services.AddSingleton<ComfyUiEndpointConfig>(/* from appsettings */);
             //services.AddSingleton<IWorkflowInjector>(_ => new MainAvatarWorkflowInjector(templateJson));
-            services.AddSingleton<ComfyUiEndpointConfig>(new ComfyUiEndpointConfig { BaseUrl = "http://192.168.0.237:8188" });
+            services.AddSingleton<ComfyUiEndpointConfig>(new ComfyUiEndpointConfig());
             services.AddSingleton<IComfyUiClient, ComfyUiClient>();
             //services.AddSingleton<IComfyUiAvatarService, ComfyUiAvatarService>();
 

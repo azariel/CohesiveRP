@@ -18,5 +18,6 @@
         NarrativeDirection = 12,
         ProseGuardian = 13,
         CharacterStatusUpdate = 14,
+        SkillChecksDescriptor = 15,
     }
 }

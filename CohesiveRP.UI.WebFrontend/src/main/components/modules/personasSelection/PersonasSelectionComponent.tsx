@@ -15,6 +15,7 @@ import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exc
 import type { SharedContextPersonaType } from "../../../../store/SharedContextPersonaType";
 import { GetAvatarPathFromPersonaId, GetFallbackEmpty } from "../../../../utils/avatarUtils";
 import { ImSpinner2 } from "react-icons/im";
+import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 
 type SortOption = "createdNewest" | "createdOldest" | "nameAZ" | "nameZA";
 
@@ -28,6 +29,7 @@ const safeTime = (d?: string | null): number => {
 
 export default function PersonasSelectionComponent() {
   const { navigateTo } = sharedContext();
+  const { activeModule } = sharedContext<SharedContextChatType>();
   const didComponentMountAlready = useRef(false);
 
   const [isLoadingPersonas, setIsLoadingPersonas] = useState(true);
@@ -268,20 +270,22 @@ export default function PersonasSelectionComponent() {
                   className={persona.isDefault ? styles.personaContainerDefault : styles.personaContainer}
                   onClick={() => handleSpecificPersonaClick(persona.personaId)}
                 >
-                  <div className={styles.personaAvatarContainer}>
-                    {persona.personaId ? (
-                      <img
-                        src={GetAvatarPathFromPersonaId(persona.personaId)}
-                        alt={persona.name}
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = GetFallbackEmpty();
-                        }}
-                      />
-                    ) : (
-                      <HiUserCircle className={styles.personaAvatarFallback} />
-                    )}
-                  </div>
+                  {activeModule?.hideAvatars !== true && (
+                    <div className={styles.personaAvatarContainer}>
+                      {persona.personaId ? (
+                        <img
+                          src={GetAvatarPathFromPersonaId(persona.personaId)}
+                          alt={persona.name}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = GetFallbackEmpty();
+                          }}
+                        />
+                      ) : (
+                        <HiUserCircle className={styles.personaAvatarFallback} />
+                      )}
+                    </div>
+                  )}
 
                   <div className={styles.personaInfoPanel}>
                     <div className={styles.personaNameRow}>

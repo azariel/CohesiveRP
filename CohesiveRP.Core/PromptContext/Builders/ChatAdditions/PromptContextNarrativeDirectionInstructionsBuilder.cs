@@ -31,14 +31,14 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         {
             var currentValuesFromStorage = await storageService.GetNarrativeDirectionsAsync(s => s.ChatId == chatDbModel.ChatId);
             var currentValueFromStorage = currentValuesFromStorage?.FirstOrDefault();
-            if (currentValueFromStorage == null || string.IsNullOrWhiteSpace(currentValueFromStorage?.Content?.Content))
+            string previousNarrativeDirection = null;
+            if (currentValueFromStorage != null && !string.IsNullOrWhiteSpace(currentValueFromStorage?.Content?.Content))
             {
-                return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
+                previousNarrativeDirection = currentValueFromStorage.Content?.Content;
             }
 
             string recentMessagesContent = await GetRecentMessagesContentAsync();
 
-            string previousNarrativeDirection = currentValueFromStorage.Content?.Content;
             if(string.IsNullOrWhiteSpace(previousNarrativeDirection))
                 previousNarrativeDirection = "No previous narrative direction. Generate a new one from the story context.";
 

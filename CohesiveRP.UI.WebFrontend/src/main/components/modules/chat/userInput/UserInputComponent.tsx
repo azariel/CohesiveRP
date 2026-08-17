@@ -49,7 +49,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
         localStorage.setItem(`chatInput_${activeModule.chatId}`, "");
       }
 
-      setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "" } : prev);
+      setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "", lastPlayerMessageId: "" } : prev);
     }
   }, [messages]);
 
@@ -72,6 +72,12 @@ export default function UserInputComponent({ messagesRef }: Props) {
       textarea.removeEventListener("focus", handleFocus);
     };
   }, [messagesRef]);
+
+  useEffect(() => {
+  if (activeModule?.mainQueryId) {
+    setIsInputBlockedDueToServer(true);
+  }
+}, [activeModule?.mainQueryId]);
 
 useEffect(() => {
     // Wait for ChatComponent's "/messages/hot" fetch to land. Otherwise this
@@ -305,6 +311,8 @@ const adjustTextareaHeight = () => {
           mainQueryId: null,
           // ── Trigger InteractiveUserInputComponent to fetch new pending queries ──
           interactiveInputRefreshToken: (prev.interactiveInputRefreshToken ?? 0) + 1,
+          // ── Trigger ChatRollsComponent to fetch the final rolls/player description ──
+         sceneTrackerRefreshToken: (prev.sceneTrackerRefreshToken ?? 0) + 1,
         } : prev);
         
         if (messagesRef?.current) {
@@ -365,7 +373,7 @@ const adjustTextareaHeight = () => {
     setSendMessageQueryStatus("Completed");
     setLocalInput(""); // clear immediately
     localStorage.setItem(`chatInput_${activeModule.chatId}`, "");
-    setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "" } : prev);
+    setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "", lastPlayerMessageId: "" } : prev);
     
     // reflect those messages in the UI!
     response.messageObj.messageIndex = (activeModule.nbColdMessages ?? 0) + messages.length + 1;
@@ -419,7 +427,8 @@ const adjustTextareaHeight = () => {
       ...prev,
       mainQueryId: response.mainQueryId,
       lastPlayerMessageId: response.messageObj?.messageId ?? null,
-      currentUserInputValue: "" 
+      currentUserInputValue: "",
+      latestPlayerDescription: ""
     } : prev);
 
     UpdateInputControlState();

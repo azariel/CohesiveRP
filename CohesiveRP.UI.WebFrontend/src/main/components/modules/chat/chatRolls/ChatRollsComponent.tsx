@@ -13,18 +13,18 @@ import type { ChatCharacterRoll, ChatCharacterRollResponse, ChatCharacterRollsRe
 // ── Colour tier ───────────────────────────────────────────────────────────────
 
 function tierClass(value: number): string {
-  if (value >= 18) return styles["tier-critical"];
+  if (value >= 20) return styles["tier-critical"];
   if (value >= 14) return styles["tier-high"];
   if (value >= 10) return styles["tier-mid"];
-  if (value >= 6) return styles["tier-low"];
+  if (value >= 1) return styles["tier-low"];
   return styles["tier-critical-fail"];
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function RollRow({ roll }: { roll: ChatCharacterRoll }) {
-  const [showReasonings, setShowReasonings] = useState(false);
-  const hasReasonings = roll.reasonings && roll.reasonings.length > 0;
+  const [showGuides, setShowGuides] = useState(false);
+  const hasGuides = roll.guides && roll.guides.length > 0;
   const hasCounters   = roll.charactersInSceneWithCounterRolls?.length > 0;
 
   return (
@@ -53,7 +53,7 @@ function RollRow({ roll }: { roll: ChatCharacterRoll }) {
                 title={`${cr.characterName} — ${String(attr)}: ${value}`}
               >
                 <span className={styles.counterCharName}>{cr.characterName}</span>
-                <span className={styles.counterAttrLabel}>{attrShort}</span>
+                <span className={styles.counterAttrLabel}>({attrShort})</span><span />
                 <span className={styles.counterValue}>{value}</span>
               </div>
             );
@@ -61,22 +61,29 @@ function RollRow({ roll }: { roll: ChatCharacterRoll }) {
         </div>
       )}
 
-      {/* Reasoning toggle */}
-      {hasReasonings && (
+      {/* Guides/Reasonings toggle */}
+      {hasGuides && (
         <button
           className={styles.reasoningBtn}
-          onClick={() => setShowReasonings(p => !p)}
+          onClick={() => setShowGuides(p => !p)}
           title="Show reasoning"
         >
-          {showReasonings ? "▲ why" : "▼ why"}
+          {showGuides ? "▲ why" : "▼ why"}
         </button>
       )}
 
       {/* Reasoning list (expanded) */}
-      {showReasonings && hasReasonings && (
+      {/* Guide list (expanded) */}
+      {showGuides && hasGuides && (
         <div className={styles.reasoningList}>
-          {roll.reasonings.map((r, i) => (
-            <span key={i} className={styles.reasoningItem}>{r}</span>
+          {roll.guides.map((r, i) => (
+            <div key={i} className={styles.reasoningItem}>
+              <span>
+                <p>{r.reasoning}</p>
+                <p className={styles.reasoningItemSuccess}>{r.reactionFromOtherCharactersWhenSucceedingSkillCheck}</p>
+                <p className={styles.reasoningItemFailure}>{r.reactionFromOtherCharactersWhenFailingSkillCheck}</p>
+              </span>
+            </div>
           ))}
         </div>
       )}
@@ -116,7 +123,6 @@ export default function ChatRollsComponent({ sceneTrackerRefreshToken }: Props) 
     const abort = new AbortController();
 
     const fetchRolls = async () => {
-      console.error(`FETCHING`);
       setIsLoading(true);
 
       const response = await getFromServerApiAsync<ChatCharacterRollsResponseDto>(
@@ -135,6 +141,10 @@ export default function ChatRollsComponent({ sceneTrackerRefreshToken }: Props) 
 
       setRolls(response.rolls ?? []);
       setIsLoading(false);
+
+      setActiveModule((prev) =>
+        prev ? { ...prev, latestPlayerDescription: response.playerDescription } : prev
+      );
     };
 
     fetchRolls();

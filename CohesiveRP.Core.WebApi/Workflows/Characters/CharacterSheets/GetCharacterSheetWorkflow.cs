@@ -94,6 +94,10 @@ public class GetCharacterSheetWorkflow : IGetCharacterSheetWorkflow
                 SpeechPattern = characterSheet.CharacterSheet.SpeechPattern,
                 Weaknesses = characterSheet.CharacterSheet.Weaknesses,
                 WeaponsProficiency = characterSheet.CharacterSheet.WeaponsProficiency,
+                LastInteractionWithPlayer = characterSheet.CharacterSheet.LastInteractionWithPlayer,
+                RecentImportantEvents = characterSheet.CharacterSheet.RecentImportantEvents,
+                LatentMoodForNextInteractionWithPlayer = characterSheet.CharacterSheet.LatentMoodForNextInteractionWithPlayer,
+                Arousal = characterSheet.CharacterSheet.Arousal
             },
         };
     }
@@ -176,6 +180,10 @@ public class GetCharacterSheetWorkflow : IGetCharacterSheetWorkflow
                 SpeechPattern = characterSheet.CharacterSheet.SpeechPattern,
                 Weaknesses = characterSheet.CharacterSheet.Weaknesses,
                 WeaponsProficiency = characterSheet.CharacterSheet.WeaponsProficiency,
+                LastInteractionWithPlayer = characterSheet.CharacterSheet.LastInteractionWithPlayer,
+                LatentMoodForNextInteractionWithPlayer = characterSheet.CharacterSheet.LatentMoodForNextInteractionWithPlayer,
+                RecentImportantEvents = characterSheet.CharacterSheet.RecentImportantEvents,
+                Arousal = characterSheet.CharacterSheet.Arousal
             },
         };
     }

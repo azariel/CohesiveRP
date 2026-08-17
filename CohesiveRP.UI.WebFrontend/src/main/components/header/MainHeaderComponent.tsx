@@ -1,24 +1,30 @@
 import styles from "./MainHeaderComponent.module.css";
 import { LuBlocks } from "react-icons/lu";
-import { HiMiniUsers, HiChatBubbleLeftEllipsis, HiCog6Tooth, HiIdentification } from "react-icons/hi2";
-// import { SiDungeonsanddragons } from "react-icons/si";
+import { HiMiniUsers, HiChatBubbleLeftEllipsis, HiCog6Tooth, HiIdentification, HiRectangleStack } from "react-icons/hi2";
+import { MdArrowBack } from "react-icons/md";
+import { FaBook } from "react-icons/fa";
 
 /* Store */
 import { sharedContext } from '../../../store/AppSharedStoreContext';
-import type { SharedContextType } from "../../../store/SharedContextType";
-import { FaBook } from "react-icons/fa";
+import type { SharedContextChatType } from "../../../store/SharedContextChatType";
 
 export default function Header() {
-  const { navigateTo } = sharedContext();
+  const { activeModule, setActiveModule, navigateTo } = sharedContext<SharedContextChatType>();
 
   const handleIconClick = (moduleName: string) => {
-
-    let module = {
-      moduleName: moduleName
-    } as SharedContextType;
-
+    const module = { moduleName } as unknown as SharedContextChatType;
     navigateTo(module);
     console.log(`Module [${moduleName}] selected.`);
+  };
+
+  const isInChat = activeModule?.moduleName === "chat" && !!activeModule?.chatId;
+  const isViewingCharacterSheets = isInChat && activeModule?.chatSubView === "characterSheetInstances";
+
+  const handleToggleCharacterSheets = () => {
+    if (!isInChat) return;
+    setActiveModule((prev) =>
+      prev ? { ...prev, chatSubView: isViewingCharacterSheets ? "chat" : "characterSheetInstances" } : prev
+    );
   };
 
   return (
@@ -28,32 +34,27 @@ export default function Header() {
           <button className={styles.iconBtn} onClick={() => handleIconClick("chatSelection")} aria-label="Chat Selection Module" title="Chat">
             <HiChatBubbleLeftEllipsis />
           </button>
-          <button className={styles.iconBtn} onClick={() => handleIconClick("characters")} aria-label="Characters Module"  title="Characters">
+          <button className={styles.iconBtn} onClick={() => handleIconClick("characters")} aria-label="Characters Module" title="Characters">
             <HiMiniUsers />
           </button>
-          <button className={styles.iconBtn} onClick={() => handleIconClick("personas")} aria-label="Player Module"  title="Player">
+          <button className={styles.iconBtn} onClick={() => handleIconClick("personas")} aria-label="Player Module" title="Player">
             <HiIdentification />
           </button>
-          <button className={styles.iconBtnSmaller} onClick={() => handleIconClick("lorebooks")} aria-label="LoreBooks Module"  title="Lorebooks">
+          <button className={styles.iconBtnSmaller} onClick={() => handleIconClick("lorebooks")} aria-label="LoreBooks Module" title="Lorebooks">
             <FaBook />
           </button>
         </div>
         <div className={styles.iconRowRight}>
-          {/* <button className={styles.iconBtn} onClick={() => handleIconClick("experimentation")} aria-label="Experimentation Module" title="Experimentation">
-            <HiBeaker />
-          </button>
-          <button className={styles.iconBtn} onClick={() => handleIconClick("agents")} aria-label="Agents Module" title="Agents">
-            <HiChip />
-          </button>
-          <button className={styles.iconBtn} onClick={() => handleIconClick("storage")} aria-label="Storage Module" title="Storage">
-            <HiCircleStack />
-          </button>
-          <button className={styles.iconBtn} onClick={() => handleIconClick("adjustments")} aria-label="Adjustments Module" title="Adjustments">
-            <HiAdjustmentsHorizontal />
-          </button> */}
-          {/* <button className={styles.iconBtnPathfinder} onClick={() => handleIconClick("pathfinder")} aria-label="Pathfinder" title="Pathfinder">
-            <SiDungeonsanddragons />
-          </button> */}
+          {isInChat && (
+            <button
+              className={`${styles.iconBtn} ${isViewingCharacterSheets ? styles.iconBtnActive : ""}`}
+              onClick={handleToggleCharacterSheets}
+              aria-label={isViewingCharacterSheets ? "Back to Chat" : "Character Sheets"}
+              title={isViewingCharacterSheets ? "Back to Chat" : "Character Sheets"}
+            >
+              {isViewingCharacterSheets ? <MdArrowBack /> : <HiRectangleStack />}
+            </button>
+          )}
           <button className={styles.iconBtnCompletionPresets} onClick={() => handleIconClick("chatCompletionPresets")} aria-label="CompletionPresets" title="Completion Presets">
             <LuBlocks />
           </button>

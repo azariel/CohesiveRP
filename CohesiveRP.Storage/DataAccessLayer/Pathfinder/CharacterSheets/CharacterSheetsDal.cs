@@ -16,11 +16,13 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
     {
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
         private readonly ICharacterSheetInstancesDal characterSheetInstancesDal;
+        private readonly IChatsDal chatsDal;
 
-        public CharacterSheetsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory, ICharacterSheetInstancesDal characterSheetInstancesDal) : base(jsonSerializerOptions)
+        public CharacterSheetsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory, ICharacterSheetInstancesDal characterSheetInstancesDal, IChatsDal chatsDal) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
             this.characterSheetInstancesDal = characterSheetInstancesDal;
+            this.chatsDal = chatsDal;
 
             using var dbContext = contextFactory.CreateDbContext();
             dbContext.Database.EnsureCreated();
@@ -111,6 +113,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             SpeechPattern = dbModel.CharacterSheet.SpeechPattern,
                             Weaknesses = dbModel.CharacterSheet.Weaknesses,
                             WeaponsProficiency = dbModel.CharacterSheet.WeaponsProficiency,
+                            LastInteractionWithPlayer = dbModel.CharacterSheet.LastInteractionWithPlayer,
+                            LatentMoodForNextInteractionWithPlayer = dbModel.CharacterSheet.LatentMoodForNextInteractionWithPlayer,
+                            RecentImportantEvents = dbModel.CharacterSheet.RecentImportantEvents,
+                            Arousal = dbModel.CharacterSheet.Arousal
                         };
 
                         instance.CharacterSheetId = dbModel.CharacterSheetId;
@@ -268,6 +274,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return false;
                 }
 
+                // Delete orphans
                 await characterSheetInstancesDal.DeleteCharacterSheetInstancesFromCharacterSheetAsync(dbModel);
                 await dbContext.SaveChangesAsync();
                 return true;

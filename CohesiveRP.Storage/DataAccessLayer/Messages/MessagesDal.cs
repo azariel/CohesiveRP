@@ -176,7 +176,29 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 return hotMessages;
             } catch (Exception ex)
             {
-                LoggingManager.LogToFile("54337d85-dc06-436d-88f2-c3d952154a16", $"Error when querying Db on table messages.", ex);
+                LoggingManager.LogToFile("54337d85-dc06-436d-88f2-c3d952154a16", $"Error when querying Db on table Hot messages.", ex);
+                return null;
+            }
+        }
+
+        public async Task<ColdMessagesDbModel> GetColdMessagesAsync(string chatId)
+        {
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var coldMessages = dbContext.ColdMessages.FirstOrDefault(w => w.ChatId == chatId);
+
+                if (coldMessages == null)
+                {
+                    LoggingManager.LogToFile("7ad4c54d-6eb5-49ad-8ed7-2d82cd32e016", $"No Cold Messages found for chatId [{chatId}].");
+                    return null;
+                }
+
+                // Convert the wrapper into individual messages
+                return coldMessages;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("ce4551b8-d0a3-4559-83bf-063998583059", $"Error when querying Db on table Cold messages.", ex);
                 return null;
             }
         }
@@ -404,18 +426,18 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
             try
             {
                 using var dbContext = await contextFactory.CreateDbContextAsync();
-                HotMessagesDbModel messagesObj = dbContext.HotMessages.FirstOrDefault(w => w.ChatId == chatId);
+                var messagesObj = dbContext.ColdMessages.FirstOrDefault(w => w.ChatId == chatId);
 
                 if (messagesObj == null)
                 {
-                    LoggingManager.LogToFile("902f1973-b0c8-43a3-a3ec-debbcf17ba86", $"Cold Messages tied to Chat [{chatId}] to delete weren't found in storage.");
+                    LoggingManager.LogToFile("032fa92a-e5da-4338-a72d-5f789c5acd65", $"Cold Messages tied to Chat [{chatId}] to delete weren't found in storage.");
                     return false;
                 }
 
-                var result = dbContext.HotMessages.Remove(messagesObj);
+                var result = dbContext.ColdMessages.Remove(messagesObj);
                 if (result.State != EntityState.Deleted)
                 {
-                    LoggingManager.LogToFile("36701052-c788-4fa6-acf4-9f237c8de4c7", $"Error when deleting a specific Cold message object. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(messagesObj)}].");
+                    LoggingManager.LogToFile("dabbeb4f-b3be-481b-aab2-077bf099a2ea", $"Error when deleting a specific Cold message object. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(messagesObj)}].");
                     return false;
                 }
 
@@ -423,7 +445,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
                 return true;
             } catch (Exception ex)
             {
-                LoggingManager.LogToFile("1e53acbf-ea6b-4006-84a4-346182bfe93d", $"Error when querying pending queries on table Cold messages.", ex);
+                LoggingManager.LogToFile("01df580d-5b37-4408-b634-2da0cb80b6dc", $"Error when querying pending queries on table Cold messages.", ex);
                 return false;
             }
         }

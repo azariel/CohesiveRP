@@ -15,6 +15,11 @@
   gap: clamp(0.2rem, 4%, 2rem);
 }
 
+.iconBtnActive {
+  color: #f6911d;
+  filter: drop-shadow(0 0 5px rgba(246, 145, 29, 0.35));
+}
+
 .iconRowLeft {
   width: 50%;
   margin-left: clamp(0.2rem, 1%, 0.5rem);

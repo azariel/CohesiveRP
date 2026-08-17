@@ -3,6 +3,7 @@ using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations.BusinessObjects;
+using CohesiveRP.Core.LLMProviderProcessors.Queue;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Pathfinder.CharactersMutations;
@@ -16,7 +17,7 @@ using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
 {
-    internal class CharacterStatusUpdateLLMQueryProcessor : LLMQueryProcessor
+    public class CharacterStatusUpdateLLMQueryProcessor : LLMQueryProcessor
     {
         public CharacterStatusUpdateLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
@@ -35,7 +36,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                 storageService,
                 httpLLMApiProviderService,
                 summaryService)
-        { }
+        {
+        }
 
         // TODO: generalize into a shared utility (duplicated from SceneTrackerLLMQueryProcessor)
         private CharacterSheetInstance FindInstanceByName(List<CharacterSheetInstance> instances, string characterName)
@@ -164,6 +166,11 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                         if (!string.IsNullOrWhiteSpace(update.Profession))
                         {
                             instance.CharacterSheet.Profession = update.Profession;
+                        }
+
+                        if (update.Arousal != null && update.Arousal >= 0 && update.Arousal <= 100)
+                        {
+                            instance.CharacterSheet.Arousal = update.Arousal.Value;
                         }
 
                         if (!string.IsNullOrWhiteSpace(update.LastInteractionWithPlayer))

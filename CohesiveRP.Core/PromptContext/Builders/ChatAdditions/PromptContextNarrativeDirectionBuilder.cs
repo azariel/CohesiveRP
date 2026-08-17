@@ -27,7 +27,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         {
             var currentValuesFromStorage = await storageService.GetNarrativeDirectionsAsync(s=> s.ChatId == chatDbModel.ChatId);
             var currentValueFromStorage = currentValuesFromStorage?.FirstOrDefault();
-            if(currentValueFromStorage == null || string.IsNullOrWhiteSpace(currentValueFromStorage?.Content?.Content))
+            if(currentValueFromStorage == null || string.IsNullOrWhiteSpace(currentValueFromStorage?.Content?.Content) || !currentValueFromStorage.InjectInMainPrompt)
             {
                 return (string.Empty, new ShareableContextLink{ LinkedBuilder = this });
             }

@@ -41,6 +41,9 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations.B
         [JsonPropertyName("profession")]
         public string Profession { get; set; }
 
+        [JsonPropertyName("arousal")]
+        public int? Arousal { get; set; }
+
         [JsonPropertyName("relationshipsToAdd")]
         public string[] RelationshipsToAdd { get; set; }
 

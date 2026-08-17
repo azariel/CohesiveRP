@@ -1,6 +1,7 @@
 ﻿using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Utils.Parsers;
+using CohesiveRP.Core.LLMProviderProcessors.Queue;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Directive;
@@ -18,7 +19,6 @@ using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.Busi
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
-using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
 
@@ -26,6 +26,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 {
     public class MainLLMQueryProcessor : LLMQueryProcessor
     {
+        ILLMProviderProcessorQueuer LLMProviderProcessorQueuer;
+
         public MainLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
@@ -34,6 +36,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
             IPromptContextElementBuilderFactory promptContextElementBuilderFactory,
             IStorageService storageService,
             IHttpLLMApiProviderService httpLLMApiProviderService,
+            ILLMProviderProcessorQueuer LLMProviderProcessorQueuer,
             ISummaryService summaryService) : base(
                 completionPresetType,
                 tag,
@@ -44,6 +47,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 httpLLMApiProviderService,
                 summaryService)
         {
+            this.LLMProviderProcessorQueuer = LLMProviderProcessorQueuer;
         }
 
         private async Task<List<CharacterAvatarDefinition>> GetAvatarsFromSceneAnalysisFilePathAsync(ChatDbModel chatDbModel, SceneTrackerDbModel dbModel)
@@ -156,7 +160,7 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 FilePath = Path.Combine(characterFolderPath, WebConstants.AvatarFileName)?.Replace(WebConstants.WebAppPublicFolder, "").ToLowerInvariant(),
             };
 
-            if(targetCharacter.ClothingStateOfDress == null)
+            if (targetCharacter.ClothingStateOfDress == null)
             {
                 return avatar;
             }
@@ -481,10 +485,10 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 IMessageDbModel newMessageInStorage = await storageService.AddMessageAsync(messageQueryModel);
                 if (newMessageInStorage == null)
                 {
-                    LoggingManager.LogToFile("15b7b071-b3bb-4d36-9321-4353dd747797", $"Error. The message creation in storage failed. Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Task will be set to Pending status for re-generation.");
+                    LoggingManager.LogToFile("15b7b071-b3bb-4d36-9321-4353dd747797", $"Error. The message creation in storage failed. Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Task will be set to Error status.");
                     backgroundQueryDbModel.Content = null;
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
-                    return false; ;
+                    return false;
                 }
 
                 backgroundQueryDbModel.LinkedId = newMessageInStorage.MessageId;
@@ -500,6 +504,14 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 if (contextBuilder == null)
                 {
                     await BuildContextAsync(backgroundQueryDbModel);
+
+                    if (contextBuilder == null)
+                    {
+                        LoggingManager.LogToFile("d3329f5f-6b2f-4a22-bb09-6c2757c0b754", $"Error. Default ContextBuilder for the backgroundQuery [{backgroundQueryDbModel.BackgroundQueryId}] couldn't be found. BackgroundQuery will be set to Error.");
+                        backgroundQueryDbModel.Content = null;
+                        backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
+                        return false;
+                    }
                 }
 
                 GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();
@@ -507,18 +519,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 var allMessages = hotMessages.Messages.OrderByDescending(o => o.CreatedAtUtc).ToArray();
                 var lastPlayerMessage = allMessages.FirstOrDefault(f => f.SourceType == MessageSourceType.User);
 
-                // Queue the prose guardian
-                await QueueProseGuardianBackgroundQueryAsync(chat);
-
-                // Scene Analyzer
-                //await QueueSceneAnalyzeAsync(chat);
-
-                // Cohesive Enforcement
-                // TODO: we need to be able to update the content of the message afterwards. That part is fine, but the UI would not reflect that change since the main backgroundQuery is set as completed..
-                //await QueueCohesionEnforcementAsync(chat);
-
-                // Narrative Architect (Secret Plot)
-                //await QueueNarrativeArchitectureAsync(chat);
+                // Queue the required backgroundQueries once the main query has been processed
+                await LLMProviderProcessorQueuer.QueueProcessorsOnAfterMainGeneration(chat);
 
                 // Prebuild the images to show in the UI according to context
                 var sceneTracker = await storageService.GetSceneTrackerAsync(backgroundQueryDbModel.ChatId);
@@ -532,6 +534,25 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 // Summary
                 _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, globalSettings);
 
+                // Handle NarrativeDirection
+                var currentNarrativeDirections = await storageService.GetNarrativeDirectionsAsync(s => s.ChatId == chat.ChatId);
+                if (currentNarrativeDirections != null && currentNarrativeDirections.Any())
+                {
+                    var currentNarrativeDirection = currentNarrativeDirections.First();
+                    currentNarrativeDirection.InjectInMainPrompt = false;
+                    currentNarrativeDirection.RefreshCooldown--;
+                    await storageService.UpdateNarrativeDirectionAsync(currentNarrativeDirection);
+                }
+
+                // Handle NarrativeArchitecture
+                var currentNarrativeArchitectures = await storageService.GetNarrativeArchitecturesAsync(s => s.ChatId == chat.ChatId);
+                if (currentNarrativeArchitectures != null && currentNarrativeArchitectures.Any())
+                {
+                    var currentNarrativeArchitecture = currentNarrativeArchitectures.First();
+                    currentNarrativeArchitecture.RefreshCooldown--;
+                    await storageService.UpdateNarrativeArchitectureAsync(currentNarrativeArchitecture);
+                }
+
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
             } catch (Exception e)
@@ -541,54 +562,6 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
                 return false;
             }
-        }
-
-        private async Task<bool> QueueProseGuardianBackgroundQueryAsync(ChatDbModel chat)
-    {
-        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-        {
-            ChatId = chat.ChatId,
-            Priority = BackgroundQueryPriority.High,// will block the next 'main'
-            DependenciesTags = [],// No dependencies at all
-            Tags = [BackgroundQuerySystemTags.proseGuardian.ToString()],
-        };
-
-        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-            return false;
-
-        return true;
-    }
-
-        private async Task<bool> QueueCohesionEnforcementAsync(ChatDbModel chat)
-        {
-            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-            {
-                ChatId = chat.ChatId,
-                Priority = BackgroundQueryPriority.Highest,// User is waiting!
-                DependenciesTags = [],// No dependencies at all
-                Tags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],
-            };
-
-            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-                return false;
-
-            return true;
-        }
-
-        private async Task<bool> QueueNarrativeArchitectureAsync(ChatDbModel chat)
-        {
-            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-            {
-                ChatId = chat.ChatId,
-                Priority = BackgroundQueryPriority.VeryLow,// user is not waiting, we're simply generation and iterating over secret plots and narrative arcs in the background, so we can set it to very low priority
-                DependenciesTags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],// Run after cohesionEnforcement
-                Tags = [BackgroundQuerySystemTags.narrativeArchitecture.ToString()],
-            };
-
-            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-                return false;
-
-            return true;
         }
     }
 }

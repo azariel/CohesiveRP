@@ -27,12 +27,21 @@
 │   │   │       │   │   ├── CharacterDetailsComponent.module.css
 │   │   │       │   │   └── CharacterDetailsComponent.tsx
 │   │   │       │   └── characterSheets/
-│   │   │       │       ├── CharacterSheetComponent.module.css
+│   │   │       │       ├── shared/
+│   │   │       │       │   ├── CharacterSheetForm.module.css
+│   │   │       │       │   ├── CharacterSheetFormBody.tsx
+│   │   │       │       │   ├── CharacterSheetFormPrimitives.tsx
+│   │   │       │       │   └── UseCharacterSheetFields.ts
 │   │   │       │       └── CharacterSheetComponent.tsx
 │   │   │       ├── charactersSelection/
 │   │   │       │   ├── CharactersSelectionComponent.module.css
 │   │   │       │   └── CharactersSelectionComponent.tsx
 │   │   │       ├── chat/
+│   │   │       │   ├── characterSheetInstances/
+│   │   │       │   │   └── CharacterSheetInstanceComponent.tsx
+│   │   │       │   ├── characterSheetInstancesSelection/
+│   │   │       │   │   ├── CharacterSheetInstancesSelectionComponent.module.css
+│   │   │       │   │   └── CharacterSheetInstancesSelectionComponent.tsx
 │   │   │       │   ├── chatDetails/
 │   │   │       │   │   ├── chatDetailsComponent.module.css
 │   │   │       │   │   └── chatDetailsComponent.tsx
@@ -83,6 +92,8 @@
 │   │   └── Constants.ts
 │   ├── RequestDto/
 │   │   ├── characters/
+│   │   │   ├── characterSheetInstances/
+│   │   │   │   └── CharacterSheetInstanceRequestDto.ts
 │   │   │   ├── characterSheets/
 │   │   │   │   └── CharacterSheetRequestDto.ts
 │   │   │   └── CharacterMainAvatarIllustrationQueryRequestDto.ts
@@ -92,6 +103,8 @@
 │   │       └── LorebookUpdateRequestDto.ts
 │   ├── ResponsesDto/
 │   │   ├── characters/
+│   │   │   ├── characterSheetInstances/
+│   │   │   │   └── CharacterSheetInstanceResponseDto.ts
 │   │   │   ├── characterSheets/
 │   │   │   │   ├── CharacterSheet.ts
 │   │   │   │   ├── CharacterSheetResponseDto.ts

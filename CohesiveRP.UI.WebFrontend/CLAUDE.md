@@ -69,5 +69,3 @@ The component sits below the latest message from the AI and shows the latest Pat
 
 ##### Input
 This component allow the user to write a message and send it, which will trigger the PRE-operations to generate and following that, the 'main' query to trigger so that the AI reply is also generated with the whole context. The whole context is built from the story context, characters, persona, memories as well as the PRE-operations results and a few other components. To the absolute right of this component, we show either a spinner to show that the AI is currently in the process of replying or we show an arrow to allow the user to send its message to the backend.
-
-#### Character Sheet Instances
