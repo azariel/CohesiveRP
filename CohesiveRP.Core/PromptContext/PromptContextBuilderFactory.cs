@@ -40,8 +40,6 @@ namespace CohesiveRP.Core.PromptContext
                     return new PromptContextBuilder(ChatCompletionPresetType.DynamicCharacterSheetCreation, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar:
                     return new PromptContextBuilder(ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
-                case BackgroundQuerySystemTags.cohesionEnforcement:
-                    return new PromptContextBuilder(ChatCompletionPresetType.CohesionEnforcement, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.narrativeArchitecture:
                     return new PromptContextBuilder(ChatCompletionPresetType.NarrativeArchitecture, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.narrativeDirection:
@@ -52,6 +50,10 @@ namespace CohesiveRP.Core.PromptContext
                     return new PromptContextBuilder(ChatCompletionPresetType.CharacterStatusUpdate, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.skillChecksDescriptor:
                     return new PromptContextBuilder(ChatCompletionPresetType.SkillChecksDescriptor, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.cohesionEnforcementAnalyzer:
+                    return new PromptContextBuilder(ChatCompletionPresetType.CohesionEnforcementAnalyzer, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.cohesionEnforcementWriter:
+                    return new PromptContextBuilder(ChatCompletionPresetType.CohesionEnforcementWriter, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.custom:
                     return null;
                 default:

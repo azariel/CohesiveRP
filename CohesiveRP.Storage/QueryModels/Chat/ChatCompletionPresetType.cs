@@ -13,11 +13,13 @@
         DynamicCharacterSheetCreation = 8,
         IllustrationPromptInjectionForCharacterAvatar = 9,
         // ChatAdditions
-        CohesionEnforcement = 10,
+        //CohesionEnforcement = 10,
         NarrativeArchitecture = 11,
         NarrativeDirection = 12,
         ProseGuardian = 13,
         CharacterStatusUpdate = 14,
         SkillChecksDescriptor = 15,
+        CohesionEnforcementAnalyzer = 16,
+        CohesionEnforcementWriter = 17,
     }
 }

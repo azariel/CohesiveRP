@@ -5,6 +5,8 @@ import UserInputComponent from "./userInput/UserInputComponent";
 import { deleteFromServerApiAsync, getFromServerApiAsync, postToServerApiAsync, putToServerApiAsync } from "../../../../utils/http/HttpRequestHelper";
 import type { ChatMessagesResponseDto } from "../../../../ResponsesDto/chat/ChatMessagesResponseDto";
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
+import BackgroundQueriesStatusComponent from "./backgroundQueriesStatus/BackgroundQueriesStatusComponent";
+import { useBackgroundQueriesPoller } from "../../../hooks/useBackgroundQueriesPoller";
 
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
@@ -26,9 +28,16 @@ export default function ChatComponent() {
   const [messages, setMessages] = useChatMessages(activeModule?.chatId);
   const didComponentMountAlready = useRef(false);
 
-  /* ── Which character's instance is open, when the header has switched us into
+const {
+    queries: backgroundQueries,
+    isLoadingInitial: backgroundQueriesLoadingInitial,
+    networkError: backgroundQueriesNetworkError,
+    triggerPoll: triggerBackgroundQueriesPoll,
+  } = useBackgroundQueriesPoller(activeModule?.chatId, !!activeModule?.hotMessagesLoaded);
+
+  /* Which character's instance is open, when the header has switched us into
      the character-sheets sub-view. Local state: doesn't need to survive
-     leaving the chat, and resets whenever the sub-view itself changes. ── */
+     leaving the chat, and resets whenever the sub-view itself changes. */
   const [selectedInstanceCharacter, setSelectedInstanceCharacter] = useState<{ characterId: string; characterName: string } | null>(null);
 
   useEffect(() => {
@@ -210,7 +219,14 @@ export default function ChatComponent() {
               refreshToken={activeModule?.interactiveInputRefreshToken}
             />
             <ChatRollsComponent sceneTrackerRefreshToken={activeModule?.sceneTrackerRefreshToken} />
-            <UserInputComponent messagesRef={messagesRef} />
+            <BackgroundQueriesStatusComponent queries={backgroundQueries} />
+            <UserInputComponent
+              messagesRef={messagesRef}
+              backgroundQueries={backgroundQueries}
+              backgroundQueriesLoadingInitial={backgroundQueriesLoadingInitial}
+              backgroundQueriesNetworkError={backgroundQueriesNetworkError}
+              triggerBackgroundQueriesPoll={triggerBackgroundQueriesPoll}
+            />
           </div>
           ):(
             <p>Chat not found.</p>

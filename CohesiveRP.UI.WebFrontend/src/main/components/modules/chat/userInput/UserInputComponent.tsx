@@ -15,15 +15,19 @@ import { TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY } from "../../../..
 import { sharedContext } from '../../../../../store/AppSharedStoreContext';
 import type { SharedContextChatType } from "../../../../../store/SharedContextChatType";
 import type { ChatMessageResponseDto } from "../../../../../ResponsesDto/chat/ChatMessageResponseDto";
-import type { BackgroundQueryResponseDto } from "../../../../../ResponsesDto/chat/BackgroundQueryResponseDto";
 import { useChatMessages } from "../../../../../store/MessagesStoreContext";
-import type { BackgroundQueriesResponseDto } from "../../../../../ResponsesDto/chat/BackgroundQueriesResponseDto";
+import type { BackgroundQuery } from "../../../../../ResponsesDto/chat/BusinessObjects/BackgroundQuery";
+import type { BackgroundQueryResponseDto } from "../../../../../ResponsesDto/chat/BackgroundQueryResponseDto";
 
 interface Props {
   messagesRef?: React.RefObject<HTMLDivElement | null>;
+  backgroundQueries: BackgroundQuery[];
+  backgroundQueriesLoadingInitial: boolean;
+  backgroundQueriesNetworkError: boolean;
+  triggerBackgroundQueriesPoll: () => void;
 }
 
-export default function UserInputComponent({ messagesRef }: Props) {
+export default function UserInputComponent({ messagesRef, backgroundQueries, backgroundQueriesLoadingInitial, backgroundQueriesNetworkError, triggerBackgroundQueriesPoll }: Props) {
   const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
   const [localInput, setLocalInput] = useState(activeModule?.currentUserInputValue ?? "");
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -32,10 +36,7 @@ export default function UserInputComponent({ messagesRef }: Props) {
   const [hoveringSendBtn, setHoveringSendBtn] = useState(false);
   const [isInputBlockedDueToServer, setIsInputBlockedDueToServer] = useState(false);
   const [sendMessageQueryStatus, setSendMessageQueryStatus] = useState("");
-  const [networkError, setNetworkError] = useState(false);
-  const [isLoadingInitialState, setIsLoadingInitialState] = useState(true);
-  const backgroundQueryNetworkError = useRef(0);
-  const isStreamingQueryResult:boolean = false;
+  const [networkError] = useState(false);
   const didSentSceneTrackerRefreshToken = useRef(false);
 
   useEffect(() => {
@@ -52,6 +53,170 @@ export default function UserInputComponent({ messagesRef }: Props) {
       setActiveModule((prev) => prev ? { ...prev, currentUserInputValue: "", lastPlayerMessageId: "" } : prev);
     }
   }, [messages]);
+
+  const resumedTrackingRef = useRef(false);
+
+  useEffect(() => {
+    if (resumedTrackingRef.current || !activeModule?.hotMessagesLoaded || backgroundQueries.length <= 0)
+      return;
+
+    const mainQuery = backgroundQueries.find((q) => q.tags.some((t) => t === "main"));
+    if (!mainQuery)
+      return;
+
+    resumedTrackingRef.current = true;
+    setIsInputBlockedDueToServer(true);
+    setActiveModule((prev) => (prev ? { ...prev, mainQueryId: mainQuery.backgroundQueryId } : prev));
+
+    setMessages((prev) => {
+      if (prev.some((m) => m.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY))
+        return prev;
+
+      return [
+        ...prev,
+        {
+          messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
+          content: mainQuery.content || "...",
+          thinkingContent: "",
+          createdAtUtc: null,
+          sourceType: 1,
+          messageIndex: (activeModule.nbColdMessages ?? 0) + prev.length + 1,
+          summarized: false,
+          characterAvatars: [],
+          characterId: null,
+          characterName: "",
+          personaId: null,
+          personaName: "",
+        },
+      ];
+    });
+  }, [backgroundQueries, activeModule?.hotMessagesLoaded]);
+
+  useEffect(() => {
+    if (!activeModule?.mainQueryId)
+      return;
+
+    const trackedId = activeModule.mainQueryId;
+    let cancelled = false;
+
+    const applyUpdate = async (
+      status: string,
+      content: string | undefined,
+      linkedId: string | undefined,
+      startFocused: string | undefined,
+      endFocused: string | undefined
+    ) => {
+      if (status === "InProgress" && !didSentSceneTrackerRefreshToken.current) {
+        didSentSceneTrackerRefreshToken.current = true;
+        setActiveModule((prev) =>
+          prev ? { ...prev, sceneTrackerRefreshToken: (prev.sceneTrackerRefreshToken ?? 0) + 1, sceneTrackerRefreshing: false } : prev
+        );
+      }
+
+      setSendMessageQueryStatus(status);
+      setMessages((prev) => {
+        const updated = [...prev];
+        const idx = updated.findIndex((m) => m.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
+        if (idx !== -1) {
+          updated[idx] = { ...updated[idx], content: content ?? "..." };
+        }
+        return updated;
+      });
+
+      if (status === "Pending" || status === "InProgress")
+        return;
+
+      // Terminal status -> resolve the real message and clean up.
+      didSentSceneTrackerRefreshToken.current = false;
+
+      let realMessageFromStorage: ChatMessageResponseDto | null = null;
+      if (linkedId) {
+        realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(
+          `api/chat/${activeModule.chatId}/messages/${linkedId}`
+        );
+        const err = realMessageFromStorage as ServerApiExceptionResponseDto | null;
+        if (!realMessageFromStorage || realMessageFromStorage.code != 200 || err?.message) {
+          console.error(`Fetching real message from main background query result failed. Code:[${realMessageFromStorage?.code}], Message:[${err?.message}].`);
+        }
+      }
+
+      if (cancelled) return;
+
+      setMessages((prev) => {
+        const updated = [...prev];
+        const idx = updated.findIndex((m) => m.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
+        if (idx !== -1) {
+          if (realMessageFromStorage?.messageObj) {
+            const index = updated[idx].messageIndex;
+            updated[idx] = realMessageFromStorage.messageObj;
+            updated[idx].messageIndex = index;
+          } else {
+            updated[idx].messageId = linkedId ?? "";
+          }
+          updated[idx].startFocusedGenerationDateTimeUtc = startFocused ?? "";
+          updated[idx].endFocusedGenerationDateTimeUtc = endFocused ?? "";
+        }
+        return updated;
+      });
+
+      const playerMsgId = activeModule?.lastPlayerMessageId;
+      if (playerMsgId && activeModule?.chatId) {
+        const playerMsgResponse = await getFromServerApiAsync<ChatMessageResponseDto>(
+          `api/chat/${activeModule.chatId}/messages/${playerMsgId}`
+        );
+        if (cancelled) return;
+        const updatedPlayerMsg = playerMsgResponse?.messageObj;
+        if (updatedPlayerMsg) {
+          setMessages((prev) =>
+            prev.map((m) => (m.messageId === playerMsgId ? { ...m, characterAvatars: updatedPlayerMsg.characterAvatars } : m))
+          );
+        }
+      }
+
+      setIsInputBlockedDueToServer(false);
+      setSendMessageQueryStatus(status);
+      setActiveModule((prev) =>
+        prev
+          ? {
+              ...prev,
+              mainQueryId: null,
+              interactiveInputRefreshToken: (prev.interactiveInputRefreshToken ?? 0) + 1,
+              sceneTrackerRefreshToken: (prev.sceneTrackerRefreshToken ?? 0) + 1,
+            }
+          : prev
+      );
+
+      if (messagesRef?.current) {
+        setTimeout(() => {
+          if (messagesRef?.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+        }, 200);
+      }
+    };
+
+    const mainQuery = backgroundQueries.find((q) => q.backgroundQueryId === trackedId);
+
+    if (mainQuery) {
+      applyUpdate(mainQuery.status, mainQuery.content, mainQuery.linkedId, mainQuery.startFocusedGenerationDateTimeUtc, mainQuery.endFocusedGenerationDateTimeUtc);
+    } else {
+      // Not in the latest shared snapshot — either the poller hasn't caught up yet,
+      // or the query finished and dropped out of the active list. Ask directly.
+      (async () => {
+        const response = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${trackedId}`);
+        if (cancelled || activeModule.mainQueryId !== trackedId)
+          return;
+
+        const err = response as ServerApiExceptionResponseDto | null;
+        if (!response || response.code != 200 || err?.message) {
+          console.error(`Fetching main background query directly failed. Code:[${response?.code}], Message:[${err?.message}].`);
+          return;
+        }
+
+        applyUpdate(response.status, response.content, response.linkedId, response.startFocusedGenerationDateTimeUtc, response.endFocusedGenerationDateTimeUtc);
+      })();
+    }
+
+    return () => { cancelled = true; };
+  }, [backgroundQueries, activeModule?.mainQueryId]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -78,76 +243,6 @@ export default function UserInputComponent({ messagesRef }: Props) {
     setIsInputBlockedDueToServer(true);
   }
 }, [activeModule?.mainQueryId]);
-
-useEffect(() => {
-    // Wait for ChatComponent's "/messages/hot" fetch to land. Otherwise this
-    // can resolve on either side of it, and whichever runs second fights the
-    // other for control of `messages`.
-    if (!activeModule?.chatId || !activeModule?.hotMessagesLoaded)
-      return;
-
-    const abortController = new AbortController();
-    const fetchBackgroundQueries = async () => {
-
-      if(!activeModule?.chatId) {
-        console.error(`Couldn't query background queries since there is no tracked chatId.`);
-        return;
-      }
-
-      const response = await getFromServerApiAsync<BackgroundQueriesResponseDto>(`api/backgroundQueries?chatId=${activeModule?.chatId}`, abortController.signal);
-
-      if (abortController.signal.aborted)
-        return;
-
-      const serverApiException = response as ServerApiExceptionResponseDto | null;
-      if (!response || response.code !== 200 || serverApiException?.message) {
-        console.error(`Fetching background queries on load failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
-        setNetworkError(true);
-        return;
-      }
-
-      setIsLoadingInitialState(false);
-      
-      if(!response.queries || response.queries.length <= 0){
-        return;
-      }
-
-      const mainQuery = response.queries.find(query => query.tags.some(tag => tag === "main"));
-      if (mainQuery) {
-        setIsInputBlockedDueToServer(true);
-        setActiveModule((prev) =>
-          prev ? { ...prev, mainQueryId: mainQuery.backgroundQueryId } : prev
-        );
-
-        setMessages((prev) => {
-          if (prev.some((m) => m.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY))
-            return prev;
-
-          return [
-            ...prev,
-            {
-              messageId: TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY,
-              content: "...",
-              thinkingContent: "",
-              createdAtUtc: null,
-              sourceType: 1,
-              messageIndex: (activeModule.nbColdMessages ?? 0) + prev.length + 1,
-              summarized: false,
-              characterAvatars: [],
-              characterId: null,
-              characterName: "",
-              personaId: null,
-              personaName: "",
-            },
-          ];
-        });
-      }
-    };
-
-    fetchBackgroundQueries();
-    return () => abortController.abort();
-
-  }, [activeModule?.chatId, activeModule?.hotMessagesLoaded]);
 
 const adjustTextareaHeight = () => {
     const el = textareaRef.current;
@@ -194,146 +289,6 @@ const adjustTextareaHeight = () => {
     }, 300);
   };
 
-  useEffect(() => {
-    // Only run if we have a query to track
-    if (!activeModule?.mainQueryId || networkError)
-      return;
-
-    setActiveModule((prev) =>
-      prev ? { ...prev, sceneTrackerRefreshing: true } : prev
-    );
-
-    const pollInterval = setInterval(async () => {
-      try {
-        if(!activeModule?.mainQueryId) {
-          console.error(`The front end didn't have any tracked background query. The backend whereabouts are unknown.`);
-          return;
-        }
-
-        let response:BackgroundQueryResponseDto | null = await getFromServerApiAsync<BackgroundQueryResponseDto>(`api/backgroundQueries/${activeModule.mainQueryId}`);
-
-        let serverApiException = response as ServerApiExceptionResponseDto | null;
-        if(!response || response.code != 200 || serverApiException?.message) {
-          console.error(`Fetching Main background query failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
-
-          if(backgroundQueryNetworkError.current >= 4){
-            setSendMessageQueryStatus("");
-            setIsInputBlockedDueToServer(false);
-            clearInterval(pollInterval);
-            setNetworkError(true);
-            return;
-          }
-          
-          backgroundQueryNetworkError.current += 1;
-          return;
-        }
-
-        // If the query is not inProgress, we'll fetch the generated message
-        let realMessageFromStorage:ChatMessageResponseDto | null = null;
-        if (response?.status === "InProgress" && !didSentSceneTrackerRefreshToken.current) {
-          didSentSceneTrackerRefreshToken.current = true;
-          setActiveModule((prev) =>
-            prev ? { ...prev, sceneTrackerRefreshToken: (prev.sceneTrackerRefreshToken ?? 0) + 1, sceneTrackerRefreshing: false } : prev
-          );
-        }
-
-        if (response?.status !== "Pending" && response?.status !== "InProgress") {
-          if(!response?.chatId) {
-            console.error(`The background query to generate AI response was done, but there is no tracked ChatId.`);
-            return;
-          }
-
-          if(!response.linkedId) {
-            console.error(`The background query to generate AI response was done, but the underlying generated message is null.`);
-            return;
-          }
-
-          realMessageFromStorage = await getFromServerApiAsync<ChatMessageResponseDto>(`api/chat/${response?.chatId}/messages/${response?.linkedId}`);
-
-          let serverApiException = realMessageFromStorage as ServerApiExceptionResponseDto | null;
-          if(!response || response.code != 200 || serverApiException?.message) {
-            console.error(`Fetching real message from main background query result failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}], Message(Json): [${JSON.stringify(serverApiException?.message)}].`);
-          }
-        }
-
-        setSendMessageQueryStatus(response?.status ?? "");
-        setMessages((prev) => {
-          const updated = [...prev];
-          const tempAIReplyMessageIndex = updated.findIndex(f => f.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY);
-
-          // Update the fake AI message to show generation progress
-          if (tempAIReplyMessageIndex !== -1) {
-            updated[tempAIReplyMessageIndex] = { ...updated[tempAIReplyMessageIndex], content: response?.content ?? "..." };
-            if (response?.status !== "InProgress" && response?.status !== "Pending") {
-              didSentSceneTrackerRefreshToken.current = false;
-
-              // swap temp id for real id
-              if (realMessageFromStorage?.messageObj) {
-                let index = updated[tempAIReplyMessageIndex].messageIndex;
-                updated[tempAIReplyMessageIndex] = realMessageFromStorage.messageObj;
-                updated[tempAIReplyMessageIndex].messageIndex = index;
-              } else {
-                updated[tempAIReplyMessageIndex].messageId = response?.linkedId ?? "";
-              }
-
-              updated[tempAIReplyMessageIndex].startFocusedGenerationDateTimeUtc = response?.startFocusedGenerationDateTimeUtc ?? "";
-              updated[tempAIReplyMessageIndex].endFocusedGenerationDateTimeUtc = response?.endFocusedGenerationDateTimeUtc ?? "";
-            }
-          }
-          return updated;
-      });
-
-      if (response?.status !== "InProgress" && response?.status !== "Pending") {
-        console.log("Generation complete, clearing polling.");
-        backgroundQueryNetworkError.current = 0;
-        clearInterval(pollInterval);
-
-        // Fetch the updated player message (avatarFilePath is now populated)
-        const playerMsgId = activeModule?.lastPlayerMessageId;
-        if (playerMsgId && response?.chatId) {
-          const playerMsgResponse = await getFromServerApiAsync<ChatMessageResponseDto>(
-            `api/chat/${response.chatId}/messages/${playerMsgId}`
-          );
-          const updatedPlayerMsg = playerMsgResponse?.messageObj;
-          if (updatedPlayerMsg) {
-            setMessages((prev) =>
-              prev.map((m) => m.messageId === playerMsgId ? { ...m, characterAvatars: updatedPlayerMsg.characterAvatars } : m)
-            );
-          }
-        }
-        
-        // These local state updates are now safe because they aren't 
-        // nested inside another component's state update logic
-        setIsInputBlockedDueToServer(false);
-        setSendMessageQueryStatus(response?.status ?? "");
-        setActiveModule((prev) => prev ? {
-          ...prev,
-          mainQueryId: null,
-          // ── Trigger InteractiveUserInputComponent to fetch new pending queries ──
-          interactiveInputRefreshToken: (prev.interactiveInputRefreshToken ?? 0) + 1,
-          // ── Trigger ChatRollsComponent to fetch the final rolls/player description ──
-         sceneTrackerRefreshToken: (prev.sceneTrackerRefreshToken ?? 0) + 1,
-        } : prev);
-        
-        if (messagesRef?.current) {
-          setTimeout(() => {
-            if(messagesRef?.current) {
-              messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-            }
-          }, 200);
-        }
-      }
-
-    } catch (err) {
-      console.error("Polling main background query error:", err);
-      clearInterval(pollInterval);
-    }
-  }, isStreamingQueryResult ? 1000 : 3000);
-
-  // cleanup
-  return () => clearInterval(pollInterval);
-}, [activeModule?.mainQueryId, setActiveModule]); // Only re-run if the ID changes
-
   const UpdateInputControlState = async () => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) {
@@ -370,6 +325,9 @@ const adjustTextareaHeight = () => {
     }
 
     console.log(`Sending player message to backend succeeded.`);
+
+    triggerBackgroundQueriesPoll();
+
     setSendMessageQueryStatus("Completed");
     setLocalInput(""); // clear immediately
     localStorage.setItem(`chatInput_${activeModule.chatId}`, "");
@@ -484,15 +442,15 @@ const adjustTextareaHeight = () => {
           onMouseEnter={() => setHoveringSendBtn(true)}
           onMouseLeave={() => setHoveringSendBtn(false)}
           onClick={
-            networkError || isLoadingInitialState ? undefined : 
+            networkError || backgroundQueriesNetworkError  || backgroundQueriesLoadingInitial ? undefined : 
             isInputBlockedDueToServer
               ? handleCancelLatestPlayerMessage
               : handleSendPlayerMessage
           }>
-            {networkError ? (
+            {networkError || backgroundQueriesNetworkError ? (
               <LuServerOff />
             ) : (
-              isInputBlockedDueToServer || isLoadingInitialState ? (
+              isInputBlockedDueToServer || backgroundQueriesLoadingInitial ? (
               <ImSpinner2 className={sendMessageQueryStatus === "" ? styles.sendInputSpinnerWaitingServerAck : (sendMessageQueryStatus === "Pending" ? styles.sendInputSpinnerWaitingMessagePending : ((sendMessageQueryStatus === "InProgress" ? styles.sendInputSpinnerWaitingMessageProcess : styles.sendInputSpinnerWaitingMessageDefault))) } />
               ) : hoveringSendBtn ? (
                 <BiPaperPlane className={styles.sendInputIcon} />

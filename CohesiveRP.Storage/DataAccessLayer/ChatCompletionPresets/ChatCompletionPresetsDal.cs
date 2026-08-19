@@ -56,7 +56,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 // Chat Additions
                 dbContext.ChatCompletionPresets.Add(NarrativeDirectionCompletionPresetInjector.InjectPreset());
                 dbContext.ChatCompletionPresets.Add(ProseGuardianCompletionPresetInjector.InjectPreset());
-                dbContext.ChatCompletionPresets.Add(CohesionEnforcementCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(CohesionEnforcementAnalyzerCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(CohesionEnforcementWriterCompletionPresetInjector.InjectPreset());
                 dbContext.ChatCompletionPresets.Add(NarrativeArchitectureCompletionPresetInjector.InjectPreset());
 
                 // Poke the AI to update character status alterations (magical effects, body status, wounds)

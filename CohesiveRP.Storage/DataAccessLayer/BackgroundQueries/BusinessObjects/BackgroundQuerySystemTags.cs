@@ -11,15 +11,17 @@
         extraSummary = 6,
         overflowSummary = 7,
         skillChecksInitiator = 8,
-        sceneAnalyze = 9,
+        sceneAnalyze = 9,// Hmm this one is unlinked and should probably be remove since we created the cohesionEnforcement ones to replace this
         dynamicCharacterCreation = 10,
         dynamicCharacterSheetCreation = 11,
         illustrationPromptInjectionForCharacterAvatar = 12,
-        cohesionEnforcement = 13,
+        //cohesionEnforcement = 13,
         narrativeArchitecture = 14,
         narrativeDirection = 15,
         proseGuardian = 16,
         characterStatusUpdate = 17,
         skillChecksDescriptor = 18,
+        cohesionEnforcementAnalyzer = 19,
+        cohesionEnforcementWriter = 20,
     }
 }

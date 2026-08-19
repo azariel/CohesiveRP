@@ -266,7 +266,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
 
             // refine the characters to include to only include those IN the scene
             // TODO: we're using the characterRools here. Probably not the best way to handle this. We need a proper way to infer the characters in the scene! The sceneTracker limits the amount whereas the checkRolls does not, so we need to think about this..
-            var characterRolls = await storageService.GetChatCharactersRollsByIdAsync(chatDbModel.ChatId);
+            var characterRolls = await storageService.GetChatCharactersRollsByChatIdAsync(chatDbModel.ChatId);
 
             StringBuilder str = new();
             if (!string.IsNullOrWhiteSpace(chatDbModel.PersonaId))

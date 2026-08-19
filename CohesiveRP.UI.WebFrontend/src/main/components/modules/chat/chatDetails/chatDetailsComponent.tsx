@@ -288,7 +288,9 @@ export default function ChatDetailsComponent() {
               <div className={styles.chatAvatarContainer}>
                 <div className={styles.addNewAvatarImageContainer}>
                   <input type="file" style={{ display: "none" }} />
-                  <img src={`${GetAvatarPathFromChatIdAndAvatarId(chatResponse?.chatId ?? "", "avatar")}`} alt="no image" />
+                  { activeModule?.hideAvatars !== true && (
+                    <img src={`${GetAvatarPathFromChatIdAndAvatarId(chatResponse?.chatId ?? "", "avatar")}`} alt="no image" />
+                  )}
                 </div>
               </div>
             </div>

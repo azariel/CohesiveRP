@@ -1,0 +1,52 @@
+.backgroundQueriesStatusComponent {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.3em 0.2em;
+}
+
+.statusPill {
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.15em 0.55em;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.06);
+    font-size: 0.8em;
+    color: rgb(200, 200, 200);
+    white-space: nowrap;
+}
+
+.statusDot {
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.statusLabel {
+    line-height: 1;
+}
+
+.statusPending   { background-color: rgb(148, 148, 148); }
+.statusInProgress{ background-color: rgb(58, 138, 230); }
+.statusCyan      { background-color: rgb(34, 211, 211); }
+.statusError     { background-color: rgb(224, 68, 68); }
+.statusOther     { background-color: rgb(230, 150, 60); }
+
+@media (max-width: 600px) {
+    .backgroundQueriesStatusComponent {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 0.3em;
+        padding: 0.25em 0.1em;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .statusPill {
+        font-size: 0.75em;
+        padding: 0.12em 0.45em;
+    }
+}

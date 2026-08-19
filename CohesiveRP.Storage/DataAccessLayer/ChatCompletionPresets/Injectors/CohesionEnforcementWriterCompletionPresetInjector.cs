@@ -4,14 +4,14 @@ using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.F
 
 namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
 {
-    internal class CohesionEnforcementCompletionPresetInjector : ICompletionPresetInjector
+    internal class CohesionEnforcementWriterCompletionPresetInjector : ICompletionPresetInjector
     {
         internal static ChatCompletionPresetsDbModel InjectPreset()
         {
             return new ChatCompletionPresetsDbModel
             {
-                Name = "Default-Cohesion-Enforcement-Prompt-Generator-Preset",
-                ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_COMPLETION_PRESET,
+                Name = "Default-Cohesion-Enforcement-Writer-Prompt-Generator-Preset",
+                ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_WRITER_COMPLETION_PRESET,
                 CreatedAtUtc = DateTime.UtcNow,
                 Format = new GlobalPromptContextFormat()
                 {
@@ -127,6 +127,16 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                                 Options = new PromptContextFormatElementOptions
                                 {
                                     Format = "<current_objective>\r\nStory progression objective.\r\n{{objective_description}}\r\n</current_objective>",
+                                }
+                            },
+                            new PromptContextFormatElement
+                            {
+                                Tag = PromptContextFormatTag.CohesionEnforcerWriter,
+                                Name = "CurrentCohesionEnforcerAnalyze",
+                                Enabled = true,
+                                Options = new PromptContextFormatElementOptions
+                                {
+                                    Format = "<current_analyze>\r\nTODO\r\n</current_analyze>",
                                 }
                             },
                             new PromptContextFormatElement

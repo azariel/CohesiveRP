@@ -28,7 +28,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
 
             operationResult &= await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
 
-
             var currentNarrativeDirections = await storageService.GetNarrativeDirectionsAsync(s => s.ChatId == chat.ChatId);
             if ((currentNarrativeDirections == null || !currentNarrativeDirections.Any()) && hotMessagesDbModel?.Messages?.Count > 5)
             {

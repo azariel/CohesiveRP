@@ -31,6 +31,21 @@ public class DeleteSpecificMessageByIdWorkflow : IDeleteSpecificMessageByIdWorkf
             };
         }
 
+        var currentRollsOnCurrentChat = await storageService.GetChatCharactersRollsByChatIdAsync(requestDto.ChatId);
+        if (currentRollsOnCurrentChat?.ChatCharactersRolls != null && currentRollsOnCurrentChat.ChatCharactersRolls.Any())
+        {
+            foreach (var characterRoll in currentRollsOnCurrentChat.ChatCharactersRolls.Where(w => w.Rolls != null && w.Rolls.Count > 0))
+            {
+                foreach (var subRolls in characterRoll.Rolls)
+                {
+                    subRolls.NbRemainingRollFreeze++;
+                    subRolls.NbRemainingInjectionTurns++;
+                }
+            }
+
+            await storageService.UpdateChatCharactersRollsAsync(currentRollsOnCurrentChat);
+        }
+
         return new DeleteMessageResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,

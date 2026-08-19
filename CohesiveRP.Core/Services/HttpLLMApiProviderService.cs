@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.HttpClient;
 using CohesiveRP.Common.Utils;
+using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.HttpLLMApiProvider;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services.ErrorHandlers;

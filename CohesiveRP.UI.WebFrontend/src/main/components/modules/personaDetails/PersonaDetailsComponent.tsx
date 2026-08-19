@@ -14,6 +14,7 @@ import type { PersonaResponseDto } from "../../../../ResponsesDto/personas/Perso
 import { GetAvatarPathFromPersonaId } from "../../../../utils/avatarUtils";
 import type { SharedContextType } from "../../../../store/SharedContextType";
 import CharacterSheetComponent from "../characters/characterSheets/CharacterSheetComponent";
+import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 
 /* Sub-components */
 
@@ -21,6 +22,7 @@ type ActiveTab = "details" | "characterSheet";
 
 export default function PersonaDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextPersonaType>();
+  const activeChatModule = sharedContext<SharedContextChatType>();
   const { navigateTo } = sharedContext();
   const didComponentMountAlready = useRef(false);
   const [isNetworkDown, setIsNetworkDown] = useState(false);
@@ -210,7 +212,9 @@ export default function PersonaDetailsComponent() {
                         style={{ display: "none" }}
                         onChange={handleUploadAvatarFileSelected}
                     />
-                    <img src={`${GetAvatarPathFromPersonaId(personaResponse?.persona?.personaId ?? "")}?t=${avatarCacheBuster}`} alt="no image" onError={() => setAvatarImageError(true)}/>
+                    {activeChatModule?.activeModule?.hideAvatars !== true && (
+                      <img src={`${GetAvatarPathFromPersonaId(personaResponse?.persona?.personaId ?? "")}?t=${avatarCacheBuster}`} alt="no image" onError={() => setAvatarImageError(true)}/>
+                    )}
                   </div>
                 )}
               </div>

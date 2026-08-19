@@ -1,19 +1,23 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Serialization;
+using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
+using CohesiveRP.Core.LLMProviderProcessors.ChatAdditions.BusinessObjects.CohesionEnforcement;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
-using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement.BusinessObjects;
 using CohesiveRP.Storage.QueryModels.Chat;
 
-namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
+namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
 {
-    public class SkillChecksDescriptorLLMQueryProcessor : LLMQueryProcessor
+    public class CohesionEnforcementWriterLLMQueryProcessor : LLMQueryProcessor
     {
-        public SkillChecksDescriptorLLMQueryProcessor(
+        public CohesionEnforcementWriterLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
             BackgroundQueryDbModel backgroundQueryDbModel,
@@ -44,21 +48,16 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
             try
             {
-                LLMApiResponseMessage LLMmessage = messages.LastOrDefault();
+                string LLMMessageResult = LLMResponseParser.ParseOnlyJson(messages.First().Content);
 
-                var currentChatRolls = await storageService.GetChatCharactersRollsByChatIdAsync(backgroundQueryDbModel.ChatId);
-                if(currentChatRolls?.ChatCharactersRolls != null && currentChatRolls.ChatCharactersRolls.Count > 0)
-                {
-                    currentChatRolls.PlayerDescription = LLMmessage?.Content;
-                    await storageService.UpdateChatCharactersRollsAsync(currentChatRolls);
-                }
+                // TODO: update last AI message with refined message
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
             } catch (Exception e)
             {
-                LoggingManager.LogToFile("65a11be1-6888-420a-9b51-65874d022ef1", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
+                LoggingManager.LogToFile("ecc6b195-65fb-4e1f-a759-728c72de7a61", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
                 backgroundQueryDbModel.RetryCount++;

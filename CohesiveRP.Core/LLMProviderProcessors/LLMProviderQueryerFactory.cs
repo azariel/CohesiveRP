@@ -94,8 +94,6 @@ namespace CohesiveRP.Core.LLMProviderManager
                 BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar =>
                     new IllustrationPromptInjectionForCharacterAvatarLLMQueryProcessor(ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar, BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 // Chat Additions
-                BackgroundQuerySystemTags.cohesionEnforcement =>
-                    new CohesionEnforcementLLMQueryProcessor(ChatCompletionPresetType.CohesionEnforcement, BackgroundQuerySystemTags.cohesionEnforcement, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.narrativeArchitecture =>
                     new NarrativeArchitectureLLMQueryProcessor(ChatCompletionPresetType.NarrativeArchitecture, BackgroundQuerySystemTags.narrativeArchitecture, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.narrativeDirection =>
@@ -106,6 +104,10 @@ namespace CohesiveRP.Core.LLMProviderManager
                     new CharacterStatusUpdateLLMQueryProcessor(ChatCompletionPresetType.CharacterStatusUpdate, BackgroundQuerySystemTags.characterStatusUpdate, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.skillChecksDescriptor =>
                     new SkillChecksDescriptorLLMQueryProcessor(ChatCompletionPresetType.SkillChecksDescriptor, BackgroundQuerySystemTags.skillChecksDescriptor, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.cohesionEnforcementAnalyzer =>
+                    new CohesionEnforcementAnalyzerLLMQueryProcessor(ChatCompletionPresetType.CohesionEnforcementAnalyzer, BackgroundQuerySystemTags.cohesionEnforcementAnalyzer, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.cohesionEnforcementWriter =>
+                    new CohesionEnforcementWriterLLMQueryProcessor(ChatCompletionPresetType.CohesionEnforcementWriter, BackgroundQuerySystemTags.cohesionEnforcementWriter, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 _ => null
             };
 

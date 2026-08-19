@@ -70,7 +70,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         //private readonly List<ChatCompletionPresetType> DSchatCompletionPresets =
         //[
         //    ChatCompletionPresetType.SceneTracker,// PRE
-        //    //ChatCompletionPresetType.CohesionEnforcement,// POST NOT WORKING YET
+        //    ChatCompletionPresetType.CohesionEnforcementAnalyzer,// POST
         //];
 
         //private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
@@ -87,7 +87,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             ChatCompletionPresetType.SkillChecksInitiator,// PRE
             ChatCompletionPresetType.SceneTracker,// PRE
             ChatCompletionPresetType.CharacterStatusUpdate,// POST
-            //ChatCompletionPresetType.CohesionEnforcement,// POST NOT WORKING YET
+            ChatCompletionPresetType.CohesionEnforcementAnalyzer,// POST
+            ChatCompletionPresetType.CohesionEnforcementWriter,// POST, right after CohesionEnforcementAnalyzer
             ChatCompletionPresetType.NarrativeArchitecture,// POST (secretPlot)
             ChatCompletionPresetType.Summarize,// POST++
             ChatCompletionPresetType.SummariesMerge,// POST++
@@ -506,11 +507,16 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_CHARACTER_STATUS_UPDATE_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
-                            // Still working on those below
                             new ChatCompletionPresetsMapElement
                             {
-                                Type = ChatCompletionPresetType.CohesionEnforcement,
-                                ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_COMPLETION_PRESET,
+                                Type = ChatCompletionPresetType.CohesionEnforcementAnalyzer,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_ANALYZER_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.CohesionEnforcementWriter,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_WRITER_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                             new ChatCompletionPresetsMapElement

@@ -18,7 +18,7 @@ public class GetChatCharacterRollsWorkflow : IChatCharacterRollsWorkflow
 
     public async Task<IWebApiResponseDto> GetChatCharacterRolls(string chatId)
     {
-        var rolls = await storageService.GetChatCharactersRollsByIdAsync(chatId);
+        var rolls = await storageService.GetChatCharactersRollsByChatIdAsync(chatId);
 
         if (rolls == null)
         {

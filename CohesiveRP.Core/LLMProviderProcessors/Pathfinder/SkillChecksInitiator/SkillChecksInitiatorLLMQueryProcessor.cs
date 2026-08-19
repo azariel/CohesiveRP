@@ -59,7 +59,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     return false;
                 }
 
-                ChatCharactersRollsDbModel chatCharactersRollsDbModel = await storageService.GetChatCharactersRollsByIdAsync(backgroundQueryDbModel.ChatId);
+                ChatCharactersRollsDbModel chatCharactersRollsDbModel = await storageService.GetChatCharactersRollsByChatIdAsync(backgroundQueryDbModel.ChatId);
 
                 //var sceneTracker = await storageService.GetSceneTrackerAsync(backgroundQueryDbModel.ChatId);
                 //if (sceneTracker?.Content == null)

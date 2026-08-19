@@ -37,10 +37,6 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                 // inject the roll into the prompt
                 string value = GeneratePromptInjectionForCharacterRoll(roll, currentCharacterSheetInstance, characterSheetsInstances);
                 innerStr += $"{value}{Environment.NewLine}";
-
-                // TODO: this MUST be done in the Processer AFTER completion
-                roll.NbRemainingInjectionTurns--;
-                roll.NbRemainingRollFreeze--;
             }
 
             innerStr = innerStr.Trim().TrimEnd(Environment.NewLine.ToCharArray());
@@ -95,7 +91,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
-            var rollsByCharacters = await storageService.GetChatCharactersRollsByIdAsync(chatDbModel.ChatId);
+            var rollsByCharacters = await storageService.GetChatCharactersRollsByChatIdAsync(chatDbModel.ChatId);
             if (rollsByCharacters?.ChatCharactersRolls == null || rollsByCharacters.ChatCharactersRolls.Count <= 0)
             {
                 return (null, new ShareableContextLink { LinkedBuilder = this, });
@@ -104,6 +100,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             // Get the characterSheetInstance associated with each
             var characterSheetsInstances = await storageService.GetCharacterSheetsInstanceByChatIdAsync(chatDbModel.ChatId);
 
+            int nbRollsInjected = 0;
             StringBuilder str = new StringBuilder();
             str.AppendLine($"<pathfinder_characters_rolls>");
             foreach (ChatCharacterRolls rollsSpecificToOneCharacter in rollsByCharacters.ChatCharactersRolls.Where(w => w.Rolls != null))
@@ -122,6 +119,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
 
                 string value = GeneratePromptInjectionForCharacterRolls(rollsToInject, currentCharacterSheetInstance, characterSheetsInstances);
                 str.AppendLine(value);
+                ++nbRollsInjected;
             }
 
             str.Append($"</pathfinder_characters_rolls>");
@@ -132,6 +130,15 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             if (string.IsNullOrWhiteSpace(str.ToString()))
             {
                 return (null, new ShareableContextLink { LinkedBuilder = this, });
+            }
+
+            if(nbRollsInjected <= 0)
+            {
+                return ($"<pathfinder_module_skills_checks>{Environment.NewLine}No Rolls.{Environment.NewLine}</pathfinder_module_skills_checks>{Environment.NewLine}{Environment.NewLine}",
+                new ShareableContextLink
+                {
+                    LinkedBuilder = this,
+                });
             }
 
             return ($"<pathfinder_module_skills_checks>{Environment.NewLine}Details on characters reactions following recent actions. Consider these  some details in your reply about how other characters react.{Environment.NewLine}{str.ToString().InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</pathfinder_module_skills_checks>{Environment.NewLine}{Environment.NewLine}",

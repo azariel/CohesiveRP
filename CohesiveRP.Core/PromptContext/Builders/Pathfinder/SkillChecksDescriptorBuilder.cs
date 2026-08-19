@@ -34,7 +34,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                 return (null, new ShareableContextLink { LinkedBuilder = this, });
             }
 
-            var rolls = await storageService.GetChatCharactersRollsByIdAsync(chatDbModel.ChatId);
+            var rolls = await storageService.GetChatCharactersRollsByChatIdAsync(chatDbModel.ChatId);
             if (rolls?.ChatCharactersRolls == null || rolls.ChatCharactersRolls.Count <= 0)
             {
                 return (null, new ShareableContextLink { LinkedBuilder = this, });

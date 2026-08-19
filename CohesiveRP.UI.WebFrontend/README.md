@@ -37,6 +37,9 @@
 │   │   │       │   ├── CharactersSelectionComponent.module.css
 │   │   │       │   └── CharactersSelectionComponent.tsx
 │   │   │       ├── chat/
+│   │   │       │   ├── backgroundQueriesStatus/
+│   │   │       │   │   ├── BackgroundQueriesStatusComponent.module.css
+│   │   │       │   │   └── BackgroundQueriesStatusComponent.tsx
 │   │   │       │   ├── characterSheetInstances/
 │   │   │       │   │   └── CharacterSheetInstanceComponent.tsx
 │   │   │       │   ├── characterSheetInstancesSelection/
@@ -89,6 +92,8 @@
 │   │   │       └── settings/
 │   │   │           ├── SettingsComponent.module.css
 │   │   │           └── SettingsComponent.tsx
+│   │   ├── hooks/
+│   │   │   └── useBackgroundQueriesPoller.ts
 │   │   └── Constants.ts
 │   ├── RequestDto/
 │   │   ├── characters/

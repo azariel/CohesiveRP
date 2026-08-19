@@ -174,7 +174,7 @@ namespace CohesiveRP.Core.Services
         // Pathfinder.ChatCharactersRolls
         public async Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsAsync() => await chatCharactersRollsDal.GetChatCharactersRollsAsync();
         public async Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsByFuncAsync(Func<ChatCharactersRollsDbModel, bool> func) => await chatCharactersRollsDal.GetChatCharactersRollsByFuncAsync(func);
-        public async Task<ChatCharactersRollsDbModel> GetChatCharactersRollsByIdAsync(string chatId) => await chatCharactersRollsDal.GetChatCharactersRollsEntryAsync(chatId);
+        public async Task<ChatCharactersRollsDbModel> GetChatCharactersRollsByChatIdAsync(string chatId) => await chatCharactersRollsDal.GetChatCharactersRollsEntrybyChatIdAsync(chatId);
         public async Task<ChatCharactersRollsDbModel> AddChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel) => await chatCharactersRollsDal.AddChatCharactersRollsAsync(dbModel);
         public async Task<bool> UpdateChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel) => await chatCharactersRollsDal.UpdateChatCharactersRollsAsync(dbModel);
         public async Task<bool> DeleteChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel) => await chatCharactersRollsDal.DeleteChatCharactersRollsAsync(dbModel);

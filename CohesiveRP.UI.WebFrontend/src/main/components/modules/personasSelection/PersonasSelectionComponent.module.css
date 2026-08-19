@@ -7,7 +7,7 @@
 
 .personasComponent {
   height: 100dvh;
-  width: 50dvw;
+  width: 100dvw;
   display: flex;
   flex-direction: column;
   overflow: hidden;

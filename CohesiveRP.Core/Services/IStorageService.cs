@@ -108,7 +108,7 @@ namespace CohesiveRP.Core.Services
 
         // Pathfinder.ChatCharactersRolls
         Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsAsync();
-        Task<ChatCharactersRollsDbModel> GetChatCharactersRollsByIdAsync(string chatId);
+        Task<ChatCharactersRollsDbModel> GetChatCharactersRollsByChatIdAsync(string chatId);
         Task<ChatCharactersRollsDbModel> AddChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
         Task<bool> UpdateChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
         Task<bool> DeleteChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);

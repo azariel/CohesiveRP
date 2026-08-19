@@ -553,6 +553,22 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     await storageService.UpdateNarrativeArchitectureAsync(currentNarrativeArchitecture);
                 }
 
+                // Handle SkillChecksResults to acknowledge that the rolls were included (or at least processor) against the most recent main
+                var currentRollsOnCurrentChat = await storageService.GetChatCharactersRollsByChatIdAsync(chat.ChatId);
+                if (currentRollsOnCurrentChat?.ChatCharactersRolls != null && currentRollsOnCurrentChat.ChatCharactersRolls.Any())
+                {
+                    foreach (var characterRoll in currentRollsOnCurrentChat.ChatCharactersRolls.Where(w => w.Rolls != null && w.Rolls.Count > 0))
+                    {
+                        foreach (var subRolls in characterRoll.Rolls)
+                        {
+                            subRolls.NbRemainingRollFreeze--;
+                            subRolls.NbRemainingInjectionTurns--;
+                        }
+                    }
+
+                    await storageService.UpdateChatCharactersRollsAsync(currentRollsOnCurrentChat);
+                }
+
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
             } catch (Exception e)

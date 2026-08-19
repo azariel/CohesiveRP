@@ -6,7 +6,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
-    public class CohesionEnforcementBuilder : IPromptContextElementBuilder
+    public class CohesionEnforcerWriterBuilder : IPromptContextElementBuilder
     {
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
@@ -14,7 +14,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private PersonaDbModel personaLinkedToChat;
         private CharacterDbModel[] charactersLinkedToChat;
 
-        public CohesionEnforcementBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
+        public CohesionEnforcerWriterBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;

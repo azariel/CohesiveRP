@@ -46,9 +46,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         continue;
                     }
 
-                    var matchingInstances = characterSheetInstancesObj.CharacterSheetInstances.Where(w => w.CharacterId == dbModel.CharacterId && !w.IsDirty).ToArray();
+                    var matchingInstances = characterSheetInstancesObj.CharacterSheetInstances.Where(w => !string.IsNullOrWhiteSpace(w.CharacterId) && w.CharacterId == dbModel.CharacterId && !w.IsDirty).ToList();
+                    matchingInstances.AddRange(characterSheetInstancesObj.CharacterSheetInstances.Where(w => !string.IsNullOrWhiteSpace(w.PersonaId) && w.PersonaId == dbModel.PersonaId && !w.IsDirty));
 
-                    if (matchingInstances.Length <= 0)
+                    if (matchingInstances.Count <= 0)
                     {
                         continue;
                     }

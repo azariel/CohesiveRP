@@ -78,6 +78,22 @@ public class SwipeMessageWorkflow : ISwipeMessageWorkflow
             };
         }
 
+        // Rollback rolls results for this chat so that they may be injected again for the swipe
+        var currentRollsOnCurrentChat = await storageService.GetChatCharactersRollsByChatIdAsync(chat.ChatId);
+        if (currentRollsOnCurrentChat?.ChatCharactersRolls != null && currentRollsOnCurrentChat.ChatCharactersRolls.Any())
+        {
+            foreach (var characterRoll in currentRollsOnCurrentChat.ChatCharactersRolls.Where(w => w.Rolls != null && w.Rolls.Count > 0))
+            {
+                foreach (var subRolls in characterRoll.Rolls)
+                {
+                    subRolls.NbRemainingRollFreeze++;
+                    subRolls.NbRemainingInjectionTurns++;
+                }
+            }
+
+            await storageService.UpdateChatCharactersRollsAsync(currentRollsOnCurrentChat);
+        }
+
         var hotMessages = await storageService.GetAllHotMessagesAsync(requestDto.ChatId);
         message = hotMessages.Messages.MaxBy(m => m.CreatedAtUtc);
 

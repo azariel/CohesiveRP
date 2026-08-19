@@ -15,9 +15,9 @@ using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
 {
-    public class CohesionEnforcementLLMQueryProcessor : LLMQueryProcessor
+    public class CohesionEnforcementAnalyzerLLMQueryProcessor : LLMQueryProcessor
     {
-        public CohesionEnforcementLLMQueryProcessor(
+        public CohesionEnforcementAnalyzerLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
             BackgroundQueryDbModel backgroundQueryDbModel,
@@ -58,7 +58,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                     cohesionEnforcement = JsonCommonSerializer.DeserializeFromString<CohesionEnforcementResult>(LLMMessageResult);
                 } catch (Exception e)
                 {
-                    LoggingManager.LogToFile("6068df55-bd22-424f-a4db-b1be7d450eed", $"Failed to deserialize CohesionEnforcementResult from LLM response.", e);
+                    LoggingManager.LogToFile("a81acc34-e4b3-4147-a5b5-2c729d181fad", $"Failed to deserialize CohesionEnforcementResult from LLM response.", e);
                     backgroundQueryDbModel.Content = null;
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
                     backgroundQueryDbModel.RetryCount++;
@@ -98,7 +98,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
                 return true;
             } catch (Exception e)
             {
-                LoggingManager.LogToFile("6068df55-bd22-424f-a4db-b1be7d450eed", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
+                LoggingManager.LogToFile("ba0ccff5-42a5-4c78-a83f-a25bab7ace20", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
                 backgroundQueryDbModel.RetryCount++;
