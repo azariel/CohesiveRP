@@ -1,6 +1,8 @@
 ﻿using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.WebApi;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
@@ -157,6 +159,18 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
 
         private async Task AddFirstChatMessageStandardChat(string chatId, CharacterDbModel character)
         {
+            // Get the user's name and character's name
+            var chat = await storageService.GetChatAsync(chatId);
+            var characterSheetInstancesTiedToChat = await storageService.GetCharacterSheetsInstanceByChatIdAsync(chat.ChatId);
+            var personaLinkedToChat = await storageService.GetPersonaByIdAsync(chat.PersonaId);
+            var personaCharacterSheetBlueprints = await storageService.GetCharacterSheetsByFuncAsync(f => f.PersonaId == chat.PersonaId);
+            var personaName = CharacterUtils.GetFullPersonaNameFromContext(chat.PersonaId, personaLinkedToChat, characterSheetInstancesTiedToChat, personaCharacterSheetBlueprints.FirstOrDefault());
+
+            var mainCharacterIdInChat = chat.CharacterIds.FirstOrDefault();
+            var mainCharacterLinkedToChat = await storageService.GetCharacterByIdAsync(mainCharacterIdInChat);
+            var mainCharacterSheetBlueprints = await storageService.GetCharacterSheetsByFuncAsync(f => f.CharacterId == mainCharacterIdInChat);
+            var characterName = CharacterUtils.GetFullCharacterNameFromContext(mainCharacterIdInChat, mainCharacterLinkedToChat, characterSheetInstancesTiedToChat, mainCharacterSheetBlueprints.FirstOrDefault());
+
             var queryModel = new CreateMessageQueryModel
             {
                 ChatId = chatId,
@@ -164,7 +178,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 SourceType = Common.BusinessObjects.MessageSourceType.AI,
                 Summarized = false,
                 InRoleplayDateTime = null,// At this point, we just generated the message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
-                MessageContent = character.FirstMessage,
+                MessageContent = character.FirstMessage.InjectMacros(personaName, characterName),
                 ThinkingContent = "",
                 CharacterId = character.CharacterId,
                 CharacterAvatars = null,

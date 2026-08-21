@@ -17,20 +17,20 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
         internal async Task<bool> QueueAll(ChatDbModel chat)
         {
             bool operationResult = true;
-            //operationResult &= await QueueCohesionEnforcerWriterAsync(chat);
+            operationResult &= await QueueCohesionEnforcerAsync(chat);
             operationResult &= await QueueProseGuardianAsync(chat);
 
             return operationResult;
         }
 
-        internal async Task<bool> QueueCohesionEnforcerWriterAsync(ChatDbModel chat)
+        internal async Task<bool> QueueCohesionEnforcerAsync(ChatDbModel chat)
         {
             var backgroundQueryModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chat.ChatId,
                 Priority = BackgroundQueryPriority.Highest,
-                DependenciesTags = [BackgroundQuerySystemTags.cohesionEnforcementAnalyzer.ToString()],
-                Tags = [BackgroundQuerySystemTags.cohesionEnforcementWriter.ToString()],
+                DependenciesTags = [BackgroundQuerySystemTags.main.ToString()],// must run directly after main without delay
+                Tags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],
             };
 
             if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)

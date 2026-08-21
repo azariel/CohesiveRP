@@ -30,6 +30,7 @@
             if(!string.IsNullOrWhiteSpace(characterName))
             {
                 outputText = outputText.Replace(Constants.CHARACTER_PLACEHOLDER, characterName);
+                outputText = outputText.Replace(Constants.CHARACTER_PLACEHOLDER_VARIANT_1, characterName);
             }
 
             return outputText;

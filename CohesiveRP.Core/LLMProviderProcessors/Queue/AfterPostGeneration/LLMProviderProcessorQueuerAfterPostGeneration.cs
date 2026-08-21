@@ -20,10 +20,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
 
             var hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
             var currentNarrativeArchitectures = await storageService.GetNarrativeArchitecturesAsync(s => s.ChatId == chat.ChatId);
-            if ((currentNarrativeArchitectures == null || !currentNarrativeArchitectures.Any()) && hotMessagesDbModel?.Messages?.Count > 50)
-            {
-                operationResult &= await QueueNarrativeArchitectureAsync(chat);
-            } else if (currentNarrativeArchitectures != null && currentNarrativeArchitectures.Any() && currentNarrativeArchitectures.First().RefreshCooldown <= 0)
+            if ((currentNarrativeArchitectures == null || !currentNarrativeArchitectures.Any()) && hotMessagesDbModel?.Messages?.Count > 50 ||
+                (currentNarrativeArchitectures != null && currentNarrativeArchitectures.Any() && currentNarrativeArchitectures.First().RefreshCooldown <= 0))
             {
                 operationResult &= await QueueNarrativeArchitectureAsync(chat);
             }

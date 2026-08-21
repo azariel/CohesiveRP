@@ -21,7 +21,8 @@
         proseGuardian = 16,
         characterStatusUpdate = 17,
         skillChecksDescriptor = 18,
-        cohesionEnforcementAnalyzer = 19,
-        cohesionEnforcementWriter = 20,
+        cohesionEnforcement = 19,
+        characterCardDescriptionCleanup = 20,// After importing a characterCard, clean up the description to standardize and enhance it. Also handle a few other fields such as the initial scenario, backstory, etc.
+        //characterCardFirstMessageCleanup = 21,// Cleanup the first message to standarize it. This should be done AFTER the description cleanup since it may infer information that is relevant to the first message/alternate greetings
     }
 }

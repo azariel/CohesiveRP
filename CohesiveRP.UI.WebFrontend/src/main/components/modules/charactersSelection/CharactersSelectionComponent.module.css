@@ -126,6 +126,41 @@
   filter: drop-shadow(0 0 5px rgba(246, 145, 29, 0.35));
 }
 
+.importingCharacterProgress {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.importProgressLabel {
+  font-size: 0.7em;
+  color: rgba(150, 150, 195, 0.75);
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+.importResultsPanel {
+  padding: 0.4em 0.5em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.78em;
+}
+
+.importResultsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(200, 200, 230, 0.8);
+}
+
+.importResultsList {
+  margin: 0.4em 0 0;
+  padding-left: 1.1em;
+  color: #e57373;
+}
+
+.importResultFailure {
+  margin-bottom: 0.15em;
+}
+
 /* ── Collapsible filter panel ── */
 
 .filterPanel {

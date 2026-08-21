@@ -6,9 +6,11 @@ using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.PromptContext.Builders.Directive;
 using CohesiveRP.Core.PromptContext.Builders.LoreByKeywords.BusinessObjects;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.LLMApiProvider;
 using CohesiveRP.Core.Services.Summary;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
@@ -465,16 +467,27 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
 
+                // Get the user's name and character's name
+                var characterSheetInstancesTiedToChat = await storageService.GetCharacterSheetsInstanceByChatIdAsync(chat.ChatId);
+                var personaLinkedToChat = await storageService.GetPersonaByIdAsync(chat.PersonaId);
+                var personaCharacterSheetBlueprints = await storageService.GetCharacterSheetsByFuncAsync(f => f.PersonaId == chat.PersonaId);
+                var personaName = CharacterUtils.GetFullPersonaNameFromContext(chat.PersonaId, personaLinkedToChat, characterSheetInstancesTiedToChat, personaCharacterSheetBlueprints.FirstOrDefault());
+
+                var mainCharacterIdInChat = chat.CharacterIds.FirstOrDefault();
+                var mainCharacterLinkedToChat = await storageService.GetCharacterByIdAsync(mainCharacterIdInChat);
+                var mainCharacterSheetBlueprints = await storageService.GetCharacterSheetsByFuncAsync(f => f.CharacterId == mainCharacterIdInChat);
+                var characterName = CharacterUtils.GetFullCharacterNameFromContext(mainCharacterIdInChat, mainCharacterLinkedToChat, characterSheetInstancesTiedToChat, mainCharacterSheetBlueprints.FirstOrDefault());
+
                 // Add the AI reply message to the end of the chat
                 CreateMessageQueryModel messageQueryModel = new()
                 {
                     ChatId = backgroundQueryDbModel.ChatId,
                     SourceType = MessageSourceType.AI,
-                    CharacterId = chat.CharacterIds.FirstOrDefault(),
+                    CharacterId = mainCharacterIdInChat,
                     CharacterAvatars = null,
                     Summarized = false,// New message, so it's not summarized yet
                     InRoleplayDateTime = null,// At this point, we just generated the message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
-                    MessageContent = ChatMessageParserUtils.ParseMessage(message.Content),
+                    MessageContent = ChatMessageParserUtils.ParseMessage(message.Content.InjectMacros(personaName, characterName)),
                     ThinkingContent = ChatMessageParserUtils.ParseThinking(message.Content),
                     CreatedAtUtc = DateTime.UtcNow,
                     StartGenerationDateTimeUtc = backgroundQueryDbModel.CreatedAtUtc,

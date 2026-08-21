@@ -123,7 +123,8 @@ export default function UserInputComponent({ messagesRef, backgroundQueries, bac
         return updated;
       });
 
-      if (status === "Pending" || status === "InProgress")
+      const isTerminal = status === "Completed" || status === "Error";
+      if (!isTerminal)
         return;
 
       // Terminal status -> resolve the real message and clean up.

@@ -3,8 +3,10 @@ using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.LLMProviderProcessors.Queue;
+using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.Summary;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat.BusinessObjects;
@@ -79,11 +81,21 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
         if (requestDto.QueueDependentBackgroundTasks)
         {
             await LLMProviderProcessorQueuer.QueueProcessorsOnBeforeMainGeneration(chat);
-        
+
             // Also queue the ones that must generate alongside the main generation
             await LLMProviderProcessorQueuer.QueueProcessorsOnDuringMainGeneration(chat);
         }
 
+        // Get the user's name and character's name
+        var characterSheetInstancesTiedToChat = await storageService.GetCharacterSheetsInstanceByChatIdAsync(chat.ChatId);
+        var personaLinkedToChat = await storageService.GetPersonaByIdAsync(chat.PersonaId);
+        var personaCharacterSheetBlueprints = await storageService.GetCharacterSheetsByFuncAsync(f => f.PersonaId == chat.PersonaId);
+        var personaName = CharacterUtils.GetFullPersonaNameFromContext(chat.PersonaId, personaLinkedToChat, characterSheetInstancesTiedToChat, personaCharacterSheetBlueprints.FirstOrDefault());
+
+        var mainCharacterIdInChat = chat.CharacterIds.FirstOrDefault();
+        var mainCharacterLinkedToChat = await storageService.GetCharacterByIdAsync(mainCharacterIdInChat);
+        var mainCharacterSheetBlueprints = await storageService.GetCharacterSheetsByFuncAsync(f => f.CharacterId == mainCharacterIdInChat);
+        var characterName = CharacterUtils.GetFullCharacterNameFromContext(mainCharacterIdInChat, mainCharacterLinkedToChat, characterSheetInstancesTiedToChat, mainCharacterSheetBlueprints.FirstOrDefault());
 
         IMessageDbModel message = null;
         if (!string.IsNullOrWhiteSpace(requestDto.Message.Content))
@@ -97,7 +109,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 Summarized = false,// adding a brand new message, so ofc it's not summarized yet
                 SourceType = MessageSourceType.User,
                 InRoleplayDateTime = null,// At this point, the player just generated its message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
-                MessageContent = requestDto.Message.Content,
+                MessageContent = requestDto.Message.Content.InjectMacros(personaName, characterName),
                 ThinkingContent = "",
                 CreatedAtUtc = now,
                 CharacterId = null,// Null as this is from the User

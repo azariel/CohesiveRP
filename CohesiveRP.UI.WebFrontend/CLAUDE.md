@@ -4,6 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # What this project is
 We are working together on a project made using Vite, React, Typescript. This WebApp uses HttpRequest to communicate with a backend made in C#. The application is named 'CohesiveRp', it's an application to allow roleplay between a User and an AI (LLMs).
 
+# Suggestions
+
+Always suggest modifications to this file when the code change in a way that invalidates information from this file.
+
 # Settings
 Note that 'erasableSyntaxOnly' is enabled.
 

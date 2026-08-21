@@ -1,4 +1,6 @@
-﻿using CohesiveRP.Storage.DataAccessLayer.Chats;
+﻿using CohesiveRP.Core.Services;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
 
 namespace CohesiveRP.Core.Utils.Characters
@@ -141,6 +143,75 @@ namespace CohesiveRP.Core.Utils.Characters
                     Directory.Delete(oldDirectoryCharacter, true);
                 } catch (Exception) { }
             }
+        }
+
+        public static string GetFullPersonaNameFromContext(string personaId, PersonaDbModel personaLinkedToChat, CharacterSheetInstancesDbModel characterSheetInstancesTiedToChat, CharacterSheetDbModel personaCharacterSheetBlueprint)
+        {
+            if(string.IsNullOrWhiteSpace(personaId))    
+            {
+                return string.Empty;
+            }
+
+            // Get the user's name and character's name
+            var personaName = personaLinkedToChat?.Name;// default is the 'name' of the persona
+            var personaCharacterSheetInstance = characterSheetInstancesTiedToChat?.CharacterSheetInstances?.FirstOrDefault(f => f.PersonaId == personaId);
+
+            // If that persona has a characterSheetInstance, use it
+            if (personaCharacterSheetInstance?.CharacterSheet != null && !string.IsNullOrWhiteSpace(personaCharacterSheetInstance.CharacterSheet.FirstName))
+            {
+                personaName = personaCharacterSheetInstance.CharacterSheet.ComposeCharacterFullName();
+            } else
+            {
+                // If the characterSheetInstance is a dummy one, fallback to the actual characterSheet if it's relevant
+                if (personaCharacterSheetBlueprint?.CharacterSheet != null && !string.IsNullOrWhiteSpace(personaCharacterSheetBlueprint.CharacterSheet.FirstName))
+                {
+                    personaName = personaCharacterSheetBlueprint.CharacterSheet.ComposeCharacterFullName();
+                }
+            }
+
+            return personaName;
+        }
+
+        public static string GetFullCharacterNameFromContext(string mainCharacterIdInChat, CharacterDbModel mainCharacterLinkedToChat, CharacterSheetInstancesDbModel characterSheetInstancesTiedToChat, CharacterSheetDbModel characterSheetBlueprint)
+        {
+            if(string.IsNullOrWhiteSpace(mainCharacterIdInChat))
+            {
+                return string.Empty;
+            }
+
+            // Get the user's name and character's name
+            var characterName = mainCharacterLinkedToChat?.Name;// default is the 'name' of the character
+            var characterCharacterSheetInstance = characterSheetInstancesTiedToChat?.CharacterSheetInstances?.FirstOrDefault(f => f.CharacterId == mainCharacterIdInChat);
+
+            // If that character has a characterSheetInstance, use it
+            if (characterCharacterSheetInstance?.CharacterSheet != null && !string.IsNullOrWhiteSpace(characterCharacterSheetInstance.CharacterSheet.FirstName))
+            {
+                characterName = characterCharacterSheetInstance.CharacterSheet.ComposeCharacterFullName();
+            } else
+            {
+                // If the characterSheetInstance is a dummy one, fallback to the actual characterSheet if it's relevant
+                if (characterSheetBlueprint?.CharacterSheet != null && !string.IsNullOrWhiteSpace(characterSheetBlueprint.CharacterSheet.FirstName))
+                {
+                    characterName = characterSheetBlueprint.CharacterSheet.ComposeCharacterFullName();
+                }
+            }
+
+            return characterName;
+        }
+
+        public static string ComposeCharacterFullName(this CharacterSheet characterSheet)
+        {
+            if (characterSheet == null)
+            {
+                return string.Empty;
+            }
+
+            if (string.IsNullOrWhiteSpace(characterSheet.LastName))
+            {
+                return characterSheet.FirstName;
+            }
+
+            return $"{characterSheet.FirstName} {characterSheet.LastName}";
         }
     }
 }

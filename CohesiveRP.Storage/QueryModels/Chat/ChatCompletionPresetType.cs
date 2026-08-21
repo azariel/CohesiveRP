@@ -19,7 +19,6 @@
         ProseGuardian = 13,
         CharacterStatusUpdate = 14,
         SkillChecksDescriptor = 15,
-        CohesionEnforcementAnalyzer = 16,
-        CohesionEnforcementWriter = 17,
+        CohesionEnforcement = 16,
     }
 }

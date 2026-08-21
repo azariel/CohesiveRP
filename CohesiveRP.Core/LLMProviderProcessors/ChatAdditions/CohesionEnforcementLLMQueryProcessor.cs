@@ -15,9 +15,9 @@ using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
 {
-    public class CohesionEnforcementAnalyzerLLMQueryProcessor : LLMQueryProcessor
+    public class CohesionEnforcementLLMQueryProcessor : LLMQueryProcessor
     {
-        public CohesionEnforcementAnalyzerLLMQueryProcessor(
+        public CohesionEnforcementLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
             BackgroundQueryDbModel backgroundQueryDbModel,

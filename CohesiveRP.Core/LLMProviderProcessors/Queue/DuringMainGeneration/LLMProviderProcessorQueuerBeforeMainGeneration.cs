@@ -19,8 +19,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
         {
             bool operationResult = true;
 
-            //operationResult &= await QueueCohesionEnforcerAnalyzerAsync(chat);
-
             var currentSkillChecks = await storageService.GetChatCharactersRollsByChatIdAsync(chat.ChatId);
             if (currentSkillChecks?.ChatCharactersRolls != null && currentSkillChecks.ChatCharactersRolls.Count > 0)
             {
@@ -53,22 +51,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
             }
 
             return operationResult;
-        }
-
-        internal async Task<bool> QueueCohesionEnforcerAnalyzerAsync(ChatDbModel chat)
-        {
-            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-            {
-                ChatId = chat.ChatId,
-                Priority = BackgroundQueryPriority.Highest,
-                DependenciesTags = [BackgroundQuerySystemTags.main.ToString()],// must run directly after main without delay
-                Tags = [BackgroundQuerySystemTags.cohesionEnforcementAnalyzer.ToString()],
-            };
-
-            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-                return false;
-
-            return true;
         }
 
         /// <summary>

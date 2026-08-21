@@ -26,7 +26,7 @@ export const AppSharedStoreProvider = ({ children }: { children: ReactNode }) =>
             currentUserInputValue: parsedSaved.currentUserInputValue ?? "",
             isSceneTrackerOpened: parsedSaved.isSceneTrackerOpened ?? null,
             isCharactersRollsOpened: parsedSaved.isCharactersRollsOpened ?? null,
-            hideAvatars: false,// For debug purpose
+            hideAvatars: true,// For debug purpose
             latestPlayerDescription: parsedSaved.latestPlayerDescription ?? undefined,
           };
         }

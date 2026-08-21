@@ -34,6 +34,6 @@
         NarrativeDirectionInstructions = 29,
         ProseGuardianInstructions = 30,
         PathfinderSkillChecksDescriptor = 31,
-        CohesionEnforcerWriter = 32,
+        CohesionEnforcer = 32,
     }
 }

@@ -12,7 +12,9 @@ using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.RequestDtos.Characters;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
+using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using SixLabors.ImageSharp;
 
@@ -241,6 +243,10 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
             }
         }
 
+        // Post-import background queries to enhance and standardize the imported character
+        // This could lead to a cleanup of the description to split the initial scenario/backstory, the actual character, the requirements to the LLM, etc. May also clean up the first message (asterisks are for thoughts in cohesiveRP, etc). Once that's cleaned up, if the characterCard represents a single character (and not a narrator), it may generate a characterSheet automatically, possibly also the initial illustrations for this character, etc.
+
+
         // Convert DbModel to an acceptable web model (without sensitive information)
         var responseDto = new CharacterResponseDto
         {
@@ -263,5 +269,22 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
         };
 
         return responseDto;
+    }
+
+    // TODO
+    internal async Task<bool> QueueCharacterCardCleanupQueriesAsync(ChatDbModel chat)
+    {
+        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+        {
+            ChatId = chat.ChatId,
+            Priority = BackgroundQueryPriority.Low,
+            DependenciesTags = Enum.GetValues<BackgroundQuerySystemTags>().Except([BackgroundQuerySystemTags.dynamicCharacterCreation]).Select(s => s.ToString()).ToList(),
+            Tags = [BackgroundQuerySystemTags.characterCardDescriptionCleanup.ToString()],
+        };
+
+        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+            return false;
+
+        return true;
     }
 }
