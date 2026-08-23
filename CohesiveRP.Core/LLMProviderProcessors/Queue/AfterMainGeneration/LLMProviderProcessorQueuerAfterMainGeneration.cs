@@ -17,7 +17,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
         internal async Task<bool> QueueAll(ChatDbModel chat)
         {
             bool operationResult = true;
-            operationResult &= await QueueCohesionEnforcerAsync(chat);
+            //operationResult &= await QueueCohesionEnforcerAsync(chat);
             operationResult &= await QueueProseGuardianAsync(chat);
 
             return operationResult;
