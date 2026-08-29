@@ -107,6 +107,20 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
                 string sceneTrackerJson = LLMResponseParser.ParseOnlyJson(messages.First().Content);
 
+                // validate that the sceneTrackerJson is valid json
+
+                try
+                {
+                    JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerJson);
+                } catch (Exception e)
+                {
+                    LoggingManager.LogToFile("9ced233b-249d-456f-a2bf-48e847daa024", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Invalid sceneTrackerJson. Skipping.", e);
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                    backgroundQueryDbModel.RetryCount++;
+                    return false;
+                }
+                VisualSceneTracker validJson = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerJson);
+
                 string linkedMessageId = shareableContextLink.Value as string;
                 CreateSceneTrackerQueryModel queryModel = new()
                 {
