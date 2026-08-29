@@ -117,7 +117,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                 return true;
             } catch (Exception e)
             {
-                LoggingManager.LogToFile("e1a930bf-c017-4ec8-a088-ce2abe84c371", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
+                LoggingManager.LogToFile("ffbae5ea-622f-497d-9bd1-f3b31d04803b", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
                 backgroundQueryDbModel.RetryCount++;

@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Common.Exceptions;
+﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.ResponseDtos.ChatCharacterRolls.BusinessObjects;
@@ -69,8 +70,12 @@ public class GetChatCharacterRollsWorkflow : IChatCharacterRollsWorkflow
                             continue;
 
                         var otherCharacterSheetInstance = characterSheetInstances?.CharacterSheetInstances?.FirstOrDefault(c => c.CharacterSheetInstanceId == charactersWithCounterRoll.CharacterSheetInstanceId);
+
                         if (otherCharacterSheetInstance == null)
+                        {
+                            LoggingManager.LogToFile("383e62cd-2b7f-44fa-bf4b-e8b2ae1759c5", $"Missing characterSheetInstance matching character [{charactersWithCounterRoll.CharacterName}] (instanceId {charactersWithCounterRoll.CharacterSheetInstanceId}) when generating counter rolls.");
                             continue;
+                        }
 
                         var characterInSceneRoll = new ChatCharacterInSceneCounterRolls
                         {

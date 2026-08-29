@@ -88,7 +88,12 @@ namespace CohesiveRP.Core.Services.Summary
             {
                 ChatId = chatId,
                 LinkedId = hotMessagesCopy.Last().MessageId,
-                DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.main.ToString()
+                ],
                 Tags = [BackgroundQuerySystemTags.shortSummary.ToString()],
                 Priority = BackgroundQueryPriority.Low,
             };
@@ -116,7 +121,13 @@ namespace CohesiveRP.Core.Services.Summary
             var backgroundQueryDbModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chatId,
-                DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.shortSummary.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.main.ToString()
+                ],
                 Tags = [BackgroundQuerySystemTags.mediumSummary.ToString()],
                 Priority = BackgroundQueryPriority.VeryLow,
             };
@@ -144,7 +155,14 @@ namespace CohesiveRP.Core.Services.Summary
             var backgroundQueryDbModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chatId,
-                DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.mediumSummary.ToString(), BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.shortSummary.ToString(),
+                    BackgroundQuerySystemTags.mediumSummary.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.main.ToString()
+                ],
                 Tags = [BackgroundQuerySystemTags.longSummary.ToString()],
                 Priority = BackgroundQueryPriority.VeryLow,
             };
@@ -172,7 +190,15 @@ namespace CohesiveRP.Core.Services.Summary
             var backgroundQueryDbModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chatId,
-                DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.mediumSummary.ToString(), BackgroundQuerySystemTags.longSummary.ToString(), BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.shortSummary.ToString(),
+                    BackgroundQuerySystemTags.mediumSummary.ToString(),
+                    BackgroundQuerySystemTags.longSummary.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.main.ToString()
+                ],
                 Tags = [BackgroundQuerySystemTags.extraSummary.ToString()],
                 Priority = BackgroundQueryPriority.VeryLow,
             };
@@ -201,7 +227,16 @@ namespace CohesiveRP.Core.Services.Summary
             var backgroundQueryDbModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chatId,
-                DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.mediumSummary.ToString(), BackgroundQuerySystemTags.longSummary.ToString(), BackgroundQuerySystemTags.extraSummary.ToString(), BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.shortSummary.ToString(),
+                    BackgroundQuerySystemTags.mediumSummary.ToString(),
+                    BackgroundQuerySystemTags.longSummary.ToString(),
+                    BackgroundQuerySystemTags.extraSummary.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.main.ToString()
+                ],
                 Tags = [BackgroundQuerySystemTags.overflowSummary.ToString()],
                 Priority = BackgroundQueryPriority.VeryLow,
             };

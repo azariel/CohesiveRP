@@ -133,7 +133,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             //var allPendingQueries = await backgroundQueriesDal.GetAllPendingQueriesAsync();
             var allProcessingQueries = await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
 
-            if (allProcessingQueries.Length <= 0)
+            if (allProcessingQueries == null || allProcessingQueries.Length <= 0)
             {
                 return null;
             }
