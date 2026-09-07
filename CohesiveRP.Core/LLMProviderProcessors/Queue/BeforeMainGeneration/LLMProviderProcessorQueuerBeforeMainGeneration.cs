@@ -37,6 +37,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
                 operationResult &= await AddNarrativeDirectionBackgroundQueryAsync(chat);
             }
 
+            operationResult &= await AddReflectionBackgroundQueryAsync(chat);
+            
             return operationResult;
         }
 
@@ -80,6 +82,26 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
                 Priority = BackgroundQueryPriority.Highest,// User is waiting!
                 DependenciesTags = [],// No dependencies at all
                 Tags = [BackgroundQuerySystemTags.narrativeDirection.ToString()],
+            };
+
+            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+                return false;
+
+            return true;
+        }
+
+        internal async Task<bool> AddReflectionBackgroundQueryAsync(ChatDbModel chat)
+        {
+            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+            {
+                ChatId = chat.ChatId,
+                Priority = BackgroundQueryPriority.Highest,// User is waiting!
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.narrativeDirection.ToString(),
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                ],// No dependencies at all
+                Tags = [BackgroundQuerySystemTags.reflection.ToString()],
             };
 
             if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)

@@ -4,6 +4,7 @@ using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
@@ -84,6 +85,8 @@ namespace CohesiveRP.Storage.Common
         public DbSet<UserDbModel> Users { get; set; }
 
         public DbSet<ChatDbModel> Chats { get; set; }
+
+        public DbSet<ReflectionDbModel> Reflections { get; set; }
 
         public DbSet<CharacterDbModel> Characters { get; set; }
 

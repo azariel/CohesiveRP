@@ -71,7 +71,7 @@
 }
 
 .messageHeaderContentModel {
-    font-size: 0.6em;
+    font-size: 0.8em;
     font-weight: bolder;
     color: #696969;
     margin-left: clamp(0.1rem, 0.5dvw, 3rem);

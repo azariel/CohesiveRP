@@ -38,7 +38,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
                 DependenciesTags = [
                     BackgroundQuerySystemTags.main.ToString(),
                     BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
-                    BackgroundQuerySystemTags.sceneTracker.ToString()
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
                 ],
                 Tags = [BackgroundQuerySystemTags.narrativeArchitecture.ToString()],
             };

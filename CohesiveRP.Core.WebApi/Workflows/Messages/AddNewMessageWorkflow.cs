@@ -131,6 +131,7 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
                 BackgroundQuerySystemTags.sceneTracker.ToString(),// before
                 BackgroundQuerySystemTags.skillChecksInitiator.ToString(),// before
                 BackgroundQuerySystemTags.narrativeDirection.ToString(),// before
+                BackgroundQuerySystemTags.reflection.ToString(),// before, if configured
                 BackgroundQuerySystemTags.proseGuardian.ToString(),// after++
             ],// Can't run as long as another one with one of these tag is running or pending
             Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'

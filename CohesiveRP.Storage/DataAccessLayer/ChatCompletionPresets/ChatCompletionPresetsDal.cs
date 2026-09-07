@@ -59,6 +59,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 dbContext.ChatCompletionPresets.Add(CohesionEnforcementCompletionPresetInjector.InjectPreset());
                 dbContext.ChatCompletionPresets.Add(NarrativeArchitectureCompletionPresetInjector.InjectPreset());
 
+                // Custom Thinking
+                dbContext.ChatCompletionPresets.Add(ReflectionCompletionPresetInjector.InjectPreset());
+
                 // Poke the AI to update character status alterations (magical effects, body status, wounds)
                 // and the other slow-changing CharacterSheetInstance fields, outputting only the diff.
                 dbContext.ChatCompletionPresets.Add(CharacterStatusUpdateCompletionPresetInjector.InjectPreset());

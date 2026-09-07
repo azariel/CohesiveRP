@@ -52,6 +52,8 @@ namespace CohesiveRP.Core.PromptContext
                     return new PromptContextBuilder(ChatCompletionPresetType.SkillChecksDescriptor, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.cohesionEnforcement:
                     return new PromptContextBuilder(ChatCompletionPresetType.CohesionEnforcement, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.reflection:
+                    return new PromptContextBuilder(ChatCompletionPresetType.Reflection, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.custom:
                     return null;
                 default:

@@ -4,6 +4,7 @@ using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
@@ -52,6 +53,7 @@ namespace CohesiveRP.Core.Services
         private INarrativeArchitecturesDal narrativeArchitecturesDal;
         private INarrativeDirectionsDal narrativeDirectionsDal;
         private IProseGuardiansDal proseGuardiansDal;
+        private IReflectionsDal reflectionsDal;
 
         public StorageService(
             IChatsDal chatsDal,
@@ -75,7 +77,8 @@ namespace CohesiveRP.Core.Services
             ICohesionEnforcementsDal cohesionEnforcementsDal,
             INarrativeArchitecturesDal narrativeArchitecturesDal,
             INarrativeDirectionsDal narrativeDirectionsDal,
-            IProseGuardiansDal proseGuardiansDal)
+            IProseGuardiansDal proseGuardiansDal,
+            IReflectionsDal reflectionsDal)
         {
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;
@@ -99,6 +102,7 @@ namespace CohesiveRP.Core.Services
             this.narrativeArchitecturesDal = narrativeArchitecturesDal;
             this.narrativeDirectionsDal = narrativeDirectionsDal;
             this.proseGuardiansDal = proseGuardiansDal;
+            this.reflectionsDal = reflectionsDal;
         }
 
         // Chats
@@ -300,5 +304,11 @@ namespace CohesiveRP.Core.Services
         public async Task<ProseGuardianDbModel> AddProseGuardianAsync(ProseGuardianDbModel dbModel) => await proseGuardiansDal.AddProseGuardianAsync(dbModel);
         public async Task<ProseGuardianDbModel> UpdateProseGuardianAsync(ProseGuardianDbModel dbModel) => await proseGuardiansDal.UpdateProseGuardianAsync(dbModel);
         public async Task<bool> DeleteProseGuardiansAsync(Func<ProseGuardianDbModel, bool> func) => await proseGuardiansDal.DeleteProseGuardianAsync(func);
+
+        // Reflections
+        public async Task<ReflectionDbModel[]> GetReflectionsAsync(Func<ReflectionDbModel, bool> func) => await reflectionsDal.GetReflectionsAsync(func);
+        public async Task<ReflectionDbModel> AddReflectionAsync(ReflectionDbModel dbModel) => await reflectionsDal.AddReflectionAsync(dbModel);
+        public async Task<ReflectionDbModel> UpdateReflectionAsync(ReflectionDbModel dbModel) => await reflectionsDal.UpdateReflectionAsync(dbModel);
+        public async Task<bool> DeleteReflectionsAsync(Func<ReflectionDbModel, bool> func) => await reflectionsDal.DeleteReflectionAsync(func);
     }
 }

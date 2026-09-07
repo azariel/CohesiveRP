@@ -35,5 +35,7 @@
         ProseGuardianInstructions = 30,
         PathfinderSkillChecksDescriptor = 31,
         CohesionEnforcer = 32,
+        ReflectionInstructions = 33,// build the reflection prompt that will get injected into the main prompt
+        Reflections = 34,// the part to inject into the main prompt
     }
 }

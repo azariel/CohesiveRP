@@ -92,7 +92,8 @@ namespace CohesiveRP.Core.Services.Summary
                     BackgroundQuerySystemTags.sceneTracker.ToString(),
                     BackgroundQuerySystemTags.sceneAnalyze.ToString(),
                     BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
-                    BackgroundQuerySystemTags.main.ToString()
+                    BackgroundQuerySystemTags.reflection.ToString(),
+                    BackgroundQuerySystemTags.main.ToString(),
                 ],
                 Tags = [BackgroundQuerySystemTags.shortSummary.ToString()],
                 Priority = BackgroundQueryPriority.Low,
@@ -126,6 +127,7 @@ namespace CohesiveRP.Core.Services.Summary
                     BackgroundQuerySystemTags.shortSummary.ToString(),
                     BackgroundQuerySystemTags.sceneAnalyze.ToString(),
                     BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
                     BackgroundQuerySystemTags.main.ToString()
                 ],
                 Tags = [BackgroundQuerySystemTags.mediumSummary.ToString()],
@@ -161,6 +163,7 @@ namespace CohesiveRP.Core.Services.Summary
                     BackgroundQuerySystemTags.mediumSummary.ToString(),
                     BackgroundQuerySystemTags.sceneAnalyze.ToString(),
                     BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
                     BackgroundQuerySystemTags.main.ToString()
                 ],
                 Tags = [BackgroundQuerySystemTags.longSummary.ToString()],
@@ -197,6 +200,7 @@ namespace CohesiveRP.Core.Services.Summary
                     BackgroundQuerySystemTags.longSummary.ToString(),
                     BackgroundQuerySystemTags.sceneAnalyze.ToString(),
                     BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
                     BackgroundQuerySystemTags.main.ToString()
                 ],
                 Tags = [BackgroundQuerySystemTags.extraSummary.ToString()],
@@ -235,6 +239,7 @@ namespace CohesiveRP.Core.Services.Summary
                     BackgroundQuerySystemTags.extraSummary.ToString(),
                     BackgroundQuerySystemTags.sceneAnalyze.ToString(),
                     BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
                     BackgroundQuerySystemTags.main.ToString()
                 ],
                 Tags = [BackgroundQuerySystemTags.overflowSummary.ToString()],

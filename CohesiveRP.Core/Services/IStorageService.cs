@@ -3,6 +3,7 @@ using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
@@ -177,5 +178,11 @@ namespace CohesiveRP.Core.Services
         Task<ProseGuardianDbModel> AddProseGuardianAsync(ProseGuardianDbModel dbModel);
         Task<ProseGuardianDbModel> UpdateProseGuardianAsync(ProseGuardianDbModel dbModel);
         Task<bool> DeleteProseGuardiansAsync(Func<ProseGuardianDbModel, bool> func);
+
+        // Reflections
+        Task<ReflectionDbModel[]> GetReflectionsAsync(Func<ReflectionDbModel, bool> func);
+        Task<ReflectionDbModel> AddReflectionAsync(ReflectionDbModel dbModel);
+        Task<ReflectionDbModel> UpdateReflectionAsync(ReflectionDbModel dbModel);
+        Task<bool> DeleteReflectionsAsync(Func<ReflectionDbModel, bool> func);
     }
 }

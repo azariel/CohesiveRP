@@ -20,5 +20,6 @@
         CharacterStatusUpdate = 14,
         SkillChecksDescriptor = 15,
         CohesionEnforcement = 16,
+        Reflection = 17,
     }
 }

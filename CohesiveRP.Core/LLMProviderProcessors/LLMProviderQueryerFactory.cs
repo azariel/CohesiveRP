@@ -5,6 +5,7 @@ using CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator;
 using CohesiveRP.Core.LLMProviderProcessors.Queue;
+using CohesiveRP.Core.LLMProviderProcessors.Reflection;
 using CohesiveRP.Core.LLMProviderProcessors.SceneTracker;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
@@ -106,6 +107,8 @@ namespace CohesiveRP.Core.LLMProviderManager
                     new SkillChecksDescriptorLLMQueryProcessor(ChatCompletionPresetType.SkillChecksDescriptor, BackgroundQuerySystemTags.skillChecksDescriptor, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.cohesionEnforcement =>
                     new CohesionEnforcementLLMQueryProcessor(ChatCompletionPresetType.CohesionEnforcement, BackgroundQuerySystemTags.cohesionEnforcement, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.reflection =>
+                    new ReflectionLLMQueryProcessor(ChatCompletionPresetType.Reflection, BackgroundQuerySystemTags.reflection, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 _ => null
             };
 

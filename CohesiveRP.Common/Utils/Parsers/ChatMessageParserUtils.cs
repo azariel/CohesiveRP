@@ -6,7 +6,7 @@ namespace CohesiveRP.Common.Utils.Parsers
     {
         public static string thinkingRegexPattern = @"(?s)<(think|thinking)>.*?</\1>";
 
-        public static string ParseMessage(string rawMessage)
+        public static string ParseMessage(string rawMessage, bool removeThinkingSectionsIfFound = false)
         {
             string message = rawMessage;
 
@@ -15,6 +15,11 @@ namespace CohesiveRP.Common.Utils.Parsers
 
             //// remove <thinking></thinking>
             //message = Regex.Replace(message, @"(?s)<thinking>.*?</thinking>", "");
+
+            // remove anything before (and including) </think> or </thinking>
+            // handles models that emit reasoning without an opening <think> tag
+            if (removeThinkingSectionsIfFound)
+                message = Regex.Replace(message, @"(?s)^.*?</think(?:ing)?>", "");
 
             // remove <think></think> and <thinking></thinking>
             message = Regex.Replace(message, thinkingRegexPattern, "");

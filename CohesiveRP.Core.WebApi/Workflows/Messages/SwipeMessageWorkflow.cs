@@ -106,6 +106,7 @@ public class SwipeMessageWorkflow : ISwipeMessageWorkflow
                 BackgroundQuerySystemTags.sceneTracker.ToString(),
                 BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
                 BackgroundQuerySystemTags.proseGuardian.ToString(),
+                BackgroundQuerySystemTags.reflection.ToString(),
                 BackgroundQuerySystemTags.narrativeDirection.ToString(),
             ],// Can't run as long as another one with one of these tag is running or pending
             Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'
