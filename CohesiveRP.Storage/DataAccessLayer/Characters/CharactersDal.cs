@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
+using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.QueryModels.Chat;
@@ -74,7 +75,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     Description = queryModel.Description,
                     IncludeDescriptionInPrompt = queryModel.IncludeDescriptionInPrompt,
                     Tags = queryModel.Tags,
-                    FirstMessage = queryModel.FirstMessage,
+                    FirstMessage = ChatMessageParserUtils.ParseMessage(queryModel.FirstMessage),
                     AlternateGreetings = queryModel.AlternateGreetings,
                     LastActivityAtUtc = DateTime.UtcNow,
                     InherentLorebookIds = queryModel.InherentLorebookIds,
@@ -117,7 +118,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 character.Creator = characterDbModel.Creator;
                 character.CreatorNotes = characterDbModel.CreatorNotes;
                 character.AlternateGreetings = characterDbModel.AlternateGreetings;
-                character.FirstMessage = characterDbModel.FirstMessage;
+                character.FirstMessage = ChatMessageParserUtils.ParseMessage(characterDbModel.FirstMessage);
                 character.Name = characterDbModel.Name;
                 character.Tags = characterDbModel.Tags;
                 character.InherentLorebookIds = characterDbModel.InherentLorebookIds;

@@ -115,7 +115,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.SceneTracker, Name = "SceneTracker", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "{{item_description}}" } },
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.PathfinderSkillChecksResults, Name = "PathfinderSkillChecksResults", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "{{item_description}}" } },
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.CurrentObjective, Name = "CurrentObjective", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "<current_objective>\r\nStory progression objective.\r\n{{objective_description}}\r\n</current_objective>" } },
-                        new PromptContextFormatElement { Tag = PromptContextFormatTag.Reflections, Name = "Reflection (Thinking)", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "{{item_description}}" } },
+                        new PromptContextFormatElement { Tag = PromptContextFormatTag.Reflections, Name = "Reflection (Thinking)", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "<thinking>\r\n{{description}}\r\n</thinking>" } },
                         new PromptContextFormatElement
                         {
                             Name = "Replies Examples",

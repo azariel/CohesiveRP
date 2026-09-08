@@ -26,7 +26,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
     {
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
 
-        // Dev-01
+        // Dev-01_EXTERNAL_PRODUCTION
         // --- Local
         //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "http://127.0.0.1:5001/v1/chat/completions";
         //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "http://127.0.0.1:5001/v1/chat/completions";
@@ -77,7 +77,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         //private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
 
         // -----------
-        // Dev-01_LOCAL
+        // Dev-01_PERSONAL_LOCAL_PRODUCTION
         // --- Local
         private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.0.237:5001/v1/chat/completions";
         private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";
@@ -117,10 +117,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
         // -----------
 
-        // Dev-02
+        // Dev-02_FULL_SOLO_LOCAL_PURE_DEV
         // --- Local
-        //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";
-        //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";
+        //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";
+        //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";
 
         //private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
         //[

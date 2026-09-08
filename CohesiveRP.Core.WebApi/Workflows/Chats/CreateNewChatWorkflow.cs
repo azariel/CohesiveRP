@@ -1,4 +1,5 @@
 ﻿using CohesiveRP.Common.Exceptions;
+using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
@@ -178,7 +179,7 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                 SourceType = Common.BusinessObjects.MessageSourceType.AI,
                 Summarized = false,
                 InRoleplayDateTime = null,// At this point, we just generated the message, we don't know the inRoleplay datetime yet, we need the input of the sceneTracker for that
-                MessageContent = character.FirstMessage.InjectMacros(personaName, characterName),
+                MessageContent = ChatMessageParserUtils.ParseMessage(character.FirstMessage).InjectMacros(personaName, characterName),
                 ThinkingContent = "",
                 CharacterId = character.CharacterId,
                 CharacterAvatars = null,

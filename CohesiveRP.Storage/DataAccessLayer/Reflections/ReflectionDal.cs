@@ -11,7 +11,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection
     /// <summary>
     /// DataAccessLayer around Reflections.
     /// </summary>
-    public class ReflectionDal : StorageDal, IReflectionsDal
+    public class ReflectionDal : StorageDal, IReflectionDal
     {
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
 

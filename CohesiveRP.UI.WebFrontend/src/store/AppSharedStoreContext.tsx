@@ -74,36 +74,35 @@ export const AppSharedStoreProvider = ({ children }: { children: ReactNode }) =>
 
   // Use this instead of setActiveModule when navigating
   const navigateTo = (module: SharedContextType) => {
-    window.history.pushState(module, "", `/${module.moduleName}`);
+    let mergedModule: SharedContextType = module as SharedContextType;
 
     try {
       const saved = localStorage.getItem("activeModule");
       const parsedSaved = saved ? JSON.parse(saved) : null;
 
       if (parsedSaved?.moduleName === module.moduleName) {
-        setActiveModule({
+        mergedModule = {
           ...module,
           currentUserInputValue: parsedSaved.currentUserInputValue ?? "",
           isSceneTrackerOpened: parsedSaved.isSceneTrackerOpened ?? null,
           isCharactersRollsOpened: parsedSaved.isCharactersRollsOpened ?? null,
           hideAvatars: parsedSaved.hideAvatars ?? null,
-        } as SharedContextType);
-        return;
+        } as SharedContextType;
+      } else {
+        mergedModule = {
+          ...module,
+          isSceneTrackerOpened: parsedSaved?.isSceneTrackerOpened ?? null,
+          isCharactersRollsOpened: parsedSaved?.isCharactersRollsOpened ?? null,
+          hideAvatars: parsedSaved?.hideAvatars ?? null,
+        } as SharedContextType;
       }
+    } catch {
+      /* localStorage unavailable/corrupt — fall back to raw module */
+    }
 
-      // Different module (e.g. picking a chat from the selection carousel): the
-      // per-input draft is module-specific and doesn't carry over, but the panel
-      // open/closed toggles are global UI preferences and should persist regardless.
-      setActiveModule({
-        ...module,
-        isSceneTrackerOpened: parsedSaved?.isSceneTrackerOpened ?? null,
-        isCharactersRollsOpened: parsedSaved?.isCharactersRollsOpened ?? null,
-        hideAvatars: parsedSaved?.hideAvatars ?? null,
-      } as SharedContextType);
-      return;
-    } catch { /* ignore */ }
-
-    setActiveModule(module as any);
+    // Push the FULLY MERGED object, so popstate has the same data React state gets
+    window.history.pushState(mergedModule, "", `/${module.moduleName}`);
+    setActiveModule(mergedModule);
   };
 
   return (

@@ -53,7 +53,7 @@ namespace CohesiveRP.Core.Services
         private INarrativeArchitecturesDal narrativeArchitecturesDal;
         private INarrativeDirectionsDal narrativeDirectionsDal;
         private IProseGuardiansDal proseGuardiansDal;
-        private IReflectionsDal reflectionsDal;
+        private IReflectionDal reflectionsDal;
 
         public StorageService(
             IChatsDal chatsDal,
@@ -78,7 +78,7 @@ namespace CohesiveRP.Core.Services
             INarrativeArchitecturesDal narrativeArchitecturesDal,
             INarrativeDirectionsDal narrativeDirectionsDal,
             IProseGuardiansDal proseGuardiansDal,
-            IReflectionsDal reflectionsDal)
+            IReflectionDal reflectionsDal)
         {
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;

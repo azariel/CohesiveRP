@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using CohesiveRP.Common.Configuration;
 using CohesiveRP.Core.BackgroundServices.BackgroundQueries;
@@ -42,6 +43,7 @@ using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.IllustrationQueries;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
@@ -185,6 +187,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<INarrativeArchitecturesDal, NarrativeArchitectureDal>();
             services.AddSingleton<INarrativeDirectionsDal, NarrativeDirectionDal>();
             services.AddSingleton<IProseGuardiansDal, ProseGuardianDal>();
+            services.AddSingleton<IReflectionDal, ReflectionDal>();
 
             //// Load the API-format workflow from embedded resources or disk
             //string templateJson = File.ReadAllText("Workflows/CohesiveRP-MainAvatarGenerator-v1.0.api.json");

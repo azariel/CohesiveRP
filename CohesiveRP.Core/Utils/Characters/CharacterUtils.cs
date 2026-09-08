@@ -147,7 +147,7 @@ namespace CohesiveRP.Core.Utils.Characters
 
         public static string GetFullPersonaNameFromContext(string personaId, PersonaDbModel personaLinkedToChat, CharacterSheetInstancesDbModel characterSheetInstancesTiedToChat, CharacterSheetDbModel personaCharacterSheetBlueprint)
         {
-            if(string.IsNullOrWhiteSpace(personaId))    
+            if (string.IsNullOrWhiteSpace(personaId))
             {
                 return string.Empty;
             }
@@ -174,7 +174,7 @@ namespace CohesiveRP.Core.Utils.Characters
 
         public static string GetFullCharacterNameFromContext(string mainCharacterIdInChat, CharacterDbModel mainCharacterLinkedToChat, CharacterSheetInstancesDbModel characterSheetInstancesTiedToChat, CharacterSheetDbModel characterSheetBlueprint)
         {
-            if(string.IsNullOrWhiteSpace(mainCharacterIdInChat))
+            if (string.IsNullOrWhiteSpace(mainCharacterIdInChat))
             {
                 return string.Empty;
             }
@@ -206,12 +206,22 @@ namespace CohesiveRP.Core.Utils.Characters
                 return string.Empty;
             }
 
-            if (string.IsNullOrWhiteSpace(characterSheet.LastName))
+            return ComposeCharacterFullName(characterSheet.FirstName, characterSheet.LastName);
+        }
+
+        public static string ComposeCharacterFullName(string FirstName, string LastName)
+        {
+            if (string.IsNullOrWhiteSpace(FirstName))
             {
-                return characterSheet.FirstName;
+                return string.Empty;
             }
 
-            return $"{characterSheet.FirstName} {characterSheet.LastName}";
+            if (string.IsNullOrWhiteSpace(LastName))
+            {
+                return FirstName;
+            }
+
+            return $"{FirstName} {LastName}";
         }
     }
 }

@@ -96,6 +96,8 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new SkillChecksDescriptorBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.CohesionEnforcer:
                     return new CohesionEnforcerBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.Reflections:
+                    return new ReflectionsBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 default:
                     throw new Exception($"Unhandled [{contextElement.Tag}].");
             }

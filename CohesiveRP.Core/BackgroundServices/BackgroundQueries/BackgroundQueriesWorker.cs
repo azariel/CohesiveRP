@@ -102,9 +102,14 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                         }
 
                         await backgroundQueriesDal.UpdateBackgroundQueryAsync(selectedQuery);
-                        await Task.Delay(500);
+                        await Task.Delay(1000);
                         cancellationToken.ThrowIfCancellationRequested();
                     }
+                } catch (Exception e)
+                {
+                    LoggingManager.LogToFile("ee1a8773-e75f-41e0-89ac-b74793bd2d24", $"Monitor loop for query [{selectedQuery.BackgroundQueryId}] failed.", e);
+                    selectedQuery.Status = BackgroundQueryStatus.Error;
+                    selectedQuery.Content = null;
                 } finally
                 {
                     if (!await backgroundQueriesDal.UpdateBackgroundQueryAsync(selectedQuery))

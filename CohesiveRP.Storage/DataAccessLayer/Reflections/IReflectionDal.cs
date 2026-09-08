@@ -1,6 +1,6 @@
 ﻿namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection
 {
-    public interface IReflectionsDal
+    public interface IReflectionDal
     {
         // Reflection
         Task<ReflectionDbModel> AddReflectionAsync(ReflectionDbModel queryModel);
