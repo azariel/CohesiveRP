@@ -85,30 +85,32 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
         [
 
+            ChatCompletionPresetType.SkillChecksInitiator,// PRE
             ChatCompletionPresetType.Main,
+
+            ChatCompletionPresetType.CohesionEnforcement,// POST
+            ChatCompletionPresetType.CharacterStatusUpdate,// POST
 
             ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
             ChatCompletionPresetType.DynamicCharacterCreation,
+            ChatCompletionPresetType.DynamicCharacterSheetCreation,
+            ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
         ];
 
         private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets = [
             ChatCompletionPresetType.SceneTracker,// PRE
-            ChatCompletionPresetType.Reflection,// PRE
-            ChatCompletionPresetType.ProseGuardian,// POST
-
-            ChatCompletionPresetType.SkillChecksInitiator,// PRE
+            
             ChatCompletionPresetType.NarrativeDirection,// PRE
+            ChatCompletionPresetType.Reflection,// PRE
             ChatCompletionPresetType.SkillChecksDescriptor,// During Main
-            ChatCompletionPresetType.CharacterStatusUpdate,// POST
-            ChatCompletionPresetType.CohesionEnforcement,// POST
+            ChatCompletionPresetType.ProseGuardian,// POST
+            
             ChatCompletionPresetType.NarrativeArchitecture,// POST (secretPlot)
             ChatCompletionPresetType.Summarize,// POST++
             ChatCompletionPresetType.SummariesMerge,// POST++
         ];
         private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets = [];
         private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [
-            ChatCompletionPresetType.DynamicCharacterSheetCreation,
-            ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
         ];
 
         private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
@@ -137,14 +139,15 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         //    ChatCompletionPresetType.SkillChecksDescriptor,// During Main
         //    ChatCompletionPresetType.Main,
         //    ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
-        //    ChatCompletionPresetType.DynamicCharacterCreation,
-        //    ChatCompletionPresetType.DynamicCharacterSheetCreation,
-        //    ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
+        //    ChatCompletionPresetType.DynamicCharacterCreation
         //];
 
         //private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets = [];
         //private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [
+        //    ChatCompletionPresetType.DynamicCharacterSheetCreation,
+        //    ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
+        //];
         //private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
         //private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets = [];
         //private readonly List<ChatCompletionPresetType> DSchatCompletionPresets = [];
@@ -179,7 +182,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         {
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_7,
                             Name = "Local-Inference-Server-Main",
-                            Model = "gemma-4-26b-a4b-heretic-styletune-v2-head.i1-Q4_K_M",
+                            Model = "debug",
                             Stream = true,
                             ApiUrl = LOCAL_MAIN_INFERENCE_SERVER_URL,
                             Type = LLMProviderType.OpenAICustom,
@@ -223,7 +226,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         {
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_8,
                             Name = "Local-Inference-Server-Secondary",
-                            Model = "gemma-4-26b-a4b-heretic-styletune-v2-head.i1-Q4_K_M",
+                            Model = "debug",
                             Stream = true,
                             ApiUrl = LOCAL_SECONDARY_INFERENCE_SERVER_URL,
                             Type = LLMProviderType.OpenAICustom,

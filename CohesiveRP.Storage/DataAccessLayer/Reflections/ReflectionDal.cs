@@ -33,7 +33,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection
                 var Reflection = dbContext.Reflections.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
                 if (Reflection != null)
                 {
-                    LoggingManager.LogToFile("b170a3c5-9451-4a7d-b28b-da3b7d6c8dd2", $"Error when querying Db on table cohesion enforcements. Reflection entity to create already exists with Id [{Reflection.ReflectionId}].");
+                    LoggingManager.LogToFile("b170a3c5-9451-4a7d-b28b-da3b7d6c8dd2", $"Error when querying Db on table reflections. Reflection entity to create already exists with Id [{Reflection.ReflectionId}].");
                     return null;
                 }
 

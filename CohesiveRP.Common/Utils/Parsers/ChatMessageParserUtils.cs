@@ -10,6 +10,9 @@ namespace CohesiveRP.Common.Utils.Parsers
         {
             string message = rawMessage;
 
+            if(string.IsNullOrWhiteSpace(message))
+                return message;
+
             //// remove <think></think>
             //message = Regex.Replace(message, @"(?s)<think>.*?</think>", "");
 
