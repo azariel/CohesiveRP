@@ -183,6 +183,9 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                             instance.CharacterSheet.LatentMoodForNextInteractionWithPlayer = update.LatentMoodForNextInteractionWithPlayer;
                         }
 
+                        update.RecentImportantEventsToAdd ??= Array.Empty<string>();
+                        update.RecentImportantEventsToRemove ??= Array.Empty<string>();
+
                         if (update.RecentImportantEventsToAdd.Length > 0 || update.RecentImportantEventsToRemove.Length > 0)
                         {
                             instance.CharacterSheet.RecentImportantEvents = ApplyStringListDiff(instance.CharacterSheet.RecentImportantEvents, update.RecentImportantEventsToAdd, update.RecentImportantEventsToRemove);
