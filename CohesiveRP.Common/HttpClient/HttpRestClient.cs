@@ -115,11 +115,11 @@ namespace CohesiveRP.Common.HttpClient
                 response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             } catch (OperationCanceledException)
             {
-                LoggingManager.LogToFile("0ea3ebe0-e24a-4948-8d80-3718e6c28236", $"[{nameof(HttpRestClient)}.{nameof(PostStreamAsync)}] cancelled.");
+                LoggingManager.LogToFile("0ea3ebe0-e24a-4948-8d80-3718e6c28236", $"[{nameof(HttpRestClient)}.{nameof(PostStreamAsync)}] cancelled when querying url [{url}].");
                 throw;
             } catch (Exception ex)
             {
-                LoggingManager.LogToFile("d7687757-7197-4097-a04d-43c8996b00f7", $"[{nameof(HttpRestClient)}.{nameof(PostStreamAsync)}] request failed.", ex);
+                LoggingManager.LogToFile("d7687757-7197-4097-a04d-43c8996b00f7", $"[{nameof(HttpRestClient)}.{nameof(PostStreamAsync)}] request failed when querying url [{url}].", ex);
                 throw;
             }
 
@@ -144,11 +144,11 @@ namespace CohesiveRP.Common.HttpClient
                     line = await reader.ReadLineAsync(cancellationToken);
                 } catch (OperationCanceledException)
                 {
-                    LoggingManager.LogToFile("6d55d521-3adc-42b2-a76a-6f67e73103d3", $"[{nameof(HttpRestClient)}.{nameof(PostStreamAsync)}] cancelled while reading stream.");
+                    LoggingManager.LogToFile("6d55d521-3adc-42b2-a76a-6f67e73103d3", $"[{nameof(HttpRestClient)}.{nameof(PostStreamAsync)}] cancelled while reading stream from url [{url}] async response.");
                     throw;
                 } catch (Exception ex)
                 {
-                    LoggingManager.LogToFile("73b9f140-1f05-41de-be68-0c58428393dc", $"[{nameof(HttpRestClient)}.{nameof(PostStreamAsync)}] failed while reading stream.", ex);
+                    LoggingManager.LogToFile("73b9f140-1f05-41de-be68-0c58428393dc", $"[{nameof(HttpRestClient)}.{nameof(PostStreamAsync)}] failed while reading stream from url [{url}] async response.", ex);
                     throw;
                 }
 

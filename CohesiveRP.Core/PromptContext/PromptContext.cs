@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Core.PromptContext.Abstractions;
+﻿using System.Text.Json;
+using CohesiveRP.Core.PromptContext.Abstractions;
 
 namespace CohesiveRP.Core.PromptContext
 {
@@ -12,5 +13,9 @@ namespace CohesiveRP.Core.PromptContext
         public IPromptMessage[] Messages { get; set; }
         public List<IShareableContextLink> ShareableContextLinks { get; set; } = new();
         public int? MaxTokensToGenerate { get; set; }
-        }
+
+        public string JsonSchemaName { get; set; }
+
+        public JsonElement? JsonSchemaDocument { get; set; }
+    }
 }

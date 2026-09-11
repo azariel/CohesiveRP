@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
+using CohesiveRP.Common.Utils.BusinessObjects;
 
-namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.BusinessObjects
+namespace CohesiveRP.Storage.DTOs.SkillChecks
 {
     /* Examples:
     * [
@@ -31,24 +32,31 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.
     /// </summary>
     public class LLMPathfinderCharactersSkillChecksActions
     {
+        [JsonSchemaRequired]
         [JsonPropertyName("characterName")]
         public string CharacterName { get; set; }
 
+        [JsonSchemaRequired]
         [JsonPropertyName("charactersWhoCanResist")]
         public List<string> CharactersWhoCanResist { get; set; }
 
+        [JsonSchemaRequired]
         [JsonPropertyName("bonus")]
         public int Bonus { get; set; }
 
+        [JsonSchemaRequired]
         [JsonPropertyName("actionCategory")]
         public string ActionCategory { get; set; }// TODO: enum?
 
+        [JsonSchemaRequired]
         [JsonPropertyName("reasoning")]
         public string Reasoning { get; set; }
 
+        [JsonSchemaRequired]
         [JsonPropertyName("reactionFromOtherCharactersWhenFailingSkillCheck")]
         public string ReactionFromOtherCharactersWhenFailingSkillCheck { get; set; }
 
+        [JsonSchemaRequired]
         [JsonPropertyName("reactionFromOtherCharactersWhenSucceedingSkillCheck")]
         public string ReactionFromOtherCharactersWhenSucceedingSkillCheck { get; set; }
     }

@@ -2,7 +2,6 @@
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
-using CohesiveRP.Core.LLMProviderProcessors.ChatAdditions.BusinessObjects.CohesionEnforcement;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
 using CohesiveRP.Core.Services;
@@ -11,6 +10,7 @@ using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement.BusinessObjects;
+using CohesiveRP.Storage.DTOs.CohesionEnforcement;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions

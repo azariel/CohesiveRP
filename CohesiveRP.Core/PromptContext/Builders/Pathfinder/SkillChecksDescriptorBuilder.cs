@@ -91,10 +91,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     foreach (var specificRoll in rollWithPlayer.Rolls)
                     {
                         str.AppendLine("<roll>");
-                        str.AppendLine($"{{{{user}}}} has rolled {specificRoll.Value} for the category {specificRoll.ActionCategory}.");
+                        str.AppendLine($"{{{{user}}}} has rolled {specificRoll.Value} for the ActionCategory {specificRoll.ActionCategory}.");
 
                         str.AppendLine("<otherCharactersInScene>");
-                        foreach (var charInScene in specificRoll.CharactersInScene.Where(w=>w.CharacterInSceneCounterRoll?.Value != null))
+                        foreach (var charInScene in specificRoll.CharactersInScene.Where(w => w.CharacterInSceneCounterRoll?.Value != null))
                         {
                             str.AppendLine($"{charInScene.CharacterName} rolled {charInScene.CharacterInSceneCounterRoll.Value} against {{{{user}}}} attempt.");
                         }

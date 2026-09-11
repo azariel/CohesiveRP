@@ -99,6 +99,8 @@ namespace CohesiveRP.Core.PromptContext.Summary
                     ],
                     MaxTokensToGenerate = presetTypeChatCompletionPreset.Format.MaxTokensToGenerate,
                     ShareableContextLinks = shareableLinks,
+                    JsonSchemaName = presetTypeChatCompletionPreset.Format.JsonSchemaName,
+                    JsonSchemaDocument = presetTypeChatCompletionPreset.Format.JsonSchemaDocument,
                 };
             } catch (Exception e)
             {

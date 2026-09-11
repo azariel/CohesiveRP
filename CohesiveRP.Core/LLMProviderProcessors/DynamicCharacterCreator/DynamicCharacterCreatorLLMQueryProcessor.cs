@@ -1,7 +1,6 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
-using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
@@ -14,6 +13,7 @@ using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DTOs;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 

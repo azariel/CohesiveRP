@@ -1,6 +1,8 @@
-﻿using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+﻿using CohesiveRP.Common.Utils;
+using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
+using CohesiveRP.Storage.DTOs;
 
 namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
 {
@@ -16,6 +18,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                 Format = new GlobalPromptContextFormat()
                 {
                     MaxTokensToGenerate = 4096,
+                    JsonSchemaName = "character_status_update",
+                    JsonSchemaDocument = StrictJsonSchemaGenerator.Generate<CharacterStatusUpdateLLMResponse>(),
                     OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
@@ -58,7 +62,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                                     Format = "<behavioral_instruction>\r\nHow do you respond?\r\nThink about it first. Before writing anything, re-read <characters_to_check> — these are the ONLY characters you are permitted to report on this cycle, no matter how many other characters appear in the messages.\r\nFor each character in <characters_to_check>, compare their current status against what happened in messages_since_last_status_check, and check every existing entry against the expiresAt_rules using current_story_datetime.\r\nOnly report genuine changes; do not invent effects, wounds or status that aren't supported by the text.\r\nYou must prove every Add or Remove with the story context.\r\nWhen removing an entry, copy its \"content\" (or full text, for goals/relationships) EXACTLY as given to you, so it can be matched.\r\nNever include a PERMANENT entry in a removal list without bulletproof proofs about its removal.\r\nBefore finalizing your response, double-check every \"characterName\" in characterUpdates against <characters_to_check> and delete any entry for a character not on that list.\r\n\r\nYour response must ONLY contain the resulting JSON.\r\n</behavioral_instruction>\r\n",
                                 }
                             }
-                        }
+                        },
                 }
             };
         }

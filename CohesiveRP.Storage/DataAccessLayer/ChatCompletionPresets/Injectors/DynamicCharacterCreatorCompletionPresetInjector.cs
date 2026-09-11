@@ -1,6 +1,8 @@
-﻿using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+﻿using CohesiveRP.Common.Utils;
+using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
+using CohesiveRP.Storage.DTOs;
 
 namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
 {
@@ -9,14 +11,16 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
         internal static ChatCompletionPresetsDbModel InjectPreset()
         {
             return new ChatCompletionPresetsDbModel
+            {
+                Name = "Default-Dynamic-Character-Creator-Preset",
+                ChatCompletionPresetId = StorageConstants.DEFAULT_DYNAMIC_CHARACTER_CREATION_COMPLETION_PRESET,
+                CreatedAtUtc = DateTime.UtcNow,
+                Format = new GlobalPromptContextFormat()
                 {
-                    Name = "Default-Dynamic-Character-Creator-Preset",
-                    ChatCompletionPresetId = StorageConstants.DEFAULT_DYNAMIC_CHARACTER_CREATION_COMPLETION_PRESET,
-                    CreatedAtUtc = DateTime.UtcNow,
-                    Format = new GlobalPromptContextFormat()
-                    {
-                        MaxTokensToGenerate = 8196,
-                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                    MaxTokensToGenerate = 8196,
+                    JsonSchemaName = "dynamic_character_creator",
+                    JsonSchemaDocument = StrictJsonSchemaGenerator.Generate<Character>(),
+                    OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
                             {
@@ -169,8 +173,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                                 }
                             }
                         }
-                    }
-                };
+                }
+            };
         }
     }
 }

@@ -124,9 +124,6 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
 
             str.Append($"</pathfinder_characters_rolls>");
 
-            // Update to keep track of NbRemainingInjectionTurns
-            await storageService.UpdateChatCharactersRollsAsync(rollsByCharacters);
-
             if (string.IsNullOrWhiteSpace(str.ToString()))
             {
                 return (null, new ShareableContextLink { LinkedBuilder = this, });

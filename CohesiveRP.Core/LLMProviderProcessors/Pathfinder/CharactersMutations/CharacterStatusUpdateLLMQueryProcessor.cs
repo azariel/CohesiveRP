@@ -13,6 +13,7 @@ using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheets.BusinessObjects;
+using CohesiveRP.Storage.DTOs;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request;
@@ -44,6 +45,20 @@ namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI
                 //FrequencyPenalty = providerConfig.SamplingSettings.FrequencyPenalty,
                 //Stop = providerConfig.SamplingSettings.StopSequences,
             };
+
+            // Enforce specific JSON structure when required
+            if (promptContext.JsonSchemaDocument is JsonElement schema)
+            {
+                requestDto.ResponseFormat = new OpenAIRequestedResponseFormat
+                {
+                    JsonSchema = new OpenAIJsonSchema
+                    {
+                        Name = promptContext.JsonSchemaName ?? "response",
+                        Strict = true,
+                        Schema = schema
+                    }
+                };
+            }
 
             var serializedModel = JsonCommonSerializer.SerializeToString(requestDto);
             return serializedModel;

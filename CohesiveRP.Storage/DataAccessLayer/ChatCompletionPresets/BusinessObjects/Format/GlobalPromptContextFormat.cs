@@ -1,4 +1,6 @@
-﻿namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format
+﻿using System.Text.Json;
+
+namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format
 {
     public class GlobalPromptContextFormat
     {
@@ -20,5 +22,7 @@
         public List<PromptContextFormatElement> OrderedElementsWithinTheGlobalPromptContext { get; set; } = new();
         //public PromptContextSettings Settings { get; set; } = new();
         public int MaxTokensToGenerate { get; set; } = 2048;
+        public string JsonSchemaName { get; set; } = null;
+        public JsonElement? JsonSchemaDocument { get; set; } = null;
     }
 }

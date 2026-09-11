@@ -16,5 +16,9 @@ namespace CohesiveRP.Core.Services.LLMApiProvider.OpenAI.BusinessObjects.Request
 
         [JsonPropertyName("max_tokens")]
         public int? MaxTokens { get; set; }
+
+        [JsonPropertyName("response_format")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public OpenAIRequestedResponseFormat ResponseFormat { get; set; }
     }
 }
