@@ -45,7 +45,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
 
                     if (rollsWithPlayer != null && rollsWithPlayer.Count > 0)
                     {
-                        operationResult &= await AddSkillChecksDescriptionBackgroundQueryAsync(chat);
+                        //operationResult &= await AddSkillChecksDescriptionBackgroundQueryAsync(chat);
                     }
                 }
             }
