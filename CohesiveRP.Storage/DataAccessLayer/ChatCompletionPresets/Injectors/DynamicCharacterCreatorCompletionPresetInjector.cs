@@ -139,7 +139,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                                 Enabled = true,
                                 Options = new PromptContextFormatElementOptions
                                 {
-                                    Format = "<character_instruction>\r\nInformation about {{character_name}}\r\n{{character_description}}\r\n</characters>\r\n\r\n",
+                                    Format = "<character_instruction>\r\nInformation about {{character_name}}\r\n{{character_description}}\r\n</character_instruction>\r\n\r\n",
                                 }
                             },
                             new PromptContextFormatElement

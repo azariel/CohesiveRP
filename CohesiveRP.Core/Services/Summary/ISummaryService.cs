@@ -5,5 +5,6 @@ namespace CohesiveRP.Core.Services.Summary
     public interface ISummaryService
     {
         Task EvaluateSummaryAsync(string chatId, GlobalSettingsDbModel settings);
+        Task<bool> FlushComputedSummaryAsync(string chatId);
     }
 }

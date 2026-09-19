@@ -44,6 +44,8 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new PromptContextSummaryMediumTermBuilder(storageService, contextElement, settings, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.SummaryShortTerm:
                     return new PromptContextSummaryShortTermBuilder(storageService, contextElement, settings, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.RelevantComputedSummariesOnly:
+                    return new PromptContextRelevantComputedSummariesOnlyBuilder(storageService, contextElement, settings, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.LoreByQuery:
                     return new PromptContextLoreByQueryBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.RelevantCharacters:

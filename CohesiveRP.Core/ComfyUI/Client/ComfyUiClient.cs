@@ -20,7 +20,7 @@ namespace CohesiveRP.Core.ComfyUI.Client
         public ComfyUiClient(ComfyUiEndpointConfig config)
         {
             _baseUrl = config.BaseUrl.TrimEnd('/');
-            _http = new HttpRestClient();
+            _http = new HttpRestClient(null);
             _ws = new WebSocketClient();
         }
 

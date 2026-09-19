@@ -545,7 +545,8 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                 await SetMessageAvatarAsync(chat, lastPlayerMessage?.MessageId, [personaAvatars]);
 
                 // Summary
-                _ = summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, globalSettings);
+                await summaryService.FlushComputedSummaryAsync(backgroundQueryDbModel.ChatId);
+                await summaryService.EvaluateSummaryAsync(backgroundQueryDbModel.ChatId, globalSettings);
 
                 // Handle NarrativeDirection
                 var currentNarrativeDirections = await storageService.GetNarrativeDirectionsAsync(s => s.ChatId == chat.ChatId);

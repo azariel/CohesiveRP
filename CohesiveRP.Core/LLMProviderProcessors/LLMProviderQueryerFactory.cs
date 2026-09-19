@@ -86,6 +86,8 @@ namespace CohesiveRP.Core.LLMProviderManager
                     new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.extraSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.overflowSummary =>
                     new SummaryMergerLLMQueryProcessor(ChatCompletionPresetType.SummariesMerge, BackgroundQuerySystemTags.overflowSummary, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.relevantSummaries =>
+                new RelevantSummariesLLMQueryProcessor(ChatCompletionPresetType.RelevantSummaries, BackgroundQuerySystemTags.relevantSummaries, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.skillChecksInitiator =>
                     new SkillChecksInitiatorLLMQueryProcessor(ChatCompletionPresetType.SkillChecksInitiator, BackgroundQuerySystemTags.skillChecksInitiator, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.dynamicCharacterCreation =>

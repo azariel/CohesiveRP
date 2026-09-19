@@ -76,9 +76,9 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                 _ => RollPerformance.Excellent
             };
 
-            string basicDescription = $"{name} is using her {roll.ActionCategory} skill: {string.Join(", ", roll.Guides.Select(s=>s.Reasoning))} ";
-            
-            if (roll.CharactersInScene.Length <= 0)
+            string basicDescription = $"{name} is using her {roll.ActionCategory} skill: {string.Join(", ", roll.Guides.Select(s => s.Reasoning))} ";
+
+            if (roll.CharactersInScene == null || roll.CharactersInScene.Length <= 0 || !roll.CharactersInScene.Any(a => a.CharacterInSceneCounterRoll?.Value != null))
             {
                 basicDescription += GetSkillActionCategoryResultDefinition(roll.ActionCategory, rollPerformance, name);
                 return basicDescription;
@@ -89,7 +89,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             str.AppendLine($"{basicDescription}");
             foreach (var characterWithCounterRoll in roll.CharactersInScene)
             {
-                if(characterWithCounterRoll.CharacterInSceneCounterRoll?.Value == null)
+                if (characterWithCounterRoll.CharacterInSceneCounterRoll?.Value == null)
                     continue;
 
                 ++nbCounterRollsInjected;
@@ -99,11 +99,18 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
 
                 if (offsetRollValue <= 0)
                 {
-                    str.AppendLine($"Possible reaction from {characterWithCounterRoll.CharacterName}: {string.Join(", ", roll.Guides.Select(g => g.ReactionFromOtherCharactersWhenFailingSkillCheck))}");
+                    str.AppendLine($"{name}'s {roll.ActionCategory} skill FAIL against {characterWithCounterRoll.CharacterName}.");
                 } else
                 {
-                    str.AppendLine($"Possible reaction from {characterWithCounterRoll.CharacterName}: {string.Join(", ", roll.Guides.Select(g => g.ReactionFromOtherCharactersWhenSucceedingSkillCheck))}");
+                    str.AppendLine($"{name}'s {roll.ActionCategory} skill SUCCEED against {characterWithCounterRoll.CharacterName}.");
+                    //str.AppendLine($"Possible reaction from {characterWithCounterRoll.CharacterName}: {string.Join(", ", roll.Guides.Select(g => g.ReactionFromOtherCharactersWhenSucceedingSkillCheck))}");
                 }
+            }
+
+            if (roll.CharactersInScene?.Any(a => a.CharacterInSceneCounterRoll?.Value != null) != null)
+            {
+                str.AppendLine($"Possible outcome (suggestion) against characters that FAIL: {string.Join(", ", roll.Guides.Select(g => g.ReactionFromOtherCharactersWhenSucceedingSkillCheck))}");
+                str.AppendLine($"Possible outcome (suggestion) against characters that SUCCESS: {string.Join(", ", roll.Guides.Select(g => g.ReactionFromOtherCharactersWhenFailingSkillCheck))}");
             }
 
             return str.ToString();
@@ -119,7 +126,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} thinks that {sourceCharacterName} performed the sexual act poorly, with noticeable errors and lack of finesse.",
                     <= 1 => $"{otherCharacterName} thinks that {sourceCharacterName} performed the sexual act adequately, with some minor mistakes but overall acceptable and enjoyable.",
                     <= 2 => $"{otherCharacterName} thinks that {sourceCharacterName} performed the sexual act well, with good technique and skill, enhancing pleasure.",
-                    <= 4 => $"{otherCharacterName} thinks that {sourceCharacterName} performed the sexual act exceptionally well, with great skill and finesse. The partner may even experience an orgasm right away due the exceptional performance.",
+                    <= 99 => $"{otherCharacterName} thinks that {sourceCharacterName} performed the sexual act exceptionally well, with great skill and finesse. The partner may even experience an orgasm right away due the exceptional performance.",
                     _ => "",
                 },
 
@@ -129,7 +136,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} thinks that {sourceCharacterName} performed the acrobatic movement poorly, with wobbles and wasted motion.",
                     <= 1 => $"{otherCharacterName} thinks that {sourceCharacterName} performed the acrobatic movement adequately, landing steadily enough.",
                     <= 2 => $"{otherCharacterName} thinks that {sourceCharacterName} performed the acrobatic movement with agility and control, cleanly and effectively.",
-                    <= 4 => $"{otherCharacterName} thinks that {sourceCharacterName} performed the acrobatic feat with flawless grace, agility, and precision.",
+                    <= 99 => $"{otherCharacterName} thinks that {sourceCharacterName} performed the acrobatic feat with flawless grace, agility, and precision.",
                     _ => "",
                 },
 
@@ -139,7 +146,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} notices that {sourceCharacterName} forces through the physical task with poor form and obvious struggle. They fail.",
                     <= 1 => $"{otherCharacterName} notices that {sourceCharacterName} completes the physical task with acceptable effort.",
                     <= 2 => $"{otherCharacterName} notices that {sourceCharacterName} performs the physical task with strong form and endurance.",
-                    <= 4 => $"{otherCharacterName} notices that {sourceCharacterName} performs the athletic feat with impressive power and stamina.",
+                    <= 99 => $"{otherCharacterName} notices that {sourceCharacterName} performs the athletic feat with impressive power and stamina.",
                     _ => "",
                 },
 
@@ -149,7 +156,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} notices {sourceCharacterName}'s lie.",
                     <= 1 => $"{otherCharacterName} does NOT notice that {sourceCharacterName} lied.",
                     <= 2 => $"{otherCharacterName} does NOT notice that {sourceCharacterName} lied. The lie is well-delivered.",
-                    <= 4 => $"{otherCharacterName} does NOT notice that {sourceCharacterName} lied. The lie is masterfully delivered, leaving NO room for doubt.",
+                    <= 99 => $"{otherCharacterName} does NOT notice that {sourceCharacterName} lied. The lie is masterfully delivered, leaving NO room for doubt.",
                     _ => "",
                 },
 
@@ -159,7 +166,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} thinks that {sourceCharacterName} makes a poor impression and struggles to connect. They're not overly bad, but it's unconvincing.",
                     <= 1 => $"{otherCharacterName} thinks that {sourceCharacterName} makes an acceptable impression.",
                     <= 2 => $"{otherCharacterName} thinks that {sourceCharacterName} makes a strong impression and wins others over.",
-                    <= 4 => $"{otherCharacterName} thinks that {sourceCharacterName} captivates those present with charm and presence.",
+                    <= 99 => $"{otherCharacterName} thinks that {sourceCharacterName} captivates those present with charm and presence.",
                     _ => "",
                 },
 
@@ -169,7 +176,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} thinks that {sourceCharacterName} delivers a weak threat that fails to scare.",
                     <= 1 => $"{otherCharacterName} thinks that {sourceCharacterName} delivers a credible threat.",
                     <= 2 => $"{otherCharacterName} thinks that {sourceCharacterName} delivers a convincing threat. {otherCharacterName} may reconsider.",
-                    <= 4 => $"{otherCharacterName} thinks that {sourceCharacterName} delivers a terrifying threat that may leave {otherCharacterName} shaken.",
+                    <= 99 => $"{otherCharacterName} thinks that {sourceCharacterName} delivers a terrifying threat that may leave {otherCharacterName} shaken.",
                     _ => "",
                 },
 
@@ -179,7 +186,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} notices that {sourceCharacterName} delivers sloppy treatment that provides little benefit. It may even injure the patient instead.",
                     <= 1 => $"{otherCharacterName} notices that {sourceCharacterName} delivers adequate treatment that stabilizes or helps the patient as expected.",
                     <= 2 => $"{otherCharacterName} notices that {sourceCharacterName} delivers skilled treatment that improves the patient's condition notably.",
-                    <= 4 => $"{otherCharacterName} notices that {sourceCharacterName} demonstrates exceptional medical expertise, saving or greatly restoring the patient.",
+                    <= 99 => $"{otherCharacterName} notices that {sourceCharacterName} demonstrates exceptional medical expertise, saving or greatly restoring the patient.",
                     _ => "",
                 },
 
@@ -189,7 +196,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} notices that {sourceCharacterName} delivers a flawed performance that fails to convince.",
                     <= 1 => $"{otherCharacterName} notices that {sourceCharacterName} delivers an acceptable performance that is mildly entertaining/convincing.",
                     <= 2 => $"{otherCharacterName} notices that {sourceCharacterName} delivers a polished performance that is entertaining or/and convincing.",
-                    <= 4 => $"{otherCharacterName} notices that {sourceCharacterName} delivers an unforgettable performance that moves the audience deeply, incredibly entertaining and/or convincing.",
+                    <= 99 => $"{otherCharacterName} notices that {sourceCharacterName} delivers an unforgettable performance that moves the audience deeply, incredibly entertaining and/or convincing.",
                     _ => "",
                 },
 
@@ -199,7 +206,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} thinks that {sourceCharacterName} struggles with etiquette and misses important social cues.",
                     <= 1 => $"{otherCharacterName} thinks that {sourceCharacterName} navigates the social situation adequately.",
                     <= 2 => $"{otherCharacterName} thinks that {sourceCharacterName} reads the room well and responds appropriately.",
-                    <= 4 => $"{otherCharacterName} thinks that {sourceCharacterName} masters the social intricacies and makes an excellent impression.",
+                    <= 99 => $"{otherCharacterName} thinks that {sourceCharacterName} masters the social intricacies and makes an excellent impression.",
                     _ => "",
                 },
 
@@ -209,7 +216,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} thinks that {sourceCharacterName} shows poor manners and offends aristocratic sensibilities.",
                     <= 1 => $"{otherCharacterName} thinks that {sourceCharacterName} conducts themselves with adequate noble decorum.",
                     <= 2 => $"{otherCharacterName} thinks that {sourceCharacterName} presents themselves with fine aristocratic grace and tact.",
-                    <= 4 => $"{otherCharacterName} thinks that {sourceCharacterName} embodies noble grace and navigates high society flawlessly.",
+                    <= 99 => $"{otherCharacterName} thinks that {sourceCharacterName} embodies noble grace and navigates high society flawlessly.",
                     _ => "",
                 },
 
@@ -219,7 +226,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} notices {sourceCharacterName} as they move clumsily and draw attention.",
                     <= 1 => $"{otherCharacterName} DOES NOT notice {sourceCharacterName}. They stay hidden or unnoticed well enough to avoid immediate detection.",
                     <= 2 => $"{otherCharacterName} DOES NOT notice {sourceCharacterName}. They move quietly and avoids notice with practiced skill.",
-                    <= 4 => $"{otherCharacterName} DOES NOT notice {sourceCharacterName}. They are virtually undetectable, moving like a shadow and go completely unnoticed.",
+                    <= 99 => $"{otherCharacterName} DOES NOT notice {sourceCharacterName}. They are virtually undetectable, moving like a shadow and go completely unnoticed.",
                     _ => "",
                 },
 
@@ -229,7 +236,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     <= -1 => $"{otherCharacterName} notices {sourceCharacterName} as they struggle, leaving obvious traces or nearly getting caught.",
                     <= 1 => $"{otherCharacterName} DOES NOT notice {sourceCharacterName}. They complete the theft or lockpicking adequately, though not perfectly.",
                     <= 2 => $"{otherCharacterName} DOES NOT notice {sourceCharacterName}. They perform the thievery cleanly and without leaving obvious evidence.",
-                    <= 4 => $"{otherCharacterName} DOES NOT notice {sourceCharacterName}. They execute the theft with flawless precision, leaving no trace.",
+                    <= 99 => $"{otherCharacterName} DOES NOT notice {sourceCharacterName}. They execute the theft with flawless precision, leaving no trace.",
                     _ => "",
                 },
 

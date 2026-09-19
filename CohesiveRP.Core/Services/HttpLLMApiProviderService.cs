@@ -254,7 +254,7 @@ namespace CohesiveRP.Core.Services
                 return null;
             }
 
-            using HttpRestClient httpClient = new HttpRestClient();
+            using HttpRestClient httpClient = new HttpRestClient(selectedLLMApiQueryDbModel?.AuthBearerValue);
 
             ILLMApiQueryPayloadBuilder llmApiQueryPayloadBuilder = llmApiQueryPayloadBuilderFactory.Create(selectedLLMApiQueryDbModel.Type);
             string payload = llmApiQueryPayloadBuilder.BuildPayload(promptContext, selectedLLMApiQueryDbModel);

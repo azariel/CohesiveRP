@@ -48,5 +48,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders
 
         [JsonPropertyName("errorsBehavior")]
         public ErrorBehavior ErrorsBehavior { get; set; } = new();
+
+        [JsonPropertyName("authBearer")]
+        public string AuthBearerValue { get; set; }
     }
 }

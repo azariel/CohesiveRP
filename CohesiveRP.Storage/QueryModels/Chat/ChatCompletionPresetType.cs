@@ -21,5 +21,6 @@
         SkillChecksDescriptor = 15,
         CohesionEnforcement = 16,
         Reflection = 17,
+        RelevantSummaries = 18,
     }
 }

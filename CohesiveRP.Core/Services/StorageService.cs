@@ -253,6 +253,7 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteExtraTermSummariesEntriesAsync(chatId, summariesIds);
         public async Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesIds) => await summaryDal.DeleteOverflowTermSummariesEntriesAsync(chatId, summariesIds);
         public async Task<bool> DeleteSummaryFromChatIdAsync(string chatId) => await summaryDal.DeleteSummaryFromChatIdAsync(chatId);
+        public async Task<bool> UpdateSummaryAsync(SummaryDbModel dbModel) => await summaryDal.UpdateSummaryAsync(dbModel);
 
         // SceneTracker
         public async Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId) => await sceneTrackerDal.GetSceneTrackerAsync(chatId);

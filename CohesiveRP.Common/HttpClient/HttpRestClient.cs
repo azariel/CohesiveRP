@@ -1,4 +1,5 @@
-﻿using System.Net.Security;
+﻿using System.Net.Http.Headers;
+using System.Net.Security;
 using System.Runtime.CompilerServices;
 using System.Text;
 using CohesiveRP.Common.Diagnostics;
@@ -12,7 +13,7 @@ namespace CohesiveRP.Common.HttpClient
         private const bool IGNORE_CERTIFICATE_ERRORS = true; // TODO: make this configurable. This is useful for development and testing environments, but should be false in production...although we may accept self-sign certs in production as well, so we should just make this configurable?
         private System.Net.Http.HttpClient httpClient;
 
-        public HttpRestClient()
+        public HttpRestClient(string authBearer)
         {
             var clientHandler = new HttpClientHandler
             {
@@ -25,7 +26,12 @@ namespace CohesiveRP.Common.HttpClient
             };
 
             // Add default headers
-            httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            if (!string.IsNullOrWhiteSpace(authBearer))
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authBearer);
+            }
         }
 
         // ********************************************************************

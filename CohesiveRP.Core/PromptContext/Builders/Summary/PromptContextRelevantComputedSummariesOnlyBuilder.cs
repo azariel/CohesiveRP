@@ -9,7 +9,7 @@ using CohesiveRP.Storage.DataAccessLayer.Settings;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
-    public class PromptContextSummaryMediumTermBuilder : IPromptContextElementBuilder
+    public class PromptContextRelevantComputedSummariesOnlyBuilder : IPromptContextElementBuilder
     {
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
@@ -18,7 +18,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private PersonaDbModel personaLinkedToChat;
         private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextSummaryMediumTermBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
+        public PromptContextRelevantComputedSummariesOnlyBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, GlobalSettingsDbModel settings, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
@@ -32,38 +32,25 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         {
             if (promptContextFormatElement == null || chatDbModel == null)
             {
-                LoggingManager.LogToFile("524573ce-fbf3-4b35-96de-f94ee0d000d7", $"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
+                LoggingManager.LogToFile("fb791430-ad57-45bd-851d-94ccf7f7b1a6", $"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
             SummaryDbModel summaryDbModel = await storageService.GetSummaryAsync(chatDbModel.ChatId);
-            if (summaryDbModel?.MediumTermSummaries == null)
+            if (string.IsNullOrWhiteSpace(summaryDbModel?.RelevantSummaryInformationFromMostRecentStoryContext))
             {
                 // We still don't have any summary yet, so we have nothing to add to the prompt atm
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            if (!string.IsNullOrWhiteSpace(summaryDbModel.RelevantSummaryInformationFromMostRecentStoryContext))
-            {
-                // If we have a computed summaries field, use that
-                return (null, new ShareableContextLink { LinkedBuilder = this });
-            }
-
-            // Inject that short term summary
-            string output = $"<summary_medium_term>{Environment.NewLine}Previous facts, events, speech and actions (Medium-Term){Environment.NewLine}";
-            foreach (ISummaryEntryDbModel summaryElement in summaryDbModel.MediumTermSummaries.Where(w => !string.IsNullOrWhiteSpace(w.Content)))
-            {
-                // TODO: add a notion of time?
-                string value = $"{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{summaryElement.Content}")}";
-                output += value;
-            }
-
-            output += $"{Environment.NewLine}</summary_medium_term>{Environment.NewLine}";
+            // Inject the computed relevant summaries
+            string output = $"<history>{Environment.NewLine}Previous facts, events, speech and actions:{Environment.NewLine}{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{summaryDbModel.RelevantSummaryInformationFromMostRecentStoryContext}")}{Environment.NewLine}</history>{Environment.NewLine}";
+            
             return (output.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name),
                     new ShareableContextLink
                     {
                         LinkedBuilder = this,
-                        Value = summaryDbModel.MediumTermSummaries.Select(s => s.SummaryEntryId).ToArray()
+                        Value = summaryDbModel.ShortTermSummaries.Select(s => s.SummaryEntryId).ToArray()
                     });
         }
     }

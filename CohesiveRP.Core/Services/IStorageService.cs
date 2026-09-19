@@ -70,6 +70,7 @@ namespace CohesiveRP.Core.Services
         Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesId);
         Task<bool> DeleteSummaryFromChatIdAsync(string chatId);
+        Task<bool> UpdateSummaryAsync(SummaryDbModel dbModel);
 
         // SceneTracker
         Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId);
