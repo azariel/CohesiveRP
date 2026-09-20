@@ -22,6 +22,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
 
             GlobalSettingsDbModel config = await storageService.GetGlobalSettingsAsync();
 
+            operationResult &= await AddRelevantSummariesBackgroundQueryAsync(chat, config);
+
             // Only generate a request for a sceneTracker once we have a decent amount of messages in the conversation/story. Otherwise, the model may get confused and blabber something irrelevant or that will induce corruption
             HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
             if (hotMessagesDbModel != null && hotMessagesDbModel.Messages.Count > 4)
@@ -39,8 +41,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
             {
                 operationResult &= await AddNarrativeDirectionBackgroundQueryAsync(chat);
             }
-
-            operationResult &= await AddRelevantSummariesBackgroundQueryAsync(chat, config);
+            
             operationResult &= await AddReflectionBackgroundQueryAsync(chat);
             
             return operationResult;
@@ -127,7 +128,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
                 DependenciesTags = [
                     //BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
                     //BackgroundQuerySystemTags.narrativeDirection.ToString(),
-                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    //BackgroundQuerySystemTags.sceneTracker.ToString(),
                 ],// No dependencies at all
                 Tags = [BackgroundQuerySystemTags.relevantSummaries.ToString()],
             };
