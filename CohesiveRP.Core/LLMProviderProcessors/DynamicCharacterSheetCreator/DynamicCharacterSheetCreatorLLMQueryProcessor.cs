@@ -239,10 +239,16 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                 Priority = BackgroundQueryPriority.Lowest,
                 LinkedId = JsonCommonSerializer.SerializeToString(new ShareableNewCharacterLinks { InteractiveUserInputQueryId = backgroundQueryDbModel.LinkedId, CharacterId = characterSheetDbModel.CharacterId }),// Keep link to the initial InteractiveUserInputQuery
                 Tags = [BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar.ToString()],
-                DependenciesTags = Enum.GetValues<BackgroundQuerySystemTags>()// this one is blocked by basically ANYTHING except the same type
-                    .Where(w => w != BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar)
-                    .Select(s => s.ToString())
-                    .ToList(),
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.main.ToString(),
+                    BackgroundQuerySystemTags.cohesionEnforcement.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
+                    BackgroundQuerySystemTags.relevantSummaries.ToString(),
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.proseGuardian.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                ],
             };
 
             await storageService.AddBackgroundQueryAsync(addCharacterSheetForCharacterQueryModel);

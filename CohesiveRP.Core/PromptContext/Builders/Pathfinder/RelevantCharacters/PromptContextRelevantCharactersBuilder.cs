@@ -269,20 +269,20 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             var characterRolls = await storageService.GetChatCharactersRollsByChatIdAsync(chatDbModel.ChatId);
 
             StringBuilder str = new();
-            if (!string.IsNullOrWhiteSpace(chatDbModel.PersonaId))
-            {
-                var personaCharacterSheet = characterSheetInstances.CharacterSheetInstances.FirstOrDefault(f =>
-                    f.PersonaId == chatDbModel.PersonaId &&
-                    f.CharacterSheet != null &&
-                    !string.IsNullOrWhiteSpace(f.CharacterSheet.FirstName));
+            //if (!string.IsNullOrWhiteSpace(chatDbModel.PersonaId))
+            //{
+                //var personaCharacterSheet = characterSheetInstances.CharacterSheetInstances.FirstOrDefault(f =>
+                    //f.PersonaId == chatDbModel.PersonaId &&
+                    //f.CharacterSheet != null &&
+                    //!string.IsNullOrWhiteSpace(f.CharacterSheet.FirstName));
 
-                if (personaCharacterSheet != null)
-                {
-                    str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName}_(player)>");
-                    AppendCharacterSheetToPromptContext(str, personaCharacterSheet);
-                    str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName}_(player)>");
-                }
-            }
+                //if (personaCharacterSheet != null)
+                //{
+                    //str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName}_(player)>");
+                    //AppendCharacterSheetToPromptContext(str, personaCharacterSheet);
+                    //str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName}_(player)>");
+                //}
+            //}
 
             var sceneTracker = await storageService.GetSceneTrackerAsync(chatDbModel.ChatId);
             if (sceneTracker != null && !string.IsNullOrWhiteSpace(sceneTracker.Content))

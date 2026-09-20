@@ -40,7 +40,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             this.charactersLinkedToChat = charactersLinkedToChat;
         }
 
-        private string GeneratePromptInjectionForCharacterRolls(ChatCharacterRoll[] rollsToInject, CharacterSheetInstance currentCharacterSheetInstance, CharacterSheetInstancesDbModel characterSheetsInstances)
+        private async Task<string> GeneratePromptInjectionForCharacterRolls(ChatCharacterRoll[] rollsToInject, CharacterSheetInstance currentCharacterSheetInstance, CharacterSheetInstancesDbModel characterSheetsInstances, CharacterSheetInstance playerCharacterSheetInstance)
         {
             string innerStr = "";
 
@@ -48,7 +48,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             foreach (ChatCharacterRoll roll in rollsToInject)
             {
                 // inject the roll into the prompt
-                string value = GeneratePromptInjectionForCharacterRoll(roll, currentCharacterSheetInstance, characterSheetsInstances);
+                string value = await GeneratePromptInjectionForCharacterRoll(roll, currentCharacterSheetInstance, characterSheetsInstances, playerCharacterSheetInstance);
                 innerStr += $"{value}{Environment.NewLine}";
             }
 
@@ -57,7 +57,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             return innerStr.ToString();
         }
 
-        private string GeneratePromptInjectionForCharacterRoll(ChatCharacterRoll roll, CharacterSheetInstance currentCharacterSheetInstance, CharacterSheetInstancesDbModel characterSheetsInstances)
+        private async Task<string> GeneratePromptInjectionForCharacterRoll(ChatCharacterRoll roll, CharacterSheetInstance currentCharacterSheetInstance, CharacterSheetInstancesDbModel characterSheetsInstances, CharacterSheetInstance playerCharacterSheetInstance)
         {
             string name = currentCharacterSheetInstance.CharacterSheet.FirstName.Trim();
             if (!string.IsNullOrWhiteSpace(currentCharacterSheetInstance.CharacterSheet.LastName))
@@ -90,6 +90,10 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             foreach (var characterWithCounterRoll in roll.CharactersInScene)
             {
                 if (characterWithCounterRoll.CharacterInSceneCounterRoll?.Value == null)
+                    continue;
+
+                // Do not describe how the player should react. Never.
+                if (characterWithCounterRoll.CharacterSheetInstanceId == playerCharacterSheetInstance?.CharacterSheetInstanceId)
                     continue;
 
                 ++nbCounterRollsInjected;
@@ -400,6 +404,8 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
             int nbRollsInjected = 0;
             StringBuilder str = new StringBuilder();
 
+            CharacterSheetInstance playerCharacterSheetInstance = characterSheetsInstances?.CharacterSheetInstances.FirstOrDefault(f => f.PersonaId == chatDbModel.PersonaId);
+
             str.AppendLine($"<pathfinder_characters_rolls>");
             foreach (ChatCharacterRolls rollsSpecificToOneCharacter in rollsByCharacters.ChatCharactersRolls.Where(w => w.Rolls != null))
             {
@@ -415,7 +421,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                     continue;// Ignore
                 }
 
-                string value = GeneratePromptInjectionForCharacterRolls(rollsToInject, currentCharacterSheetInstance, characterSheetsInstances);
+                string value = await GeneratePromptInjectionForCharacterRolls(rollsToInject, currentCharacterSheetInstance, characterSheetsInstances, playerCharacterSheetInstance);
                 str.AppendLine(value);
                 ++nbRollsInjected;
             }
@@ -458,7 +464,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder
                 PathfinderSkills.Acrobatics => "When someone is dodging or doing acrobatic movements or using their agility to critically enhance their movements.",
                 PathfinderSkills.Athletics => "Physical strength. Ability to physically restrain someone, overpower them, etc.",
                 PathfinderSkills.Deception => "When someone is lying, when they're being misleading, dishonest or insincere.",
-                PathfinderSkills.Charisma => "Diplomacy, argumentation, debating and persuasion.",
+                PathfinderSkills.Charisma => "Diplomacy, argumentation, debating and persuasion. Failing a Charisma check doesn't mean that the people the character is talking to aren't convinced, it simply mean that they find the character uncharismatic in the way that they convey their words. A Charisma check that succeed has better change to convince the people listening to the character due to the fact that they find the character charismatic.",
                 PathfinderSkills.Intimidation => "When someone is intimidating someone else by using physical strength, coercion, compulsion, oppression, harassment, threats or by using their influence.",
                 PathfinderSkills.Medicine => "When someone is using medicinal knowledge to treat a condition or to get insights. Medical acts are also included in this category.",
                 PathfinderSkills.Performance => "When someone is acting, masking their emotions or disguising themselves.",

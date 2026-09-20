@@ -25,12 +25,17 @@
             if(!string.IsNullOrWhiteSpace(userName))
             {
                 outputText = outputText.Replace(Constants.USER_PLACEHOLDER, userName);
+                outputText = outputText.Replace(Constants.USER_PLACEHOLDER_VARIANT_1, userName);
             }
 
             if(!string.IsNullOrWhiteSpace(characterName))
             {
                 outputText = outputText.Replace(Constants.CHARACTER_PLACEHOLDER, characterName);
                 outputText = outputText.Replace(Constants.CHARACTER_PLACEHOLDER_VARIANT_1, characterName);
+                outputText = outputText.Replace(Constants.CHARACTER_PLACEHOLDER_VARIANT_2, characterName);
+                outputText = outputText.Replace(Constants.CHARACTER_PLACEHOLDER_VARIANT_3, characterName);
+                outputText = outputText.Replace(Constants.CHARACTER_PLACEHOLDER_VARIANT_4, characterName);
+                outputText = outputText.Replace(Constants.CHARACTER_PLACEHOLDER_VARIANT_5, characterName);
             }
 
             return outputText;

@@ -325,10 +325,14 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 Priority = BackgroundQueryPriority.Lowest,
                 LinkedId = JsonCommonSerializer.SerializeToString(new CharacterStatusUpdateLinks { Targets = targets }),
                 Tags = [BackgroundQuerySystemTags.characterStatusUpdate.ToString()],
-                DependenciesTags = Enum.GetValues<BackgroundQuerySystemTags>()
-                    .Where(w => w != BackgroundQuerySystemTags.characterStatusUpdate)
-                    .Select(s => s.ToString())
-                    .ToList(),
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.main.ToString(),
+                    BackgroundQuerySystemTags.cohesionEnforcement.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
+                    BackgroundQuerySystemTags.relevantSummaries.ToString(),
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                ],
             };
 
             await storageService.AddBackgroundQueryAsync(queryModel);

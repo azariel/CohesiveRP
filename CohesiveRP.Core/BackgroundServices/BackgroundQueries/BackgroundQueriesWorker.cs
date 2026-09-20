@@ -150,12 +150,12 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             {
                 if (query.DependenciesTags != null)
                 {
-                    if (query.DependenciesTags != null && allProcessingQueries.Any(a =>
+                    if (allProcessingQueries.Any(a =>
                         a.BackgroundQueryId != query.BackgroundQueryId && // Not the same query
                         query.DependenciesTags.Any(an => a.Tags.Contains(an) && // The dependency tag is present in the other query dependant tags
                         a.ChatId == query.ChatId)))// Same chat, same dependency tag, different query
                     {
-                        continue;// Skip this query, it has dependencies that are still in progress
+                        continue;// Skip this query, it has dependencies that are still in progress or pending
                     }
                 }
 
