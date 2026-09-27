@@ -15,6 +15,7 @@ import { GetAvatarPathFromCharacterName, GetFallbackEmpty } from "../../../../ut
 import type { SharedContextCharacterType } from "../../../../store/SharedContextCharacterType";
 import { ImSpinner2 } from "react-icons/im";
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
+type ImportResult = { fileName: string; success: boolean; message?: string };
 
 type SortOption = 'createdNewest' | 'createdOldest' | 'nameAZ' | 'nameZA';
 
@@ -37,6 +38,9 @@ export default function CharactersSelectionComponent() {
   const [isImportingCharacter, setIsImportingCharacter] = useState(false);
   const [isNetworkDown, setIsNetworkDown]               = useState(false);
   const [charactersResponse, setCharactersResponse]     = useState<CharactersResponseDto | null>(null);
+
+  const [importProgress, setImportProgress] = useState<{ current: number; total: number } | null>(null);
+  const [importResults, setImportResults] = useState<ImportResult[] | null>(null);
 
   /* ── Filter / sort state ── */
   const [isFilterOpen, setIsFilterOpen]           = useState(false);
@@ -88,33 +92,55 @@ export default function CharactersSelectionComponent() {
     } as SharedContextCharacterType);
   };
 
-  const handleAddCharacterFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    try {
-      setIsImportingCharacter(true);
-      const response = await postToServerApiAsync<CharacterResponseDto>("api/characters", formData);
-      const serverApiException = response as ServerApiExceptionResponseDto | null;
-      if (!response || response.code != 200 || serverApiException?.message) {
-        console.error(`Upload new character failed.`);
+  const handleAddCharacterFilesSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const fileArray = Array.from(files);
+    setIsImportingCharacter(true);
+    setImportProgress({ current: 0, total: fileArray.length });
+    setImportResults(null);
+
+    const results: ImportResult[] = [];
+
+    for (const file of fileArray) {
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const response = await postToServerApiAsync<CharacterResponseDto>("api/characters", formData);
+        const serverApiException = response as ServerApiExceptionResponseDto | null;
+
+        if (!response || response.code != 200 || serverApiException?.message) {
+          results.push({
+            fileName: file.name,
+            success: false,
+            message: serverApiException?.message ?? "Import failed.",
+          });
+        } else {
+          const newCharacter = (response as CharacterResponseDto).character;
+          if (newCharacter) {
+            setCharactersResponse((prev) => {
+              if (!prev) return { code: 200, characters: [newCharacter] } as CharactersResponseDto;
+              return { ...prev, characters: [newCharacter, ...(prev.characters || [])] };
+            });
+            results.push({ fileName: file.name, success: true });
+          } else {
+            results.push({ fileName: file.name, success: false, message: "No character returned." });
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        results.push({ fileName: file.name, success: false, message: "Network error." });
+      } finally {
+        setImportProgress((prev) => (prev ? { ...prev, current: prev.current + 1 } : null));
       }
-      const newCharacter = response as CharacterResponseDto;
-      setCharactersResponse((prev) => {
-        const charToAdd = newCharacter.character;
-        if (!charToAdd) return prev;
-        if (!prev) return { code: 200, characters: [charToAdd] } as CharactersResponseDto;
-        return { ...prev, characters: [charToAdd, ...(prev.characters || [])] };
-      });
-      /* New character is prepended — jump to page 1 to show it */
-      setCurrentPage(1);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      event.target.value = "";
-      setIsImportingCharacter(false);
     }
+
+    setImportResults(results);
+    setCurrentPage(1);
+    event.target.value = "";
+    setIsImportingCharacter(false);
+    setImportProgress(null);
   };
 
   useEffect(() => {
@@ -238,7 +264,14 @@ export default function CharactersSelectionComponent() {
 
             <div className={styles.charactersToolsComponent}>
               {isImportingCharacter ? (
-                <ImSpinner2 className={styles.importingCharacterSpinner} />
+                <div className={styles.importingCharacterProgress}>
+                  <ImSpinner2 className={styles.importingCharacterSpinner} />
+                  {importProgress && (
+                    <span className={styles.importProgressLabel}>
+                      {importProgress.current}/{importProgress.total}
+                    </span>
+                  )}
+                </div>
               ) : (
                 <>
                   <MdAddBox
@@ -247,14 +280,37 @@ export default function CharactersSelectionComponent() {
                   />
                   <input
                     type="file"
+                    multiple
                     ref={newCharacterFileInputRef}
                     style={{ display: "none" }}
-                    onChange={handleAddCharacterFileSelected}
+                    onChange={handleAddCharacterFilesSelected}
                   />
                 </>
               )}
             </div>
           </div>
+
+          {importResults && (
+            <div className={styles.importResultsPanel}>
+              <div className={styles.importResultsHeader}>
+                <span>
+                  Imported {importResults.filter(r => r.success).length}/{importResults.length}
+                </span>
+                <button className={styles.clearButton} onClick={() => setImportResults(null)}>
+                  Dismiss
+                </button>
+              </div>
+              {importResults.filter(r => !r.success).length > 0 && (
+                <ul className={styles.importResultsList}>
+                  {importResults.filter(r => !r.success).map((r, i) => (
+                    <li key={i} className={styles.importResultFailure}>
+                      {r.fileName}: {r.message}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           {/* ── Collapsible filter panel ── */}
           <div className={`${styles.filterPanel} ${isFilterOpen ? styles.filterPanelOpen : ''}`}>

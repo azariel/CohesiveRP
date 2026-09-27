@@ -33,7 +33,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection
                 var NarrativeDirection = dbContext.NarrativeDirections.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
                 if (NarrativeDirection != null)
                 {
-                    LoggingManager.LogToFile("80b967e3-5778-422f-b05d-da3a392a4a10", $"Error when querying Db on table cohesion enforcements. NarrativeDirection entity to create already exists with Id [{NarrativeDirection.NarrativeDirectionId}].");
+                    LoggingManager.LogToFile("80b967e3-5778-422f-b05d-da3a392a4a10", $"Error when querying Db on table narrative direction. NarrativeDirection entity to create already exists with Id [{NarrativeDirection.NarrativeDirectionId}].");
                     return null;
                 }
 

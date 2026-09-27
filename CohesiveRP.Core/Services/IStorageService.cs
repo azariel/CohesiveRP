@@ -1,8 +1,9 @@
 ﻿using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
@@ -12,7 +13,6 @@ using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
 using CohesiveRP.Storage.QueryModels.Personas;
-using CohesiveRP.Storage.QueryModels.SceneTracker;
 
 namespace CohesiveRP.Core.Services
 {
@@ -69,11 +69,12 @@ namespace CohesiveRP.Core.Services
         Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesId);
         Task<bool> DeleteSummaryFromChatIdAsync(string chatId);
+        Task<bool> UpdateSummaryAsync(SummaryDbModel dbModel);
 
         // SceneTracker
         Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId);
-        Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
-        Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
+        Task<SceneTrackerDbModel> AddSceneTrackerAsync(SceneTrackerDbModel queryModel);
+        Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(SceneTrackerDbModel queryModel, bool autoUpdatePreviousContent = true);
         Task<bool> DeleteSceneTrackerAsync(string chatId);
 
         // SceneAnalyzer
@@ -108,7 +109,7 @@ namespace CohesiveRP.Core.Services
 
         // Pathfinder.ChatCharactersRolls
         Task<ChatCharactersRollsDbModel[]> GetChatCharactersRollsAsync();
-        Task<ChatCharactersRollsDbModel> GetChatCharactersRollsByIdAsync(string chatId);
+        Task<ChatCharactersRollsDbModel> GetChatCharactersRollsByChatIdAsync(string chatId);
         Task<ChatCharactersRollsDbModel> AddChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
         Task<bool> UpdateChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
         Task<bool> DeleteChatCharactersRollsAsync(ChatCharactersRollsDbModel dbModel);
@@ -154,11 +155,11 @@ namespace CohesiveRP.Core.Services
         Task<bool> DeleteIllustrationQueryAsync(string illustrationQueryId);
         Task<bool> DeleteIllustrationQueryAsync(Func<IllustrationQueryDbModel, bool> func);
 
-        // CohesionEnforcement
-        Task<CohesionEnforcementDbModel[]> GetCohesionEnforcementsAsync(Func<CohesionEnforcementDbModel, bool> func);
-        Task<CohesionEnforcementDbModel> AddCohesionEnforcementAsync(CohesionEnforcementDbModel dbModel);
-        Task<CohesionEnforcementDbModel> UpdateCohesionEnforcementAsync(CohesionEnforcementDbModel dbModel);
-        Task<bool> DeleteCohesionEnforcementsAsync(Func<CohesionEnforcementDbModel, bool> func);
+        // CharactersCohesionEnforcement
+        Task<CharactersCohesionEnforcementDbModel[]> GetCharactersCohesionEnforcementsAsync(Func<CharactersCohesionEnforcementDbModel, bool> func);
+        Task<CharactersCohesionEnforcementDbModel> AddCharactersCohesionEnforcementAsync(CharactersCohesionEnforcementDbModel dbModel);
+        Task<CharactersCohesionEnforcementDbModel> UpdateCharactersCohesionEnforcementAsync(CharactersCohesionEnforcementDbModel dbModel);
+        Task<bool> DeleteCharactersCohesionEnforcementsAsync(Func<CharactersCohesionEnforcementDbModel, bool> func);
 
         // NarrativeArchitecture
         Task<NarrativeArchitectureDbModel[]> GetNarrativeArchitecturesAsync(Func<NarrativeArchitectureDbModel, bool> func);
@@ -177,5 +178,11 @@ namespace CohesiveRP.Core.Services
         Task<ProseGuardianDbModel> AddProseGuardianAsync(ProseGuardianDbModel dbModel);
         Task<ProseGuardianDbModel> UpdateProseGuardianAsync(ProseGuardianDbModel dbModel);
         Task<bool> DeleteProseGuardiansAsync(Func<ProseGuardianDbModel, bool> func);
+
+        // Reflections
+        Task<ReflectionDbModel[]> GetReflectionsAsync(Func<ReflectionDbModel, bool> func);
+        Task<ReflectionDbModel> AddReflectionAsync(ReflectionDbModel dbModel);
+        Task<ReflectionDbModel> UpdateReflectionAsync(ReflectionDbModel dbModel);
+        Task<bool> DeleteReflectionsAsync(Func<ReflectionDbModel, bool> func);
     }
 }

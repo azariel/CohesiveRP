@@ -46,7 +46,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             {
                 LLMApiResponseMessage LLMmessage = messages.LastOrDefault();
 
-                var currentChatRolls = await storageService.GetChatCharactersRollsByIdAsync(backgroundQueryDbModel.ChatId);
+                var currentChatRolls = await storageService.GetChatCharactersRollsByChatIdAsync(backgroundQueryDbModel.ChatId);
                 if(currentChatRolls?.ChatCharactersRolls != null && currentChatRolls.ChatCharactersRolls.Count > 0)
                 {
                     currentChatRolls.PlayerDescription = LLMmessage?.Content;

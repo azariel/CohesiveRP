@@ -57,7 +57,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             }
         }
 
-        public async Task<ChatCharactersRollsDbModel> GetChatCharactersRollsEntryAsync(string chatId)
+        public async Task<ChatCharactersRollsDbModel> GetChatCharactersRollsEntrybyChatIdAsync(string chatId)
         {
             var characters = await GetChatCharactersRollsByFuncAsync(f => f.ChatId == chatId);
             return characters?.FirstOrDefault();

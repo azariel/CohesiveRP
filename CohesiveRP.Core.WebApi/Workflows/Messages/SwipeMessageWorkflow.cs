@@ -78,6 +78,22 @@ public class SwipeMessageWorkflow : ISwipeMessageWorkflow
             };
         }
 
+        // Rollback rolls results for this chat so that they may be injected again for the swipe
+        var currentRollsOnCurrentChat = await storageService.GetChatCharactersRollsByChatIdAsync(chat.ChatId);
+        if (currentRollsOnCurrentChat?.ChatCharactersRolls != null && currentRollsOnCurrentChat.ChatCharactersRolls.Any())
+        {
+            foreach (var characterRoll in currentRollsOnCurrentChat.ChatCharactersRolls.Where(w => w.Rolls != null && w.Rolls.Count > 0))
+            {
+                foreach (var subRolls in characterRoll.Rolls)
+                {
+                    subRolls.NbRemainingRollFreeze++;
+                    subRolls.NbRemainingInjectionTurns++;
+                }
+            }
+
+            await storageService.UpdateChatCharactersRollsAsync(currentRollsOnCurrentChat);
+        }
+
         var hotMessages = await storageService.GetAllHotMessagesAsync(requestDto.ChatId);
         message = hotMessages.Messages.MaxBy(m => m.CreatedAtUtc);
 
@@ -87,10 +103,15 @@ public class SwipeMessageWorkflow : ISwipeMessageWorkflow
             ChatId = requestDto.ChatId,
             Priority = BackgroundQueryPriority.Highest,// User is waiting!
             DependenciesTags = [
-                BackgroundQuerySystemTags.sceneTracker.ToString(),
-                BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
-                BackgroundQuerySystemTags.proseGuardian.ToString(),
-                BackgroundQuerySystemTags.narrativeDirection.ToString(),
+                BackgroundQuerySystemTags.relevantSummaries.ToString(),// before
+                BackgroundQuerySystemTags.skillChecksInitiator.ToString(),// before
+                BackgroundQuerySystemTags.sceneTracker.ToString(),// before
+                BackgroundQuerySystemTags.sceneTrackerValidator.ToString(),// before
+                BackgroundQuerySystemTags.sceneTrackerRefiner.ToString(),// before
+                BackgroundQuerySystemTags.charactersCohesionEnforcement.ToString(),// before
+                BackgroundQuerySystemTags.narrativeDirection.ToString(),// before
+                BackgroundQuerySystemTags.reflection.ToString(),// before, if configured
+                BackgroundQuerySystemTags.proseGuardian.ToString(),// after++
             ],// Can't run as long as another one with one of these tag is running or pending
             Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'
         };

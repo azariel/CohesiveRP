@@ -3,6 +3,7 @@ using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Users;
 using CohesiveRP.Storage.QueryModels.Message;
@@ -246,6 +247,41 @@ namespace CohesiveRP.Storage.DataAccessLayer.Summary.Short
             } catch (Exception ex)
             {
                 LoggingManager.LogToFile("f4315e1a-3448-4e4f-a351-d13da7446e96", $"Error when querying pending queries on table Summaries.", ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateSummaryAsync(SummaryDbModel dbModel)
+        {
+            if(dbModel?.ChatId == null)
+                return false;
+
+            try
+            {
+                using var dbContext = await contextFactory.CreateDbContextAsync();
+                var summary = dbContext.Summaries.FirstOrDefault(w => w.ChatId == dbModel.ChatId);
+
+                if (summary == null)
+                {
+                    LoggingManager.LogToFile("55ba0d84-a972-4730-b4fe-54c39256996c", $"Summary linked to chat [{dbModel.ChatId}] to update wasn't found in storage.");
+                    return false;
+                }
+
+                // Only handle overridable fields
+                summary.RelevantSummaryInformationFromMostRecentStoryContext = dbModel.RelevantSummaryInformationFromMostRecentStoryContext;
+
+                EntityEntry<SummaryDbModel> result = dbContext.Summaries.Update(summary);
+                if (result.State != EntityState.Modified)
+                {
+                    LoggingManager.LogToFile("f47456e1-d5c0-4107-a6ee-12129295d455", $"Error when updating Summary linked to chat [{dbModel.ChatId}]. State was [{result.State}]. Result: [{JsonCommonSerializer.SerializeToString(result)}]. dbModel: [{JsonCommonSerializer.SerializeToString(dbModel)}].");
+                    return false;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                LoggingManager.LogToFile("3080d1be-5c0a-4490-957f-eead05846342", $"Error when updating row on table Summaries.", ex);
                 return false;
             }
         }

@@ -4,7 +4,6 @@ using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
-using CohesiveRP.Storage.DataAccessLayer.Summary;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 
 namespace CohesiveRP.Core.Services.Summary
@@ -16,6 +15,19 @@ namespace CohesiveRP.Core.Services.Summary
         public SummaryService(IStorageService storageService)
         {
             this.storageService = storageService;
+        }
+
+        public async Task<bool> FlushComputedSummaryAsync(string chatId)
+        {
+            SummaryDbModel summaryDbModel = await storageService.GetSummaryAsync(chatId);
+
+            if(summaryDbModel == null)
+                return false;
+
+            // flush that field so that a subsequent MAIN generation doesn't get injected with that 'old' and irrelevant computed summaries field.
+            // If the information is not relevant (fresh), we want to either re-generate it or fallback on injecting all the summaries instead. Both are better alternatives.
+            summaryDbModel.RelevantSummaryInformationFromMostRecentStoryContext = null;
+            return true;
         }
 
         public async Task EvaluateSummaryAsync(string chatId, GlobalSettingsDbModel settings)
@@ -88,7 +100,13 @@ namespace CohesiveRP.Core.Services.Summary
             {
                 ChatId = chatId,
                 LinkedId = hotMessagesCopy.Last().MessageId,
-                DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
+                    BackgroundQuerySystemTags.main.ToString(),
+                ],
                 Tags = [BackgroundQuerySystemTags.shortSummary.ToString()],
                 Priority = BackgroundQueryPriority.Low,
             };
@@ -102,7 +120,7 @@ namespace CohesiveRP.Core.Services.Summary
         /// </summary>
         public async Task EvaluateMediumTermSummaryAsync(string chatId, GlobalSettingsDbModel settings, SummaryDbModel summaryDbModel)
         {
-            if (summaryDbModel == null)
+            if (summaryDbModel?.ShortTermSummaries == null)
             {
                 return;
             }
@@ -116,7 +134,14 @@ namespace CohesiveRP.Core.Services.Summary
             var backgroundQueryDbModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chatId,
-                DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.shortSummary.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
+                    BackgroundQuerySystemTags.main.ToString()
+                ],
                 Tags = [BackgroundQuerySystemTags.mediumSummary.ToString()],
                 Priority = BackgroundQueryPriority.VeryLow,
             };
@@ -130,7 +155,7 @@ namespace CohesiveRP.Core.Services.Summary
         /// </summary>
         public async Task EvaluateLongTermSummaryAsync(string chatId, GlobalSettingsDbModel settings, SummaryDbModel summaryDbModel)
         {
-            if (summaryDbModel == null)
+            if (summaryDbModel?.MediumTermSummaries == null)
             {
                 return;
             }
@@ -144,7 +169,15 @@ namespace CohesiveRP.Core.Services.Summary
             var backgroundQueryDbModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chatId,
-                DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.mediumSummary.ToString(), BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.shortSummary.ToString(),
+                    BackgroundQuerySystemTags.mediumSummary.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
+                    BackgroundQuerySystemTags.main.ToString()
+                ],
                 Tags = [BackgroundQuerySystemTags.longSummary.ToString()],
                 Priority = BackgroundQueryPriority.VeryLow,
             };
@@ -158,7 +191,7 @@ namespace CohesiveRP.Core.Services.Summary
         /// </summary>
         public async Task EvaluateExtraTermSummaryAsync(string chatId, GlobalSettingsDbModel settings, SummaryDbModel summaryDbModel)
         {
-            if (summaryDbModel == null)
+            if (summaryDbModel?.LongTermSummaries == null)
             {
                 return;
             }
@@ -172,7 +205,16 @@ namespace CohesiveRP.Core.Services.Summary
             var backgroundQueryDbModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chatId,
-                DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.mediumSummary.ToString(), BackgroundQuerySystemTags.longSummary.ToString(), BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.shortSummary.ToString(),
+                    BackgroundQuerySystemTags.mediumSummary.ToString(),
+                    BackgroundQuerySystemTags.longSummary.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
+                    BackgroundQuerySystemTags.main.ToString()
+                ],
                 Tags = [BackgroundQuerySystemTags.extraSummary.ToString()],
                 Priority = BackgroundQueryPriority.VeryLow,
             };
@@ -187,7 +229,7 @@ namespace CohesiveRP.Core.Services.Summary
         /// </summary>
         public async Task EvaluateOverflowTermSummaryAsync(string chatId, GlobalSettingsDbModel settings, SummaryDbModel summaryDbModel)
         {
-            if (summaryDbModel == null)
+            if (summaryDbModel?.ExtraTermSummaries == null)
             {
                 return;
             }
@@ -201,7 +243,17 @@ namespace CohesiveRP.Core.Services.Summary
             var backgroundQueryDbModel = new CreateBackgroundQueryQueryModel
             {
                 ChatId = chatId,
-                DependenciesTags = [BackgroundQuerySystemTags.sceneTracker.ToString(), BackgroundQuerySystemTags.shortSummary.ToString(), BackgroundQuerySystemTags.mediumSummary.ToString(), BackgroundQuerySystemTags.longSummary.ToString(), BackgroundQuerySystemTags.extraSummary.ToString(), BackgroundQuerySystemTags.sceneAnalyze.ToString()],
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.shortSummary.ToString(),
+                    BackgroundQuerySystemTags.mediumSummary.ToString(),
+                    BackgroundQuerySystemTags.longSummary.ToString(),
+                    BackgroundQuerySystemTags.extraSummary.ToString(),
+                    BackgroundQuerySystemTags.sceneAnalyze.ToString(),
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.reflection.ToString(),
+                    BackgroundQuerySystemTags.main.ToString()
+                ],
                 Tags = [BackgroundQuerySystemTags.overflowSummary.ToString()],
                 Priority = BackgroundQueryPriority.VeryLow,
             };

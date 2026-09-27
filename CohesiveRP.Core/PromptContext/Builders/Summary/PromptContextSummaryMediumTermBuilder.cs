@@ -43,6 +43,12 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
+            if (!string.IsNullOrWhiteSpace(summaryDbModel.RelevantSummaryInformationFromMostRecentStoryContext))
+            {
+                // If we have a computed summaries field, use that
+                return (null, new ShareableContextLink { LinkedBuilder = this });
+            }
+
             // Inject that short term summary
             string output = $"<summary_medium_term>{Environment.NewLine}Previous facts, events, speech and actions (Medium-Term){Environment.NewLine}";
             foreach (ISummaryEntryDbModel summaryElement in summaryDbModel.MediumTermSummaries.Where(w => !string.IsNullOrWhiteSpace(w.Content)))

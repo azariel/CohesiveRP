@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Common.Exceptions;
+﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.ResponseDtos.ChatCharacterRolls.BusinessObjects;
@@ -18,7 +19,7 @@ public class GetChatCharacterRollsWorkflow : IChatCharacterRollsWorkflow
 
     public async Task<IWebApiResponseDto> GetChatCharacterRolls(string chatId)
     {
-        var rolls = await storageService.GetChatCharactersRollsByIdAsync(chatId);
+        var rolls = await storageService.GetChatCharactersRollsByChatIdAsync(chatId);
 
         if (rolls == null)
         {
@@ -63,14 +64,30 @@ public class GetChatCharacterRollsWorkflow : IChatCharacterRollsWorkflow
                         CharactersInSceneWithCounterRolls = [],
                     };
 
-                    foreach (var charactersWithCounterRoll in roll.CharactersInScene)
+                    foreach (var characterWithCounterRoll in roll.CharactersInScene)
                     {
-                        if (charactersWithCounterRoll?.CharacterInSceneCounterRoll == null)
+                        if (characterWithCounterRoll?.CharacterInSceneCounterRoll == null)
                             continue;
 
-                        var otherCharacterSheetInstance = characterSheetInstances?.CharacterSheetInstances?.FirstOrDefault(c => c.CharacterSheetInstanceId == charactersWithCounterRoll.CharacterSheetInstanceId);
+                        var otherCharacterSheetInstance = characterSheetInstances?.CharacterSheetInstances?.FirstOrDefault(c => c.CharacterSheetInstanceId == characterWithCounterRoll.CharacterSheetInstanceId);
+
                         if (otherCharacterSheetInstance == null)
+                        {
+                            // The character that is being tracked within the sceneTracker doesn't have a proper CharacterSheet, so we'll induce one perfectly average for the counter rolls
+                            var inferredCharacterInSceneRoll = new ChatCharacterInSceneCounterRolls
+                            {
+                                CharacterId = null,
+                                CharacterName = $"{characterWithCounterRoll.CharacterName}".Trim(),
+                                CharacterInSceneCounterRoll = new()
+                                {
+                                    Attribute = characterWithCounterRoll.CharacterInSceneCounterRoll.Attribute,
+                                    Value = characterWithCounterRoll.CharacterInSceneCounterRoll.Value,
+                                }
+                            };
+
+                            newRoll.CharactersInSceneWithCounterRolls.Add(inferredCharacterInSceneRoll);
                             continue;
+                        }
 
                         var characterInSceneRoll = new ChatCharacterInSceneCounterRolls
                         {
@@ -78,8 +95,8 @@ public class GetChatCharacterRollsWorkflow : IChatCharacterRollsWorkflow
                             CharacterName = $"{otherCharacterSheetInstance.CharacterSheet?.FirstName} {otherCharacterSheetInstance.CharacterSheet?.LastName}".Trim(),
                             CharacterInSceneCounterRoll = new()
                             {
-                                Attribute = charactersWithCounterRoll.CharacterInSceneCounterRoll.Attribute,
-                                Value = charactersWithCounterRoll.CharacterInSceneCounterRoll.Value,
+                                Attribute = characterWithCounterRoll.CharacterInSceneCounterRoll.Attribute,
+                                Value = characterWithCounterRoll.CharacterInSceneCounterRoll.Value,
                             }
                         };
 

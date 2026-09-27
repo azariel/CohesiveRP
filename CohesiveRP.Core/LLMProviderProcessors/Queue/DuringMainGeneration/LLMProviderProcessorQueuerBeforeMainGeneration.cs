@@ -18,7 +18,36 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
         {
             bool operationResult = true;
 
-            operationResult &= await AddSkillChecksDescriptionBackgroundQueryAsync(chat);
+            var currentSkillChecks = await storageService.GetChatCharactersRollsByChatIdAsync(chat.ChatId);
+            if (currentSkillChecks?.ChatCharactersRolls != null && currentSkillChecks.ChatCharactersRolls.Count > 0)
+            {
+                var chatCharacterSheetInstance = await storageService.GetCharacterSheetsInstanceByChatIdAsync(chat.ChatId);
+                var persona = chatCharacterSheetInstance?.CharacterSheetInstances?.FirstOrDefault(w => w.PersonaId != null);
+                if (persona != null)
+                {
+                    // add the roll where the player initiates
+                    var rollsWithPlayer = currentSkillChecks.ChatCharactersRolls.Where(w => w.CharacterSheetInstanceId == persona.CharacterSheetInstanceId).ToList();
+
+                    // add the rolls where the player is a target
+                    foreach (var roll in currentSkillChecks.ChatCharactersRolls.Where(w => w.CharacterSheetInstanceId != persona.CharacterSheetInstanceId))
+                    {
+                        if (roll.Rolls == null || roll.Rolls.Count <= 0)
+                        {
+                            continue;
+                        }
+
+                        if (roll.Rolls.Any(w => w.CharactersInScene.Any(a => a.CharacterSheetInstanceId == persona.CharacterSheetInstanceId)))
+                        {
+                            rollsWithPlayer.Add(roll);
+                        }
+                    }
+
+                    if (rollsWithPlayer != null && rollsWithPlayer.Count > 0)
+                    {
+                        //operationResult &= await AddSkillChecksDescriptionBackgroundQueryAsync(chat);
+                    }
+                }
+            }
 
             return operationResult;
         }
@@ -29,9 +58,9 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
         internal async Task<bool> AddSkillChecksDescriptionBackgroundQueryAsync(ChatDbModel chat)
         {
             // Only add if there's currently skillChecks in the chat
-            var currentSkillChecks = await storageService.GetChatCharactersRollsByIdAsync(chat.ChatId);
+            var currentSkillChecks = await storageService.GetChatCharactersRollsByChatIdAsync(chat.ChatId);
 
-            if(currentSkillChecks?.ChatCharactersRolls == null || currentSkillChecks.ChatCharactersRolls.Count <= 0)
+            if (currentSkillChecks?.ChatCharactersRolls == null || currentSkillChecks.ChatCharactersRolls.Count <= 0)
             {
                 // There's no description to have, this is valid
                 return true;

@@ -1,7 +1,6 @@
 ﻿using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
-using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.RequestDtos.Personas;
 using CohesiveRP.Core.WebApi.ResponseDtos.Personas;
 using CohesiveRP.Core.WebApi.ResponseDtos.Personas.BusinessObjects;

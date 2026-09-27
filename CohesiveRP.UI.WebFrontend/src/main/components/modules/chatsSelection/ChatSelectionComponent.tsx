@@ -145,7 +145,7 @@ export default function ChatSelectionComponent() {
               </label>
 
               <div className={styles.chatAvatarContainer}>
-                <img src={GetAvatarPathFromChatId(chat.chatId, activeModule?.hideAvatars ?? false)} alt="Avatar" onError={(e) => {
+                <img src={GetAvatarPathFromChatId(chat.chatId, activeModule?.hideAvatars ?? true)} alt="Avatar" onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = GetFallbackEmpty();
                   }} />

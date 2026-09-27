@@ -20,12 +20,23 @@ function tierClass(value: number): string {
   return styles["tier-critical-fail"];
 }
 
+// Counter-roll color relative to the main roll's total (value + bonus)
+function relativeTierClass(counterValue: number, mainTotal: number): string {
+  const diff = mainTotal - counterValue;
+  if (diff < 0) return styles["counter-tier-higher"];      // counter beats main
+  if (diff === 0) return styles["counter-tier-equal"];      // tied
+  if (diff <= 3) return styles["counter-tier-close"];       // lower by ≤3
+  if (diff <= 7) return styles["counter-tier-behind"];      // lower by ≤7
+  return styles["counter-tier-far-behind"];                 // lower by >7
+}
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function RollRow({ roll }: { roll: ChatCharacterRoll }) {
   const [showGuides, setShowGuides] = useState(false);
   const hasGuides = roll.guides && roll.guides.length > 0;
   const hasCounters   = roll.charactersInSceneWithCounterRolls?.length > 0;
+  const mainTotal = roll.value + roll.bonus;
 
   return (
     <div className={styles.rollRow}>
@@ -36,6 +47,7 @@ function RollRow({ roll }: { roll: ChatCharacterRoll }) {
       >
         <span className={styles.skillLabel}>{roll.actionCategory}</span>
         <span className={styles.rollValue}>{roll.value}</span>
+        {roll.bonus !== 0 && <span className={styles.rollValue}>( {(roll.bonus > 0 ? `+ ${roll.bonus}` : roll.bonus)} )</span>}
       </div>
 
       {/* Counter rolls from other characters in the scene */}
@@ -49,7 +61,7 @@ function RollRow({ roll }: { roll: ChatCharacterRoll }) {
             return (
               <div
                 key={`${cr.characterId}-${idx}`}
-                className={`${styles.counterPill} ${tierClass(value)}`}
+                className={`${styles.counterPill} ${relativeTierClass(value, mainTotal)}`}
                 title={`${cr.characterName} — ${String(attr)}: ${value}`}
               >
                 <span className={styles.counterCharName}>{cr.characterName}</span>

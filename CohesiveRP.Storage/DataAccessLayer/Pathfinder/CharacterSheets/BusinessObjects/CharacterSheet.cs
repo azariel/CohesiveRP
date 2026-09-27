@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using CohesiveRP.Common.Utils.BusinessObjects;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheets.BusinessObjects;
@@ -7,166 +8,220 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
 {
     public class CharacterSheet
     {
+        [JsonSchemaRequired]
         [JsonPropertyName("firstName")]
         public string FirstName { get; set; }// e.g: Daphne
 
+        [JsonSchemaRequired]
         [JsonPropertyName("lastName")]
         public string LastName { get; set; }// e.g: Greengrass
 
+        [JsonSchemaRequired]
         [JsonPropertyName("birthday")]
         public string BirthdayDate { get; set; }// e.g: 27 March 1980
 
+        [JsonSchemaRequired]
         [JsonPropertyName("gender")]
         public string Gender { get; set; }// e.g: Female
 
+        [JsonSchemaRequired]
         [JsonPropertyName("ageGroup")]
         public string AgeGroup { get; set; }// e.g: Young adult
 
+        [JsonSchemaRequired]
         [JsonPropertyName("ageGroupAppearance")]
         public string AgeGroupAppearance { get; set; }// e.g: Young adult
 
+        [JsonSchemaRequired]
         [JsonPropertyName("race")]
         public string Race { get; set; }// e.g: human, elf, ... + add blood purity (mixed, pureblood, etc) // human (Pure-blood witch)
 
+        [JsonSchemaRequired]
         [JsonPropertyName("height")]
         public string Height { get; set; }// e.g: five foot four (162 cm)
 
+        [JsonSchemaRequired]
         [JsonPropertyName("speechPattern")]
         public string SpeechPattern { get; set; }// e.g: feminine and low, controlled and detached. Conveys subtle authority through dry wit and intelligent sarcasm. Her tone is cold(icy) with people she dislikes. Her voice can turn into venom when annoyed. Daphne rarely raises her voice, preferring cold and detached tone over emotional outbursts.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("speechImpairment")]
         public string SpeechImpairment { get; set; }// e.g: could be something like stutters, crippling shyness, etc
 
+        [JsonSchemaRequired]
         [JsonPropertyName("bodyType")]
         public string BodyType { get; set; }// e.g: lean and slender with attractive feminine aristocratic features
 
+        [JsonSchemaRequired]
         [JsonPropertyName("hairColor")]
         public string HairColor { get; set; }// e.g: platinum blonde
 
+        [JsonSchemaRequired]
         [JsonPropertyName("hairStyle")]
         public string HairStyle { get; set; }// e.g: long, straight, slicked back
 
+        [JsonSchemaRequired]
         [JsonPropertyName("eyeColor")]
         public string EyeColor { get; set; }// e.g: emerald green
 
+        [JsonSchemaRequired]
         [JsonPropertyName("earShape")]
         public string EarShape { get; set; }// e.g: normal // in fantasy scenario, pointy seems like a reasonable choice
 
+        [JsonSchemaRequired]
         [JsonPropertyName("skinColor")]
         public string SkinColor { get; set; }// e.g: very pale
 
+        [JsonSchemaRequired]
         [JsonPropertyName("teethDetails")]
         public string TeethDetails { get; set; }// e.g: normal, white, yellow, blackened, sharp fangs, etc
 
+        [JsonSchemaRequired]
         [JsonPropertyName("nailsColor")]
         public string NailsColor { get; set; }// e.g: normal, pink, blue, black, etc. AKA nails polish.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("nailsDetails")]
         public string NailsDetails { get; set; }// e.g: normal, French nails, long nails, short nails, etc.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("lipsDetails")]
         public string LipsDetails { get; set; }// e.g: normal, full, big, fine, etc.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("eyebrows")]
         public string Eyebrows { get; set; }// e.g: normal, fine, messy, bulky, etc.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("genitals")]
         public string Genitals { get; set; }// e.g: female
 
+        [JsonSchemaRequired]
         [JsonPropertyName("penisSize")]
         public string PenisSize { get; set; }// e.g: average
 
+        [JsonSchemaRequired]
         [JsonPropertyName("breastsSize")]
         public string BreastsSize { get; set; }// e.g: small
 
+        [JsonSchemaRequired]
         [JsonPropertyName("areolasSize")]
         public string AreolasSize { get; set; }// e.g: small
 
+        [JsonSchemaRequired]
         [JsonPropertyName("areolasDetails")]
         public string AreolasDetails { get; set; }// e.g: puffy
 
+        [JsonSchemaRequired]
         [JsonPropertyName("areolasColor")]
         public string AreolasColor { get; set; }// e.g: dark pink, brown, etc
 
+        [JsonSchemaRequired]
         [JsonPropertyName("sexuality")]
         public string Sexuality { get; set; }// e.g: bisexual
 
         // TODO: This may conflict with Dynamic Memory module!
+        [JsonSchemaRequired]
         [JsonPropertyName("relationships")]
         public string[] Relationships { get; set; }
 
+        [JsonSchemaRequired]
         [JsonPropertyName("profession")]
         public string Profession { get; set; }// e.g: Hogwarts student (Slytherin House)
 
+        [JsonSchemaRequired]
         [JsonPropertyName("reputation")]
         public string Reputation { get; set; }// e.g: Daphne has the reputation of the 'Ice Princess' of Slytherin due to her cold demeanor and acid remarks to people she doesn't like. She is known to be discreet and independant. She is ostracised from other Slytherin students due to her cold attitude
 
+        [JsonSchemaRequired]
         [JsonPropertyName("preferredCombatStyle")]
         public string PreferredCombatStyle { get; set; }// e.g: She often open the fight using darker curses that leave long-lasting or permanent marks on her opponent (cutting curses are her favorite. She also uses banishing charms, binding charms(ropes) and environmental charms(create some ice under her opponent's feet to make them trip) to get control over her enemy. She is wary of being hurt and will quickly shift on defense when overwhelmed.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("weaponsProficiency")]
         public string WeaponsProficiency { get; set; }// e.g: wand magic
 
+        [JsonSchemaRequired]
         [JsonPropertyName("combatAffinityAttack")]
         public string CombatAffinityAttack { get; set; }// e.g: Medium-High (uses stupefy, binding enemy's body with magical ropes, transfiguration to bind her opponent's body, stinging jinx, trip jinx, Jelly-Legs Jinx, Reducto curse, Laceration Curse, Leg-Locker Curse, etc. Daphne will use unforgivable when her life is threatened)
 
+        [JsonSchemaRequired]
         [JsonPropertyName("combatAffinityDefense")]
         public string CombatAffinityDefense { get; set; }// e.g: Medium (uses shield charm, but focus more on controlling her opponent body with magical ropes, shackles, binds, vines or using stupefaction spells)
 
+        [JsonSchemaRequired]
         [JsonPropertyName("socialAnxiety")]
         public string SocialAnxiety { get; set; }// e.g: None // could be shy
 
+        [JsonSchemaRequired]
         [JsonPropertyName("clothesPreference")]
         public string ClothesPreference { get; set; }// e.g: Impeccably tailored expensive silk Hogwarts robes that emphasize her aristocratic traits. Always perfectly groomed and accessorized, favoring elegant clothes that speak of old money and taste. Frequently wears very expensive perfume. She prefers lace silk bras and panties.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("mannerisms")]
         public string Mannerisms { get; set; }// e.g: Carries herself like a queen in exile, one hand often resting on hip bones. Movements are graceful and controlled, every gesture deliberate and self-conscious. Maintains perfect posture that conveys both distance and authority.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("behavior")]
         public string Behavior { get; set; }// e.g: Composed, intelligent, and quietly ambitious. Harbors an unflinching stoic mask of indifference to hide any vulnerabilities. Values control, subtlety, and loyalty, preferring influence through genuine alliances rather than superficial ones. Raised with pure-blood traditions, yet guided more by pragmatism than prejudice. Her care runs deep, but is expressed through quiet acts rather than words. Lash-out sarcasm when cornered. Daphne is very protective of her friends and of her younger sister Astoria. Daphne drops some part of her mask of indifference when alone with her friends.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("attractiveness")]
         public string Attractiveness { get; set; }// e.g: Very High (She's seen a skinny and petite aristocratic beauty, but inaccessible due to her personality)
 
+        [JsonSchemaRequired]
         [JsonPropertyName("kinks")]
         public string[] Kinks { get; set; }// e.g:  Body Worship & Inspection (RECEIVE): A partner meticulously admiring and caressing every inch of her body, including her small breasts and the scar on her ribs. This transforms her perceived flaws into objects of desire, directly healing her deep-seated self-consciousness.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("secretKinks")]
         public string[] SecretKinks { get; set; }// e.g:  Pet Play & Collaring others (GIVE): Treating her partner or victim as a pet. Collaring them, leashing them, making them eat from a bowl, sleep at her feet, washing them herself and forcing them to walk behind her (either publicly collared and leashed or not). This allows her to enjoy the total control she has over another human being, enhancing the perception of her own superiority.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("skills")]
         public string[] Skills { get; set; }// e.g:  Competent duelist with elegant and precise spellwork based on her opponent body control
 
+        [JsonSchemaRequired]
         [JsonPropertyName("weaknesses")]
         public string[] Weaknesses { get; set; }// e.g:  Unwillingness to directly escalate a conflict to a magical or physical fight. She will often simply descalate the argument instead.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("fears")]
         public string[] Fears { get; set; }// e.g:  She's secretly terrified that the blood malediction affecting her family manifests in herself
 
+        [JsonSchemaRequired]
         [JsonPropertyName("likes")]
         public string[] Likes { get; set; }// e.g:  The feeling of complete control over a situation or a person
 
+        [JsonSchemaRequired]
         [JsonPropertyName("dislikes")]
         public string[] Dislikes { get; set; }// e.g:  Chaos and unpredictability in any form
 
+        [JsonSchemaRequired]
         [JsonPropertyName("secrets")]
         public string[] Secrets { get; set; }// e.g:  The Greengrass blood malediction that has manifested in her sister Astoria
 
+        [JsonSchemaRequired]
         [JsonPropertyName("personalityTraits")]
         public string[] PersonalityTraits { get; set; }// e.g:  Composed, Intelligent, Quietly ambitious, Graceful, ...
 
+        [JsonSchemaRequired]
         [JsonPropertyName("goalsForNextYear")]
         public string[] GoalsForNextYear { get; set; }// e.g:  Daphne wants to find contractual loopholes or coercive evidence to legally or politically nullify the betrothal to Draco Malfoy.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("longTermGoals")]
         public string[] LongTermGoals { get; set; }// e.g:  Daphne wants to recruits a loyal informant, healer, and a political figure bound to her by mutual benefit and quiet favors.
 
+        [JsonSchemaRequired]
         [JsonPropertyName("magicalEffects")]
         public CharacterStatusEffect[] MagicalEffects { get; set; }// e.g: magical ailments, buffs, curses, afflictions, tattoos, item effects, compulsions, mental alterations
 
+        [JsonSchemaRequired]
         [JsonPropertyName("bodyStatus")]
         public CharacterStatusEffect[] BodyStatus { get; set; }// e.g: poisons, non-magical afflictions, malnutrition, sicknesses, drug effects, corrosive effects, anesthesia, cancers, alcohol effects
 
+        [JsonSchemaRequired]
         [JsonPropertyName("wounds")]
         public CharacterStatusEffect[] Wounds { get; set; }// e.g: maiming (PERMANENT) and other unhealed physical wounds
 
@@ -182,6 +237,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
         [JsonPropertyName("arousal")]
         public int Arousal { get; set; }
 
+        [JsonSchemaRequired]
         [JsonPropertyName("pathfinderAttributes")]
         public PathfinderAttribute[] PathfinderAttributesValues { get; set; } = [
             // Default is AVERAGE human male attributes AKA 10 everywhere
@@ -195,7 +251,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.Busi
             new PathfinderAttribute{ AttributeType = PathfinderAttributes.Discernment, Value = 10 },
             new PathfinderAttribute{ AttributeType = PathfinderAttributes.Perception, Value = 10 },
         ];
-
+        
+        [JsonSchemaRequired]
         [JsonPropertyName("pathfinderSkills")]
         public PathfinderSkillAttributes[] PathfinderSkillsValues { get; set; } = [
             // Default is AVERAGE human male attributes AKA 10 everywhere

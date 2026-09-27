@@ -188,6 +188,32 @@
     flex: 1 1 0;
     overflow-y: auto;
     min-height: 0;
+    scrollbar-gutter: stable;
+}
+
+/* Firefox */
+.lorebookEntriesContainer {
+    scrollbar-width: thin;
+    scrollbar-color: #33aee7 transparent;
+}
+
+/* Chrome / Edge / Safari — add these new rules */
+.lorebookEntriesContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.lorebookEntriesContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lorebookEntriesContainer::-webkit-scrollbar-thumb {
+  background-color: rgba(51, 174, 231, 0.35);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.lorebookEntriesContainer::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(51, 174, 231, 0.6);
 }
 
 .lorebookEntriesLabel {
@@ -331,6 +357,106 @@
     width: 3em;
     height: 3em;
     animation: spin 1s linear infinite;
+}
+
+.lorebookEntriesHeader {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.addNewEntryIcon {
+    font-size: 1.3em;
+    color: #dfdfdf;
+    cursor: pointer;
+}
+
+.addNewEntryIcon:hover {
+    color: #fff;
+    transition: color 0.3s ease;
+}
+
+.lorebookEntriesHeader {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.6em;
+    margin-bottom: 0.6em;
+    border-bottom: 1px solid #2e2e48;
+}
+
+.lorebookEntriesTitleGroup {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6em;
+}
+
+.lorebookEntriesAccent {
+    width: 3px;
+    height: 1.4em;
+    border-radius: 2px;
+    background-color: #33aee7;
+    box-shadow: 0 0 6px 1px rgba(51, 174, 231, 0.5);
+    flex-shrink: 0;
+}
+
+.lorebookEntriesTitleText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05em;
+}
+
+.lorebookEntriesLabel {
+    font-family: "Georgia", serif;
+    font-size: 1.15em;
+    font-weight: 500;
+    color: #f6911d;
+    line-height: 1.2;
+}
+
+.lorebookEntriesCount {
+    font-size: 0.7em;
+    color: #8a8aa3;
+}
+
+.addEntryButton {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4em;
+    background: transparent;
+    border: 1px solid #33aee7;
+    color: #33aee7;
+    border-radius: 6px;
+    padding: 0.4em 1em;
+    font-size: 0.85em;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.addEntryButton:hover {
+    background-color: rgba(51, 174, 231, 0.12);
+    box-shadow: 0 0 10px 1px rgba(51, 174, 231, 0.25);
+}
+
+.addEntryButton:active {
+    background-color: rgba(51, 174, 231, 0.2);
+}
+
+.addEntryButtonIcon {
+    font-size: 1.1em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .addEntryButton {
+    transition: none;
+  }
 }
 
 @keyframes spin {

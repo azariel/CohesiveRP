@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using CohesiveRP.Common.Configuration;
 using CohesiveRP.Core.BackgroundServices.BackgroundQueries;
@@ -7,6 +8,7 @@ using CohesiveRP.Core.DtoConverters;
 using CohesiveRP.Core.DtoConverters.Abstractions;
 using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Core.LLMProviderProcessors.Queue;
+using CohesiveRP.Core.LLMProviderProcessors.SceneTracker;
 using CohesiveRP.Core.PromptContext;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
@@ -38,10 +40,11 @@ using CohesiveRP.Core.WebApi.Workflows.Settings;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.IllustrationQueries;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
@@ -158,6 +161,7 @@ namespace CohesiveRP.Core.WebApi
 
             // Processors
             services.AddSingleton<ILLMProviderProcessorQueuer, LLMProviderProcessorQueuer>();
+            services.AddSingleton<ISceneTrackerPostProcess, SceneTrackerPostProcess>();
 
             // DataAccessLayers
             services.AddDbContextFactory<StorageDbContext>();
@@ -181,10 +185,11 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IChatCharactersRollsDal, ChatCharactersRollsDal>();
             services.AddSingleton<IInteractiveUserInputDal, InteractiveUserInputDal>();
             services.AddSingleton<IIllustrationQueryDal, IllustrationQueryDal>();
-            services.AddSingleton<ICohesionEnforcementsDal, CohesionEnforcementDal>();
+            services.AddSingleton<ICharactersCohesionEnforcementsDal, CharactersCohesionEnforcementDal>();
             services.AddSingleton<INarrativeArchitecturesDal, NarrativeArchitectureDal>();
             services.AddSingleton<INarrativeDirectionsDal, NarrativeDirectionDal>();
             services.AddSingleton<IProseGuardiansDal, ProseGuardianDal>();
+            services.AddSingleton<IReflectionDal, ReflectionDal>();
 
             //// Load the API-format workflow from embedded resources or disk
             //string templateJson = File.ReadAllText("Workflows/CohesiveRP-MainAvatarGenerator-v1.0.api.json");

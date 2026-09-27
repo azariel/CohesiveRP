@@ -102,9 +102,14 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
                         }
 
                         await backgroundQueriesDal.UpdateBackgroundQueryAsync(selectedQuery);
-                        await Task.Delay(500);
+                        await Task.Delay(1000);
                         cancellationToken.ThrowIfCancellationRequested();
                     }
+                } catch (Exception e)
+                {
+                    LoggingManager.LogToFile("ee1a8773-e75f-41e0-89ac-b74793bd2d24", $"Monitor loop for query [{selectedQuery.BackgroundQueryId}] failed.", e);
+                    selectedQuery.Status = BackgroundQueryStatus.Error;
+                    selectedQuery.Content = null;
                 } finally
                 {
                     if (!await backgroundQueriesDal.UpdateBackgroundQueryAsync(selectedQuery))
@@ -133,7 +138,7 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             //var allPendingQueries = await backgroundQueriesDal.GetAllPendingQueriesAsync();
             var allProcessingQueries = await backgroundQueriesDal.GetPendingOrProcessingBackgroundQueryAsync();
 
-            if (allProcessingQueries.Length <= 0)
+            if (allProcessingQueries == null || allProcessingQueries.Length <= 0)
             {
                 return null;
             }
@@ -145,12 +150,12 @@ namespace CohesiveRP.Core.BackgroundServices.BackgroundQueries
             {
                 if (query.DependenciesTags != null)
                 {
-                    if (query.DependenciesTags != null && allProcessingQueries.Any(a =>
+                    if (allProcessingQueries.Any(a =>
                         a.BackgroundQueryId != query.BackgroundQueryId && // Not the same query
                         query.DependenciesTags.Any(an => a.Tags.Contains(an) && // The dependency tag is present in the other query dependant tags
                         a.ChatId == query.ChatId)))// Same chat, same dependency tag, different query
                     {
-                        continue;// Skip this query, it has dependencies that are still in progress
+                        continue;// Skip this query, it has dependencies that are still in progress or pending
                     }
                 }
 

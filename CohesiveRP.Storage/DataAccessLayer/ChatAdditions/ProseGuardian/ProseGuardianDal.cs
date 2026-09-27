@@ -33,7 +33,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian
                 var ProseGuardian = dbContext.ProseGuardians.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
                 if (ProseGuardian != null)
                 {
-                    LoggingManager.LogToFile("4b32f5d6-9512-41e3-af80-2228f067b3f5", $"Error when querying Db on table cohesion enforcements. ProseGuardian entity to create already exists with Id [{ProseGuardian.ProseGuardianId}].");
+                    LoggingManager.LogToFile("4b32f5d6-9512-41e3-af80-2228f067b3f5", $"Error when querying Db on table prose guardians. ProseGuardian entity to create already exists with Id [{ProseGuardian.ProseGuardianId}].");
                     return null;
                 }
 

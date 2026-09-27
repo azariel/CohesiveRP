@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.Serialization;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.HttpLLMApiProvider;
@@ -143,7 +144,9 @@ namespace CohesiveRP.Core.WebApi.Workflows.IllustrationQueries
                         Content = str.ToString(),
                     }
                 ],
-                ShareableContextLinks = null
+                ShareableContextLinks = null,
+                //JsonSchemaName = "character_sheet_generation",
+                //JsonSchemaDocument = StrictJsonSchemaGenerator.Generate<>(),
             };
 
             GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
+using CohesiveRP.Storage.DTOs;
 
 namespace CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects
 {

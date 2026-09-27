@@ -36,6 +36,12 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var config = await storageService.GetGlobalSettingsAsync();
+            if(!config.FeaturesSettings.EnableComfyUI)
+            {
+                return;
+            }
+
             while (true)
             {
                 try

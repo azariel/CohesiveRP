@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using CohesiveRP.Common.Exceptions;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.HttpLLMApiProvider;
@@ -12,6 +13,7 @@ using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
+using CohesiveRP.Storage.DTOs;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Characters.CharacterSheets;
@@ -102,7 +104,9 @@ public class RegenerateCharacterSheetWorkflow : IRegenerateCharacterSheetWorkflo
                         Content = str.ToString(),
                     }
                 ],
-            ShareableContextLinks = null
+            ShareableContextLinks = null,
+            JsonSchemaName = "character_sheet_regeneration",
+            JsonSchemaDocument = StrictJsonSchemaGenerator.Generate<CharacterSheet>(),
         };
 
         GlobalSettingsDbModel globalSettings = await storageService.GetGlobalSettingsAsync();

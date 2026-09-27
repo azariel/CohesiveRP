@@ -6,7 +6,7 @@ using CohesiveRP.Storage.DataAccessLayer.Chats;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
-    public class CohesionEnforcementBuilder : IPromptContextElementBuilder
+    public class CohesionEnforcerBuilder : IPromptContextElementBuilder
     {
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
@@ -14,7 +14,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private PersonaDbModel personaLinkedToChat;
         private CharacterDbModel[] charactersLinkedToChat;
 
-        public CohesionEnforcementBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
+        public CohesionEnforcerBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
@@ -25,7 +25,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
-            var currentValuesFromStorage = await storageService.GetCohesionEnforcementsAsync(s=> s.ChatId == chatDbModel.ChatId);
+            var currentValuesFromStorage = await storageService.GetCharactersCohesionEnforcementsAsync(s=> s.ChatId == chatDbModel.ChatId);
             var currentValueFromStorage = currentValuesFromStorage?.FirstOrDefault();
             if(currentValueFromStorage == null)
             {

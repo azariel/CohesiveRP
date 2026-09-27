@@ -25,4 +25,8 @@
       <ProjectReference Include="..\CohesiveRP.Storage\CohesiveRP.Storage.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="LLMProviderProcessors\SceneTracker\BusinessObjects\" />
+    </ItemGroup>
+
 </Project>

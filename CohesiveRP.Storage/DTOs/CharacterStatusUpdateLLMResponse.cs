@@ -1,16 +1,19 @@
 ﻿using System.Text.Json.Serialization;
+using CohesiveRP.Common.Utils.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheets.BusinessObjects;
 
-namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations.BusinessObjects
+namespace CohesiveRP.Storage.DTOs
 {
     public class CharacterStatusUpdateLLMResponse
     {
+        [JsonSchemaRequired]
         [JsonPropertyName("characterUpdates")]
         public List<CharacterStatusUpdateEntry> CharacterUpdates { get; set; }
     }
 
     public class CharacterStatusUpdateEntry
     {
+        [JsonSchemaRequired]
         [JsonPropertyName("characterName")]
         public string CharacterName { get; set; }
 

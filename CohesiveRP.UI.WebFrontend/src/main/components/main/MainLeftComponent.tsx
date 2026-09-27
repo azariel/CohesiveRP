@@ -22,7 +22,7 @@ export default function MainLeftComponent() {
   return (
     <main className={styles.body}>
       <div className={styles.centerModule}>
-        {avatarSrc && (
+        {avatarSrc && activeModule?.hideAvatars !== true && (
           <div className={styles.avatarContainer}>
             <img src={avatarSrc} alt="Persona avatar" className={styles.avatar} onError={(e) => {
               const el = e.currentTarget;

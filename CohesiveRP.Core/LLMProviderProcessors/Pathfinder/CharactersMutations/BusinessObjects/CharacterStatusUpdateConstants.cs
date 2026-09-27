@@ -17,6 +17,6 @@
         /// Minimum number of new STABLE (non-buffered) messages a present character must accumulate since their
         /// last status check before a status update is queued.
         /// </summary>
-        public const int CHARACTER_STATUS_UPDATE_MESSAGE_THRESHOLD = 10;// TODO: make configurable
+        public const int CHARACTER_STATUS_UPDATE_MESSAGE_THRESHOLD = 5;// TODO: make configurable
     }
 }

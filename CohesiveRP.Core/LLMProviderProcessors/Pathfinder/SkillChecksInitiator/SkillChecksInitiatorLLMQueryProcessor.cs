@@ -13,6 +13,7 @@ using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
+using CohesiveRP.Storage.DTOs.SkillChecks;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.Utils.Characters;
 
@@ -59,7 +60,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     return false;
                 }
 
-                ChatCharactersRollsDbModel chatCharactersRollsDbModel = await storageService.GetChatCharactersRollsByIdAsync(backgroundQueryDbModel.ChatId);
+                ChatCharactersRollsDbModel chatCharactersRollsDbModel = await storageService.GetChatCharactersRollsByChatIdAsync(backgroundQueryDbModel.ChatId);
 
                 //var sceneTracker = await storageService.GetSceneTrackerAsync(backgroundQueryDbModel.ChatId);
                 //if (sceneTracker?.Content == null)
@@ -116,6 +117,12 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
                 if (CharactersSkillChecks?.Actions == null || CharactersSkillChecks.Actions.Length <= 0)
                 {
+                    // reset the player description every time
+                    chatCharactersRollsDbModel.PlayerDescription = null;
+
+                    // Update the rolls tied to this character in this chat
+                    await storageService.UpdateChatCharactersRollsAsync(chatCharactersRollsDbModel);
+
                     return true;
                 }
 
@@ -172,6 +179,17 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 // Remove the character rolls for the characters that are NOT in the scene anymore to avoid confusing the LLM
                 chatCharactersRollsDbModel.ChatCharactersRolls = await RemoveSkillChecksFromCharactersNotInScene(chatCharactersRollsDbModel, chatDbModel.ChatId);
 
+                // Remove empty characters with no rolls
+                if (chatCharactersRollsDbModel.ChatCharactersRolls != null && chatCharactersRollsDbModel.ChatCharactersRolls.Count > 0)
+                {
+                    foreach (var rollsCharacter in chatCharactersRollsDbModel.ChatCharactersRolls)
+                    {
+                        rollsCharacter.Rolls.RemoveAll(r => r.NbRemainingInjectionTurns <= 0);
+                    }
+
+                    chatCharactersRollsDbModel.ChatCharactersRolls.RemoveAll(r => r.Rolls.Count <= 0);
+                }
+
                 // Update the rolls tied to this character in this chat
                 if (!await storageService.UpdateChatCharactersRollsAsync(chatCharactersRollsDbModel))
                 {
@@ -211,6 +229,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                     // The NPC has left the scene, its roll becomes invalid
                     continue;
                 }
+
+
 
                 cleanedUpRolls.Add(roll);
             }
@@ -274,9 +294,19 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             foreach (string characterIdLinkedToTheChat in chatDbModel.CharacterIds)
             {
                 // Make sure that we have a CharacterSheetInstance for this character
-                if (characterSheetInstancesDbModel.CharacterSheetInstances.Any(a => a.CharacterId == characterIdLinkedToTheChat))
+                var currentCharacterSheetInstances = characterSheetInstancesDbModel.CharacterSheetInstances.Where(w => w.CharacterId == characterIdLinkedToTheChat);
+                if (currentCharacterSheetInstances.Any())
                 {
-                    continue;
+                    var current = currentCharacterSheetInstances.First();
+                    var characterSheetBlueprint = await storageService.GetCharacterSheetByCharacterIdAsync(characterIdLinkedToTheChat);
+                    if (characterSheetBlueprint?.CharacterSheet != null && (current.CharacterSheet == null || string.IsNullOrWhiteSpace(current.CharacterSheet.FirstName)))
+                    {
+                        // There's a characterSheetInstance for this characterId, but it's most likely corrupted, reset it
+                        characterSheetInstancesDbModel.CharacterSheetInstances.Remove(current);
+                    } else
+                    {
+                        continue;
+                    }
                 }
 
                 // Get the blueprint if any
@@ -323,6 +353,17 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             if (persona != null)
             {
                 var existingCharacterSheetInstance = characterSheetInstancesDbModel.CharacterSheetInstances.FirstOrDefault(f => f.PersonaId == persona.PersonaId);
+                if (existingCharacterSheetInstance != null)
+                {
+                    var characterSheetBlueprints = await storageService.GetCharacterSheetsByFuncAsync(f => f.PersonaId == chatDbModel.PersonaId);
+                    var characterSheetBlueprint = characterSheetBlueprints.FirstOrDefault();
+                    if (characterSheetBlueprint != null && (existingCharacterSheetInstance.CharacterSheet == null || string.IsNullOrWhiteSpace(existingCharacterSheetInstance.CharacterSheet.FirstName)))
+                    {
+                        // There's a characterSheetInstance for this characterId, but it's most likely corrupted, reset it
+                        characterSheetInstancesDbModel.CharacterSheetInstances.Remove(existingCharacterSheetInstance);
+                        existingCharacterSheetInstance = null;
+                    }
+                }
 
                 if (existingCharacterSheetInstance == null)
                 {
@@ -352,10 +393,14 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
 
         private async Task<ChatCharactersRollsDbModel> ProcessSkillCheckQueriesAsync(ChatDbModel chatDbModel, ChatCharactersRollsDbModel chatCharactersRollsDbModel, CharacterSheetInstancesDbModel characterSheetInstancesDbModel, string characterName, List<SkillCheckQuery> queries, string[] charactersInScene)
         {
+            if (queries == null)
+                return chatCharactersRollsDbModel;
+
             // Find the character from the available character sheet instances
             var selectedCharacterSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstancesDbModel?.CharacterSheetInstances, characterName);
             if (selectedCharacterSheetInstance == null)
             {
+                LoggingManager.LogToFile("a85eaba3-be91-41bd-b670-570af6c75bd2", $"Couldn't Add a new ChatCharactersRolls row for CharacterSheetInstance in storage for character [{characterName}] since that characterName couldn't be found in the available characterSheetInstances tied to the chatId [{chatDbModel.ChatId}].");
                 return chatCharactersRollsDbModel;
             }
 
@@ -424,25 +469,28 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
             foreach (SkillCheckQuery query in queries)
             {
                 // Add a default characterSheetInstance for the characters that don't have one
-                foreach (string characterNameWhoCanResist in query.CharactersWhoCanResist)
+                if (query.CharactersWhoCanResist != null)
                 {
-                    var characterWhoCanResistSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstancesDbModel?.CharacterSheetInstances, characterNameWhoCanResist);
-                    if (characterWhoCanResistSheetInstance == null)
+                    foreach (string characterNameWhoCanResist in query.CharactersWhoCanResist)
                     {
-                        characterSheetInstancesInScene.Add(new CharacterSheetInstance()
+                        var characterWhoCanResistSheetInstance = FindCharacterSheetInstanceFromCharacterName(characterSheetInstancesDbModel?.CharacterSheetInstances, characterNameWhoCanResist);
+                        if (characterWhoCanResistSheetInstance == null)
                         {
-                            CharacterSheetId = Guid.NewGuid().ToString(),
-                            CharacterSheetInstanceId = Guid.NewGuid().ToString(),
-                            CharacterSheet = new CharacterSheet
+                            characterSheetInstancesInScene.Add(new CharacterSheetInstance()
                             {
-                                FirstName = characterNameWhoCanResist,
-                            }
-                        });
+                                CharacterSheetId = Guid.NewGuid().ToString(),
+                                CharacterSheetInstanceId = Guid.NewGuid().ToString(),
+                                CharacterSheet = new CharacterSheet
+                                {
+                                    FirstName = characterNameWhoCanResist,
+                                }
+                            });
+                        }
                     }
                 }
 
                 // Resolve the resist list into CharacterSheetInstanceIds, now that everyone in it is guaranteed to exist in characterSheetInstancesInScene
-                var resistingCharacterSheetInstanceIds = query.CharactersWhoCanResist
+                var resistingCharacterSheetInstanceIds = query.CharactersWhoCanResist?
                     .Select(name => FindCharacterSheetInstanceFromCharacterName(characterSheetInstancesInScene, name)?.CharacterSheetInstanceId)
                     .Where(id => id != null)
                     .ToHashSet();
@@ -452,7 +500,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 if (roll == null)
                 {
                     // A roll for Charisma for example will stick for a few messages, to give a momentum
-                    var freezeValue = new Random(DateTime.Now.Millisecond).Next(1,4);
+                    var freezeValue = new Random(DateTime.Now.Millisecond).Next(1, 4);
 
                     // Create a new roll
                     roll = new ChatCharacterRoll
@@ -500,29 +548,28 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                 await GenerateCounterRollsForCharactersInSceneAsync(roll, characterSheetInstancesInScene.ToArray(), resistingCharacterSheetInstanceIds);
             }
 
-            // Remove old rolls
-            foreach (var rollsCharacter in chatCharactersRollsDbModel.ChatCharactersRolls)
-            {
-                rollsCharacter.Rolls.RemoveAll(r => r.NbRemainingInjectionTurns <= 0);
-            }
-
-            // Remove empty characters with no rolls
-            chatCharactersRollsDbModel.ChatCharactersRolls.RemoveAll(r => r.Rolls.Count <= 0);
-
             return chatCharactersRollsDbModel;
         }
 
-        private async Task GenerateCounterRollsForCharactersInSceneAsync(ChatCharacterRoll roll, CharacterSheetInstance[] characterSheetInstancesInScene, HashSet<string> resistingCharacterSheetInstanceIds)
+        private async Task GenerateCounterRollsForCharactersInSceneAsync(ChatCharacterRoll roll, CharacterSheetInstance[] characterSheetInstancesInScene, HashSet<string> resistingCharacterSheetInstanceIds, bool generateAverageCharacterSheetWhenNotFound = true)
         {
+            if (resistingCharacterSheetInstanceIds == null)
+                return;
+
             foreach (CharacterInScene otherCharacterInScene in roll.CharactersInScene)
             {
-                // Only characters the LLM flagged as able to resist this specific check get a counter roll
-                if (!resistingCharacterSheetInstanceIds.Contains(otherCharacterInScene.CharacterSheetInstanceId))
-                    continue;
+                CharacterSheetInstance characterSheetInstance = null;
 
-                var characterSheetInstance = characterSheetInstancesInScene.FirstOrDefault(f => f.CharacterSheetInstanceId == otherCharacterInScene.CharacterSheetInstanceId);
+                // Only characters the LLM flagged as able to resist this specific check get a counter roll
+                if (resistingCharacterSheetInstanceIds.Contains(otherCharacterInScene.CharacterSheetInstanceId))
+                {
+                    characterSheetInstance = characterSheetInstancesInScene?.FirstOrDefault(f => f.CharacterSheetInstanceId == otherCharacterInScene.CharacterSheetInstanceId);
+                }
+
                 if (characterSheetInstance == null)
+                {
                     continue;
+                }
 
                 switch (roll.ActionCategory)
                 {
@@ -533,6 +580,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                             Attribute = PathfinderAttributes.Discernment,
                             Value = await GenerateNewRollForCharacterForAttributeCheckAsync(characterSheetInstance, PathfinderAttributes.Discernment, roll.Bonus),
                         };
+
                         otherCharacterInScene.CharacterInSceneCounterRoll = otherCharacterRoll;
                         break;
                     }
@@ -545,6 +593,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                             Attribute = PathfinderAttributes.Willpower,
                             Value = await GenerateNewRollForCharacterForAttributeCheckAsync(characterSheetInstance, PathfinderAttributes.Willpower, roll.Bonus),
                         };
+
                         otherCharacterInScene.CharacterInSceneCounterRoll = otherCharacterRoll;
                         break;
                     }
@@ -557,6 +606,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.SkillChecksInitiator
                             Attribute = PathfinderAttributes.Perception,
                             Value = await GenerateNewRollForCharacterForAttributeCheckAsync(characterSheetInstance, PathfinderAttributes.Perception, roll.Bonus),
                         };
+
                         otherCharacterInScene.CharacterInSceneCounterRoll = otherCharacterRoll;
                         break;
                     }

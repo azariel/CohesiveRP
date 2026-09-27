@@ -2,6 +2,7 @@
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.DataAccessLayer.Settings;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
@@ -19,6 +20,10 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
         {
             bool operationResult = true;
 
+            GlobalSettingsDbModel config = await storageService.GetGlobalSettingsAsync();
+
+            operationResult &= await AddRelevantSummariesBackgroundQueryAsync(chat, config);
+
             // Only generate a request for a sceneTracker once we have a decent amount of messages in the conversation/story. Otherwise, the model may get confused and blabber something irrelevant or that will induce corruption
             HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chat.ChatId);
             if (hotMessagesDbModel != null && hotMessagesDbModel.Messages.Count > 4)
@@ -28,7 +33,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
 
             operationResult &= await AddSkillChecksInitiatorBackgroundQueryAsync(chat);
 
-
             var currentNarrativeDirections = await storageService.GetNarrativeDirectionsAsync(s => s.ChatId == chat.ChatId);
             if ((currentNarrativeDirections == null || !currentNarrativeDirections.Any()) && hotMessagesDbModel?.Messages?.Count > 5)
             {
@@ -37,7 +41,9 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
             {
                 operationResult &= await AddNarrativeDirectionBackgroundQueryAsync(chat);
             }
-
+            
+            //operationResult &= await AddReflectionBackgroundQueryAsync(chat);
+            
             return operationResult;
         }
 
@@ -81,6 +87,50 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
                 Priority = BackgroundQueryPriority.Highest,// User is waiting!
                 DependenciesTags = [],// No dependencies at all
                 Tags = [BackgroundQuerySystemTags.narrativeDirection.ToString()],
+            };
+
+            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+                return false;
+
+            return true;
+        }
+
+        internal async Task<bool> AddReflectionBackgroundQueryAsync(ChatDbModel chat)
+        {
+            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+            {
+                ChatId = chat.ChatId,
+                Priority = BackgroundQueryPriority.Highest,// User is waiting!
+                DependenciesTags = [
+                    BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    BackgroundQuerySystemTags.narrativeDirection.ToString(),
+                    BackgroundQuerySystemTags.sceneTracker.ToString(),
+                    BackgroundQuerySystemTags.relevantSummaries.ToString(),
+                ],// No dependencies at all
+                Tags = [BackgroundQuerySystemTags.reflection.ToString()],
+            };
+
+            if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+                return false;
+
+            return true;
+        }
+
+        internal async Task<bool> AddRelevantSummariesBackgroundQueryAsync(ChatDbModel chat, GlobalSettingsDbModel config)
+        {
+            if(config?.FeaturesSettings?.EnableRelevantSummariesFeature != true)
+                return true;
+
+            var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+            {
+                ChatId = chat.ChatId,
+                Priority = BackgroundQueryPriority.Highest,// User is waiting!
+                DependenciesTags = [
+                    //BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
+                    //BackgroundQuerySystemTags.narrativeDirection.ToString(),
+                    //BackgroundQuerySystemTags.sceneTracker.ToString(),
+                ],// No dependencies at all
+                Tags = [BackgroundQuerySystemTags.relevantSummaries.ToString()],
             };
 
             if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)

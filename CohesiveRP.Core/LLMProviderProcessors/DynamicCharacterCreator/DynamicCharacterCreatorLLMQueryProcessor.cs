@@ -1,7 +1,6 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
-using CohesiveRP.Core.CharacterCards.Loaders.CohesiveRPv1.BusinessObjects;
 using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator.BusinessObjects;
 using CohesiveRP.Core.PromptContext.Abstractions;
@@ -14,6 +13,7 @@ using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DTOs;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 
@@ -117,7 +117,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                 return true;
             } catch (Exception e)
             {
-                LoggingManager.LogToFile("e1a930bf-c017-4ec8-a088-ce2abe84c371", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
+                LoggingManager.LogToFile("ffbae5ea-622f-497d-9bd1-f3b31d04803b", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
                 backgroundQueryDbModel.RetryCount++;

@@ -22,5 +22,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Messages
         public string LinkMessageId { get; set; }
         
         public string Content { get; set; }
+
+        public string PreviousContent { get; set; }
+        public string Suggestions { get; set; }
     }
 }

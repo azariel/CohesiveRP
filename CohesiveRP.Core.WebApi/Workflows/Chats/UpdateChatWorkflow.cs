@@ -1,6 +1,7 @@
 ﻿using CohesiveRP.Common.Exceptions;
 using CohesiveRP.Common.WebApi;
 using CohesiveRP.Core.Services;
+using CohesiveRP.Core.Utils.Characters;
 using CohesiveRP.Core.WebApi.RequestDtos.Chat;
 using CohesiveRP.Core.WebApi.ResponseDtos.Chat;
 using CohesiveRP.Core.WebApi.Workflows.Chats.Abstractions;
@@ -74,6 +75,26 @@ namespace CohesiveRP.Core.WebApi.Workflows.Chats
                         Message = $"Couldn't update chat with id {requestDto.ChatId}. Lorebooks [{string.Join(",", missingLorebooks)}] were not found in storage."
                     };
                 }
+            }
+
+            // Update the messages in the chat (simple switch for now... I need to revise this)
+            if (chat.PersonaId != requestDto.PersonaId)
+            {
+                var oldPersona = await storageService.GetPersonaByIdAsync(chat.PersonaId);
+                var oldPersonaCharacterSheet = await storageService.GetCharacterSheetsByFuncAsync(f => f.PersonaId == chat.PersonaId);
+                string oldPersonaName = CharacterUtils.ComposeCharacterFullName(oldPersonaCharacterSheet?.FirstOrDefault()?.CharacterSheet?.FirstName ?? oldPersona?.Name, oldPersonaCharacterSheet?.FirstOrDefault()?.CharacterSheet?.LastName);
+
+                var newPersona = await storageService.GetPersonaByIdAsync(requestDto.PersonaId);
+                var newPersonaCharacterSheet = await storageService.GetCharacterSheetsByFuncAsync(f => f.PersonaId == requestDto.PersonaId);
+                string newPersonaName = CharacterUtils.ComposeCharacterFullName(newPersonaCharacterSheet?.FirstOrDefault()?.CharacterSheet?.FirstName ?? newPersona?.Name, newPersonaCharacterSheet?.FirstOrDefault()?.CharacterSheet?.LastName);
+
+                var hotMessages = await storageService.GetAllHotMessagesAsync(chat.ChatId);
+                foreach (var message in hotMessages.Messages)
+                {
+                    message.Content = message.Content.Replace(oldPersonaName, newPersonaName);
+                }
+
+                await storageService.UpdateHotMessagesAsync(hotMessages);
             }
 
             // Update the chat

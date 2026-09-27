@@ -7,6 +7,7 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.Characters.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.ChatCharactersRolls.BusinessObjects;
+using CohesiveRP.Storage.DTOs;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 

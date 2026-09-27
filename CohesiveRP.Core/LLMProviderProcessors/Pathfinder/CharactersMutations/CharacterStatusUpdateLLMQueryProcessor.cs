@@ -13,6 +13,7 @@ using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheetInstances.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Pathfinder.CharacterSheets.BusinessObjects;
+using CohesiveRP.Storage.DTOs;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
@@ -182,6 +183,9 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations
                         {
                             instance.CharacterSheet.LatentMoodForNextInteractionWithPlayer = update.LatentMoodForNextInteractionWithPlayer;
                         }
+
+                        update.RecentImportantEventsToAdd ??= Array.Empty<string>();
+                        update.RecentImportantEventsToRemove ??= Array.Empty<string>();
 
                         if (update.RecentImportantEventsToAdd.Length > 0 || update.RecentImportantEventsToRemove.Length > 0)
                         {

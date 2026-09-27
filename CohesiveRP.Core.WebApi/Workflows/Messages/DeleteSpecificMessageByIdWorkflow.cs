@@ -31,6 +31,20 @@ public class DeleteSpecificMessageByIdWorkflow : IDeleteSpecificMessageByIdWorkf
             };
         }
 
+        // Delete the dependent objs since they don't apply anymore
+        // rolls
+        var chatCharacterRolls = await storageService.GetChatCharactersRollsByChatIdAsync(requestDto.ChatId);
+        chatCharacterRolls.ChatCharactersRolls.Clear();
+        chatCharacterRolls.CharacterNamesInScene.Clear();
+        chatCharacterRolls.PlayerDescription = string.Empty;
+        await storageService.UpdateChatCharactersRollsAsync(chatCharacterRolls);
+
+        // sceneTracker
+        var sceneTracker = await storageService.GetSceneTrackerAsync(requestDto.ChatId);
+        sceneTracker.Content = sceneTracker.PreviousContent;
+        sceneTracker.PreviousContent = string.Empty;
+        await storageService.CreateOrUpdateSceneTrackerAsync(sceneTracker, false);
+
         return new DeleteMessageResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,

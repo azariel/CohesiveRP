@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Storage.DataAccessLayer.Messages;
+﻿using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.QueryModels.Message;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Summary.Short
@@ -17,5 +18,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Summary.Short
         Task<bool> DeleteExtraTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteOverflowTermSummariesEntriesAsync(string chatId, string[] summariesIds);
         Task<bool> DeleteSummaryFromChatIdAsync(string chatId);
+
+        // administrative
+        Task<bool> UpdateSummaryAsync(SummaryDbModel dbModel);
     }
 }

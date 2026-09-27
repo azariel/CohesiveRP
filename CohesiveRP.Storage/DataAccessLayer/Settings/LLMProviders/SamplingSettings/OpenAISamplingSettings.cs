@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.SamplingSettings.ChatTemplateKw;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.SamplingSettings
 {
@@ -8,7 +9,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.SamplingSetti
         public float Temperature { get; set; } = 1.0f;
 
         [JsonPropertyName("min_p")]
-        public float MinP { get; set; } = 0.1f;// Min-P removes only tokens that are too unlikely relative to the best token, which tends to preserve creativity while filtering obvious garbage. This makes TopP paired with TopK alsmost irrelevant.
+        public float MinP { get; set; } = 0.05f;// Min-P removes only tokens that are too unlikely relative to the best token, which tends to preserve creativity while filtering obvious garbage. This makes TopP paired with TopK alsmost irrelevant.
 
         // DRY
         [JsonPropertyName("dry_multiplier")]
@@ -38,6 +39,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.SamplingSetti
 
         [JsonPropertyName("top_k")]
         public float TopK { get; set; } = 0.0f;
+
+        [JsonPropertyName("chat_template_kwargs")]
+        public ChatTemplateKwargs ChatTemplateKwargs { get; set; } = new();
         // --------------
     }
 }

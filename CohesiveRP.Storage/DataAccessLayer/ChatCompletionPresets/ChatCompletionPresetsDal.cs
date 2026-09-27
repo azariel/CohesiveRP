@@ -44,6 +44,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 // Generate a scene tracker object
                 dbContext.ChatCompletionPresets.Add(SceneTrackerCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(SceneTrackerValidatorCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(SceneTrackerRefinerCompletionPresetInjector.InjectPreset());
 
                 // Determine if a character needs to do a skill check
                 dbContext.ChatCompletionPresets.Add(SkillChecksInitiatorCompletionPresetInjector.InjectPreset());
@@ -58,6 +60,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 dbContext.ChatCompletionPresets.Add(ProseGuardianCompletionPresetInjector.InjectPreset());
                 dbContext.ChatCompletionPresets.Add(CohesionEnforcementCompletionPresetInjector.InjectPreset());
                 dbContext.ChatCompletionPresets.Add(NarrativeArchitectureCompletionPresetInjector.InjectPreset());
+
+                // Custom Thinking
+                dbContext.ChatCompletionPresets.Add(ReflectionCompletionPresetInjector.InjectPreset());
+
+                // Sumaries shrinker to only get relevant parts
+                dbContext.ChatCompletionPresets.Add(RelevantSummariesCompletionPresetInjector.InjectPreset());
 
                 // Poke the AI to update character status alterations (magical effects, body status, wounds)
                 // and the other slow-changing CharacterSheetInstance fields, outputting only the diff.

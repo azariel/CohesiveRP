@@ -33,7 +33,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture
                 var NarrativeArchitecture = dbContext.NarrativeArchitectures.FirstOrDefault(f => f.ChatId == queryModel.ChatId);
                 if (NarrativeArchitecture != null)
                 {
-                    LoggingManager.LogToFile("79813e58-7c6c-4dcc-94f7-0555087d307f", $"Error when querying Db on table cohesion enforcements. NarrativeArchitecture entity to create already exists with Id [{NarrativeArchitecture.NarrativeArchitectureId}].");
+                    LoggingManager.LogToFile("79813e58-7c6c-4dcc-94f7-0555087d307f", $"Error when querying Db on table narrative architectures. NarrativeArchitecture entity to create already exists with Id [{NarrativeArchitecture.NarrativeArchitectureId}].");
                     return null;
                 }
 

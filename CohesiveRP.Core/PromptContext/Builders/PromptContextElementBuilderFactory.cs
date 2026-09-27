@@ -44,6 +44,8 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new PromptContextSummaryMediumTermBuilder(storageService, contextElement, settings, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.SummaryShortTerm:
                     return new PromptContextSummaryShortTermBuilder(storageService, contextElement, settings, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.RelevantComputedSummariesOnly:
+                    return new PromptContextRelevantComputedSummariesOnlyBuilder(storageService, contextElement, settings, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.LoreByQuery:
                     return new PromptContextLoreByQueryBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.RelevantCharacters:
@@ -94,6 +96,10 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new PromptContextProseGuardianInstructionsBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.PathfinderSkillChecksDescriptor:
                     return new SkillChecksDescriptorBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.CohesionEnforcer:
+                    return new CohesionEnforcerBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.Reflections:
+                    return new ReflectionsBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 default:
                     throw new Exception($"Unhandled [{contextElement.Tag}].");
             }

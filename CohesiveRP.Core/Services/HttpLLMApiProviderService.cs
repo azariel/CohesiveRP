@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.HttpClient;
 using CohesiveRP.Common.Utils;
@@ -216,18 +215,31 @@ namespace CohesiveRP.Core.Services
             }
         }
 
-        private static string? TryExtractContentDelta(string json)
+        private static string TryExtractContentDelta(string json)
         {
             try
             {
                 using JsonDocument doc = JsonDocument.Parse(json);
 
-                return doc.RootElement
+                var candidate = doc.RootElement
                     .GetProperty("choices")[0]
                     .GetProperty("delta")
                     .TryGetProperty("content", out JsonElement content)
                         ? content.GetString()
                         : null;
+
+                if(candidate == null)
+                {
+                    candidate = doc.RootElement
+                    .GetProperty("choices")[0]
+                    .GetProperty("delta")
+                    .TryGetProperty("reasoning_content", out JsonElement reasoningContent)
+                        ? reasoningContent.GetString()
+                        : null;
+                }
+
+                return candidate;
+
             } catch (Exception)
             {
                 return null; // malformed frame — skip silently
@@ -242,7 +254,7 @@ namespace CohesiveRP.Core.Services
                 return null;
             }
 
-            using HttpRestClient httpClient = new HttpRestClient();
+            using HttpRestClient httpClient = new HttpRestClient(selectedLLMApiQueryDbModel?.AuthBearerValue);
 
             ILLMApiQueryPayloadBuilder llmApiQueryPayloadBuilder = llmApiQueryPayloadBuilderFactory.Create(selectedLLMApiQueryDbModel.Type);
             string payload = llmApiQueryPayloadBuilder.BuildPayload(promptContext, selectedLLMApiQueryDbModel);

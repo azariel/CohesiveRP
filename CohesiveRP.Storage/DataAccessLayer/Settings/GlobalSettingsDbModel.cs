@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using CohesiveRP.Storage.DataAccessLayer.Settings.ChatCompletionPresets;
+using CohesiveRP.Storage.DataAccessLayer.Settings.Features;
 using CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders;
 using CohesiveRP.Storage.DataAccessLayer.Settings.Summary;
 using CohesiveRP.Storage.JsonConverters;
@@ -30,5 +31,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings
 
         [JsonValueConverter]
         public ChatCompletionPresetsMap ChatCompletionPresetsMap { get; set; }
+
+        [JsonValueConverter]
+        public FeaturesSettings FeaturesSettings { get; set; }
     }
 }
