@@ -17,6 +17,16 @@ import type { LorebookUpdateRequestDto } from "../../../../RequestDto/lorebooks/
 import LorebookEntryComponent from "./lorebookEntry/LorebookEntryComponent";
 import type { LorebookEntry } from "../../../../ResponsesDto/lorebooks/BusinessObjects/LorebookEntry";
 
+interface KeyedEntry {
+  clientKey: string;
+  entry: LorebookEntry;
+}
+
+const generateClientKey = (): string =>
+  (typeof crypto !== "undefined" && "randomUUID" in crypto)
+    ? crypto.randomUUID()
+    : `entry-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 export default function LorebookDetailsComponent() {
   const { activeModule } = sharedContext<SharedContextLorebookType>();
   const { navigateTo } = sharedContext();
@@ -26,13 +36,17 @@ export default function LorebookDetailsComponent() {
   const [avatarImageError, setAvatarImageError] = useState(false);
   const [avatarCacheBuster, setAvatarCacheBuster] = useState<number>(Date.now());
   const newAvatarFileInputRef = useRef<HTMLInputElement | null>(null);
-  
+
   // saving state
   const [lorebookResponse, setLorebookResponse] = useState<LorebookResponseDto | null>(null);
   const [lorebookName, setLorebookName] = useState<string>("");
-  const [entries, setEntries] = useState<LorebookEntry[]>([]);
+  const [keyedEntries, setKeyedEntries] = useState<KeyedEntry[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [operationError, setOperationError] = useState(false);
+
+  // drag-and-drop reorder state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (didComponentMountAlready.current)
@@ -73,13 +87,46 @@ export default function LorebookDetailsComponent() {
         console.log(`Lorebooks details fetched successfully.`);
         setLorebookResponse(response);
         setLorebookName(response?.lorebook?.name ?? "");
-        setEntries(response?.lorebook?.entries ?? []);
+        setKeyedEntries(
+          (response?.lorebook?.entries ?? []).map(entry => ({
+            clientKey: generateClientKey(),
+            entry,
+          }))
+        );
       } catch (error) {
         console.error("Fetch lorebook error:", error);
       } finally {
         setIsLoadingLorebookDetails(false);
       }
     };
+
+    const createEmptyLorebookEntry = (nextInsertionOrder: number): LorebookEntry => ({
+      keys: [],
+      content: "",
+      enabled: true,
+      insertionOrder: nextInsertionOrder,
+      useRegex: false,
+      constant: false,
+      depth: 0,
+      caseSensitive: false,
+      comment: "",
+      secondaryKeys: [],
+      vectorized: false,
+      matchWholeWord: false,
+      probabilityPercentage: 100,
+      positionInPrompt: 0,
+      stickyForNbMessages: 0,
+      cooldown: 0,
+      ignoreTokensBudget: false,
+      delay: 0,
+      excludeRecursion: false,
+      preventRecursion: false,
+      onlyTriggeredByRecursion: false,
+      tags: [],
+      name: "",
+      entryId: "",
+      selectiveLogicBetweenKeysAndSecondaryKeys: 0, // KeysEvaluationLogicGate.MainKeysOnly
+    });
 
   const handleSave = async () => {
     if (!activeModule?.selectedLorebookId || isSaving)
@@ -91,7 +138,7 @@ export default function LorebookDetailsComponent() {
     try {
       const payload:LorebookUpdateRequestDto = {
         name: lorebookName,
-        entries: entries,
+        entries: keyedEntries.map(k => k.entry),
       };
       const response = await putToServerApiAsync(`api/lorebooks/${activeModule.selectedLorebookId}`, payload);
 
@@ -173,7 +220,46 @@ export default function LorebookDetailsComponent() {
   };
 
   const handleEntryChange = (index: number, updated: LorebookEntry) => {
-    setEntries(prev => prev.map((e, i) => (i === index ? updated : e)));
+    setKeyedEntries(prev => prev.map((k, i) => (i === index ? { ...k, entry: updated } : k)));
+  };
+
+  const handleAddEntry = () => {
+    setKeyedEntries((prev) => {
+      const nextOrder = prev.length > 0
+        ? Math.max(...prev.map(k => k.entry.insertionOrder ?? 0)) + 1
+        : 0;
+      return [{ clientKey: generateClientKey(), entry: createEmptyLorebookEntry(nextOrder) }, ...prev];
+    });
+  };
+
+  const handleRemoveEntry = (index: number) => {
+    setKeyedEntries(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDragStart = (index: number) => setDraggedIndex(index);
+
+  const handleDragEnter = (index: number) => {
+    if (draggedIndex === null || draggedIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  // The move happens on drop; insertionOrder is renumbered to match the new
+  // visual order so what gets saved actually matches what you dragged.
+  const handleDrop = (targetIndex: number) => {
+    setKeyedEntries(prev => {
+      if (draggedIndex === null || draggedIndex === targetIndex) return prev;
+      const updated = [...prev];
+      const [moved] = updated.splice(draggedIndex, 1);
+      updated.splice(targetIndex, 0, moved);
+      return updated.map((k, i) => ({ ...k, entry: { ...k.entry, insertionOrder: i } }));
+    });
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   return (
@@ -223,18 +309,38 @@ export default function LorebookDetailsComponent() {
             </div>
             <div className={styles.detailsContainer}>
               <div className={styles.lorebookEntriesContainer}>
-                <label className={styles.lorebookEntriesLabel}>Entries</label>
-                {entries?.length ?? 0 > 0 ? (
-                  entries.map((entry, index) => {
-                    return (
-                      <Fragment key={`Entry_${index}`}>
-                        <LorebookEntryComponent
-                          entry={entry}
-                          onEntryChange={(updated) => handleEntryChange(index, updated)}
-                        />
-                      </Fragment>
-                    );
-                  })
+                <div className={styles.lorebookEntriesHeader}>
+                  <div className={styles.lorebookEntriesTitleGroup}>
+                    <span className={styles.lorebookEntriesAccent} />
+                    <div className={styles.lorebookEntriesTitleText}>
+                      <label className={styles.lorebookEntriesLabel}>Entries</label>
+                      <span className={styles.lorebookEntriesCount}>
+                        {keyedEntries.length} {keyedEntries.length === 1 ? "entry" : "entries"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button type="button" className={styles.addEntryButton} onClick={handleAddEntry}>
+                    <MdAddBox className={styles.addEntryButtonIcon} />
+                    <span>New entry</span>
+                  </button>
+                </div>
+                {keyedEntries.length > 0 ? (
+                  keyedEntries.map((keyed, index) => (
+                    <Fragment key={keyed.clientKey}>
+                      <LorebookEntryComponent
+                        entry={keyed.entry}
+                        onEntryChange={(updated) => handleEntryChange(index, updated)}
+                        onDelete={() => handleRemoveEntry(index)}
+                        onDragStart={() => handleDragStart(index)}
+                        onDragEnter={() => handleDragEnter(index)}
+                        onDrop={() => handleDrop(index)}
+                        onDragEnd={handleDragEnd}
+                        isDragging={draggedIndex === index}
+                        isDragOver={dragOverIndex === index && draggedIndex !== index}
+                      />
+                    </Fragment>
+                  ))
                 ) : (
                   <p />
                 )}

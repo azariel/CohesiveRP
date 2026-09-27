@@ -195,7 +195,7 @@ namespace CohesiveRP.Core.Services
         public async Task<LorebookDbModel> GetLorebookByIdAsync(string lorebookId) => await lorebooksDal.GetLorebookByIdAsync(lorebookId);
         public async Task<bool> UpdateLorebookAsync(LorebookDbModel lorebookDbModel) => await lorebooksDal.UpdateLorebookAsync(lorebookDbModel);
         public async Task<bool> DeleteLorebookAsync(LorebookDbModel lorebookDbModel) => await lorebooksDal.DeleteLorebookAsync(lorebookDbModel);
-        public async Task<LorebookDbModel> AddEmptyLorebookAsync() => await lorebooksDal.AddLorebookAsync(new AddLorebookQueryModel { Name = "New Lorebook", Entries = [] });
+        public async Task<LorebookDbModel> AddEmptyLorebookAsync() => await lorebooksDal.AddLorebookAsync(new AddLorebookQueryModel { Name = $"New Lorebook ({Guid.NewGuid()})", Entries = [] });
         public async Task<LorebookDbModel> AddLorebookAsync(LorebookDbModel dbModel) => await lorebooksDal.AddLorebookAsync(dbModel);
 
         // Lorebook Instances

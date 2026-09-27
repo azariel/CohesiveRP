@@ -1,9 +1,300 @@
-.lorebookEntryComponent {
-    width: 100%;
-    padding: 0.5em;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 0.5em;
+.card {
+   width: 100%;
+  box-sizing: border-box;
+  background-color: #171726;
+  border: 1px solid #2e2e48;
+  border-left: 3px solid #33aee7;
+  border-radius: 8px;
+  margin-bottom: 0.6em;
+  overflow: hidden;
+  flex-shrink: 0;                 /* ← add this */
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.card:hover { border-color: #3a3a5c; }
+
+.cardDisabled {
+  border-left-color: #4a4a63;
+  opacity: 0.55;
+}
+
+.cardHeader {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.7em 0.8em;
+  cursor: pointer;
+}
+
+.chevron {
+  flex-shrink: 0;
+  font-size: 1.2em;
+  color: #8a8aa3;
+  transition: transform 0.15s ease;
+}
+
+.chevronOpen { transform: rotate(180deg); }
+
+.headerText {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1em;
+}
+
+.entryTitle {
+  font-family: "Georgia", serif;
+  color: #f6911d;
+  font-size: 1em;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entryKeysPreview {
+  font-size: 0.75em;
+  color: #8a8aa3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.orderBadge {
+  flex-shrink: 0;
+  font-size: 0.7em;
+  color: #8a8aa3;
+  background-color: #12121f;
+  border: 1px solid #2e2e48;
+  border-radius: 999px;
+  padding: 0.15em 0.6em;
+}
+
+.toggleSwitch {
+  flex-shrink: 0;
+  position: relative;
+  width: 2.1em;
+  height: 1.2em;
+  cursor: pointer;
+}
+
+.toggleSwitch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.toggleTrack {
+  position: absolute;
+  inset: 0;
+  background-color: #2e2e48;
+  border-radius: 999px;
+  transition: background-color 0.15s ease;
+}
+
+.toggleTrack::before {
+  content: "";
+  position: absolute;
+  top: 0.15em;
+  left: 0.15em;
+  width: 0.9em;
+  height: 0.9em;
+  background-color: #dfdfdf;
+  border-radius: 50%;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.toggleSwitch input:checked + .toggleTrack { background-color: #33aee7; }
+.toggleSwitch input:checked + .toggleTrack::before {
+  transform: translateX(0.9em);
+  background-color: #0d0d16;
+}
+.toggleSwitch input:focus-visible + .toggleTrack {
+  outline: 2px solid #33aee7;
+  outline-offset: 2px;
+}
+
+.deleteIcon {
+  flex-shrink: 0;
+  font-size: 1.15em;
+  color: #6b6b85;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.deleteIcon:hover { color: #ff2727; }
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  padding: 0.7em 0.8em 0.8em;
+  border-top: 1px solid #2e2e48;
+}
+
+.tabBar {
+  display: flex;
+  flex-direction: row;
+  gap: 0.4em;
+  border-bottom: 1px solid #2e2e48;
+  padding-bottom: 0.6em;
+}
+
+.tabButton {
+  background: transparent;
+  border: none;
+  color: #8a8aa3;
+  font-size: 0.8em;
+  font-family: inherit;
+  padding: 0.3em 0.7em;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.tabButton:hover { color: #dfdfdf; }
+
+.tabButtonActive {
+  color: #33aee7;
+  background-color: rgba(51, 174, 231, 0.1);
+}
+
+.tabPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+
+.fieldLabel {
+  font-size: 0.7em;
+  color: #8a8aa3;
+}
+
+.textInput,
+.numberInput,
+.selectInput,
+.contentInput,
+.commentInput {
+  box-sizing: border-box;
+  width: 100%;
+  background-color: #12121f;
+  color: #e8e8f0;
+  border: 1px solid #2e2e48;
+  border-radius: 6px;
+  padding: 0.5em 0.6em;
+  font-size: 0.9em;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.contentInput { min-height: 8.5em; resize: vertical; line-height: 1.5; }
+.commentInput { min-height: 6.5em; resize: vertical; line-height: 1.4; }
+
+.selectInput { appearance: none; cursor: pointer; }
+
+.textInput:focus,
+.numberInput:focus,
+.selectInput:focus,
+.contentInput:focus,
+.commentInput:focus {
+  border-color: #33aee7;
+}
+
+.numberGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6em;
+}
+
+.optionsRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.chipToggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.4em 0.8em;
+  background-color: #12121f;
+  border: 1px solid #2e2e48;
+  border-radius: 999px;
+  font-size: 0.8em;
+  color: #8a8aa3;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.chipToggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+.chipToggleActive {
+  border-color: #33aee7;
+  color: #33aee7;
+  background-color: rgba(51, 174, 231, 0.08);
+}
+
+.chipToggle:has(input:focus-visible) {
+  outline: 2px solid #33aee7;
+  outline-offset: 2px;
+}
+
+.entryIdRow {
+  font-size: 0.7em;
+  color: #6b6b85;
+  padding-top: 0.3em;
+  border-top: 1px solid #2e2e48;
+}
+
+.dragHandle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: #6b6b85;
+  cursor: grab;
+  touch-action: none;
+  transition: color 0.15s ease;
+}
+
+.dragHandle:hover {
+  color: #dfdfdf;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.cardDragging {
+  opacity: 0.4;
+}
+
+.cardDragOver {
+  border-top: 2px solid #33aee7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dragHandle {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .chevron, .toggleTrack, .toggleTrack::before, .chipToggle, .tabButton {
+    transition: none;
+  }
 }

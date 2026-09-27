@@ -9,6 +9,7 @@ import { getFromServerApiAsync, postToServerApiAsync } from "../../../../utils/h
 import type { ServerApiExceptionResponseDto } from "../../../../ResponsesDto/Exceptions/ServerApiExceptionResponseDto";
 import type { LorebooksResponseDto } from "../../../../ResponsesDto/lorebooks/LorebooksResponseDto";
 import type { LorebookResponseDto } from "../../../../ResponsesDto/lorebooks/LorebookResponseDto";
+import type { LorebookUpdateRequestDto } from "../../../../RequestDto/lorebooks/LorebookUpdateRequestDto";
 
 /* Store */
 import { sharedContext } from '../../../../store/AppSharedStoreContext';
@@ -16,7 +17,6 @@ import type { SharedContextLorebookType } from "../../../../store/SharedContextL
 import { GetAvatarPathFromLorebookId, GetFallbackEmpty } from "../../../../utils/avatarUtils";
 import { GetLorebookNameFontSize } from "../../../../utils/fontSizeUtils";
 import { MdAddBox } from "react-icons/md";
-import type { SharedContextType } from "../../../../store/SharedContextType";
 import type { Lorebook } from "../../../../ResponsesDto/lorebooks/BusinessObjects/Lorebook";
 import type { SharedContextChatType } from "../../../../store/SharedContextChatType";
 
@@ -29,6 +29,7 @@ export default function LorebookSelectionComponent() {
   const [lorebookDefinitions, setLorebookDefinitions] = useState<LorebooksResponseDto>();
   const [isNetworkDown, setIsNetworkDown] = useState(false);
   const [isImportingLorebook, setIsImportingLorebook] = useState(false);
+  const [isCreatingLorebook, setIsCreatingLorebook] = useState(false);
 
   useEffect(() => {
     if (didComponentMountAlready.current)
@@ -66,11 +67,44 @@ export default function LorebookSelectionComponent() {
   }, []);
   
   const handleCreateNewLorebookClick = async () => {
-    let module = {
-      moduleName: 'lorebooks'
-    } as SharedContextType;
+  if (isCreatingLorebook)
+    return;
 
-    navigateTo(module);
+  setIsCreatingLorebook(true);
+    try {
+      const response = await postToServerApiAsync<LorebookResponseDto>(
+        "api/lorebooks",
+        {} as LorebookUpdateRequestDto
+      );
+
+      const serverApiException = response as ServerApiExceptionResponseDto | null;
+      if (!response || response.code != 200 || serverApiException?.message) {
+        console.error(`Create lorebook failed. Error Code:[${response?.code}], Message: [${serverApiException?.message}].`);
+        return;
+      }
+
+      const newLorebook = response.lorebook;
+      if (!newLorebook) {
+        console.error("Create lorebook succeeded but no lorebook was returned.");
+        return;
+      }
+
+      setLorebookDefinitions((prev) => {
+        if (!prev)
+          return { code: 200, lorebooks: [newLorebook] } as LorebooksResponseDto;
+
+        return { ...prev, lorebooks: [newLorebook, ...(prev.lorebooks || [])] };
+      });
+
+      navigateTo({
+        moduleName: "lorebookDetails",
+        selectedLorebookId: newLorebook.lorebookId,
+      } as SharedContextLorebookType);
+    } catch (error) {
+      console.error("Create lorebook error:", error);
+    } finally {
+      setIsCreatingLorebook(false);
+    }
   };
 
   const handleSpecificLorebookClick = async (lorebook: Lorebook) => {
@@ -178,16 +212,21 @@ const handleAddLorebookClick = () => {
           <div className={styles.lorebookAddNewLorebookContainer}>
             <ImSpinner2 className={styles.isLoadingSpinner} />
           </div>
+        ) : isNetworkDown ? (
+          <div className={styles.lorebookAddNewLorebookContainerDisconnected}>
+            <AiOutlineDisconnect className={styles.lorebookAddNewLorebookBtn} />
+          </div>
         ) : (
-          isNetworkDown ? (
-            <div className={styles.lorebookAddNewLorebookContainerDisconnected}>
-              <AiOutlineDisconnect className={styles.lorebookAddNewLorebookBtn} />
-            </div>
-          ) : (
-            <div className={styles.lorebookAddNewLorebookContainer} onClick={async () => await handleCreateNewLorebookClick()}>
+          <div
+            className={styles.lorebookAddNewLorebookContainer}
+            onClick={isCreatingLorebook ? undefined : handleCreateNewLorebookClick}
+          >
+            {isCreatingLorebook ? (
+              <ImSpinner2 className={styles.isLoadingSpinner} />
+            ) : (
               <MdAddBox className={styles.lorebookAddNewLorebookBtn} />
-            </div>
-          )
+            )}
+          </div>
         )}
         {isLoading || lorebookDefinitions?.lorebooks && lorebookDefinitions.lorebooks.length > 0 ? (
           lorebookDefinitions?.lorebooks?.map((element, index) => (
