@@ -128,8 +128,12 @@ public class AddNewMessageWorkflow : IChatAddNewMessageWorkflow
             ChatId = requestDto.ChatId,
             Priority = BackgroundQueryPriority.Highest,// User is waiting!
             DependenciesTags = [
-                BackgroundQuerySystemTags.sceneTracker.ToString(),// before
+                BackgroundQuerySystemTags.relevantSummaries.ToString(),// before
                 BackgroundQuerySystemTags.skillChecksInitiator.ToString(),// before
+                BackgroundQuerySystemTags.sceneTracker.ToString(),// before
+                BackgroundQuerySystemTags.sceneTrackerValidator.ToString(),// before
+                BackgroundQuerySystemTags.sceneTrackerRefiner.ToString(),// before
+                BackgroundQuerySystemTags.charactersCohesionEnforcement.ToString(),// before
                 BackgroundQuerySystemTags.narrativeDirection.ToString(),// before
                 BackgroundQuerySystemTags.reflection.ToString(),// before, if configured
                 BackgroundQuerySystemTags.proseGuardian.ToString(),// after++

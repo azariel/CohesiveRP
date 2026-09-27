@@ -8,6 +8,7 @@ using CohesiveRP.Core.DtoConverters;
 using CohesiveRP.Core.DtoConverters.Abstractions;
 using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Core.LLMProviderProcessors.Queue;
+using CohesiveRP.Core.LLMProviderProcessors.SceneTracker;
 using CohesiveRP.Core.PromptContext;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
@@ -39,7 +40,7 @@ using CohesiveRP.Core.WebApi.Workflows.Settings;
 using CohesiveRP.Core.WebApi.Workflows.Settings.Abstractions;
 using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
@@ -160,6 +161,7 @@ namespace CohesiveRP.Core.WebApi
 
             // Processors
             services.AddSingleton<ILLMProviderProcessorQueuer, LLMProviderProcessorQueuer>();
+            services.AddSingleton<ISceneTrackerPostProcess, SceneTrackerPostProcess>();
 
             // DataAccessLayers
             services.AddDbContextFactory<StorageDbContext>();
@@ -183,7 +185,7 @@ namespace CohesiveRP.Core.WebApi
             services.AddSingleton<IChatCharactersRollsDal, ChatCharactersRollsDal>();
             services.AddSingleton<IInteractiveUserInputDal, InteractiveUserInputDal>();
             services.AddSingleton<IIllustrationQueryDal, IllustrationQueryDal>();
-            services.AddSingleton<ICohesionEnforcementsDal, CohesionEnforcementDal>();
+            services.AddSingleton<ICharactersCohesionEnforcementsDal, CharactersCohesionEnforcementDal>();
             services.AddSingleton<INarrativeArchitecturesDal, NarrativeArchitectureDal>();
             services.AddSingleton<INarrativeDirectionsDal, NarrativeDirectionDal>();
             services.AddSingleton<IProseGuardiansDal, ProseGuardianDal>();

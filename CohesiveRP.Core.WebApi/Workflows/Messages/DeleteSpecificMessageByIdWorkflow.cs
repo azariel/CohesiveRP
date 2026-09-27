@@ -31,20 +31,19 @@ public class DeleteSpecificMessageByIdWorkflow : IDeleteSpecificMessageByIdWorkf
             };
         }
 
-        var currentRollsOnCurrentChat = await storageService.GetChatCharactersRollsByChatIdAsync(requestDto.ChatId);
-        if (currentRollsOnCurrentChat?.ChatCharactersRolls != null && currentRollsOnCurrentChat.ChatCharactersRolls.Any())
-        {
-            foreach (var characterRoll in currentRollsOnCurrentChat.ChatCharactersRolls.Where(w => w.Rolls != null && w.Rolls.Count > 0))
-            {
-                foreach (var subRolls in characterRoll.Rolls)
-                {
-                    subRolls.NbRemainingRollFreeze++;
-                    subRolls.NbRemainingInjectionTurns++;
-                }
-            }
+        // Delete the dependent objs since they don't apply anymore
+        // rolls
+        var chatCharacterRolls = await storageService.GetChatCharactersRollsByChatIdAsync(requestDto.ChatId);
+        chatCharacterRolls.ChatCharactersRolls.Clear();
+        chatCharacterRolls.CharacterNamesInScene.Clear();
+        chatCharacterRolls.PlayerDescription = string.Empty;
+        await storageService.UpdateChatCharactersRollsAsync(chatCharacterRolls);
 
-            await storageService.UpdateChatCharactersRollsAsync(currentRollsOnCurrentChat);
-        }
+        // sceneTracker
+        var sceneTracker = await storageService.GetSceneTrackerAsync(requestDto.ChatId);
+        sceneTracker.Content = sceneTracker.PreviousContent;
+        sceneTracker.PreviousContent = string.Empty;
+        await storageService.CreateOrUpdateSceneTrackerAsync(sceneTracker, false);
 
         return new DeleteMessageResponseDto
         {

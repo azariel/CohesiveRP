@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
@@ -122,7 +122,7 @@ namespace CohesiveRP.Storage.Common
         public DbSet<IllustrationQueryDbModel> IllustrationQueries { get; set; }
 
         // Chat Additions
-         public DbSet<CohesionEnforcementDbModel> CohesionEnforcements { get; set; }
+         public DbSet<CharactersCohesionEnforcementDbModel> CharactersCohesionEnforcements { get; set; }
          public DbSet<ProseGuardianDbModel> ProseGuardians { get; set; }
          public DbSet<NarrativeDirectionDbModel> NarrativeDirections { get; set; }
          public DbSet<NarrativeArchitectureDbModel> NarrativeArchitectures { get; set; }

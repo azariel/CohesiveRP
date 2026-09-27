@@ -16,11 +16,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 {
     /// <summary>
     /// DataAccessLayer around Global Settings.
-    /// 
-    /// Pre-Main: SceneTracker, SkillChecksInitiator, ProseGuardian, NarrativeDirection
-    /// Main: Main
-    /// After-Main: CohesionEnforcement
-    /// Downtime: Summarize, SummariesMerge, NarrativeArchitecture
     /// </summary>
     public class GlobalSettingsDal : StorageDal, IGlobalSettingsDal
     {
@@ -29,43 +24,49 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         // -----------
         // Dev-01_HOME_PRIVATE
         // --- Local
-        private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.0.237:5001/v1/chat/completions";
-        private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";
+        //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.0.237:5001/v1/chat/completions";
+        //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";
 
-        private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
-        [
+        //private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
+        //[
 
-            ChatCompletionPresetType.SkillChecksInitiator,// PRE #1
-            ChatCompletionPresetType.NarrativeDirection,// PRE #1
-            ChatCompletionPresetType.Main,
+        //    ChatCompletionPresetType.SkillChecksInitiator,// PRE #1
+        //    ChatCompletionPresetType.NarrativeDirection,// PRE #1
+        //    ChatCompletionPresetType.CharactersCohesionEnforcement,// PRE
+        //    ChatCompletionPresetType.Main,
+        //    ChatCompletionPresetType.CharactersAdherenceEnforcement,// POST
 
-            ChatCompletionPresetType.CohesionEnforcement,// POST
-            ChatCompletionPresetType.CharacterStatusUpdate,// POST
+        //    ChatCompletionPresetType.CharacterStatusUpdate,// POST
 
-            ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
-            ChatCompletionPresetType.DynamicCharacterCreation,
-            ChatCompletionPresetType.DynamicCharacterSheetCreation,
-            ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
-        ];
+        //    ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
+        //    ChatCompletionPresetType.DynamicCharacterCreation,
+        //    ChatCompletionPresetType.DynamicCharacterSheetCreation,
+        //    ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
+        //];
 
-        private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets = [
-            ChatCompletionPresetType.SceneTracker,// PRE #1
-            ChatCompletionPresetType.RelevantSummaries,// PRE #2 (after sceneTracker)
-            ChatCompletionPresetType.Reflection,// PRE #3
+        //private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets = [
+        //    ChatCompletionPresetType.SceneTracker,// PRE #1
+        //    ChatCompletionPresetType.SceneTrackerRefiner,// PRE
+        //    ChatCompletionPresetType.SceneTrackerValidator,// PRE
+        //    ChatCompletionPresetType.RelevantSummaries,// PRE #2 (after sceneTracker)
+        //    ChatCompletionPresetType.Reflection,// PRE #3
 
-            ChatCompletionPresetType.SkillChecksDescriptor,// During Main
-            ChatCompletionPresetType.ProseGuardian,// POST
-            
-            ChatCompletionPresetType.NarrativeArchitecture,// POST+ (secretPlot)
-            ChatCompletionPresetType.Summarize,// POST++
-            ChatCompletionPresetType.SummariesMerge,// POST++
-        ];
-        private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> DSchatCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
+        //    ChatCompletionPresetType.ProseEdition,// POST
+        //    ChatCompletionPresetType.StyleEdition,// POST
+
+        //    ChatCompletionPresetType.SkillChecksDescriptor,// During Main
+        //    ChatCompletionPresetType.ProseGuardian,// POST
+
+        //    ChatCompletionPresetType.NarrativeArchitecture,// POST+ (secretPlot)
+        //    ChatCompletionPresetType.Summarize,// POST++
+        //    ChatCompletionPresetType.SummariesMerge,// POST++
+        //];
+        //private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> DSchatCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
         // -----------
 
 
@@ -73,37 +74,44 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
         // Dev-02_WORK_PRIVATE
         // --- Local
-        //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
-        //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
+        private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
+        private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
 
-        //private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
-        //[
-        //    ChatCompletionPresetType.NarrativeDirection,// PRE
-        //    ChatCompletionPresetType.SceneTracker,// PRE
-        //    ChatCompletionPresetType.SkillChecksInitiator,// PRE
-        //    ChatCompletionPresetType.Reflection,// PRE+
-        //    ChatCompletionPresetType.RelevantSummaries,// PRE+
-        //    ChatCompletionPresetType.SkillChecksDescriptor,// During Main
-        //    ChatCompletionPresetType.Main,// Main
-        //    ChatCompletionPresetType.ProseGuardian,// POST
-        //    ChatCompletionPresetType.CharacterStatusUpdate,// POST
-        //    ChatCompletionPresetType.CohesionEnforcement,// POST
-        //    ChatCompletionPresetType.Summarize,// POST++
-        //    ChatCompletionPresetType.SummariesMerge,// POST++
-        //    ChatCompletionPresetType.NarrativeArchitecture,// POST (secretPlot)
-        //    ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
-        //    ChatCompletionPresetType.DynamicCharacterCreation,
-        //    ChatCompletionPresetType.DynamicCharacterSheetCreation,
-        //    ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
-        //];
+        private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
+        [
+            ChatCompletionPresetType.RelevantSummaries,// PRE+
+            ChatCompletionPresetType.SkillChecksInitiator,// PRE
+            ChatCompletionPresetType.SceneTracker,// PRE
+            ChatCompletionPresetType.SceneTrackerValidator,// PRE
+            ChatCompletionPresetType.SceneTrackerRefiner,// PRE
+            ChatCompletionPresetType.NarrativeDirection,// PRE
+            ChatCompletionPresetType.Reflection,// PRE+
+            ChatCompletionPresetType.CharactersCohesionEnforcement,// PRE
+            ChatCompletionPresetType.SkillChecksDescriptor,// During Main
+            ChatCompletionPresetType.Main,// Main
+            ChatCompletionPresetType.CharactersAdherenceEnforcement,// POST
+            ChatCompletionPresetType.ProseEdition,// POST
+            ChatCompletionPresetType.StyleEdition,// POST
 
-        //private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> DSchatCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
+            ChatCompletionPresetType.ProseGuardian,// POST++
+            ChatCompletionPresetType.CharacterStatusUpdate,// POST++
+            ChatCompletionPresetType.Summarize,// POST++
+            ChatCompletionPresetType.SummariesMerge,// POST++
+            ChatCompletionPresetType.NarrativeArchitecture,// POST (secretPlot)
+            
+            ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
+            ChatCompletionPresetType.DynamicCharacterCreation,
+            ChatCompletionPresetType.DynamicCharacterSheetCreation,
+            ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
+        ];
+
+        private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> DSchatCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
         // -----------
 
 
@@ -138,6 +146,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         //[
         //    ChatCompletionPresetType.CharacterStatusUpdate,// POST++
         //    ChatCompletionPresetType.RelevantSummaries,// PRE+
+        //    ChatCompletionPresetType.SceneTrackerValidator,// PRE
         //    ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
         //    ChatCompletionPresetType.DynamicCharacterCreation,
         //    ChatCompletionPresetType.DynamicCharacterSheetCreation,
@@ -183,6 +192,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     FeaturesSettings = new() {
                         EnableRelevantSummariesFeature = true,
+                        EnableComfyUI = false,
                     },
                     // TODO: replace this dev option
                     LLMProviders = new List<LLMProviderConfig>()
@@ -579,8 +589,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             },
                             new ChatCompletionPresetsMapElement
                             {
-                                Type = ChatCompletionPresetType.CohesionEnforcement,
-                                ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_COMPLETION_PRESET,
+                                Type = ChatCompletionPresetType.CharactersCohesionEnforcement,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_CHARACTERS_COHESION_ENCORCEMENT_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                             new ChatCompletionPresetsMapElement
@@ -605,6 +615,36 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             {
                                 Type = ChatCompletionPresetType.RelevantSummaries,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_RELEVANT_SUMMARIES_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.SceneTrackerValidator,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_TRACKER_VALIDATOR_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.SceneTrackerRefiner,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_TRACKER_REFINER_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.CharactersAdherenceEnforcement,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_CHARACTER_ADHERENCE_ENFORCEMENT_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.ProseEdition,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_PROSE_EDITION_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.StyleEdition,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_STYLE_EDITION_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                         }

@@ -1,5 +1,4 @@
-﻿using CohesiveRP.Core.PromptContext;
-using CohesiveRP.Core.Services;
+﻿using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.QueryModels.BackgroundQuery;

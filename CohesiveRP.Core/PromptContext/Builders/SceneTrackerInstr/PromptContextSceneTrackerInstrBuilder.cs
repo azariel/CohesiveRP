@@ -61,20 +61,28 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             string sceneTrackerMessagesContent = "";
             foreach (var message in messagesToInclude)
             {
-                sceneTrackerMessagesContent += $"<message>{message.Content}</message>{Environment.NewLine}";
+                sceneTrackerMessagesContent += $"<message>{message.SourceType}:{Environment.NewLine}{message.Content}</message>{Environment.NewLine}";
             }
 
             // TODO: if it's stale, what should we do? cut it? may lead to inconsistencies... hm
-            var lastSceneTracker = await storageService.GetSceneTrackerAsync(chatDbModel.ChatId);
+            var sceneTracker = await storageService.GetSceneTrackerAsync(chatDbModel.ChatId);
+
+            string suggestions = string.Empty;
+
+            if(!string.IsNullOrWhiteSpace(sceneTracker?.Suggestions))
+            {
+                suggestions = sceneTracker.Suggestions;
+            }
 
             // Also inject the Scene Analyzer relevant information
             //var sceneAnalysis = await storageService.GetSceneAnalyzerAsync(chatDbModel.ChatId);
             //StringBuilder sceneAnalysisInjection = new();
 
             //<last_scene_analysis>{Environment.NewLine}{sceneAnalysisInjection.ToString().InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</last_scene_analysis>
-            return ($"{Environment.NewLine}{Environment.NewLine}<scene_tracker>{Environment.NewLine}Details on the current scene in the story{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
+            return ($"<scene_tracker_details>{Environment.NewLine}Details on the current scene in the story{Environment.NewLine}{promptContextFormatElement?.Options?.Format?
                 .Replace("{{messages_after_last_scene_tracker}}", sceneTrackerMessagesContent)
-                .Replace("{{last_scene_tracker}}", lastSceneTracker?.Content ?? "Empty. Generate a new scene tracker.")}{Environment.NewLine}</scene_tracker>{Environment.NewLine}{Environment.NewLine}",
+                .Replace("{{last_scene_tracker}}", sceneTracker?.PreviousContent ?? "Empty. Generate a new scene tracker.")}{Environment.NewLine}</scene_tracker_details>{Environment.NewLine}{Environment.NewLine}"
+                .Replace("{{suggestions}}", suggestions),
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

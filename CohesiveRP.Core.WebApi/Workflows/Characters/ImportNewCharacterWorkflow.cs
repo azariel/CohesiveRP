@@ -272,19 +272,19 @@ public class ImportNewCharacterWorkflow : IImportNewCharacterWorkflow
     }
 
     // TODO
-    internal async Task<bool> QueueCharacterCardCleanupQueriesAsync(ChatDbModel chat)
-    {
-        var backgroundQueryModel = new CreateBackgroundQueryQueryModel
-        {
-            ChatId = chat.ChatId,
-            Priority = BackgroundQueryPriority.Low,
-            DependenciesTags = Enum.GetValues<BackgroundQuerySystemTags>().Except([BackgroundQuerySystemTags.dynamicCharacterCreation]).Select(s => s.ToString()).ToList(),
-            Tags = [BackgroundQuerySystemTags.characterCardDescriptionCleanup.ToString()],
-        };
+    //internal async Task<bool> QueueCharacterCardCleanupQueriesAsync(ChatDbModel chat)
+    //{
+    //    var backgroundQueryModel = new CreateBackgroundQueryQueryModel
+    //    {
+    //        ChatId = chat.ChatId,
+    //        Priority = BackgroundQueryPriority.Low,
+    //        DependenciesTags = Enum.GetValues<BackgroundQuerySystemTags>().Except([BackgroundQuerySystemTags.dynamicCharacterCreation]).Select(s => s.ToString()).ToList(),
+    //        Tags = [BackgroundQuerySystemTags.characterCardDescriptionCleanup.ToString()],
+    //    };
 
-        if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
-            return false;
+    //    if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)
+    //        return false;
 
-        return true;
-    }
+    //    return true;
+    //}
 }

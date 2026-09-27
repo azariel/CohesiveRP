@@ -5,7 +5,6 @@ using CohesiveRP.Core.WebApi.RequestDtos.Personas;
 using CohesiveRP.Core.WebApi.ResponseDtos.Characters;
 using CohesiveRP.Core.WebApi.Workflows.SceneTrackers.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
-using CohesiveRP.Storage.QueryModels.SceneTracker;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -33,7 +32,7 @@ public class UpdateSceneTrackerWorkflow : IUpdateSceneTrackerWorkflow
             };
         }
 
-        CreateSceneTrackerQueryModel queryModel = new CreateSceneTrackerQueryModel
+        SceneTrackerDbModel queryModel = new SceneTrackerDbModel
         {
             ChatId = requestDto.ChatId,
             Content = requestDto.SceneTracker.Content,

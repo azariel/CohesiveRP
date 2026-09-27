@@ -13,13 +13,13 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
             return new ChatCompletionPresetsDbModel
             {
                 Name = "Default-Cohesion-Enforcement-Prompt-Generator-Preset",
-                ChatCompletionPresetId = StorageConstants.DEFAULT_COHESION_ENCORCEMENT_COMPLETION_PRESET,
+                ChatCompletionPresetId = StorageConstants.DEFAULT_CHARACTERS_COHESION_ENCORCEMENT_COMPLETION_PRESET,
                 CreatedAtUtc = DateTime.UtcNow,
                 Format = new GlobalPromptContextFormat()
                 {
                     MaxTokensToGenerate = 4096,
-                    JsonSchemaName = "cohesion_enforcement_prompt_generator",
-                    JsonSchemaDocument = StrictJsonSchemaGenerator.Generate<CohesionEnforcementResult>(),
+                    JsonSchemaName = "characters-cohesion_enforcement_prompt_generator",
+                    JsonSchemaDocument = StrictJsonSchemaGenerator.Generate<CharactersCohesionEnforcementResult>(),
                     OrderedElementsWithinTheGlobalPromptContext =
                     [
                         new PromptContextFormatElement

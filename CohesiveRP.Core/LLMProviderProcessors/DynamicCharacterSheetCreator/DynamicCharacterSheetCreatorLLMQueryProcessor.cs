@@ -241,7 +241,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator
                 Tags = [BackgroundQuerySystemTags.illustrationPromptInjectionForCharacterAvatar.ToString()],
                 DependenciesTags = [
                     BackgroundQuerySystemTags.main.ToString(),
-                    BackgroundQuerySystemTags.cohesionEnforcement.ToString(),
+                    BackgroundQuerySystemTags.charactersCohesionEnforcement.ToString(),
                     BackgroundQuerySystemTags.reflection.ToString(),
                     BackgroundQuerySystemTags.relevantSummaries.ToString(),
                     BackgroundQuerySystemTags.sceneTracker.ToString(),

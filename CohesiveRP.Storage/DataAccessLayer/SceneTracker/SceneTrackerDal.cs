@@ -2,11 +2,8 @@
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Storage.Common;
-using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
-using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker;
-using CohesiveRP.Storage.QueryModels.SceneTracker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -27,7 +24,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             dbContext.Database.EnsureCreated();
         }
 
-        public async Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel)
+        public async Task<SceneTrackerDbModel> AddSceneTrackerAsync(SceneTrackerDbModel queryModel)
         {
             try
             {
@@ -41,6 +38,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     ChatId = queryModel.ChatId,
                     LinkMessageId = queryModel.LinkMessageId,
                     Content = queryModel.Content,
+                    Suggestions = null,
+                    PreviousContent = null,// Nothing yet as we're simply creating a brand new one
                 };
 
                 // Check if SceneTrackers for this chat already exist
@@ -81,7 +80,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             }
         }
 
-        public async Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel)
+        public async Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(SceneTrackerDbModel queryModel, bool autoUpdatePreviousContent = true)
         {
             try
             {
@@ -99,6 +98,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         LinkMessageId = queryModel.LinkMessageId,
                         CreatedAtUtc = DateTime.UtcNow,
                         Content = queryModel.Content,
+                        Suggestions = queryModel.Suggestions,
+                        PreviousContent = autoUpdatePreviousContent ? sceneTracker.Content : queryModel.PreviousContent,
                     };
 
                     EntityEntry<SceneTrackerDbModel> resultAdd = dbContext.SceneTrackers.Add(sceneTrackerObj);
@@ -112,8 +113,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     return resultAdd.Entity;
                 }
 
+                // System fields
+                sceneTracker.PreviousContent = sceneTracker.Content;
+
                 // Those are the TWO accepted fields to update
                 sceneTracker.Content = queryModel.Content;
+                sceneTracker.Suggestions = queryModel.Suggestions;
                 sceneTracker.LinkMessageId = queryModel.LinkMessageId;
 
                 EntityEntry<SceneTrackerDbModel> result = dbContext.SceneTrackers.Update(sceneTracker);

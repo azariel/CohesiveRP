@@ -30,7 +30,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
                 ChatId = chat.ChatId,
                 Priority = BackgroundQueryPriority.Highest,
                 DependenciesTags = [BackgroundQuerySystemTags.main.ToString()],// must run directly after main without delay
-                Tags = [BackgroundQuerySystemTags.cohesionEnforcement.ToString()],
+                Tags = [BackgroundQuerySystemTags.charactersCohesionEnforcement.ToString()],
             };
 
             if (await storageService.AddBackgroundQueryAsync(backgroundQueryModel) == null)

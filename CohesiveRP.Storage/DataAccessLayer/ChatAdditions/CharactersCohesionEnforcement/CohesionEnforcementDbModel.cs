@@ -4,24 +4,24 @@ using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement.Busin
 using CohesiveRP.Storage.JsonConverters;
 using CohesiveRP.Storage.Sqlite;
 
-namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement
+namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement
 {
     /// <summary>
-    /// Represents the structure of Cohesion Enforcement in db.
+    /// Represents the structure of Characters Cohesion Enforcement in db.
     /// </summary>
-    [Table("CohesionEnforcements")]
-    public class CohesionEnforcementDbModel : CohesiveRPSqliteBaseTable
+    [Table("CharactersCohesionEnforcements")]
+    public class CharactersCohesionEnforcementDbModel : CohesiveRPSqliteBaseTable
     {
         [Required]
         [MaxLength(32)]
         [Key]// Partition key AND FK
-        public string CohesionEnforcementId { get; set; }
+        public string CharactersCohesionEnforcementId { get; set; }
 
         [Required]
         [MaxLength(32)]
         public string ChatId { get; set; }
         
         [JsonValueConverter]
-        public CohesionEnforcementElement Content { get; set; }
+        public CharactersCohesionEnforcementElement Content { get; set; }
     }
 }

@@ -31,6 +31,7 @@ function getStatusLabel(status: BackgroundQueryStatus): string {
 function getTagsLabel(tag: string): string {
   switch (tag) {
     case "sceneTracker": return "Tracking scene";
+    case "sceneTrackerValidator": return "Validating scene tracker";
     case "skillChecksInitiator": return "Rolling dices";
     case "skillChecksDescriptor": return "Describing rolls";
     case "main": return "Generating AI reply";

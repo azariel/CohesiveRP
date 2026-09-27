@@ -103,11 +103,15 @@ public class SwipeMessageWorkflow : ISwipeMessageWorkflow
             ChatId = requestDto.ChatId,
             Priority = BackgroundQueryPriority.Highest,// User is waiting!
             DependenciesTags = [
-                BackgroundQuerySystemTags.sceneTracker.ToString(),
-                BackgroundQuerySystemTags.skillChecksInitiator.ToString(),
-                BackgroundQuerySystemTags.proseGuardian.ToString(),
-                BackgroundQuerySystemTags.reflection.ToString(),
-                BackgroundQuerySystemTags.narrativeDirection.ToString(),
+                BackgroundQuerySystemTags.relevantSummaries.ToString(),// before
+                BackgroundQuerySystemTags.skillChecksInitiator.ToString(),// before
+                BackgroundQuerySystemTags.sceneTracker.ToString(),// before
+                BackgroundQuerySystemTags.sceneTrackerValidator.ToString(),// before
+                BackgroundQuerySystemTags.sceneTrackerRefiner.ToString(),// before
+                BackgroundQuerySystemTags.charactersCohesionEnforcement.ToString(),// before
+                BackgroundQuerySystemTags.narrativeDirection.ToString(),// before
+                BackgroundQuerySystemTags.reflection.ToString(),// before, if configured
+                BackgroundQuerySystemTags.proseGuardian.ToString(),// after++
             ],// Can't run as long as another one with one of these tag is running or pending
             Tags = [BackgroundQuerySystemTags.main.ToString()],// This is a message from the player and thus is tagged as 'main'
         };

@@ -25,7 +25,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
 
         public async Task<(string, IShareableContextLink)> BuildAsync()
         {
-            var currentValuesFromStorage = await storageService.GetCohesionEnforcementsAsync(s=> s.ChatId == chatDbModel.ChatId);
+            var currentValuesFromStorage = await storageService.GetCharactersCohesionEnforcementsAsync(s=> s.ChatId == chatDbModel.ChatId);
             var currentValueFromStorage = currentValuesFromStorage?.FirstOrDefault();
             if(currentValueFromStorage == null)
             {

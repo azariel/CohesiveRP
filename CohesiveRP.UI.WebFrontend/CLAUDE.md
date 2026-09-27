@@ -17,7 +17,7 @@ Dark Arcane Editorial theme (Dark cyan)
 ## Backend
 The backend is made using c# 10. It exposes many routes. When we receive a new message from the User (typically from the UI), the backend queue two background tasks.
 
-One to update the sceneTracker(sceneDirector), which tracks the main themes of the scene (such as Romance, Combat, etc), nestedThemes, currentDateTime (in the roleplay), location, characters (name, mood, facialExpression, outfit, underwear, stateOfDress(partially dressed, fully dressed), exposedBodyParts, clothingStateOfDress, hairStyle, posture, semenOnBodyLocation, bodyPosition, personalGainInScene, relevantKinksInScene, relevantSecretKinksInScene, relevantPersonalityTraits, innerThoughtsOrMonologue, nextActionsAccordingToPersonality).
+One to update the sceneTracker(sceneDirector), which tracks the main themes of the scene (such as Romance, Combat, etc), nestedThemes, currentDateTime (in the roleplay), location, characters (name, mood, facialExpression, outfit, underwear, stateOfDress(partially dressed, fully dressed), exposedBodyParts, clothingStateOfDress, hairStyle, posture, semenOnBodyLocation, bodyPosition, relevantKinksInScene, relevantSecretKinksInScene, relevantPersonalityTraits).
 
 The second background task is to update the SkillCheckInitiator, which will analyse the scene and infer what Attributes or Skills may be in play. The backend will then roll dices, using the characterSheets attributes and skills to infer their success or failures in the scene.
 

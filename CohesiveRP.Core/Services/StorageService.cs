@@ -1,6 +1,6 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
@@ -22,7 +22,6 @@ using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Lorebooks;
 using CohesiveRP.Storage.QueryModels.Message;
 using CohesiveRP.Storage.QueryModels.Personas;
-using CohesiveRP.Storage.QueryModels.SceneTracker;
 
 namespace CohesiveRP.Core.Services
 {
@@ -49,7 +48,7 @@ namespace CohesiveRP.Core.Services
         private ISceneAnalyzerDal sceneAnalyzerDal;
         private IInteractiveUserInputDal interactiveUserInputDal;
         private IIllustrationQueryDal illustrationQueriesDal;
-        private ICohesionEnforcementsDal cohesionEnforcementsDal;
+        private ICharactersCohesionEnforcementsDal cohesionEnforcementsDal;
         private INarrativeArchitecturesDal narrativeArchitecturesDal;
         private INarrativeDirectionsDal narrativeDirectionsDal;
         private IProseGuardiansDal proseGuardiansDal;
@@ -74,7 +73,7 @@ namespace CohesiveRP.Core.Services
             ISceneAnalyzerDal sceneAnalyzerDal,
             IInteractiveUserInputDal interactiveUserInputDal,
             IIllustrationQueryDal illustrationQueriesDal,
-            ICohesionEnforcementsDal cohesionEnforcementsDal,
+            ICharactersCohesionEnforcementsDal cohesionEnforcementsDal,
             INarrativeArchitecturesDal narrativeArchitecturesDal,
             INarrativeDirectionsDal narrativeDirectionsDal,
             IProseGuardiansDal proseGuardiansDal,
@@ -257,8 +256,8 @@ namespace CohesiveRP.Core.Services
 
         // SceneTracker
         public async Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId) => await sceneTrackerDal.GetSceneTrackerAsync(chatId);
-        public async Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.AddSceneTrackerAsync(queryModel);
-        public async Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel) => await sceneTrackerDal.CreateOrUpdateSceneTrackerAsync(queryModel);
+        public async Task<SceneTrackerDbModel> AddSceneTrackerAsync(SceneTrackerDbModel queryModel) => await sceneTrackerDal.AddSceneTrackerAsync(queryModel);
+        public async Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(SceneTrackerDbModel queryModel, bool autoUpdatePreviousContent) => await sceneTrackerDal.CreateOrUpdateSceneTrackerAsync(queryModel, autoUpdatePreviousContent);
         public async Task<bool> DeleteSceneTrackerAsync(string chatId) => await sceneTrackerDal.DeleteSceneTrackerAsync(chatId);
 
         // SceneAnalyzer
@@ -282,11 +281,11 @@ namespace CohesiveRP.Core.Services
         public async Task<bool> DeleteIllustrationQueryAsync(string illustrationQueryId) => await illustrationQueriesDal.DeleteIllustrationQueryAsync(illustrationQueryId);
         public async Task<bool> DeleteIllustrationQueryAsync(Func<IllustrationQueryDbModel, bool> func) => await illustrationQueriesDal.DeleteIllustrationQueryAsync(func);
 
-        // CohesionEnforcement
-        public async Task<CohesionEnforcementDbModel[]> GetCohesionEnforcementsAsync(Func<CohesionEnforcementDbModel, bool> func) => await cohesionEnforcementsDal.GetCohesionEnforcementsAsync(func);
-        public async Task<CohesionEnforcementDbModel> AddCohesionEnforcementAsync(CohesionEnforcementDbModel dbModel) => await cohesionEnforcementsDal.AddCohesionEnforcementAsync(dbModel);
-        public async Task<CohesionEnforcementDbModel> UpdateCohesionEnforcementAsync(CohesionEnforcementDbModel dbModel) => await cohesionEnforcementsDal.UpdateCohesionEnforcementAsync(dbModel);
-        public async Task<bool> DeleteCohesionEnforcementsAsync(Func<CohesionEnforcementDbModel, bool> func) => await cohesionEnforcementsDal.DeleteCohesionEnforcementAsync(func);
+        // CharactersCohesionEnforcement
+        public async Task<CharactersCohesionEnforcementDbModel[]> GetCharactersCohesionEnforcementsAsync(Func<CharactersCohesionEnforcementDbModel, bool> func) => await cohesionEnforcementsDal.GetCharactersCohesionEnforcementsAsync(func);
+        public async Task<CharactersCohesionEnforcementDbModel> AddCharactersCohesionEnforcementAsync(CharactersCohesionEnforcementDbModel dbModel) => await cohesionEnforcementsDal.AddCharactersCohesionEnforcementAsync(dbModel);
+        public async Task<CharactersCohesionEnforcementDbModel> UpdateCharactersCohesionEnforcementAsync(CharactersCohesionEnforcementDbModel dbModel) => await cohesionEnforcementsDal.UpdateCharactersCohesionEnforcementAsync(dbModel);
+        public async Task<bool> DeleteCharactersCohesionEnforcementsAsync(Func<CharactersCohesionEnforcementDbModel, bool> func) => await cohesionEnforcementsDal.DeleteCharactersCohesionEnforcementAsync(func);
 
         // NarrativeArchitecture
         public async Task<NarrativeArchitectureDbModel[]> GetNarrativeArchitecturesAsync(Func<NarrativeArchitectureDbModel, bool> func) => await narrativeArchitecturesDal.GetNarrativeArchitecturesAsync(func);

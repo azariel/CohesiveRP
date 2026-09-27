@@ -3,7 +3,7 @@ using CohesiveRP.Common.Utils.BusinessObjects;
 
 namespace CohesiveRP.Storage.DTOs.CohesionEnforcement
 {
-    public class CohesionEnforcementIssue
+    public class CharactersCohesionEnforcementIssue
     {
         [JsonSchemaRequired]
         [JsonPropertyName("severity")]

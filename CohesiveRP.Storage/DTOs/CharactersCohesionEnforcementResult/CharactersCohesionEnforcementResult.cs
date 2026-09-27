@@ -3,11 +3,11 @@ using CohesiveRP.Common.Utils.BusinessObjects;
 
 namespace CohesiveRP.Storage.DTOs.CohesionEnforcement
 {
-    public class CohesionEnforcementResult
+    public class CharactersCohesionEnforcementResult
     {
         [JsonSchemaRequired]
         [JsonPropertyName("issues")]
-        public List<CohesionEnforcementIssue> Issues { get; set; }
+        public List<CharactersCohesionEnforcementIssue> Issues { get; set; }
 
         [JsonSchemaRequired]
         [JsonPropertyName("verdict")]

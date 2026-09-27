@@ -44,6 +44,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
                 // Generate a scene tracker object
                 dbContext.ChatCompletionPresets.Add(SceneTrackerCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(SceneTrackerValidatorCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(SceneTrackerRefinerCompletionPresetInjector.InjectPreset());
 
                 // Determine if a character needs to do a skill check
                 dbContext.ChatCompletionPresets.Add(SkillChecksInitiatorCompletionPresetInjector.InjectPreset());

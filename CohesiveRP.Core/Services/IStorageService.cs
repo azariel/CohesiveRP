@@ -1,5 +1,5 @@
 ﻿using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
@@ -13,7 +13,6 @@ using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 using CohesiveRP.Storage.QueryModels.Message;
 using CohesiveRP.Storage.QueryModels.Personas;
-using CohesiveRP.Storage.QueryModels.SceneTracker;
 
 namespace CohesiveRP.Core.Services
 {
@@ -74,8 +73,8 @@ namespace CohesiveRP.Core.Services
 
         // SceneTracker
         Task<SceneTrackerDbModel> GetSceneTrackerAsync(string chatId);
-        Task<SceneTrackerDbModel> AddSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
-        Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(CreateSceneTrackerQueryModel queryModel);
+        Task<SceneTrackerDbModel> AddSceneTrackerAsync(SceneTrackerDbModel queryModel);
+        Task<SceneTrackerDbModel> CreateOrUpdateSceneTrackerAsync(SceneTrackerDbModel queryModel, bool autoUpdatePreviousContent = true);
         Task<bool> DeleteSceneTrackerAsync(string chatId);
 
         // SceneAnalyzer
@@ -156,11 +155,11 @@ namespace CohesiveRP.Core.Services
         Task<bool> DeleteIllustrationQueryAsync(string illustrationQueryId);
         Task<bool> DeleteIllustrationQueryAsync(Func<IllustrationQueryDbModel, bool> func);
 
-        // CohesionEnforcement
-        Task<CohesionEnforcementDbModel[]> GetCohesionEnforcementsAsync(Func<CohesionEnforcementDbModel, bool> func);
-        Task<CohesionEnforcementDbModel> AddCohesionEnforcementAsync(CohesionEnforcementDbModel dbModel);
-        Task<CohesionEnforcementDbModel> UpdateCohesionEnforcementAsync(CohesionEnforcementDbModel dbModel);
-        Task<bool> DeleteCohesionEnforcementsAsync(Func<CohesionEnforcementDbModel, bool> func);
+        // CharactersCohesionEnforcement
+        Task<CharactersCohesionEnforcementDbModel[]> GetCharactersCohesionEnforcementsAsync(Func<CharactersCohesionEnforcementDbModel, bool> func);
+        Task<CharactersCohesionEnforcementDbModel> AddCharactersCohesionEnforcementAsync(CharactersCohesionEnforcementDbModel dbModel);
+        Task<CharactersCohesionEnforcementDbModel> UpdateCharactersCohesionEnforcementAsync(CharactersCohesionEnforcementDbModel dbModel);
+        Task<bool> DeleteCharactersCohesionEnforcementsAsync(Func<CharactersCohesionEnforcementDbModel, bool> func);
 
         // NarrativeArchitecture
         Task<NarrativeArchitectureDbModel[]> GetNarrativeArchitecturesAsync(Func<NarrativeArchitectureDbModel, bool> func);

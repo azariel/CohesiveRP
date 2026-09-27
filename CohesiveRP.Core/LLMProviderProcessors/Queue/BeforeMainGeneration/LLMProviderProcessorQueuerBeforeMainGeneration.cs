@@ -42,7 +42,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Queue.AfterPostGeneration
                 operationResult &= await AddNarrativeDirectionBackgroundQueryAsync(chat);
             }
             
-            operationResult &= await AddReflectionBackgroundQueryAsync(chat);
+            //operationResult &= await AddReflectionBackgroundQueryAsync(chat);
             
             return operationResult;
         }

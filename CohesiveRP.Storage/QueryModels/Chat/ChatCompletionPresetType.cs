@@ -19,8 +19,13 @@
         ProseGuardian = 13,
         CharacterStatusUpdate = 14,
         SkillChecksDescriptor = 15,
-        CohesionEnforcement = 16,
+        CharactersCohesionEnforcement = 16,
         Reflection = 17,
         RelevantSummaries = 18,
+        SceneTrackerValidator = 19,
+        CharactersAdherenceEnforcement = 20,
+        ProseEdition = 21,
+        StyleEdition = 22,
+        SceneTrackerRefiner = 23,
     }
 }

@@ -12,14 +12,15 @@ using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects.Visual;
-using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 {
-    public class SceneTrackerLLMQueryProcessor : LLMQueryProcessor
+    public class SceneTrackerRefinerLLMQueryProcessor : LLMQueryProcessor
     {
-        public SceneTrackerLLMQueryProcessor(
+        ISceneTrackerPostProcess sceneTrackerPostProcess;
+
+        public SceneTrackerRefinerLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
             BackgroundQueryDbModel backgroundQueryDbModel,
@@ -27,7 +28,8 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
             IPromptContextElementBuilderFactory promptContextElementBuilderFactory,
             IStorageService storageService,
             IHttpLLMApiProviderService httpLLMApiProviderService,
-            ISummaryService summaryService) : base(
+            ISummaryService summaryService,
+            ISceneTrackerPostProcess sceneTrackerPostProcess) : base(
                 completionPresetType,
                 tag,
                 backgroundQueryDbModel,
@@ -36,7 +38,9 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 storageService,
                 httpLLMApiProviderService,
                 summaryService)
-        { }
+        {
+            this.sceneTrackerPostProcess = sceneTrackerPostProcess;
+        }
 
         public override async Task<bool> ProcessCompletedQueryAsync()
         {
@@ -54,7 +58,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 IShareableContextLink shareableContextLink = promptContext.ShareableContextLinks.FirstOrDefault(f => f.LinkedBuilder is PromptContextSceneTrackerInstrBuilder);
                 if (shareableContextLink == null)
                 {
-                    LoggingManager.LogToFile("c1a42696-c67e-484f-86b9-e0a41f501221", $"No ShareableContextLink of type [{nameof(PromptContextSceneTrackerInstrBuilder)} found.]");
+                    LoggingManager.LogToFile("d241e7a5-5b32-414e-8a01-47eb50cf07cb", $"No ShareableContextLink of type [{nameof(PromptContextSceneTrackerInstrBuilder)} found.]");
                     return false;
                 }
 
@@ -67,7 +71,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                     JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerJson);
                 } catch (Exception e)
                 {
-                    LoggingManager.LogToFile("9ced233b-249d-456f-a2bf-48e847daa024", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Invalid sceneTrackerJson. Skipping.", e);
+                    LoggingManager.LogToFile("7b58e8ff-d4b5-4d7e-9170-69ae5ec815f8", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Invalid sceneTrackerJson. Skipping.", e);
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
                     backgroundQueryDbModel.RetryCount++;
                     return false;
@@ -80,45 +84,31 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 {
                     ChatId = backgroundQueryDbModel.ChatId,
                     LinkMessageId = linkedMessageId,
+                    Suggestions = null,
                     Content = sceneTrackerJson,
                 };
 
                 SceneTrackerDbModel sceneTrackerDbModel = await storageService.CreateOrUpdateSceneTrackerAsync(queryModel);
                 if (sceneTrackerDbModel == null)
                 {
-                    LoggingManager.LogToFile("c352fa3d-7019-4ed1-923a-d4b17db6d7a1", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Couldn't update storage. Skipping.");
+                    LoggingManager.LogToFile("0d0fe9f3-39b1-47a0-b7c9-adbd5cc3de3d", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Couldn't update storage. Skipping.");
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
                     return false;
                 }
 
-                // Queue the sceneTracker validator
-                await QueueSceneTrackerValidatorBackgroundQuery(backgroundQueryDbModel.ChatId, backgroundQueryDbModel.LinkedId);
-
+                await sceneTrackerPostProcess.Process(completionPresetType, tag, backgroundQueryDbModel, shareableContextLink, sceneTrackerDbModel.Content);
+            
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
             } catch (Exception e)
             {
-                LoggingManager.LogToFile("be1a2097-a9d4-4242-9a9d-4e60429f59df", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
+                LoggingManager.LogToFile("7dedc240-a017-4b25-ae54-bb628c5ad16f", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
                 backgroundQueryDbModel.RetryCount++;
                 return false;
             }
-        }
-
-        private async Task QueueSceneTrackerValidatorBackgroundQuery(string chatId, string linkedId)
-        {
-            CreateBackgroundQueryQueryModel queryModel = new()
-            {
-                ChatId = chatId,
-                Priority = BackgroundQueryPriority.Highest,
-                LinkedId = linkedId,
-                Tags = [BackgroundQuerySystemTags.sceneTrackerValidator.ToString()],
-                DependenciesTags = [],// at this point in time, we don't depend on anything, we're the most important query
-            };
-
-            await storageService.AddBackgroundQueryAsync(queryModel);
         }
     }
 }
