@@ -43,6 +43,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Chats
         [JsonValueConverter]
         public List<string> AlternateGreetings { get; set; }
 
+        [MaxLength(512)]
+        public string ConciseDescription { get; set; }// MUCH smaller description to inject into the relevant characters section
+
         public DateTime LastActivityAtUtc { get; set; }
 
         public List<string> InherentLorebookIds { get; set; }

@@ -31,5 +31,8 @@ namespace CohesiveRP.Storage.DTOs
 
         [JsonPropertyName("imageGenerationConfiguration")]
         public CharacterImageGenerationConfiguration ImageGenerationConfiguration { get; set; }
+
+        [JsonPropertyName("conciseDescription")]
+        public string ConciseDescription { get; set; }
     }
 }

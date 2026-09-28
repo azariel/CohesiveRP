@@ -3,5 +3,6 @@
     public class PromptContextFormatElementRelevantCharactersOptions : PromptContextFormatElementOptions
     {
         public bool IncludeKnownCharacters { get; set; } = true;
+        public bool IncludeKnownCharactersConciseDescription { get; set; } = true;
     }
 }

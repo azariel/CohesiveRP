@@ -48,6 +48,7 @@ public class GetAllCharactersWorkflow : IGetAllCharactersWorkflow
                 Description = s.Description,
                 IncludeDescriptionInPrompt = s.IncludeDescriptionInPrompt,
                 Tags = s.Tags,
+                ConciseDescription = s.ConciseDescription,
                 FirstMessage = s.FirstMessage,
                 AlternateGreetings = s.AlternateGreetings,
                 LastActivityAtUtc = s.LastActivityAtUtc,

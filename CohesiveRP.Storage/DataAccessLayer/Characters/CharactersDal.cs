@@ -75,6 +75,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     Description = queryModel.Description,
                     IncludeDescriptionInPrompt = queryModel.IncludeDescriptionInPrompt,
                     Tags = queryModel.Tags,
+                    ConciseDescription = queryModel.ConciseDescription,
                     FirstMessage = ChatMessageParserUtils.ParseMessage(queryModel.FirstMessage),
                     AlternateGreetings = queryModel.AlternateGreetings,
                     LastActivityAtUtc = DateTime.UtcNow,
@@ -121,6 +122,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 character.FirstMessage = ChatMessageParserUtils.ParseMessage(characterDbModel.FirstMessage);
                 character.Name = characterDbModel.Name;
                 character.Tags = characterDbModel.Tags;
+                character.ConciseDescription = characterDbModel.ConciseDescription;
                 character.InherentLorebookIds = characterDbModel.InherentLorebookIds;
                 character.ImageGenerationConfiguration = characterDbModel.ImageGenerationConfiguration;
 

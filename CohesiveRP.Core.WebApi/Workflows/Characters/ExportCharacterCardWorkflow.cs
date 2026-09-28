@@ -72,6 +72,7 @@ public class ExportCharacterCardWorkflow : IExportCharacterCardWorkflow
                     Creator = character.Creator,
                     CreatorNotes = character.CreatorNotes,
                     Tags = character.Tags,
+                    ConciseDescription = character.ConciseDescription,
                     FirstMessage = character.FirstMessage,
                     AlternateGreetings = character.AlternateGreetings,
                     Description = character.Description,

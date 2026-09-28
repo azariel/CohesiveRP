@@ -118,7 +118,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
                 if (characterSheetInstances?.CharacterSheetInstances == null || characterSheetInstances.CharacterSheetInstances.Count <= 0 || characterSheetInstance == null)
                 {
-                    if (allCurrentInteractiveUserInputQueries == null || allCurrentInteractiveUserInputQueries.Length <= 0 || allCurrentInteractiveUserInputQueries.All(a => a == null || !string.IsNullOrWhiteSpace(a.Metadata) && !a.Metadata.ToLowerInvariant().Trim().Contains(characterName.ToLowerInvariant().Trim())))
+                    if (allCurrentInteractiveUserInputQueries == null || allCurrentInteractiveUserInputQueries.Length <= 0 || allCurrentInteractiveUserInputQueries.All(a => a == null || (!string.IsNullOrWhiteSpace(a.Metadata)) && !a.Metadata.ToLowerInvariant().Trim().Contains(characterName.ToLowerInvariant().Trim())))
                     {
                         await storageService.AddInteractiveUserInputQueryAsync(new InteractiveUserInputDbModel
                         {

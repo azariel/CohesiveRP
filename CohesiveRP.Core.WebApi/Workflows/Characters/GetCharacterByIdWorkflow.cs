@@ -46,6 +46,7 @@ public class GetCharacterByIdWorkflow : IGetCharacterByIdWorkflow
                 Description = character.Description,
                 IncludeDescriptionInPrompt = character.IncludeDescriptionInPrompt,
                 Tags = character.Tags,
+                ConciseDescription = character.ConciseDescription,
                 FirstMessage = character.FirstMessage,
                 AlternateGreetings = character.AlternateGreetings,
                 LastActivityAtUtc = character.LastActivityAtUtc,

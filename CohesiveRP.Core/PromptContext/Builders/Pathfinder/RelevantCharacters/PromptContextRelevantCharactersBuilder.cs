@@ -86,7 +86,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                         tagName == "secretKinks" ||
                         tagName == "magicalEffects" ||
                         tagName == "bodyStatus" ||
-                        tagName == "wounds" || 
+                        tagName == "wounds" ||
                         tagName == "latentMoodForNextInteractionWithPlayer" ||
                         tagName == "lastInteractionWithPlayer")
                         continue;
@@ -197,14 +197,14 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             }
 
             // Only inject on the first messages after a character entered the scene, and then it will be cleared. This is to avoid the AI from being too repetitive in its responses.
-            if(sheetInstance?.ConsecutiveMessagesInScene <= 3)
+            if (sheetInstance?.ConsecutiveMessagesInScene <= 3)
             {
-                if(!string.IsNullOrWhiteSpace(sheetInstance.CharacterSheet.LatentMoodForNextInteractionWithPlayer))
+                if (!string.IsNullOrWhiteSpace(sheetInstance.CharacterSheet.LatentMoodForNextInteractionWithPlayer))
                 {
                     str.AppendLine($"      <latentMoodForNextInteractionWithPlayer>{sheetInstance.CharacterSheet.LatentMoodForNextInteractionWithPlayer}</latentMoodForNextInteractionWithPlayer>");
                 }
 
-                if(!string.IsNullOrWhiteSpace(sheetInstance.CharacterSheet.LastInteractionWithPlayer))
+                if (!string.IsNullOrWhiteSpace(sheetInstance.CharacterSheet.LastInteractionWithPlayer))
                 {
                     str.AppendLine($"      <lastInteractionWithPlayer>{sheetInstance.CharacterSheet.LastInteractionWithPlayer}</lastInteractionWithPlayer>");
                 }
@@ -340,13 +340,40 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 }
             }
 
-            string finalKnownCharacters = "";
+            string finalKnownCharacters = $"<known_characters_in_story_context>{Environment.NewLine}";
+            int nbKnownCharacters = 0;
             if (knownCharacters.Count > 0 && (options == null || options.IncludeKnownCharacters))
             {
-                finalKnownCharacters = $"<known_characters_in_story_context>{string.Join(",", knownCharacters)}</known_characters_in_story_context>";
+                foreach (var knownCharacter in knownCharacters)
+                {
+                    string value = knownCharacter?.Trim();
+                    if (options != null && !options.IncludeKnownCharactersConciseDescription)
+                    {
+                        finalKnownCharacters += $"  {value}{Environment.NewLine}";
+                        ++nbKnownCharacters;
+                        continue;
+                    }
+
+                    string conciseDescription = allCharacters.FirstOrDefault(f => AreNameEquivalent(f.Name?.Trim(), value, null))?.ConciseDescription?.Trim();
+
+                    if (!string.IsNullOrWhiteSpace(conciseDescription))
+                    {
+                        finalKnownCharacters += $"{conciseDescription}{Environment.NewLine}{Environment.NewLine}";
+                        ++nbKnownCharacters;
+                    }
+                }
+
             }
 
-            return ($"<relevant_characters>{Environment.NewLine}{str.ToString().Trim().TrimEnd(Environment.NewLine.ToCharArray()).InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</relevant_characters>{Environment.NewLine}Please note that secretKinks are kinks or fetishes that the character is ashamed or embarassed about and will avoid openly talk about, but that character will react positively when exposed to situations implementing their kinks and secret kinks or fetishes.{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
+            finalKnownCharacters = finalKnownCharacters.Replace($"{Environment.NewLine}{Environment.NewLine}", string.Empty);
+            finalKnownCharacters += $"{Environment.NewLine}</known_characters_in_story_context>{Environment.NewLine}";
+
+            if(nbKnownCharacters <= 0)
+            {
+                finalKnownCharacters = string.Empty;
+            }
+
+            return ($"{finalKnownCharacters}<relevant_characters>{Environment.NewLine}{str.ToString().Trim().TrimEnd(Environment.NewLine.ToCharArray()).InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</relevant_characters>{Environment.NewLine}Please note that secretKinks are kinks or fetishes that the character is ashamed or embarassed about and will avoid openly talk about, but that character will react positively when exposed to situations implementing their kinks and secret kinks or fetishes.{Environment.NewLine}{Environment.NewLine}", new ShareableContextLink { LinkedBuilder = this });
         }
 
         private static string GetCharacterFullName(string firstName, string lastName, string separator = " ")

@@ -45,6 +45,7 @@ export default function CharacterDetailsComponent() {
   const [firstMessage, setFirstMessage] = useState("");
   const [alternateGreetings, setAlternateGreetings] = useState<string[]>([]);
   const [characterDescription, setCharacterDescription] = useState("");
+  const [conciseDescription, setConciseDescription] = useState("");
   const [sheetKey, setSheetKey] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [operationError, setOperationError] = useState(false);
@@ -101,6 +102,7 @@ export default function CharacterDetailsComponent() {
         setFirstMessage(response?.character?.firstMessage ?? "");
         setAlternateGreetings(response?.character?.alternateGreetings ?? []);
         setCharacterDescription(response?.character?.description ?? "");
+        setConciseDescription(response?.character?.conciseDescription ?? "");
         setIncludeDescriptionInPrompt(response?.character?.includeDescriptionInPrompt ?? true);
         setIllustratorTag(response?.character?.imageGenerationConfiguration?.illustratorTag ?? "");
         setIllustrationMapOutfits(
@@ -190,6 +192,7 @@ export default function CharacterDetailsComponent() {
       const response = await putToServerApiAsync(`api/characters/${activeModule.selectedCharacterId}`, {
         characterId: activeModule.selectedCharacterId,
         characterDescription,
+        conciseDescription,
         includeDescriptionInPrompt,
         characterName,
         creator,
@@ -262,6 +265,7 @@ export default function CharacterDetailsComponent() {
       setFirstMessage(c?.firstMessage ?? "");
       setAlternateGreetings(c?.alternateGreetings ?? []);
       setCharacterDescription(c?.description ?? "");
+      setConciseDescription(c?.conciseDescription ?? "");
       setIllustratorTag(c?.imageGenerationConfiguration?.illustratorTag ?? "");
       setIllustrationMapOutfits(
         (c?.imageGenerationConfiguration?.illustrationMapOutfits ?? []).map((e) => ({
@@ -412,6 +416,15 @@ export default function CharacterDetailsComponent() {
                         className={styles.characterDescription}
                         value={characterDescription}
                         onChange={(e) => setCharacterDescription(e.target.value)}
+                      />
+                    </div>
+
+                    <div className={styles.characterConciseDescriptionContainer}>
+                      <label className={styles.characterConciseDescriptionLabel}>Concise Description (always injected in main prompt as this character's description)</label>
+                      <textarea
+                        className={styles.characterConciseDescription}
+                        value={conciseDescription}
+                        onChange={(e) => setConciseDescription(e.target.value)}
                       />
                     </div>
 

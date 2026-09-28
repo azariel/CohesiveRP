@@ -44,6 +44,7 @@ public class UpdateCharacterWorkflow : IUpdateCharacterWorkflow
         currentCharacter.Description = requestDto.CharacterDescription;
         currentCharacter.IncludeDescriptionInPrompt = requestDto.IncludeDescriptionInPrompt;
         currentCharacter.Tags = requestDto.Tags?.ToList();
+        currentCharacter.ConciseDescription = requestDto.ConciseDescription;
         currentCharacter.AlternateGreetings = requestDto.AlternateGreetings?.ToList();
         currentCharacter.ImageGenerationConfiguration = requestDto.ImageGenerationConfiguration;
 

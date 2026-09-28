@@ -40,5 +40,8 @@ namespace CohesiveRP.Core.WebApi.ResponseDtos.Characters.BusinessObjects
 
         [JsonPropertyName("imageGenerationConfiguration")]
         public CharacterImageGenerationConfiguration ImageGenerationConfiguration { get; set; }
+
+        [JsonPropertyName("conciseDescription")]
+        public string ConciseDescription { get; set; }
     }
 }

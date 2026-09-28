@@ -316,6 +316,7 @@
 /* ── Shared input base — used by all form textareas ── */
 
 .characterDescription,
+.characterConciseDescription,
 .characterTags,
 .characterFirstMessage,
 .characterCreator,
@@ -338,6 +339,7 @@
 }
 
 .characterDescription:focus,
+.characterConciseDescription:focus,
 .characterTags:focus,
 .characterFirstMessage:focus,
 .characterCreator:focus,
@@ -349,6 +351,7 @@
 
 /* Specific sizes */
 .characterDescription  { min-height: 10em; max-height: 100em; height: 20em; resize: vertical; }
+.characterConciseDescription  { min-height: 5em; max-height: 10em; height: 5em; resize: vertical; }
 .characterTags         { min-height: 2rem; max-height: 30em; resize: vertical; }
 .characterFirstMessage { min-height: 10em; max-height: 50em; height: 20em; resize: vertical; }
 .characterCreator      { height: 3em; resize: none; }
@@ -358,6 +361,7 @@
 /* ── Container wrappers ── */
 
 .characterDescriptionContainer,
+.characterConciseDescriptionContainer,
 .characterTagsContainer,
 .characterFirstMessageContainer,
 .characterCreatorContainer,
@@ -420,6 +424,7 @@
 
 /* ── Kept for backwards compat with label overrides ── */
 .characterDescriptionLabel,
+.characterConciseDescriptionLabel,
 .characterTagsLabel,
 .characterFirstMessageLabel,
 .characterCreatorLabel {
