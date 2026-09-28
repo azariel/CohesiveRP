@@ -96,7 +96,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 } else
                 {
                     // Start by updating the sceneTracker to add the suggestions
-                    currentSceneTrackerInStorage.Suggestions = string.Join($"{Environment.NewLine}- ", result.Recommendations);
+                    currentSceneTrackerInStorage.Suggestions = string.Join($"{(result.Recommendations.Length > 0? "- " : string.Empty)}{Environment.NewLine}- ", result.Recommendations);
                     await storageService.CreateOrUpdateSceneTrackerAsync(currentSceneTrackerInStorage);
                     await QueueSceneTrackerRefinerBackgroundQuery(backgroundQueryDbModel.ChatId);
                 }

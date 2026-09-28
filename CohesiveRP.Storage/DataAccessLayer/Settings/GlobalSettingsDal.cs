@@ -74,8 +74,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
         // Dev-02_WORK_PRIVATE
         // --- Local
-        private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
-        private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
+        private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";// 192.168.100.1
+        private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";// 192.168.100.1
 
         private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
         [
@@ -192,7 +192,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                     CreatedAtUtc = DateTime.UtcNow,
                     FeaturesSettings = new() {
                         EnableRelevantSummariesFeature = true,
-                        EnableComfyUI = false,
+                        EnableComfyUI = true,
                     },
                     // TODO: replace this dev option
                     LLMProviders = new List<LLMProviderConfig>()

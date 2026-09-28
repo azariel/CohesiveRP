@@ -254,36 +254,16 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
             }
 
             var options = promptContextFormatElement?.Options as PromptContextFormatElementRelevantCharactersOptions;
-            CharacterSheetInstance[] charactersToInclude = characterSheetInstances.CharacterSheetInstances.Where(w =>
+            CharacterSheetInstance[] charactersAvailableInChat = characterSheetInstances.CharacterSheetInstances.Where(w =>
             chatDbModel.CharacterIds.Any(a => w.CharacterId == a) &&
             w.CharacterSheet != null &&
             !string.IsNullOrWhiteSpace(w.CharacterSheet.FirstName)).ToArray();
-
-            if (charactersToInclude.Length <= 0)
-            {
-                return (null, new ShareableContextLink { LinkedBuilder = this });
-            }
 
             // refine the characters to include to only include those IN the scene
             // TODO: we're using the characterRools here. Probably not the best way to handle this. We need a proper way to infer the characters in the scene! The sceneTracker limits the amount whereas the checkRolls does not, so we need to think about this..
             var characterRolls = await storageService.GetChatCharactersRollsByChatIdAsync(chatDbModel.ChatId);
 
             StringBuilder str = new();
-            //if (!string.IsNullOrWhiteSpace(chatDbModel.PersonaId))
-            //{
-                //var personaCharacterSheet = characterSheetInstances.CharacterSheetInstances.FirstOrDefault(f =>
-                    //f.PersonaId == chatDbModel.PersonaId &&
-                    //f.CharacterSheet != null &&
-                    //!string.IsNullOrWhiteSpace(f.CharacterSheet.FirstName));
-
-                //if (personaCharacterSheet != null)
-                //{
-                    //str.AppendLine($"  <{personaCharacterSheet.CharacterSheet.FirstName}_(player)>");
-                    //AppendCharacterSheetToPromptContext(str, personaCharacterSheet);
-                    //str.AppendLine($"  </{personaCharacterSheet.CharacterSheet.FirstName}_(player)>");
-                //}
-            //}
-
             var sceneTracker = await storageService.GetSceneTrackerAsync(chatDbModel.ChatId);
             if (sceneTracker != null && !string.IsNullOrWhiteSpace(sceneTracker.Content))
             {
@@ -292,12 +272,12 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 if (sceneTrackerModel?.CharactersAnalysis != null && sceneTrackerModel.CharactersAnalysis.Length > 0)
                 {
                     var characterNamesInScene = sceneTrackerModel.CharactersAnalysis.Select(s => s.Name).ToArray();
-                    charactersToInclude = charactersToInclude.Where(w => characterNamesInScene.Any(a => AreNameEquivalent(a, w.CharacterSheet.FirstName, w.CharacterSheet.LastName))).ToArray();
+                    //var currentCharactersToInclude = charactersAvailableInChat.Where(w => characterNamesInScene.Any(a => AreNameEquivalent(a, w.CharacterSheet.FirstName, w.CharacterSheet.LastName))).ToArray();
 
                     List<CharacterSheetInstance> orderedInstances = new();
                     foreach (var characterNameInScene in characterNamesInScene)
                     {
-                        var selection = charactersToInclude.FirstOrDefault(f => AreNameEquivalent(characterNameInScene, f.CharacterSheet.FirstName, f.CharacterSheet.LastName));
+                        var selection = charactersAvailableInChat.FirstOrDefault(f => AreNameEquivalent(characterNameInScene, f.CharacterSheet.FirstName, f.CharacterSheet.LastName));
 
                         if (selection != null)
                         {
@@ -314,14 +294,14 @@ namespace CohesiveRP.Core.PromptContext.Builders.Pathfinder.RelevantCharacters
                 }
             } else
             {
-                if (charactersToInclude != null && characterRolls?.CharacterNamesInScene != null && characterRolls.CharacterNamesInScene.Count > 0)
+                if (charactersAvailableInChat != null && characterRolls?.CharacterNamesInScene != null && characterRolls.CharacterNamesInScene.Count > 0)
                 {
-                    charactersToInclude = charactersToInclude.Where(w => characterRolls.CharacterNamesInScene.Any(a => AreNameEquivalent(a, w.CharacterSheet.FirstName, w.CharacterSheet.LastName))).ToArray();
+                    charactersAvailableInChat = charactersAvailableInChat.Where(w => characterRolls.CharacterNamesInScene.Any(a => AreNameEquivalent(a, w.CharacterSheet.FirstName, w.CharacterSheet.LastName))).ToArray();
 
                     List<CharacterSheetInstance> orderedInstances = new();
                     foreach (var characterNameInScene in characterRolls.CharacterNamesInScene)
                     {
-                        var selection = charactersToInclude.FirstOrDefault(f => AreNameEquivalent(characterNameInScene, f.CharacterSheet.FirstName, f.CharacterSheet.LastName));
+                        var selection = charactersAvailableInChat.FirstOrDefault(f => AreNameEquivalent(characterNameInScene, f.CharacterSheet.FirstName, f.CharacterSheet.LastName));
 
                         if (selection != null)
                         {

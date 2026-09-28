@@ -96,8 +96,8 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new PromptContextProseGuardianInstructionsBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.PathfinderSkillChecksDescriptor:
                     return new SkillChecksDescriptorBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
-                case PromptContextFormatTag.CohesionEnforcer:
-                    return new CohesionEnforcerBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.CharactersCohesionEnforcer:
+                    return new CharactersCohesionEnforcerBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.Reflections:
                     return new ReflectionsBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
                 default:

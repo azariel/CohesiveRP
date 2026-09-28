@@ -58,7 +58,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 // Chat Additions
                 dbContext.ChatCompletionPresets.Add(NarrativeDirectionCompletionPresetInjector.InjectPreset());
                 dbContext.ChatCompletionPresets.Add(ProseGuardianCompletionPresetInjector.InjectPreset());
-                dbContext.ChatCompletionPresets.Add(CohesionEnforcementCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(CharactersCohesionEnforcementCompletionPresetInjector.InjectPreset());
                 dbContext.ChatCompletionPresets.Add(NarrativeArchitectureCompletionPresetInjector.InjectPreset());
 
                 // Custom Thinking
