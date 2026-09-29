@@ -1,4 +1,4 @@
-﻿namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement
+﻿namespace CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement
 {
     public interface ICharactersCohesionEnforcementsDal
     {

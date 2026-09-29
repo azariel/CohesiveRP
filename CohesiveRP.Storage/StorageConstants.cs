@@ -23,7 +23,9 @@
         public const string DEFAULT_SCENE_TRACKER_VALIDATOR_COMPLETION_PRESET = "cdd41fbb-fd9f-4e7d-a727-e96754696bdb";
         public const string DEFAULT_SCENE_TRACKER_REFINER_COMPLETION_PRESET = "91440429-b577-4820-a6b8-0d0ab376e99e";
         public const string DEFAULT_CHARACTER_ADHERENCE_ENFORCEMENT_COMPLETION_PRESET = "5ed55bda-b1d6-46fb-998d-efdfdf66aed5";
+        public const string DEFAULT_PROSE_VALIDATOR_COMPLETION_PRESET = "0879721a-7215-46b0-b543-f63bba11d2f4";
         public const string DEFAULT_PROSE_EDITION_COMPLETION_PRESET = "4a23bb6d-10d2-4c24-b08b-9ff8b43296df";
+        public const string DEFAULT_STYLE_VALIDATOR_COMPLETION_PRESET = "edf6b3b2-12de-49c5-99fb-d1ffed863d07";
         public const string DEFAULT_STYLE_EDITION_COMPLETION_PRESET = "95cb0eb9-0c2e-4427-bf48-99267ff9f255";
 
         public const string DEFAULT_LLM_PROVIDER_CONFIG_ID_1 = "7f824d86-198d-4f01-ab3f-45e12fe519c0";

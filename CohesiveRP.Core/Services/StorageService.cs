@@ -1,12 +1,14 @@
 ﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.ProseCohesion;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.StyleCohesion;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.LorebookInstances;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
@@ -53,6 +55,8 @@ namespace CohesiveRP.Core.Services
         private INarrativeDirectionsDal narrativeDirectionsDal;
         private IProseGuardiansDal proseGuardiansDal;
         private IReflectionDal reflectionsDal;
+        private IProseCohesionDal proseCohesionsDal;
+        private IStyleCohesionsDal styleCohesionsDal;
 
         public StorageService(
             IChatsDal chatsDal,
@@ -77,7 +81,9 @@ namespace CohesiveRP.Core.Services
             INarrativeArchitecturesDal narrativeArchitecturesDal,
             INarrativeDirectionsDal narrativeDirectionsDal,
             IProseGuardiansDal proseGuardiansDal,
-            IReflectionDal reflectionsDal)
+            IReflectionDal reflectionsDal,
+            IProseCohesionDal proseCohesionsDal,
+            IStyleCohesionsDal styleCohesionsDal)
         {
             this.chatsDal = chatsDal;
             this.charactersDal = charactersDal;
@@ -102,6 +108,8 @@ namespace CohesiveRP.Core.Services
             this.narrativeDirectionsDal = narrativeDirectionsDal;
             this.proseGuardiansDal = proseGuardiansDal;
             this.reflectionsDal = reflectionsDal;
+            this.proseCohesionsDal = proseCohesionsDal;
+            this.styleCohesionsDal = styleCohesionsDal;
         }
 
         // Chats
@@ -310,5 +318,17 @@ namespace CohesiveRP.Core.Services
         public async Task<ReflectionDbModel> AddReflectionAsync(ReflectionDbModel dbModel) => await reflectionsDal.AddReflectionAsync(dbModel);
         public async Task<ReflectionDbModel> UpdateReflectionAsync(ReflectionDbModel dbModel) => await reflectionsDal.UpdateReflectionAsync(dbModel);
         public async Task<bool> DeleteReflectionsAsync(Func<ReflectionDbModel, bool> func) => await reflectionsDal.DeleteReflectionAsync(func);
+
+        // ProseCohesion
+        public async Task<ProseCohesionDbModel[]> GetProseCohesionsAsync(Func<ProseCohesionDbModel, bool> func) => await proseCohesionsDal.GetProseCohesionsAsync(func);
+        public async Task<ProseCohesionDbModel> AddProseCohesionAsync(ProseCohesionDbModel dbModel) => await proseCohesionsDal.AddProseCohesionAsync(dbModel);
+        public async Task<ProseCohesionDbModel> UpdateProseCohesionAsync(ProseCohesionDbModel dbModel) => await proseCohesionsDal.UpdateProseCohesionAsync(dbModel);
+        public async Task<bool> DeleteProseCohesionsAsync(Func<ProseCohesionDbModel, bool> func) => await proseCohesionsDal.DeleteProseCohesionAsync(func);
+
+        // StyleCohesion
+        public async Task<StyleCohesionDbModel[]> GetStyleCohesionsAsync(Func<StyleCohesionDbModel, bool> func) => await styleCohesionsDal.GetStyleCohesionsAsync(func);
+        public async Task<StyleCohesionDbModel> AddStyleCohesionAsync(StyleCohesionDbModel dbModel) => await styleCohesionsDal.AddStyleCohesionAsync(dbModel);
+        public async Task<StyleCohesionDbModel> UpdateStyleCohesionAsync(StyleCohesionDbModel dbModel) => await styleCohesionsDal.UpdateStyleCohesionAsync(dbModel);
+        public async Task<bool> DeleteStyleCohesionsAsync(Func<StyleCohesionDbModel, bool> func) => await styleCohesionsDal.DeleteStyleCohesionAsync(func);
     }
 }

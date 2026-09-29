@@ -51,7 +51,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         //    ChatCompletionPresetType.RelevantSummaries,// PRE #2 (after sceneTracker)
         //    ChatCompletionPresetType.Reflection,// PRE #3
 
+        //    ChatCompletionPresetType.ProseValidator,// POST
         //    ChatCompletionPresetType.ProseEdition,// POST
+        //    ChatCompletionPresetType.StyleValidator,// POST
         //    ChatCompletionPresetType.StyleEdition,// POST
 
         //    ChatCompletionPresetType.SkillChecksDescriptor,// During Main
@@ -74,8 +76,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
         // Dev-02_WORK_PRIVATE
         // --- Local
-        private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";// 192.168.100.1
-        private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";// 192.168.100.1
+        private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
+        private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
 
         private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
         [
@@ -90,7 +92,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             ChatCompletionPresetType.SkillChecksDescriptor,// During Main
             ChatCompletionPresetType.Main,// Main
             ChatCompletionPresetType.CharactersAdherenceEnforcement,// POST
+            ChatCompletionPresetType.ProseValidator,// POST
             ChatCompletionPresetType.ProseEdition,// POST
+            ChatCompletionPresetType.StyleValidator,// POST
             ChatCompletionPresetType.StyleEdition,// POST
 
             ChatCompletionPresetType.ProseGuardian,// POST++
@@ -114,61 +118,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
         // -----------
 
-
-
-
-        // Dev-01_INTENSERP_AND_LOCAL
-        // --- Local
-        //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "http://127.0.0.1:5001/v1/chat/completions";
-        //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "http://127.0.0.1:5001/v1/chat/completions";
-
-        //private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
-        //[
-        //    ChatCompletionPresetType.NarrativeDirection,// PRE ~15s
-        //    ChatCompletionPresetType.SkillChecksDescriptor,// During Main
-        //    ChatCompletionPresetType.ProseGuardian,// POST ~50s
-        //    ChatCompletionPresetType.Summarize,// POST++ ~45s
-        //    ChatCompletionPresetType.SummariesMerge,// POST++ ~50s
-        //    ChatCompletionPresetType.CohesionEnforcement,// POST
-        //];
-
-        //private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets =
-        //[
-        //];
-
-        //// --- IntenseRP
-        //private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets =
-        //[
-        //    ChatCompletionPresetType.Main,
-        //];
-
-        //private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets =
-        //[
-        //    ChatCompletionPresetType.CharacterStatusUpdate,// POST++
-        //    ChatCompletionPresetType.RelevantSummaries,// PRE+
-        //    ChatCompletionPresetType.SceneTrackerValidator,// PRE
-        //    ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
-        //    ChatCompletionPresetType.DynamicCharacterCreation,
-        //    ChatCompletionPresetType.DynamicCharacterSheetCreation,
-        //    ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration
-        //];
-
-        //private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
-
-        //private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets =
-        //[
-        //    //ChatCompletionPresetType.NarrativeArchitecture,// POST++ (secretPlot) NOT WORKING YET
-        //];
-
-        //private readonly List<ChatCompletionPresetType> DSchatCompletionPresets =
-        //[
-        //    ChatCompletionPresetType.SceneTracker,// PRE
-        //    ChatCompletionPresetType.SkillChecksInitiator,// PRE
-        //    ChatCompletionPresetType.Reflection,// PRE
-        //];
-
-        //private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
-
         public GlobalSettingsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
         {
             this.contextFactory = contextFactory;
@@ -190,7 +139,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 {
                     GlobalSettingsId = Guid.NewGuid().ToString(),
                     CreatedAtUtc = DateTime.UtcNow,
-                    FeaturesSettings = new() {
+                    FeaturesSettings = new()
+                    {
                         EnableRelevantSummariesFeature = true,
                         EnableComfyUI = true,
                     },
@@ -625,12 +575,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             },
                             new ChatCompletionPresetsMapElement
                             {
-                                Type = ChatCompletionPresetType.SceneTrackerRefiner,
-                                ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_TRACKER_REFINER_COMPLETION_PRESET,
-                                IsDefault = true,
-                            },
-                            new ChatCompletionPresetsMapElement
-                            {
                                 Type = ChatCompletionPresetType.CharactersAdherenceEnforcement,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_CHARACTER_ADHERENCE_ENFORCEMENT_COMPLETION_PRESET,
                                 IsDefault = true,
@@ -643,8 +587,26 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             },
                             new ChatCompletionPresetsMapElement
                             {
+                                Type = ChatCompletionPresetType.ProseValidator,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_PROSE_VALIDATOR_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
                                 Type = ChatCompletionPresetType.StyleEdition,
                                 ChatCompletionPresetId = StorageConstants.DEFAULT_STYLE_EDITION_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.StyleValidator,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_STYLE_VALIDATOR_COMPLETION_PRESET,
+                                IsDefault = true,
+                            },
+                            new ChatCompletionPresetsMapElement
+                            {
+                                Type = ChatCompletionPresetType.SceneTrackerRefiner,
+                                ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_TRACKER_REFINER_COMPLETION_PRESET,
                                 IsDefault = true,
                             },
                         }

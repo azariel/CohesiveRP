@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement.BusinessObjects
+namespace CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement.BusinessObjects
 {
     public class CharactersCohesionEnforcementElement
     {

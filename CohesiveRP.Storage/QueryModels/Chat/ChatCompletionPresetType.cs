@@ -25,7 +25,9 @@
         SceneTrackerValidator = 19,
         CharactersAdherenceEnforcement = 20,
         ProseEdition = 21,
-        StyleEdition = 22,
-        SceneTrackerRefiner = 23,
+        ProseValidator = 22,
+        StyleEdition = 23,
+        StyleValidator = 24,
+        SceneTrackerRefiner = 25,
     }
 }

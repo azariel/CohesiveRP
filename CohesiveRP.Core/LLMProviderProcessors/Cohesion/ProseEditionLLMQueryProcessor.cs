@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Common.Diagnostics;
+﻿using CohesiveRP.Common.BusinessObjects;
+using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
@@ -8,16 +9,15 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement.BusinessObjects;
-using CohesiveRP.Storage.DTOs.CohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.ProseCohesion.BusinessObjects;
 using CohesiveRP.Storage.QueryModels.Chat;
 
-namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
+namespace CohesiveRP.Core.LLMProviderProcessors.Cohesion
 {
-    public class CharactersCohesionEnforcementLLMQueryProcessor : LLMQueryProcessor
+    public class ProseEditionLLMQueryProcessor : LLMQueryProcessor
     {
-        public CharactersCohesionEnforcementLLMQueryProcessor(
+        public ProseEditionLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
             BackgroundQueryDbModel backgroundQueryDbModel,
@@ -50,47 +50,47 @@ namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
             {
                 string LLMMessageResult = LLMResponseParser.ParseOnlyJson(messages.First().Content);
 
-                // deserialize the CohesionEnforcement
-                CharactersCohesionEnforcementResult cohesionEnforcement = null;
+                // deserialize the ProseValidationResult
+                ProseValidationResult proseValidationResult = null;
 
                 try
                 {
-                    cohesionEnforcement = JsonCommonSerializer.DeserializeFromString<CharactersCohesionEnforcementResult>(LLMMessageResult);
+                    proseValidationResult = JsonCommonSerializer.DeserializeFromString<ProseValidationResult>(LLMMessageResult);
                 } catch (Exception e)
                 {
-                    LoggingManager.LogToFile("a81acc34-e4b3-4147-a5b5-2c729d181fad", $"Failed to deserialize CharactersCohesionEnforcementResult from LLM response.", e);
+                    LoggingManager.LogToFile("a81acc34-e4b3-4147-a5b5-2c729d181fad", $"Failed to deserialize ProseCohesionResult from LLM response.", e);
                     backgroundQueryDbModel.Content = null;
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
                     backgroundQueryDbModel.RetryCount++;
                     return false;
                 }
 
-                var finalContent = JsonCommonSerializer.SerializeToString(cohesionEnforcement);
+                var finalContent = JsonCommonSerializer.SerializeToString(proseValidationResult);
 
-                // Replace the CohesionEnforcement tied to this chat with the new one
-                var currentDbModels = await storageService.GetCharactersCohesionEnforcementsAsync(s => s.ChatId == backgroundQueryDbModel.ChatId);
+                // Replace the ProseValidationResult tied to this chat with the new one
+                var currentDbModels = await storageService.GetProseCohesionsAsync(s => s.ChatId == backgroundQueryDbModel.ChatId);
                 var currentDbModel = currentDbModels?.FirstOrDefault();
                 if (currentDbModel == null)
                 {
                     // Create a brand new one
-                    currentDbModel = new CharactersCohesionEnforcementDbModel
+                    currentDbModel = new ProseCohesionDbModel
                     {
                         ChatId = backgroundQueryDbModel.ChatId,
-                        Content = new CharactersCohesionEnforcementElement
+                        Content = new ProseCohesionElement
                         {
                             Content = finalContent,
                         },
                     };
 
-                    await storageService.AddCharactersCohesionEnforcementAsync(currentDbModel);
+                    await storageService.AddProseCohesionAsync(currentDbModel);
                 } else
                 {
-                    currentDbModel.Content = new CharactersCohesionEnforcementElement
+                    currentDbModel.Content = new ProseCohesionElement
                     {
                         Content = finalContent,
                     };
 
-                    await storageService.UpdateCharactersCohesionEnforcementAsync(currentDbModel);
+                    await storageService.UpdateProseCohesionAsync(currentDbModel);
                 }
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;

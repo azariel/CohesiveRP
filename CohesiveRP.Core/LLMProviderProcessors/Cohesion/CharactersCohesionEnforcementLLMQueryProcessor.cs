@@ -8,16 +8,17 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.ProseCohesion.BusinessObjects;
 using CohesiveRP.Storage.DTOs.CohesionEnforcement;
 using CohesiveRP.Storage.QueryModels.Chat;
 
-namespace CohesiveRP.Core.LLMProviderProcessors.ChatAdditions
+namespace CohesiveRP.Core.LLMProviderProcessors.Cohesion
 {
-    public class ProseEditionLLMQueryProcessor : LLMQueryProcessor
+    public class CharactersCohesionEnforcementLLMQueryProcessor : LLMQueryProcessor
     {
-        public ProseEditionLLMQueryProcessor(
+        public CharactersCohesionEnforcementLLMQueryProcessor(
             ChatCompletionPresetType completionPresetType,
             BackgroundQuerySystemTags tag,
             BackgroundQueryDbModel backgroundQueryDbModel,

@@ -1,5 +1,6 @@
 ﻿using CohesiveRP.Core.LLMProviderManager.Main;
 using CohesiveRP.Core.LLMProviderProcessors.ChatAdditions;
+using CohesiveRP.Core.LLMProviderProcessors.Cohesion;
 using CohesiveRP.Core.LLMProviderProcessors.DynamicCharacterCreator;
 using CohesiveRP.Core.LLMProviderProcessors.Illustrator.MainCharacterAvatar;
 using CohesiveRP.Core.LLMProviderProcessors.Pathfinder.CharactersMutations;
@@ -120,8 +121,12 @@ namespace CohesiveRP.Core.LLMProviderManager
                     new SceneTrackerRefinerLLMQueryProcessor(ChatCompletionPresetType.SceneTrackerRefiner, BackgroundQuerySystemTags.sceneTrackerRefiner, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService, sceneTrackerPostProcess),
                 BackgroundQuerySystemTags.charactersAdherenceEnforcement =>
                     new CharactersAdherenceEnforcementLLMQueryProcessor(ChatCompletionPresetType.CharactersAdherenceEnforcement, BackgroundQuerySystemTags.charactersAdherenceEnforcement, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                BackgroundQuerySystemTags.proseValidator =>
+                    new ProseValidatorLLMQueryProcessor(ChatCompletionPresetType.ProseValidator, BackgroundQuerySystemTags.proseValidator, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.proseEdition =>
                     new ProseEditionLLMQueryProcessor(ChatCompletionPresetType.ProseEdition, BackgroundQuerySystemTags.proseEdition, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
+                 BackgroundQuerySystemTags.styleValidator =>
+                    new StyleValidatorLLMQueryProcessor(ChatCompletionPresetType.StyleValidator, BackgroundQuerySystemTags.styleValidator, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 BackgroundQuerySystemTags.styleEdition =>
                     new StyleEditionLLMQueryProcessor(ChatCompletionPresetType.StyleEdition, BackgroundQuerySystemTags.styleEdition, queryModel, promptContextBuilderFactory, promptContextElementBuilderFactory, storageService, httpLLMApiProviderService, summaryService),
                 _ => null

@@ -28,8 +28,10 @@
         relevantSummaries = 22,
         sceneTrackerValidator = 23,
         charactersAdherenceEnforcement = 24,
-        proseEdition = 25,
-        styleEdition = 26,
-        sceneTrackerRefiner = 27,
+        proseValidator = 25,
+        proseEdition = 26,
+        styleValidator = 27,
+        styleEdition = 28,
+        sceneTrackerRefiner = 29,
     }
 }

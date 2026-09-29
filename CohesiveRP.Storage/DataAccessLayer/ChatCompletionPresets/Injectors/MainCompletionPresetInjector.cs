@@ -78,7 +78,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                                 Format = "<narrative_mechanics>\n<engagement>\nImprovise naturally during conversations and acts to best fit current affairs without User input, unless directly involved. Discreetly incorporate visual object details (signs, menus, documents) where suitable. Namify and coin culturally appropriate, unique names for new characters.\n</engagement>\n<secrets>\nWe share the whole story context, including secrets. Only act on or reference information a character has heard, seen, or learned. Otherwise, infer their ignorance immersively.\n</secrets>\n</narrative_mechanics>\n"
                             }
                         },
-                        // --- Dynamic Tags Below (Keep as you had them) ---
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.World, Name = "World", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "{{item_description}}" } },
                         new PromptContextFormatElement
                         {
@@ -94,7 +93,6 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.SummaryLongTerm, Name = "SummaryLongTerm", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "- {{item_description}}" } },
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.SummaryMediumTerm, Name = "SummaryMediumTerm", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "- {{item_description}}" } },
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.SummaryShortTerm, Name = "SummaryShortTerm", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "- {{item_description}}" } },
-                        // When this field is computed, use it. Otherwise, default back to the other previous ones
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.RelevantComputedSummariesOnly, Name = "RelevantComputedSummariesOnly", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "- {{item_description}}" } },
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.LoreByQuery, Name = "LoreByQuery", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "{{item_header}}\r\n{{item_description}}" } },
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.NarrativeArchitecture, Name = "NarrativeArchitecture", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "<secret_plot_state>\r\n{{description}}</secret_plot_state>\r\n" } },

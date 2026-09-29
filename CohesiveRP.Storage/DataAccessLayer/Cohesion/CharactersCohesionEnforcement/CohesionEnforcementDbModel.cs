@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CohesionEnforcement.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement.BusinessObjects;
 using CohesiveRP.Storage.JsonConverters;
 using CohesiveRP.Storage.Sqlite;
 
-namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement
+namespace CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement
 {
     /// <summary>
     /// Represents the structure of Characters Cohesion Enforcement in db.

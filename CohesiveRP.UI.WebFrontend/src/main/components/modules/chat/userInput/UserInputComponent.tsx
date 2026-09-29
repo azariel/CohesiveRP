@@ -27,6 +27,19 @@ interface Props {
   triggerBackgroundQueriesPoll: () => void;
 }
 
+// Background queries that can still change the AI reply after/besides 'main'.
+const GENERATION_TAGS = new Set([
+  "sceneTrackerRefiner",
+  "styleEdition",
+  "styleValidator",
+  "proseEdition",
+  "proseValidator",
+  "charactersAdherenceEnforcement",
+  "main",
+]);
+
+const isTerminalStatus = (status: string) => status === "Completed" || status === "Error";
+
 export default function UserInputComponent({ messagesRef, backgroundQueries, backgroundQueriesLoadingInitial, backgroundQueriesNetworkError, triggerBackgroundQueriesPoll }: Props) {
   const { activeModule, setActiveModule } = sharedContext<SharedContextChatType>();
   const [localInput, setLocalInput] = useState(activeModule?.currentUserInputValue ?? "");
@@ -99,6 +112,13 @@ export default function UserInputComponent({ messagesRef, backgroundQueries, bac
     const trackedId = activeModule.mainQueryId;
     let cancelled = false;
 
+    const otherGenerationStillRunning = backgroundQueries.some(
+      (q) =>
+        q.backgroundQueryId !== trackedId &&
+        !isTerminalStatus(q.status) &&
+        q.tags.some((t) => GENERATION_TAGS.has(t))
+    );
+
     const applyUpdate = async (
       status: string,
       content: string | undefined,
@@ -123,9 +143,33 @@ export default function UserInputComponent({ messagesRef, backgroundQueries, bac
         return updated;
       });
 
-      const isTerminal = status === "Completed" || status === "Error";
-      if (!isTerminal)
+      if (!isTerminalStatus(status))
         return;
+
+      // 'main' is done, but editors/validators/etc. may still rewrite the reply.
+      // Keep the temp message + blocked input, and keep refreshing its content.
+      if (otherGenerationStillRunning) {
+        setSendMessageQueryStatus("InProgress"); // keep the spinner in its "working" style
+
+        if (linkedId) {
+          const res = await getFromServerApiAsync<ChatMessageResponseDto>(
+            `api/chat/${activeModule.chatId}/messages/${linkedId}`
+          );
+          if (cancelled) return;
+
+          if (res && res.code == 200 && res.messageObj) {
+            const fresh = res.messageObj;
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.messageId === TEMP_AI_REPLY_MESSAGE_ID_WHEN_GENERATING_MAIN_QUERY
+                  ? { ...m, content: fresh.content, thinkingContent: fresh.thinkingContent }
+                  : m
+              )
+            );
+          }
+        }
+        return;
+      }
 
       // Terminal status -> resolve the real message and clean up.
       didSentSceneTrackerRefreshToken.current = false;

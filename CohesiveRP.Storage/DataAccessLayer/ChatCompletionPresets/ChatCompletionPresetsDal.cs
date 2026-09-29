@@ -5,6 +5,7 @@ using CohesiveRP.Storage.Common;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors;
+using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors.Cohesion;
 using Microsoft.EntityFrameworkCore;
 
 namespace CohesiveRP.Storage.DataAccessLayer.Users
@@ -58,8 +59,15 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                 // Chat Additions
                 dbContext.ChatCompletionPresets.Add(NarrativeDirectionCompletionPresetInjector.InjectPreset());
                 dbContext.ChatCompletionPresets.Add(ProseGuardianCompletionPresetInjector.InjectPreset());
-                dbContext.ChatCompletionPresets.Add(CharactersCohesionEnforcementCompletionPresetInjector.InjectPreset());
                 dbContext.ChatCompletionPresets.Add(NarrativeArchitectureCompletionPresetInjector.InjectPreset());
+
+                // Cohesion
+                dbContext.ChatCompletionPresets.Add(CharactersCohesionEnforcementCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(ProseValidatorCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(ProseEditorCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(StyleValidatorCompletionPresetInjector.InjectPreset());
+                dbContext.ChatCompletionPresets.Add(StyleEditorCompletionPresetInjector.InjectPreset());
+                //dbContext.ChatCompletionPresets.Add(CharactersAdherenceCompletionPresetInjector.InjectPreset());
 
                 // Custom Thinking
                 dbContext.ChatCompletionPresets.Add(ReflectionCompletionPresetInjector.InjectPreset());

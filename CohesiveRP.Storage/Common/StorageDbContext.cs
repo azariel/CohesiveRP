@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
@@ -108,7 +108,7 @@ namespace CohesiveRP.Storage.Common
         public DbSet<LLMApiQueryDbModel> LLMApiQueries { get; set; }
 
         public DbSet<SummaryDbModel> Summaries { get; set; }
-        
+
         public DbSet<SceneTrackerDbModel> SceneTrackers { get; set; }
 
         public DbSet<SceneAnalyzerDbModel> SceneAnalyzers { get; set; }
@@ -116,22 +116,27 @@ namespace CohesiveRP.Storage.Common
         public DbSet<LorebookDbModel> Lorebooks { get; set; }
 
         public DbSet<LorebookInstanceDbModel> LorebookInstances { get; set; }
-        
+
         public DbSet<InteractiveUserInputDbModel> InteractiveUserInputQueries { get; set; }
 
         public DbSet<IllustrationQueryDbModel> IllustrationQueries { get; set; }
 
         // Chat Additions
-         public DbSet<CharactersCohesionEnforcementDbModel> CharactersCohesionEnforcements { get; set; }
-         public DbSet<ProseGuardianDbModel> ProseGuardians { get; set; }
-         public DbSet<NarrativeDirectionDbModel> NarrativeDirections { get; set; }
-         public DbSet<NarrativeArchitectureDbModel> NarrativeArchitectures { get; set; }
+        public DbSet<ProseGuardianDbModel> ProseGuardians { get; set; }
+        public DbSet<NarrativeDirectionDbModel> NarrativeDirections { get; set; }
+        public DbSet<NarrativeArchitectureDbModel> NarrativeArchitectures { get; set; }
         // --------------
 
         // Pathfinder
         public DbSet<CharacterSheetDbModel> CharacterSheets { get; set; }
         public DbSet<CharacterSheetInstancesDbModel> CharacterSheetInstances { get; set; }
         public DbSet<ChatCharactersRollsDbModel> ChatCharactersRolls { get; set; }
+        // ---------
+
+        // Cohesion
+        public DbSet<CharactersCohesionEnforcementDbModel> CharactersCohesionEnforcements { get; set; }
+        public DbSet<ProseCohesionDbModel> ProseCohesions { get; set; }
+        public DbSet<StyleCohesionDbModel> StyleCohesions { get; set; }
         // ---------
     }
 }

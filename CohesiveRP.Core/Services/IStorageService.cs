@@ -1,10 +1,10 @@
 ﻿using CohesiveRP.Storage.DataAccessLayer.AIQueries;
-using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeArchitecture;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.NarrativeDirection;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.ProseGuardian;
 using CohesiveRP.Storage.DataAccessLayer.ChatAdditions.Reflection;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement;
 using CohesiveRP.Storage.DataAccessLayer.InteractiveUserInputQueries;
 using CohesiveRP.Storage.DataAccessLayer.Messages;
 using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
@@ -184,5 +184,17 @@ namespace CohesiveRP.Core.Services
         Task<ReflectionDbModel> AddReflectionAsync(ReflectionDbModel dbModel);
         Task<ReflectionDbModel> UpdateReflectionAsync(ReflectionDbModel dbModel);
         Task<bool> DeleteReflectionsAsync(Func<ReflectionDbModel, bool> func);
+
+        // ProseCohesion
+        Task<ProseCohesionDbModel[]> GetProseCohesionsAsync(Func<ProseCohesionDbModel, bool> func);
+        Task<ProseCohesionDbModel> AddProseCohesionAsync(ProseCohesionDbModel dbModel);
+        Task<ProseCohesionDbModel> UpdateProseCohesionAsync(ProseCohesionDbModel dbModel);
+        Task<bool> DeleteProseCohesionsAsync(Func<ProseCohesionDbModel, bool> func);
+
+        // StyleCohesion
+        Task<StyleCohesionDbModel[]> GetStyleCohesionsAsync(Func<StyleCohesionDbModel, bool> func);
+        Task<StyleCohesionDbModel> AddStyleCohesionAsync(StyleCohesionDbModel dbModel);
+        Task<StyleCohesionDbModel> UpdateStyleCohesionAsync(StyleCohesionDbModel dbModel);
+        Task<bool> DeleteStyleCohesionsAsync(Func<StyleCohesionDbModel, bool> func);
     }
 }

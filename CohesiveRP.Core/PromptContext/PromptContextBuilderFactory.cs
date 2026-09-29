@@ -60,8 +60,12 @@ namespace CohesiveRP.Core.PromptContext
                     return new PromptContextBuilder(ChatCompletionPresetType.SceneTrackerValidator, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.sceneTrackerRefiner:
                     return new PromptContextBuilder(ChatCompletionPresetType.SceneTrackerRefiner, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.proseValidator:
+                    return new PromptContextBuilder(ChatCompletionPresetType.ProseValidator, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.proseEdition:
                     return new PromptContextBuilder(ChatCompletionPresetType.ProseEdition, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
+                case BackgroundQuerySystemTags.styleValidator:
+                    return new PromptContextBuilder(ChatCompletionPresetType.StyleValidator, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.styleEdition:
                     return new PromptContextBuilder(ChatCompletionPresetType.StyleEdition, promptContextElementBuilderFactory, storageService, globalSettings, backgroundQuery, generationTag);
                 case BackgroundQuerySystemTags.custom:

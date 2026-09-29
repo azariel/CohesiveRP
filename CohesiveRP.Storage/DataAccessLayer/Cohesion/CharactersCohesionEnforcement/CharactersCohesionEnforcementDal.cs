@@ -6,7 +6,7 @@ using CohesiveRP.Storage.DataAccessLayer.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace CohesiveRP.Storage.DataAccessLayer.ChatAdditions.CharactersCohesionEnforcement
+namespace CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement
 {
     /// <summary>
     /// DataAccessLayer around CharactersCohesionEnforcementDal.
