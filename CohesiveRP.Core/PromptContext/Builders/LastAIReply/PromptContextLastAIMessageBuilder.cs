@@ -9,7 +9,7 @@ using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
-    public class PromptContextLastUserMessageBuilder : IPromptContextElementBuilder
+    public class PromptContextLastAIMessageBuilder : IPromptContextElementBuilder
     {
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
@@ -17,7 +17,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private PersonaDbModel personaLinkedToChat;
         private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextLastUserMessageBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
+        public PromptContextLastAIMessageBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
@@ -30,7 +30,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         {
             if (promptContextFormatElement == null || chatDbModel == null)
             {
-                LoggingManager.LogToFile("8a023c77-6471-4185-9308-fdab9267d658", $"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
+                LoggingManager.LogToFile("1958d2fc-80b7-44e6-8b43-60683b6b42ee", $"Invalid parameters. ChatId: [{chatDbModel?.ChatId}].");
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
@@ -40,26 +40,25 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.Where(w => w.SourceType == Common.BusinessObjects.MessageSourceType.User).ToList();
+            hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.Where(w => w.SourceType == Common.BusinessObjects.MessageSourceType.AI).ToList();
             if (hotMessagesDbModel.Messages.Count <= 0)
             {
-                // TODO: if user hasn't talked in recent messages (hot), well...we could always fetch cold I guess, but that would be highly irregular for roleplay..
+                // TODO: if AI hasn't talked in recent messages (hot), well...we could always fetch cold I guess, but that would be highly irregular for roleplay..
                 return (null, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            IMessageDbModel lastUserMessage = hotMessagesDbModel.Messages.OrderByDescending(o => o.CreatedAtUtc).First();
-            PersonaDbModel linkedPersona = await storageService.GetPersonaByIdAsync(chatDbModel?.PersonaId);
+            IMessageDbModel lastAIMessage = hotMessagesDbModel.Messages.OrderByDescending(o => o.CreatedAtUtc).First();
 
-            if (string.IsNullOrWhiteSpace(lastUserMessage.Content))
+            if (string.IsNullOrWhiteSpace(lastAIMessage.Content))
             {
                 return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            return ($"<last_message_by_{linkedPersona.Name}>{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastUserMessage.Content).InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}</last_message_by_{linkedPersona.Name}>",
+            return ($"{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastAIMessage.Content).InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,
-                    Value = lastUserMessage.MessageId,
+                    Value = lastAIMessage.MessageId,
                 });
         }
     }

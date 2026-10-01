@@ -1,7 +1,5 @@
-﻿using CohesiveRP.Common.BusinessObjects;
-using CohesiveRP.Common.Diagnostics;
+﻿using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
-using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.LLMProviderManager;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
@@ -10,8 +8,10 @@ using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Cohesion.CharactersCohesionEnforcement;
-using CohesiveRP.Storage.DataAccessLayer.Cohesion.ProseCohesion.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Cohesion.StyleCohesion.BusinessObjects;
+using CohesiveRP.Storage.DataAccessLayer.Messages;
+using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
+using CohesiveRP.Storage.QueryModels.BackgroundQuery;
 using CohesiveRP.Storage.QueryModels.Chat;
 
 namespace CohesiveRP.Core.LLMProviderProcessors.Cohesion
@@ -49,49 +49,13 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Cohesion
 
             try
             {
-                string LLMMessageResult = LLMResponseParser.ParseOnlyJson(messages.First().Content);
-
-                // deserialize the StyleValidationResult
-                StyleValidationResult styleValidationResult = null;
-
-                try
+                string LLMMessageResult = messages.First().Content;
+                if (!await UpdateLastReplyByAI(backgroundQueryDbModel.ChatId, LLMMessageResult))
                 {
-                    styleValidationResult = JsonCommonSerializer.DeserializeFromString<StyleValidationResult>(LLMMessageResult);
-                } catch (Exception e)
-                {
-                    LoggingManager.LogToFile("a81acc34-e4b3-4147-a5b5-2c729d181fad", $"Failed to deserialize StyleCohesionResult from LLM response.", e);
                     backgroundQueryDbModel.Content = null;
                     backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;// re-queue
                     backgroundQueryDbModel.RetryCount++;
                     return false;
-                }
-
-                var finalContent = JsonCommonSerializer.SerializeToString(styleValidationResult);
-
-                // Replace the CohesionEnforcement tied to this chat with the new one
-                var currentDbModels = await storageService.GetStyleCohesionsAsync(s => s.ChatId == backgroundQueryDbModel.ChatId);
-                var currentDbModel = currentDbModels?.FirstOrDefault();
-                if (currentDbModel == null)
-                {
-                    // Create a brand new one
-                    currentDbModel = new StyleCohesionDbModel
-                    {
-                        ChatId = backgroundQueryDbModel.ChatId,
-                        Content = new StyleCohesionElement
-                        {
-                            Content = finalContent,
-                        },
-                    };
-
-                    await storageService.AddStyleCohesionAsync(currentDbModel);
-                } else
-                {
-                    currentDbModel.Content = new StyleCohesionElement
-                    {
-                        Content = finalContent,
-                    };
-
-                    await storageService.UpdateStyleCohesionAsync(currentDbModel);
                 }
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
@@ -99,12 +63,38 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Cohesion
                 return true;
             } catch (Exception e)
             {
-                LoggingManager.LogToFile("ba0ccff5-42a5-4c78-a83f-a25bab7ace20", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
+                LoggingManager.LogToFile("0fd671d1-b019-48e7-8bd4-fb06e4f39a71", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}]. Task will be set to Pending status for re-generation.", e);
                 backgroundQueryDbModel.Content = null;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
                 backgroundQueryDbModel.RetryCount++;
                 return false;
             }
+        }
+
+        private async Task<bool> UpdateLastReplyByAI(string chatId, string newMessageContent)
+        {
+            HotMessagesDbModel hotMessagesDbModel = await storageService.GetAllHotMessagesAsync(chatId);
+            if (hotMessagesDbModel?.Messages == null)
+            {
+                return false;
+            }
+
+            hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.Where(w => w.SourceType == Common.BusinessObjects.MessageSourceType.AI).ToList();
+            if (hotMessagesDbModel.Messages.Count <= 0)
+            {
+                // TODO: if AI hasn't talked in recent messages (hot), well...we could always fetch cold I guess, but that would be highly irregular for roleplay..
+                return false;
+            }
+
+            IMessageDbModel lastAIMessage = hotMessagesDbModel.Messages.OrderByDescending(o => o.CreatedAtUtc).First();
+
+            if (string.IsNullOrWhiteSpace(lastAIMessage.Content))
+            {
+                return false;
+            }
+
+            lastAIMessage.Content = newMessageContent;
+            return await storageService.UpdateHotMessageAsync(chatId, lastAIMessage as MessageDbModel);
         }
     }
 }

@@ -94,7 +94,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Cohesion
                     // Start by updating the proseCohesion to add the suggestions
                     linkedProseInStorage.Content = new ProseCohesionElement
                     {
-                        Content = string.Join($"{(result.Recommendations.Length > 0 ? "- " : string.Empty)}{Environment.NewLine}- ", result.Recommendations),
+                        Content = JsonCommonSerializer.SerializeToString(result),
                     };
 
                     await storageService.UpdateProseCohesionAsync(linkedProseInStorage);

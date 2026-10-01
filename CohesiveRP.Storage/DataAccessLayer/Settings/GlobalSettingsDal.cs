@@ -35,6 +35,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         //    ChatCompletionPresetType.CharactersCohesionEnforcement,// PRE
         //    ChatCompletionPresetType.Main,
         //    ChatCompletionPresetType.CharactersAdherenceEnforcement,// POST
+        //    ChatCompletionPresetType.ProseEdition,// POST
 
         //    ChatCompletionPresetType.CharacterStatusUpdate,// POST
 
@@ -51,12 +52,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         //    ChatCompletionPresetType.RelevantSummaries,// PRE #2 (after sceneTracker)
         //    ChatCompletionPresetType.Reflection,// PRE #3
 
+        //    ChatCompletionPresetType.SkillChecksDescriptor,// During Main
+
         //    ChatCompletionPresetType.ProseValidator,// POST
-        //    ChatCompletionPresetType.ProseEdition,// POST
         //    ChatCompletionPresetType.StyleValidator,// POST
         //    ChatCompletionPresetType.StyleEdition,// POST
 
-        //    ChatCompletionPresetType.SkillChecksDescriptor,// During Main
         //    ChatCompletionPresetType.ProseGuardian,// POST
 
         //    ChatCompletionPresetType.NarrativeArchitecture,// POST+ (secretPlot)

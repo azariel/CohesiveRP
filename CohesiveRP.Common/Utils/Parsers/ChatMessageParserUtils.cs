@@ -10,7 +10,7 @@ namespace CohesiveRP.Common.Utils.Parsers
         {
             string message = rawMessage;
 
-            if(string.IsNullOrWhiteSpace(message))
+            if (string.IsNullOrWhiteSpace(message))
                 return message;
 
             //// remove <think></think>
@@ -26,6 +26,13 @@ namespace CohesiveRP.Common.Utils.Parsers
 
             // remove <think></think> and <thinking></thinking>
             message = Regex.Replace(message, thinkingRegexPattern, "");
+
+            // Remove reasoning-budget boilerplate
+            message = message.Replace("(Reasoning budget exceeded)\r\nTime to respond now.","", StringComparison.InvariantCultureIgnoreCase);
+
+            // Normalize excessive empty lines
+            // 2+ consecutive blank lines -> 1 blank line
+            message = Regex.Replace(message, @"(\r?\n){3,}", Environment.NewLine + Environment.NewLine);
 
             // normalize quotes
             message = message

@@ -45,6 +45,8 @@ public class DeleteSpecificMessageByIdWorkflow : IDeleteSpecificMessageByIdWorkf
         sceneTracker.PreviousContent = string.Empty;
         await storageService.CreateOrUpdateSceneTrackerAsync(sceneTracker, false);
 
+        // TODO: delete interactive inputs?
+
         return new DeleteMessageResponseDto
         {
             HttpResultCode = System.Net.HttpStatusCode.OK,

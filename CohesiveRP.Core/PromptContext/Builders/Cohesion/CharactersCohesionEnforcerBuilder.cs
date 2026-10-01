@@ -4,7 +4,7 @@ using CohesiveRP.Core.Services;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 
-namespace CohesiveRP.Core.PromptContext.Builders.Directive
+namespace CohesiveRP.Core.PromptContext.Builders.Cohesion
 {
     public class CharactersCohesionEnforcerBuilder : IPromptContextElementBuilder
     {

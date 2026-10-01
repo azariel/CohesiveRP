@@ -94,7 +94,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Cohesion
                     // Start by updating the StyleCohesion to add the suggestions
                     linkedStyleInStorage.Content = new StyleCohesionElement
                     {
-                        Content = string.Join($"{(result.Recommendations.Length > 0 ? "- " : string.Empty)}{Environment.NewLine}- ", result.Recommendations),
+                        Content = JsonCommonSerializer.SerializeToString(result),
                     };
 
                     await storageService.UpdateStyleCohesionAsync(linkedStyleInStorage);
