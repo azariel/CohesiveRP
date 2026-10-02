@@ -55,7 +55,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors.Coh
                         new PromptContextFormatElement
                         {
                             Name = "Core Directive",
-                            Tag = PromptContextFormatTag.LastAIMessage,
+                            Tag = PromptContextFormatTag.LastAIMessageSentences,
                             Enabled = true,
                             Options = new PromptContextFormatElementOptions
                             {
@@ -69,7 +69,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors.Coh
                             Enabled = true,
                             Options = new PromptContextFormatElementOptions
                             {
-                                Format = "Each recommendation must be an actionable suggestion that you make that will enhance the prose. This could mean to remove something, alter a phrase, add details, etc.",
+                                Format = "Each value within the output array 'recommendations' must be a textual value representing the recommendation. You may return mutations, each on one sentence id. Allowed actions:\r\n- delete: remove a sentence that adds nothing concrete.\r\n- trim: remove a phrase or clause from a sentence. \"text\" is the exact words to remove, copied from the sentence.\r\n- replace: only to shorten a sentence, using only words already in it.\r\nNever add a person, object, sound, body sensation, or action that is not already in the sentence.\r\nNever touch [LOCKED] sentences.\r\nIf a sentence cannot be improved by cutting, leave it alone. Returning no mutations is a correct answer. Make sure that your suggestions won't make the final text incoherent or worse than the original.",
                             }
                         }
                     ]

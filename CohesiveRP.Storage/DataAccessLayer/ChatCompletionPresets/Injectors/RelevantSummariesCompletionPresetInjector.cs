@@ -1,6 +1,8 @@
-﻿using CohesiveRP.Storage.DataAccessLayer.AIQueries;
+﻿using CohesiveRP.Common.Utils;
+using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.BusinessObjects.Format;
+using CohesiveRP.Storage.DTOs;
 
 namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
 {
@@ -16,6 +18,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                 Format = new GlobalPromptContextFormat()
                 {
                     MaxTokensToGenerate = 8192,
+                    JsonSchemaName = "pathfinder_skill_checks_initiator",
+                    JsonSchemaDocument = StrictJsonSchemaGenerator.Generate<LLMRelevantSummariesResponseDto>(),
                     OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                     {
                         new PromptContextFormatElement
@@ -45,7 +49,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                             Enabled = true,
                             Options = new PromptContextFormatElementOptions
                             {
-                                Format = "<behavioral_instruction>\r\nHow do you respond?\r\nThink about it first. Consider the current point in the narrative and how you got there.\r\nWrite your analysis, do *NOT* write a narrative response, we're solely looking for a trimmed down version of <history> that would keep only the events and facts that are relevant to the *CURRENT* scene.\r\n Limit your reply to 6144 tokens at maximum. Your reply *MUST* contains *ONLY* the summaries within either '<summary_very_long_term>', '<summary_long_term>', '<summary_medium_term>' or '<summary_short_term>' tags.\r\n</behavioral_instruction>",
+                                Format = "<behavioral_instruction>\r\nHow do you respond?\r\nThink about it first. Consider the current point in the narrative and how you got there.\r\nWrite your analysis, do *NOT* write a narrative response, we're solely looking for a trimmed down version of <history> that would keep only the events and facts that are relevant to the *CURRENT* scene.\r\n Limit your reply to 6144 tokens at maximum.\r\n</behavioral_instruction>",
                             }
                         }
                     },

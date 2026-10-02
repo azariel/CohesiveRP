@@ -11,16 +11,16 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
         internal static ChatCompletionPresetsDbModel InjectPreset()
         {
             return new ChatCompletionPresetsDbModel
+            {
+                Name = "Default-Scene-Tracker-Validator-Preset",
+                ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_TRACKER_VALIDATOR_COMPLETION_PRESET,
+                CreatedAtUtc = DateTime.UtcNow,
+                Format = new GlobalPromptContextFormat()
                 {
-                    Name = "Default-Scene-Tracker-Validator-Preset",
-                    ChatCompletionPresetId = StorageConstants.DEFAULT_SCENE_TRACKER_VALIDATOR_COMPLETION_PRESET,
-                    CreatedAtUtc = DateTime.UtcNow,
-                    Format = new GlobalPromptContextFormat()
-                    {
-                        MaxTokensToGenerate = 4096,
-                        JsonSchemaName = "scene_tracker_validator",
+                    MaxTokensToGenerate = 4096,
+                    JsonSchemaName = "scene_tracker_validator",
                     JsonSchemaDocument = StrictJsonSchemaGenerator.Generate<SceneTrackerValidationResult>(),
-                        OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
+                    OrderedElementsWithinTheGlobalPromptContext = new List<PromptContextFormatElement>
                         {
                             new PromptContextFormatElement
                             {
@@ -83,8 +83,8 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                                 }
                             }
                         }
-                    }
-                };
+                }
+            };
         }
     }
 }

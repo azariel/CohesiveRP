@@ -101,8 +101,8 @@ namespace CohesiveRP.Core.PromptContext.Builders
                     return new CharactersCohesionEnforcerBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.Reflections:
                     return new ReflectionsBuilder(storageService, contextElement, chatDbModel, backgroundQuery?.LinkedId, personaLinkedToChat, charactersLinkedToChat);
-                case PromptContextFormatTag.LastAIMessage:
-                    return new PromptContextLastAIMessageBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
+                case PromptContextFormatTag.LastAIMessageSentences:
+                    return new PromptContextLastAIMessageSentencesBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.ProseValidationEdition:
                     return new PromptContextProseValidationEditionBuilder(storageService, contextElement, chatDbModel, personaLinkedToChat, charactersLinkedToChat);
                 case PromptContextFormatTag.StyleValidationEdition:

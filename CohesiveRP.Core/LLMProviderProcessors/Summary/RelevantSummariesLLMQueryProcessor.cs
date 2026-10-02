@@ -1,17 +1,14 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Serialization;
 using CohesiveRP.Common.Utils.Parsers;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Builders;
-using CohesiveRP.Core.PromptContext.Builders.Directive;
 using CohesiveRP.Core.Services;
 using CohesiveRP.Core.Services.Summary;
 using CohesiveRP.Storage.DataAccessLayer.AIQueries;
 using CohesiveRP.Storage.DataAccessLayer.BackgroundQueries.BusinessObjects;
-using CohesiveRP.Storage.DataAccessLayer.Messages;
-using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
-using CohesiveRP.Storage.DataAccessLayer.Settings;
+using CohesiveRP.Storage.DTOs;
 using CohesiveRP.Storage.QueryModels.Chat;
-using CohesiveRP.Storage.QueryModels.Message;
 
 namespace CohesiveRP.Core.LLMProviderManager.Main
 {
@@ -57,6 +54,21 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     return false;
                 }
 
+                string relevantSummariesResponseContent = messages.First().Content;
+                string relevantSummariesJson = LLMResponseParser.ParseOnlyJson(relevantSummariesResponseContent);
+                LLMRelevantSummariesResponseDto responseDto = null;
+
+                try
+                {
+                    responseDto = JsonCommonSerializer.DeserializeFromString<LLMRelevantSummariesResponseDto>(relevantSummariesJson);
+                } catch (Exception e)
+                {
+                    LoggingManager.LogToFile("5139be1f-735e-4abb-bdc1-9fb5d04f7057", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Invalid relevantSummariesJson. Skipping.", e);
+                    backgroundQueryDbModel.Status = BackgroundQueryStatus.Pending;
+                    backgroundQueryDbModel.RetryCount++;
+                    return false;
+                }
+
                 var summaryDbModel = await storageService.GetSummaryAsync(backgroundQueryDbModel.ChatId);
                 if (summaryDbModel == null)
                 {
@@ -64,20 +76,9 @@ namespace CohesiveRP.Core.LLMProviderManager.Main
                     return false;
                 }
 
-                if(string.IsNullOrWhiteSpace(messages[0].Content))
-                    return true;
-
-                summaryDbModel.RelevantSummaryInformationFromMostRecentStoryContext = messages[0].Content;
+                summaryDbModel.RelevantSummaryInformationFromMostRecentStoryContext = $"<summary_short_term>{Environment.NewLine}{responseDto.ShortTermSummaries}{Environment.NewLine}</summary_short_term>{Environment.NewLine}<summary_medium_term>{Environment.NewLine}{responseDto.MediumTermSummaries}{Environment.NewLine}</summary_medium_term>{Environment.NewLine}<summary_long_term>{Environment.NewLine}{responseDto.LongTermSummaries}{Environment.NewLine}</summary_long_term>{Environment.NewLine}<summary_very_long_term>{Environment.NewLine}{responseDto.LongTermSummaries}{Environment.NewLine}</summary_very_long_term>{Environment.NewLine}";
                 await storageService.UpdateSummaryAsync(summaryDbModel);
 
-                //// Update the summarized messages in db
-                //if(!await UpdateSummarizedMessagesAsync(messageQueryModel.ChatId))
-                //{
-                //    backgroundQueryDbModel.Status = BackgroundQueryStatus.Error;
-                //    return false;
-                //}
-
-                //backgroundQueryDbModel.LinkedId = newSummaryEntryInStorage.MessageIdTracker;
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;

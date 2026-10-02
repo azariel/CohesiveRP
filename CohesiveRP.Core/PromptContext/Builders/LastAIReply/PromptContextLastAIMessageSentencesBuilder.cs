@@ -1,4 +1,6 @@
 ﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Serialization;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
@@ -9,7 +11,7 @@ using CohesiveRP.Storage.DataAccessLayer.Messages.Hot;
 
 namespace CohesiveRP.Core.PromptContext.Builders.Directive
 {
-    public class PromptContextLastAIMessageBuilder : IPromptContextElementBuilder
+    public class PromptContextLastAIMessageSentencesBuilder : IPromptContextElementBuilder
     {
         private IStorageService storageService;
         private PromptContextFormatElement promptContextFormatElement;
@@ -17,7 +19,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
         private PersonaDbModel personaLinkedToChat;
         private CharacterDbModel[] charactersLinkedToChat;
 
-        public PromptContextLastAIMessageBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
+        public PromptContextLastAIMessageSentencesBuilder(IStorageService storageService, PromptContextFormatElement promptContextFormatElement, ChatDbModel chatDbModel, PersonaDbModel personaLinkedToChat, CharacterDbModel[] charactersLinkedToChat)
         {
             this.storageService = storageService;
             this.promptContextFormatElement = promptContextFormatElement;
@@ -54,7 +56,8 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
                 return (string.Empty, new ShareableContextLink { LinkedBuilder = this });
             }
 
-            return ($"{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", lastAIMessage.Content).InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}",
+            string sentences = $"{JsonCommonSerializer.SerializeToString(SentenceSplitter.SplitIntoIdSentences(lastAIMessage.Content))}";
+            return ($"{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.Replace("{{item_description}}", sentences).InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)}{Environment.NewLine}",
                 new ShareableContextLink
                 {
                     LinkedBuilder = this,

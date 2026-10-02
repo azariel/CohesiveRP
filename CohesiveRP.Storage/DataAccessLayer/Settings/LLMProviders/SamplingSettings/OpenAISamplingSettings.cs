@@ -29,7 +29,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.SamplingSetti
         [JsonPropertyName("xtc_probability")]
         public float XTCProbability { get; set; } = 0.3f;
 
-        [JsonPropertyName("xtc_treshold")]
+        [JsonPropertyName("xtc_threshold")]
         public float XTCTreshold { get; set; } = 0.1f;
         // --------------
 
@@ -38,7 +38,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Settings.LLMProviders.SamplingSetti
         public float TopP { get; set; } = 1.0f;// Top-P dynamically changes how many tokens are available depending on the entropy of the distribution.
 
         [JsonPropertyName("top_k")]
-        public float TopK { get; set; } = 0.0f;
+        public int TopK { get; set; } = 0;
 
         [JsonPropertyName("chat_template_kwargs")]
         public ChatTemplateKwargs ChatTemplateKwargs { get; set; } = new();

@@ -6,6 +6,7 @@ using CohesiveRP.Core.WebApi.ResponseDtos.Personas;
 using CohesiveRP.Core.WebApi.ResponseDtos.Personas.BusinessObjects;
 using CohesiveRP.Core.WebApi.Workflows.Lorebooks.Abstractions;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
+using CohesiveRP.Storage.DataAccessLayer.Lorebooks.BusinessObjects;
 
 namespace CohesiveRP.Core.WebApi.Workflows.Chat;
 
@@ -56,6 +57,16 @@ public class UpdateLorebookWorkflow : IUpdateLorebookWorkflow
                 Message = $"Lorebook with id {requestDto?.LorebookId} failed to update."
             };
         }
+
+        // Update lorebook instances
+        var lorebookInstances = await storageService.GetLorebookInstancesAsync(f => f.LorebookId == requestDto.LorebookId);
+        foreach (var lorebookInstance in lorebookInstances)
+        {
+            // we flush the state (we were maybe keeping tab with sticky or CD entries, we'll flush that state entirely)
+            lorebookInstance.Entries.Clear();
+            await storageService.UpdateLorebookInstanceAsync(lorebookInstance);
+        }
+
 
         // Convert DbModel to an acceptable web model (without sensitive information)
         var responseDto = new LorebookResponseDto

@@ -22,54 +22,57 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         private readonly IDbContextFactory<StorageDbContext> contextFactory;
 
         // -----------
-        // Dev-01_HOME_PRIVATE
+        //Dev-01_HOME_PRIVATE
         // --- Local
         //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.0.237:5001/v1/chat/completions";
         //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";
 
-        //private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
-        //[
+        private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";
+        private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";
 
-        //    ChatCompletionPresetType.SkillChecksInitiator,// PRE #1
-        //    ChatCompletionPresetType.NarrativeDirection,// PRE #1
-        //    ChatCompletionPresetType.CharactersCohesionEnforcement,// PRE
-        //    ChatCompletionPresetType.Main,
-        //    ChatCompletionPresetType.CharactersAdherenceEnforcement,// POST
-        //    ChatCompletionPresetType.ProseEdition,// POST
+        private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
+        [
 
-        //    ChatCompletionPresetType.CharacterStatusUpdate,// POST
+            ChatCompletionPresetType.SkillChecksInitiator,// PRE #1
+            ChatCompletionPresetType.NarrativeDirection,// PRE #1
+            ChatCompletionPresetType.CharactersCohesionEnforcement,// PRE
+            ChatCompletionPresetType.Main,
+            ChatCompletionPresetType.CharactersAdherenceEnforcement,// POST
 
-        //    ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
-        //    ChatCompletionPresetType.DynamicCharacterCreation,
-        //    ChatCompletionPresetType.DynamicCharacterSheetCreation,
-        //    ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
-        //];
+            ChatCompletionPresetType.CharacterStatusUpdate,// POST
 
-        //private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets = [
-        //    ChatCompletionPresetType.SceneTracker,// PRE #1
-        //    ChatCompletionPresetType.SceneTrackerRefiner,// PRE
-        //    ChatCompletionPresetType.SceneTrackerValidator,// PRE
-        //    ChatCompletionPresetType.RelevantSummaries,// PRE #2 (after sceneTracker)
-        //    ChatCompletionPresetType.Reflection,// PRE #3
+            ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
+            ChatCompletionPresetType.DynamicCharacterCreation,
+            ChatCompletionPresetType.DynamicCharacterSheetCreation,
+            ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
+        ];
 
-        //    ChatCompletionPresetType.SkillChecksDescriptor,// During Main
+        private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets = [
+            ChatCompletionPresetType.SceneTracker,// PRE #1
+            ChatCompletionPresetType.SceneTrackerRefiner,// PRE
+            ChatCompletionPresetType.SceneTrackerValidator,// PRE
+            ChatCompletionPresetType.RelevantSummaries,// PRE #2 (after sceneTracker)
+            ChatCompletionPresetType.Reflection,// PRE #3
 
-        //    ChatCompletionPresetType.ProseValidator,// POST
-        //    ChatCompletionPresetType.StyleValidator,// POST
-        //    ChatCompletionPresetType.StyleEdition,// POST
+            ChatCompletionPresetType.SkillChecksDescriptor,// During Main
 
-        //    ChatCompletionPresetType.ProseGuardian,// POST
+            ChatCompletionPresetType.ProseValidator,// POST
+            ChatCompletionPresetType.ProseEdition,// POST
+            ChatCompletionPresetType.StyleValidator,// POST
+            ChatCompletionPresetType.StyleEdition,// POST
 
-        //    ChatCompletionPresetType.NarrativeArchitecture,// POST+ (secretPlot)
-        //    ChatCompletionPresetType.Summarize,// POST++
-        //    ChatCompletionPresetType.SummariesMerge,// POST++
-        //];
-        //private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> DSchatCompletionPresets = [];
-        //private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
+            ChatCompletionPresetType.ProseGuardian,// POST
+
+            ChatCompletionPresetType.NarrativeArchitecture,// POST+ (secretPlot)
+            ChatCompletionPresetType.Summarize,// POST++
+            ChatCompletionPresetType.SummariesMerge,// POST++
+        ];
+        private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> DSchatCompletionPresets = [];
+        private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
         // -----------
 
 
@@ -77,46 +80,47 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
         // Dev-02_WORK_PRIVATE
         // --- Local
-        private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
-        private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
+        //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
+        //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";// 192.168.100.1
 
-        private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
-        [
-            ChatCompletionPresetType.RelevantSummaries,// PRE+
-            ChatCompletionPresetType.SkillChecksInitiator,// PRE
-            ChatCompletionPresetType.SceneTracker,// PRE
-            ChatCompletionPresetType.SceneTrackerValidator,// PRE
-            ChatCompletionPresetType.SceneTrackerRefiner,// PRE
-            ChatCompletionPresetType.NarrativeDirection,// PRE
-            ChatCompletionPresetType.Reflection,// PRE+
-            ChatCompletionPresetType.CharactersCohesionEnforcement,// PRE
-            ChatCompletionPresetType.SkillChecksDescriptor,// During Main
-            ChatCompletionPresetType.Main,// Main
-            ChatCompletionPresetType.CharactersAdherenceEnforcement,// POST
-            ChatCompletionPresetType.ProseValidator,// POST
-            ChatCompletionPresetType.ProseEdition,// POST
-            ChatCompletionPresetType.StyleValidator,// POST
-            ChatCompletionPresetType.StyleEdition,// POST
+        //private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets = [];
 
-            ChatCompletionPresetType.ProseGuardian,// POST++
-            ChatCompletionPresetType.CharacterStatusUpdate,// POST++
-            ChatCompletionPresetType.Summarize,// POST++
-            ChatCompletionPresetType.SummariesMerge,// POST++
-            ChatCompletionPresetType.NarrativeArchitecture,// POST (secretPlot)
+        //private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets =
+        //[
+        //    ChatCompletionPresetType.RelevantSummaries,// PRE+
+        //    ChatCompletionPresetType.SkillChecksInitiator,// PRE
+        //    ChatCompletionPresetType.SceneTracker,// PRE
+        //    ChatCompletionPresetType.SceneTrackerValidator,// PRE
+        //    ChatCompletionPresetType.SceneTrackerRefiner,// PRE
+        //    ChatCompletionPresetType.NarrativeDirection,// PRE
+        //    ChatCompletionPresetType.Reflection,// PRE+
+        //    ChatCompletionPresetType.CharactersCohesionEnforcement,// PRE
+        //    ChatCompletionPresetType.SkillChecksDescriptor,// During Main
+        //    ChatCompletionPresetType.Main,// Main
+        //    ChatCompletionPresetType.CharactersAdherenceEnforcement,// POST
+        //    ChatCompletionPresetType.ProseValidator,// POST
+        //    ChatCompletionPresetType.ProseEdition,// POST
+        //    ChatCompletionPresetType.StyleValidator,// POST
+        //    ChatCompletionPresetType.StyleEdition,// POST
+
+        //    ChatCompletionPresetType.ProseGuardian,// POST++
+        //    ChatCompletionPresetType.CharacterStatusUpdate,// POST++
+        //    ChatCompletionPresetType.Summarize,// POST++
+        //    ChatCompletionPresetType.SummariesMerge,// POST++
+        //    ChatCompletionPresetType.NarrativeArchitecture,// POST (secretPlot)
             
-            ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
-            ChatCompletionPresetType.DynamicCharacterCreation,
-            ChatCompletionPresetType.DynamicCharacterSheetCreation,
-            ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
-        ];
+        //    ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
+        //    ChatCompletionPresetType.DynamicCharacterCreation,
+        //    ChatCompletionPresetType.DynamicCharacterSheetCreation,
+        //    ChatCompletionPresetType.SPECIAL_CharacterSheetGeneration,
+        //];
 
-        private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> DSchatCompletionPresets = [];
-        private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> GLMthinkCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> DSthinkCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> KimithinkCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> GLMchatCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> DSchatCompletionPresets = [];
+        //private readonly List<ChatCompletionPresetType> KimichatCompletionPresets = [];
         // -----------
 
         public GlobalSettingsDal(JsonSerializerOptions jsonSerializerOptions, IDbContextFactory<StorageDbContext> contextFactory) : base(jsonSerializerOptions)
@@ -153,7 +157,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_7,
                             Name = "Local-Inference-Server-Main",
                             AuthBearerValue = "o39[1|'DJp>48ZXKb2[3fFs>!n2|{gsd/dssd",
-                            Model = "debug",
+                            Model = "TheDrummer_Orion-26B-A4B-v1.1-Q4_K_M",
                             Stream = true,
                             ApiUrl = LOCAL_MAIN_INFERENCE_SERVER_URL,
                             Type = LLMProviderType.OpenAICustom,
@@ -162,10 +166,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Tags = localInferenceServerMainMachineCompletionPresets,
                             SamplingSettings = new()
                             {
-                                Temperature = 0.85f,
-                                MinP = 0.02f,
-                                TopP = 0.92f,
-                                TopK = 30.0f,
+                                Temperature = 0.2f,
+                                MinP = 0.05f,
+                                TopP = 1.0f,
+                                TopK = 20,
+                                XTCProbability = 0.0f,// we certainly don't want to remove the most probable tokens for the secondary inference server as we're running the cohesion tools on this server
+                                DryMultiplier = 0.0f
                             },
                             TimeoutStrategy = new TimeoutStrategy
                             {
@@ -198,7 +204,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             ProviderConfigId = StorageConstants.DEFAULT_LLM_PROVIDER_CONFIG_ID_8,
                             Name = "Local-Inference-Server-Secondary",
                             AuthBearerValue = "o39[1|'DJp>48ZXKb2[3fFs>!n2|{gsd/dssd",
-                            Model = "debug",
+                            Model = "Qwen3.8-9B-Q6_K",
                             Stream = true,
                             ApiUrl = LOCAL_SECONDARY_INFERENCE_SERVER_URL,
                             Type = LLMProviderType.OpenAICustom,
@@ -207,10 +213,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Tags = localInferenceServerSecondaryMachineCompletionPresets,
                             SamplingSettings = new()
                             {
-                                Temperature = 1.0f,
+                                Temperature = 0.6f,
                                 MinP = 0.05f,
-                                TopP = 1.0f,
-                                TopK = 0.0f,
+                                TopP = 0.95f,
+                                TopK = 20,
                             },
                             TimeoutStrategy = new TimeoutStrategy
                             {

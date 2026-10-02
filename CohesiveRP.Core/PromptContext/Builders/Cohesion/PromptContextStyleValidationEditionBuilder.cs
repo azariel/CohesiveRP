@@ -1,6 +1,7 @@
 ﻿using CohesiveRP.Common.BusinessObjects;
 using CohesiveRP.Common.Diagnostics;
 using CohesiveRP.Common.Serialization;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Core.PromptContext.Abstractions;
 using CohesiveRP.Core.PromptContext.Utils;
 using CohesiveRP.Core.Services;
@@ -58,6 +59,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Cohesion
 
             var lastReplyByAIResult = await GetLastReplyByAI();
             string lastReplyByAI = lastReplyByAIResult?.Content;
+            lastReplyByAI = $"{JsonCommonSerializer.SerializeToString(SentenceSplitter.SplitIntoIdSentences(lastReplyByAI))}";
 
             return ($"{Environment.NewLine}{promptContextFormatElement?.Options?.Format?.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name)
                 .Replace("{{description}}", formattedRecommendations)

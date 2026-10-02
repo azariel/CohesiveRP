@@ -66,9 +66,10 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
 
                 // validate that the sceneTrackerJson is valid json
 
+                VisualSceneTracker validJson = null;
                 try
                 {
-                    JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerJson);
+                    validJson = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerJson);
                 } catch (Exception e)
                 {
                     LoggingManager.LogToFile("7b58e8ff-d4b5-4d7e-9170-69ae5ec815f8", $"Couldn't complete backgroundTask [{backgroundQueryDbModel.BackgroundQueryId}] of Type [{tag}]. Invalid sceneTrackerJson. Skipping.", e);
@@ -76,8 +77,6 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                     backgroundQueryDbModel.RetryCount++;
                     return false;
                 }
-
-                VisualSceneTracker validJson = JsonCommonSerializer.DeserializeFromString<VisualSceneTracker>(sceneTrackerJson);
 
                 string linkedMessageId = shareableContextLink.Value as string;
                 SceneTrackerDbModel queryModel = new()
@@ -97,7 +96,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.SceneTracker
                 }
 
                 await sceneTrackerPostProcess.Process(completionPresetType, tag, backgroundQueryDbModel, shareableContextLink, sceneTrackerDbModel.Content);
-            
+
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
                 return true;
