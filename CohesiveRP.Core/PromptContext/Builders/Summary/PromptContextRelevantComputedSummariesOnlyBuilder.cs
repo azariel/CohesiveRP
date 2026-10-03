@@ -44,7 +44,7 @@ namespace CohesiveRP.Core.PromptContext.Builders.Directive
             }
 
             // Inject the computed relevant summaries
-            string output = $"<history>{Environment.NewLine}Previous facts, events, speech and actions:{Environment.NewLine}{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{summaryDbModel.RelevantSummaryInformationFromMostRecentStoryContext}")}{Environment.NewLine}</history>{Environment.NewLine}";
+            string output = $"<history>{Environment.NewLine}Previous facts, events, speech and actions:{Environment.NewLine}{promptContextFormatElement.Options?.Format?.Replace("{{item_description}}", $"{summaryDbModel.RelevantSummaryInformationFromMostRecentStoryContext}")}{Environment.NewLine}<format_description>\r\nHere is the description of the history fields:\r\n<summary_short_term>: memories that are relevant to the current scene that are *very recent*.\r\n<summary_medium_term>: memories that are relevant to the current scene that are relatively *recent*.\r\n<summary_long_term>: memories that are relevant to the current scene, but not very recent, possibly overwritten with more recent memories.\r\n<summary_very_long_term>: memories that are older, giving more context into less recent facts.\r\n</format_description>\r\n</history>{Environment.NewLine}";
             
             return (output.InjectMacros(personaLinkedToChat?.Name, charactersLinkedToChat?.FirstOrDefault()?.Name),
                     new ShareableContextLink

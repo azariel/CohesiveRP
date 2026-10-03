@@ -44,6 +44,16 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors
                         new PromptContextFormatElement { Tag = PromptContextFormatTag.LastUserMessage, Name = "LastUserMessage", Enabled = true, Options = new PromptContextFormatElementOptions { Format = "\r\nThis is the very *LAST* (most RECENT) message by the User:\r\n{{item_description}}\r\n" } },
                         new PromptContextFormatElement
                         {
+                            Tag = PromptContextFormatTag.Directive,
+                            Name = "FormatDescription",
+                            Enabled = true,
+                            Options = new PromptContextFormatElementOptions
+                            {
+                                Format = "<format_description>\r\nHere is the description of the output fields:\r\nshortTermSummaries: memories that are relevant to the current scene that are *very recent*.\r\nmediumTermSummaries: memories that are relevant to the current scene that are relatively *recent*.\r\nlongTermSummaries: memories that are relevant to the current scene, but not very recent, possibly overwritten with more recent memories.\r\nveryLongTermSummaries: memories that are older, giving more context into less recent facts.\r\n</format_description>",
+                            }
+                        },
+                        new PromptContextFormatElement
+                        {
                             Tag = PromptContextFormatTag.BehavioralInstructions,
                             Name = "BehavioralInstructions",
                             Enabled = true,
