@@ -99,7 +99,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                         CreatedAtUtc = DateTime.UtcNow,
                         Content = queryModel.Content,
                         Suggestions = queryModel.Suggestions,
-                        PreviousContent = autoUpdatePreviousContent ? sceneTracker.Content : queryModel.PreviousContent,
+                        PreviousContent = null,
                     };
 
                     EntityEntry<SceneTrackerDbModel> resultAdd = dbContext.SceneTrackers.Add(sceneTrackerObj);

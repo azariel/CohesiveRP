@@ -32,14 +32,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
 
         private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
         [
-
-            ChatCompletionPresetType.SkillChecksInitiator,// PRE #1
             ChatCompletionPresetType.NarrativeDirection,// PRE #1
-            ChatCompletionPresetType.CharactersCohesionEnforcement,// PRE
+            
             ChatCompletionPresetType.Main,
-            ChatCompletionPresetType.CharactersAdherenceEnforcement,// POST
-
-            ChatCompletionPresetType.CharacterStatusUpdate,// POST
 
             ChatCompletionPresetType.IllustrationPromptInjectionForCharacterAvatar,
             ChatCompletionPresetType.DynamicCharacterCreation,
@@ -48,10 +43,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         ];
 
         private readonly List<ChatCompletionPresetType> localInferenceServerSecondaryMachineCompletionPresets = [
+            ChatCompletionPresetType.SkillChecksInitiator,// PRE #1
             ChatCompletionPresetType.SceneTracker,// PRE #1
             ChatCompletionPresetType.SceneTrackerRefiner,// PRE
             ChatCompletionPresetType.SceneTrackerValidator,// PRE
             ChatCompletionPresetType.RelevantSummaries,// PRE #2 (after sceneTracker)
+            ChatCompletionPresetType.CharactersCohesionEnforcement,// PRE
             ChatCompletionPresetType.Reflection,// PRE #3
 
             ChatCompletionPresetType.SkillChecksDescriptor,// During Main
@@ -60,6 +57,9 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
             ChatCompletionPresetType.ProseEdition,// POST
             ChatCompletionPresetType.StyleValidator,// POST
             ChatCompletionPresetType.StyleEdition,// POST
+
+            ChatCompletionPresetType.CharactersAdherenceEnforcement,// POST
+            ChatCompletionPresetType.CharacterStatusUpdate,// POST
 
             ChatCompletionPresetType.ProseGuardian,// POST
 

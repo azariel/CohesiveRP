@@ -88,7 +88,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Cohesion
                 if (result.Recommendations.Length <= 0)
                 {
                     // The validator didn't find any recommendations, the current prose is alright
-                    await QueueStyleValidatorBackgroundQuery(backgroundQueryDbModel.ChatId);
+                    //await QueueStyleValidatorBackgroundQuery(backgroundQueryDbModel.ChatId);
                 } else
                 {
                     // Start by updating the proseCohesion to add the suggestions

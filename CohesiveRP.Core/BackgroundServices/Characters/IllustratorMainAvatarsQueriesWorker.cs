@@ -22,6 +22,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
         private IStorageService storageService;
         private IComfyUiClient comfyUiClient;
         private ComfyUiEndpointConfig config;
+        private const int nbImagesToGenerateDefault = 5;
 
         public IllustratorMainAvatarsQueriesWorker(
             IStorageService storageService,
@@ -408,7 +409,7 @@ namespace CohesiveRP.Core.WebApi.BackgroundServices.Characters.DynamicCharacters
             }
 
             // Limit the images by outfit to 5 to avoid generating TB of stuff TODO: make this configurable
-            int nbImagesToGenerate = 5 - Directory.EnumerateFiles(rawFolder, "*.*", SearchOption.TopDirectoryOnly).Count();
+            int nbImagesToGenerate = nbImagesToGenerateDefault - Directory.EnumerateFiles(rawFolder, "*.*", SearchOption.TopDirectoryOnly).Count();
             if (nbImagesToGenerate <= 0)
                 return (flowControl: false, value: atLeastOneGenerated);
 

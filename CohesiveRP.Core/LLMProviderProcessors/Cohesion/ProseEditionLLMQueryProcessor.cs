@@ -75,7 +75,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Cohesion
                     return false;
                 }
 
-                await QueueStyleValidatorBackgroundQuery(backgroundQueryDbModel.ChatId);
+                //await QueueStyleValidatorBackgroundQuery(backgroundQueryDbModel.ChatId);
 
                 backgroundQueryDbModel.EndFocusedGenerationDateTimeUtc = DateTime.UtcNow;
                 backgroundQueryDbModel.Status = BackgroundQueryStatus.Completed;
