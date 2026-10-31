@@ -1,4 +1,5 @@
-﻿using CohesiveRP.Common.Utils;
+﻿using CohesiveRP.Common.Diagnostics;
+using CohesiveRP.Common.Utils;
 using CohesiveRP.Storage.DataAccessLayer.Characters.BusinessObjects;
 using CohesiveRP.Storage.DataAccessLayer.Chats;
 using CohesiveRP.Storage.DataAccessLayer.SceneTracker.BusinessObjects;
@@ -35,40 +36,48 @@ namespace CohesiveRP.Core.Utils.Characters
         {
             List<ExpressionAvatars> avatars = new();
 
-            // Scan the Webapp public assets folder to find all the avatar images for the character
-            string[] characterAvatarFoldersPath = Directory.GetDirectories(Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name.ToLowerInvariant(), WebConstants.ExpressiveAvatarFolder, outfit.ToString().ToLowerInvariant()));
-            if (characterAvatarFoldersPath.Length == 0)
-            {
-                CharacterUtils.CreateCharacterAssets(characterDbModel.Name);
-                return avatars;
-            }
+            var outfitToUse = outfit == ClothingStateOfDress.Unknown ? ClothingStateOfDress.Clothed : outfit;
 
-            foreach (var folderPath in characterAvatarFoldersPath)
+            try
             {
-                string[] avatarFiles = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
-                var avatarsInFolder = avatarFiles
-                    .Where(file => file.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
-                    .Select(file => new CharacterAvatar
-                    {
-                        AvatarFilePath = file.Replace(WebConstants.WebAppPublicFolder, ""),
-                        AvatarFileName = Path.GetFileName(file),
-                        AvatarSeed = AvatarUtils.GetSeedFromFileName(file),
-                    })
-                    .ToList();
-
-                // get the last path segment (folder name) and parse to enum
-                var expressionName = Path.GetFileName(folderPath);
-                if (!Enum.TryParse<MappedFacialExpression>(expressionName, true, out var expression))
+                // Scan the Webapp public assets folder to find all the avatar images for the character
+                string[] characterAvatarFoldersPath = Directory.GetDirectories(Path.Combine(WebConstants.CharactersAvatarFilePath, characterDbModel.Name.ToLowerInvariant(), WebConstants.ExpressiveAvatarFolder, outfitToUse.ToString().ToLowerInvariant()));
+                if (characterAvatarFoldersPath.Length == 0)
                 {
-                    // fallback: skip this folder or set a default expression
-                    continue;
+                    CharacterUtils.CreateCharacterAssets(characterDbModel.Name);
+                    return avatars;
                 }
 
-                avatars.Add(new ExpressionAvatars
+                foreach (var folderPath in characterAvatarFoldersPath)
                 {
-                    Avatars = avatarsInFolder,
-                    Expression = expression,
-                });
+                    string[] avatarFiles = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
+                    var avatarsInFolder = avatarFiles
+                        .Where(file => file.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) || file.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                        .Select(file => new CharacterAvatar
+                        {
+                            AvatarFilePath = file.Replace(WebConstants.WebAppPublicFolder, ""),
+                            AvatarFileName = Path.GetFileName(file),
+                            AvatarSeed = AvatarUtils.GetSeedFromFileName(file),
+                        })
+                        .ToList();
+
+                    // get the last path segment (folder name) and parse to enum
+                    var expressionName = Path.GetFileName(folderPath);
+                    if (!Enum.TryParse<MappedFacialExpression>(expressionName, true, out var expression))
+                    {
+                        // fallback: skip this folder or set a default expression
+                        continue;
+                    }
+
+                    avatars.Add(new ExpressionAvatars
+                    {
+                        Avatars = avatarsInFolder,
+                        Expression = expression,
+                    });
+                }
+            } catch (Exception e)
+            {
+                LoggingManager.LogToFile($"5393a756-6b09-499d-8b45-033e2b971805", $"Couldn't get GetCharacterExpressionAvatars for character [{characterDbModel.Name}].", e);
             }
 
             return avatars;

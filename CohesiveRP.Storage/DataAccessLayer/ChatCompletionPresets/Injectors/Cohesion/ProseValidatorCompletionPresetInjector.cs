@@ -29,7 +29,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors.Coh
                             Enabled = true,
                             Options = new PromptContextFormatElementOptions
                             {
-                                Format = "<core_directive>\r\nStop the roleplay. You are a line editor for a young-adult novel. The text below is already good. Find only the few places where a small edit clearly helps. Returning no mutations is a correct answer. You are forbidden from alterating the meaning of events, actions and speech within the provided text in '<last_message_by_AI>' xml tag, but you can suggests ways to reformulate it in a better way.\r\n</core_directive>\r\n"
+                                Format = "<core_directive>\r\nStop the roleplay. You are a line editor for a young-adult novel. Below is a reply, one sentence per line. Most of it is fine. Suggest a small cut only where a sentence clearly hurts the text. An empty list is a correct answer. {{user}} is played by the User: never suggest anything about what {{user}} does, says or thinks. Never suggest anything that changes the meaning of events, actions or speech."
                             }
                         },
                         new PromptContextFormatElement
@@ -39,29 +39,29 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors.Coh
                             Enabled = true,
                             Options = new PromptContextFormatElementOptions
                             {
-                                Format = "<look_for priority=\"in order\">\r\n1. redundancy: repeats information already stated earlier in this message (speech included). Set \"duplicateOf\" to the earlier sentence id.\r\n2. clarity: confusing or unexplained statement. Smallest possible fix.\r\n3. thought: a *thought* whose emotion is already visible in nearby behavior. Delete it. Otherwise keep it.\r\n4. filler: a detail nobody reacts to or uses.\r\n5. tic: comma-stacked adjective pairs (\"a steady, measured rhythm\") and \"almost imperceptible\". Use one adjective or \"X and Y\".\r\n6. missing_reaction: only if no side character reacts. Use insert_after once, max 20 words, one observable action by a character from <present_characters>.\r\n</look_for>\r\n"
+                                Format = "<look_for priority=\"in order\">\r\n1. redundancy: repeats information already stated earlier in this message (speech included). Set \"duplicateOf\" to the earlier sentence id.\r\n2. clarity: confusing or unexplained statement. Smallest possible fix.\r\n3. Not story text: planning notes, rules, or instructions the writer gave itself (\"I need to...\", \"I must NOT...\", \"I'll start with...\"). DELETE every one, however many there are.\r\n4. A stacked adjective pair (\"a single, sharp click\") or a detail nobody reacts to. TRIM it.\r\n5. missing_reaction: only if no side character reacts. Use insert_after once, max 20 words, one observable action by a character from <present_characters>.\r\n</look_for>\r\n"
                             }
                         },
                         new PromptContextFormatElement
                         {
-                            Name = "Leave Alone",
+                            Name = "Never",
                             Tag = PromptContextFormatTag.Directive,
                             Enabled = true,
                             Options = new PromptContextFormatElementOptions
                             {
-                                Format = "<leave_alone>\r\n- The last line that hands the scene back to {{user}}.\r\n- Figurative language that reveals character or plot (keep one or two).\r\n- Sounds or details that mark tension or silence.\r\n- Anything that changes events, outcomes, or what {{user}} does.\r\n- A rewording that is not clearly better. Do not swap one phrase for an equivalent one.\r\n</leave_alone>\r\n"
+                                Format = "<never>\r\n- Modify the last line that hands the scene back to {{user}}.\r\n- Touch a [LOCKED] sentence or the last sentence.\r\n- Delete a sentence that introduces a person or object the next sentence refers to (\"He\", \"She\", \"it\").\r\n- Reword a sentence just to reword it.\r\n- Add anything that is not already in the sentence..\r\n</never>\r\n"
                             }
                         },
-                        new PromptContextFormatElement
-                        {
-                            Name = "Sub Directive",
-                            Tag = PromptContextFormatTag.Directive,
-                            Enabled = true,
-                            Options = new PromptContextFormatElementOptions
-                            {
-                                Format = "<directives>\r\n1. {{user}} is the character played by the User. The User will write the next reply to impersonate that character, so we want to avoid deciding what that character do, react or say. We will leave this flexibility to the User instead. Our role is to impersonate the other characters and the world as well as how it react to the User to make it believable and immersive.\r\n2. You are limited on suggesting modifications to the prose.\r\n3. Keep in mind that we want the text to be short, a few paragraphs long.\r\n Try to find ways to improve the prose. The end goal here is to have text that could be found in young-adults novels.\r\n</directives>\r\n"
-                            }
-                        },
+                        //new PromptContextFormatElement
+                        //{
+                        //    Name = "Sub Directive",
+                        //    Tag = PromptContextFormatTag.Directive,
+                        //    Enabled = true,
+                        //    Options = new PromptContextFormatElementOptions
+                        //    {
+                        //        Format = "<directives>\r\n1. {{user}} is the character played by the User. The User will write the next reply to impersonate that character, so we want to avoid deciding what that character do, react or say. We will leave this flexibility to the User instead. Our role is to impersonate the other characters and the world as well as how it react to the User to make it believable and immersive.\r\n2. You are limited on suggesting modifications to the prose.\r\n3. Keep in mind that we want the text to be short, a few paragraphs long.\r\n Try to find ways to improve the prose. The end goal here is to have text that could be found in young-adults novels.\r\n</directives>\r\n"
+                        //    }
+                        //},
                         new PromptContextFormatElement
                         {
                             Name = "Prose Rules",
@@ -79,7 +79,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors.Coh
                             Enabled = true,
                             Options = new PromptContextFormatElementOptions
                             {
-                                Format = "<examples>\r\n<example>\r\n<text>\r\n[S1] Lysa slid the tray of loaves onto the counter.\r\n[S2] A dog barked somewhere down the street.\r\n[S3] [LOCKED] \"Fresh this morning,\" she said.\r\n[S4] She wiped her floury hands on her apron, then wiped them again on a towel.\r\n[S5] The soldier eyed the bread, then the coins in his palm.\r\n[S6] [LOCKED] \"How many can I get for this?\"\r\n</text>\r\n<output>{\"delete\":[\"S2\",\"S4\"]}</output>\r\n</example>\r\n\r\n<example>\r\n<text>\r\n[S1] The gate creaked open and Warden Pike stepped out.\r\n[S2] [LOCKED] \"The bridge is out,\" he said. \"Nobody crosses tonight.\"\r\n[S3] He told them again that the bridge had collapsed and no one would be crossing.\r\n[S4] Rennick set his jaw and glanced at the river.\r\n[S5] The torches along the wall flickered in the wind.\r\n[S6] [LOCKED] \"Well, traveler? What will it be?\"\r\n</text>\r\n<output>{\"delete\":[\"S3\"]}</output>\r\n</example>\r\n\r\n<example>\r\n<text>\r\n[S1] Rain ticked against the shutters.\r\n[S2] Old Bram counted the coins twice and slid half across the table.\r\n[S3] [LOCKED] \"That's the last of it.\"\r\n[S4] Wren pocketed her share without a word.\r\n[S5] [LOCKED] \"Well? Are you coming or not?\"\r\n</text>\r\n<output>{\"delete\":[]}</output>\r\n</example>\r\n</examples>\r\n"
+                                Format = "<examples><example>\r\n[S1] I need to show the aftermath without repeating the dialogue.\r\n[S2] I will end on Mara's silence.\r\n[S3] The kettle clicked off and Mara poured two cups.\r\n[S4] She didn't sit; she stood by the window with her cup.\r\n[S5] Joren watched her over the rim.\r\n[S6] [LOCKED] \"\"You knew,\"\" he said.\r\nAnswer:\r\n[\"\"S1: DELETE -- planning note, not story text.\"\",\r\n \"\"S2: DELETE -- planning note, not story text.\"\",\r\n \"\"S4: REPLACE: She stood by the window with her cup. -- removes the 'didn't X; she Y' contrast.\"\"]\r\n</example>\r\n\r\n<example>\r\n[S1] The courier burst in, mud to his knees.\r\n[S2] He dropped a sealed letter on the table.\r\n[S3] [LOCKED] \"\"From the border,\"\" he panted. \"\"The pass is closed.\"\"\r\n[S4] The captain read it twice, then folded it.\r\n[S5] The courier repeated that the pass was closed.\r\n[S6] [LOCKED] \"\"How long?\"\"\r\nAnswer:\r\n[\"\"S5: DELETE -- repeats what the courier already said in S3.\"\"]\r\n</example>\r\n\r\n<example>\r\n[S1] Rain ticked against the shutters.\r\n[S2] Old Bram counted the coins twice and slid half across the table.\r\n[S3] [LOCKED] \"\"That's the last of it.\"\"\r\n[S4] Wren pocketed her share without a word.\r\n[S5] [LOCKED] \"\"Well? Are you coming or not?\"\"\r\nAnswer:\r\n[]\r\n</example></examples>\r\n"
                             }
                         },
                         new PromptContextFormatElement
@@ -99,7 +99,7 @@ namespace CohesiveRP.Storage.DataAccessLayer.ChatCompletionPresets.Injectors.Coh
                             Enabled = true,
                             Options = new PromptContextFormatElementOptions
                             {
-                                Format = "Each value within the output array 'recommendations' must be a textual value representing the recommendation. You may return mutations, each on one sentence id. At most 5 mutations. Each one has: category, id, action, text, duplicateOf (or null). Allowed actions:\r\n- delete: remove a sentence that adds nothing concrete.\r\n- trim: remove a phrase or clause from a sentence. \"text\" is the exact words to remove, copied from the sentence.\r\n- replace: only to shorten a sentence, using only words already in it.\r\nNever add a person, object, sound, body sensation, or action that is not already in the sentence.\r\nNever touch [LOCKED] sentences.\r\nIf a sentence cannot be improved by cutting, leave it alone. Returning no mutations is a correct answer. Make sure that your suggestions won't make the final text incoherent or worse than the original.",
+                                Format = "Answer with a JSON array of strings in 'recommendations', one suggestion per string, in exactly one of these formats:\r\nS<number>: DELETE -- reason\r\nS<number>: TRIM: exact words to remove -- reason\r\nS<number>: REPLACE: shorter sentence using only its own words -- reason\r\nMaximum 8 suggestions. Planning notes at the top of the reply do not count toward the maximum.",
                             }
                         }
                     ]

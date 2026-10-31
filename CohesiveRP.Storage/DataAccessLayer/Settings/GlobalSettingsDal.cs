@@ -24,11 +24,11 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
         // -----------
         //Dev-01_HOME_PRIVATE
         // --- Local
-        private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.0.237:5001/v1/chat/completions";
-        private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";
+        //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.0.237:5001/v1/chat/completions";
+        //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://127.0.0.1:5001/v1/chat/completions";
 
-        //private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";
-        //private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";
+        private const string LOCAL_MAIN_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";
+        private const string LOCAL_SECONDARY_INFERENCE_SERVER_URL = "https://192.168.100.1:5001/v1/chat/completions";
 
         private readonly List<ChatCompletionPresetType> localInferenceServerMainMachineCompletionPresets =
         [
@@ -166,12 +166,10 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Tags = localInferenceServerMainMachineCompletionPresets,
                             SamplingSettings = new()
                             {
-                                Temperature = 0.2f,
+                                Temperature = 0.6f,
                                 MinP = 0.05f,
-                                TopP = 1.0f,
+                                TopP = 0.95f,
                                 TopK = 20,
-                                XTCProbability = 0.0f,// we certainly don't want to remove the most probable tokens for the secondary inference server as we're running the cohesion tools on this server
-                                DryMultiplier = 0.0f
                             },
                             TimeoutStrategy = new TimeoutStrategy
                             {
@@ -213,10 +211,12 @@ namespace CohesiveRP.Storage.DataAccessLayer.Users
                             Tags = localInferenceServerSecondaryMachineCompletionPresets,
                             SamplingSettings = new()
                             {
-                                Temperature = 0.6f,
+                                Temperature = 0.2f,
                                 MinP = 0.05f,
-                                TopP = 0.95f,
+                                TopP = 1.0f,
                                 TopK = 20,
+                                XTCProbability = 0.0f,// we certainly don't want to remove the most probable tokens for the secondary inference server as we're running the cohesion tools on this server
+                                DryMultiplier = 0.0f
                             },
                             TimeoutStrategy = new TimeoutStrategy
                             {

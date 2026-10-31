@@ -103,7 +103,7 @@ namespace CohesiveRP.Core.LLMProviderProcessors.Cohesion
                 return false;
             }
 
-            hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.Where(w => w.SourceType == Common.BusinessObjects.MessageSourceType.AI).ToList();
+            hotMessagesDbModel.Messages = hotMessagesDbModel.Messages.Where(w => w.SourceType == MessageSourceType.AI).ToList();
             if (hotMessagesDbModel.Messages.Count <= 0)
             {
                 // TODO: if AI hasn't talked in recent messages (hot), well...we could always fetch cold I guess, but that would be highly irregular for roleplay..

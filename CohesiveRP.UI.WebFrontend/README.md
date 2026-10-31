@@ -94,9 +94,6 @@
 │   │   │           └── SettingsComponent.tsx
 │   │   ├── hooks/
 │   │   │   └── useBackgroundQueriesPoller.ts
-│   │   ├── ResponsesDto/
-│   │   │   └── lorebooks/
-│   │   │       └── BusinessObjects/
 │   │   └── Constants.ts
 │   ├── RequestDto/
 │   │   ├── characters/
